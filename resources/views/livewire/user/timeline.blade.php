@@ -10,7 +10,7 @@
           <form wire:submit.prevent="post">
            
             <div class="input-group">
-              <input type="text" wire:model="content" name="content"  :value="old('content')" class="form-control form-control-alt @error('content') is-invalid @enderror" placeholder="Say something amazing">
+              <input type="text" wire:model="content" name="content"  :value="old('content')" class="form-control form-control-alt @error('content') is-invalid @enderror" placeholder="Say something amazing" required>
               
               <button type="submit" class="btn btn-primary border-0">
                 <i class="fa fa-pencil-alt opacity-50 me-1"></i> Post
@@ -25,9 +25,9 @@
      
       <!-- Update #2 -->
 
-      @if($timelines)
-            @foreach ($timelines as $timeline)
-                <div class="block block-rounded block-bordered" id="timelines">
+     
+            @forelse ($timelines as $timeline)
+                <div wire:poll.visible.10s class="block block-rounded block-bordered" id="timelines">
                     <div class="block-header block-header-default">
                     <div>
                         <a class="img-link me-1" href="javascript:void(0)">
@@ -58,25 +58,26 @@
                     </div>
                     </div>
                     <div class="block-content">
-                    <p>
-                        {{ $timeline->content }}
-                        ...Read More
-                    </p>
+                        <a href="">
+                            <p style="color: dimgrey">
+                                {{ $timeline->content }}
+                            </p>
+                        </a>
                     <hr>
                     <ul class="nav nav-pills fs-sm push">
                         <li class="nav-item me-1">
                         <a class="nav-link" href="javascript:void(0)">
-                            <i class="fa fa-thumbs-up opacity-50 me-1"></i> Like
+                            <i class="fa fa-thumbs-up opacity-50 me-1"></i> 134k
                         </a>
                         </li>
                         <li class="nav-item me-1">
                         <a class="nav-link" href="javascript:void(0)">
-                            <i class="fa fa-comment-alt opacity-50 me-1"></i> Comment
+                            <i class="fa fa-comment-alt opacity-50 me-1"></i> 17k
                         </a>
                         </li>
                         <li class="nav-item">
                         <a class="nav-link" href="javascript:void(0)">
-                            <i class="fa fa-share-alt opacity-50 me-1"></i> Share
+                            <i class="fa fa-eye opacity-50 me-1"></i> 1.6M
                         </a>
                         </li>
                     </ul>
@@ -93,10 +94,9 @@
                     </form>
                     </div>
                 </div>
-            @endforeach
-      @else 
-            NO TM
-      @endif
+            @empty
+                no posts
+            @endforelse
       
       <!-- END Update #2 -->
 

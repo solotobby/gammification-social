@@ -197,13 +197,20 @@
                 <!-- For more info and examples you can check out https://github.com/jzaefferer/jquery-validation -->
                 <div class="row g-0 justify-content-center">
                   <div class="col-sm-8 col-xl-6">
+
+                    @if (session('error'))
                     
-                    <form method="POST" class="js-validation-signin" action="{{ route('register') }}">
+                        <div class="alert alert-danger" role="alert">
+                            {{ session('error') }}
+                        </div>
+                    @endif
+
+                    <form method="POST" class="js-validation-signin" action="{{ route('reg.user') }}">
                             @csrf
                       <div class="py-3">
                         <div class="mb-4">
-                          <input type="text" class="form-control @error('name') is-invalid @enderror form-control-lg form-control-alt" id="login-username" name="name" placeholder="Name" required autocomplete="name" autofocus>
-                          @error('name')
+                          <input type="text" class="form-control @error('username') is-invalid @enderror form-control-lg form-control-alt" id="login-username" name="username" placeholder="Username" required autocomplete="username" autofocus>
+                          @error('username')
                             <span class="invalid-feedback" role="alert">
                                 <strong>{{ $message }}</strong>
                             </span>
@@ -225,7 +232,7 @@
                                 </span>
                           @enderror
                         </div>
-                        <div class="mb-4">
+                        <div class="mb-0">
                           <input type="password" class="form-control @error('password') is-invalid @enderror form-control-lg form-control-alt" id="login-password" name="password" placeholder="Password" required>
                           @error('password')
                             <span class="invalid-feedback" role="alert">
@@ -233,6 +240,16 @@
                             </span>
                         @enderror
                         </div>
+                      </div>
+                      <div class="mb-4">
+                        <small><a href="{{ url('access/code') }}" target="_blank" alt="How to get Access code">Get Access Code</a></small>
+                        <input type="text" class="form-control @error('access_code') is-invalid @enderror form-control-lg form-control-alt" id="access_code" name="access_code" placeholder="Access Code" required>
+                          @error('password')
+                            <span class="invalid-feedback" role="alert">
+                                <strong>{{ $message }}</strong>
+                            </span>
+                        @enderror
+                             
                       </div>
                       <div class="mb-4">
                         <button type="submit" class="btn w-100 btn-lg btn-hero btn-primary">

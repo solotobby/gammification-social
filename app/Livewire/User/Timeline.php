@@ -6,13 +6,19 @@ use App\Models\Post;
 use App\Models\Timeline as ModelsTimeline;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
+use Livewire\Attributes\On;
 
+#[On('user.timeline')]
 class Timeline extends Component
 {
     public $timelines;
+    #[Validate('required|string')]
+    public $content = '';
+
+    protected $listeners=['refresh'=>'$refresh'];
 
     public function timelines(){
-        return   Post::where('status', 'LIVE')->orderBy('created_at', 'DESC')->get();//Post::all();
+        return   Post::where('status', 'LIVE')->orderBy('created_at', 'desc')->get();//Post::all();
      }
 
 
@@ -20,10 +26,7 @@ class Timeline extends Component
         $this->timelines = $this->timelines();
     }
 
-   
 
-    #[Validate('required|string')]
-    public $content = '';
     public function post(){
 
         $timelines = Post::create(['user_id' => auth()->user()->id, 'content' => $this->content]);
@@ -31,7 +34,7 @@ class Timeline extends Component
 
         $this->timelines->push($timelines);
 
-        $this->dispatch('user.timelines');
+        $this->dispatch('user.timeline');
 
         session()->flash('success', 'Posted Created Successfully');
 
