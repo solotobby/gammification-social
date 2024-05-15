@@ -50,7 +50,8 @@ class RegisterController extends Controller
     public function regUser(Request $request){
         // return $request;
         $validated = $request->validate([
-             'username' => ['required', 'string', 'min:5', 'max:255', 'unique:users'],
+            'name' => ['required', 'string', 'min:3'],
+            //  'username' => ['required', 'string', 'min:5', 'max:255', 'unique:users'],
              // 'phone' => ['numeric', 'max:255', 'unique:users'],
              'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
              // 'password' => ['required', 'string', 'min:8', 'confirmed'],
@@ -70,8 +71,8 @@ class RegisterController extends Controller
  
  
          $user = User::create([
-             // 'name' => $data['name'],
-             'username' => $validated['username'],
+             'name' => $validated['name'],
+             'username' => 'user'.rand(1000, 10000000), //$validated['username'],
              // 'phone' => $data['phone'],
              'referral_code' => Str::random(7),
              'email' => $validated['email'],

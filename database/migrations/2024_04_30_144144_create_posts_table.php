@@ -16,9 +16,11 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id');
             $table->longText('content');
             $table->bigInteger('views')->default(0);
+            $table->bigInteger('views_external')->default(0);
             $table->bigInteger('clicks')->default(0);
-            $table->bigInteger('likes_count')->default(0);
-            $table->bigInteger('comment_count')->default(0);
+            $table->bigInteger('likes')->default(0);
+            $table->bigInteger('likes_external')->default(0);
+            $table->bigInteger('comments')->default(0);
             $table->string('status')->default('LIVE');
             $table->timestamps();
         });

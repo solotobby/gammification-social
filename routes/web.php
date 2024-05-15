@@ -1,6 +1,8 @@
 <?php
 
 use App\Livewire\CreateProduct;
+use App\Livewire\User\Profile;
+use App\Livewire\User\ShowPost;
 use App\Livewire\User\Timeline;
 use Illuminate\Support\Facades\Route;
 
@@ -26,17 +28,20 @@ Route::group(['namespace' => 'auth'], function () {
     Route::get('validate/api', [\App\Http\Controllers\GeneralController::class, 'validateApi']);
     Route::get('success', [\App\Http\Controllers\GeneralController::class, 'success']);
     Route::get('error', [\App\Http\Controllers\GeneralController::class, 'error']);
+
+    // Route::get('');
 });
+
 Auth::routes();
 Route::middleware(['auth'])->group(function () {
 
-    
     Route::get('/home', [\App\Http\Controllers\HomeController::class, 'index'])->name('home');
-
     Route::get('user/home', [\App\Http\Controllers\HomeController::class, 'userHome'])->name('user.home');
     Route::get('admin/home', [\App\Http\Controllers\HomeController::class, 'adminHome'])->name('admin.home');
 
     Route::get('timeline', Timeline::class);
+    Route::get('profile', Profile::class);
+    Route::get('show/{query}', ShowPost::class)->name('show');
 });
 
 

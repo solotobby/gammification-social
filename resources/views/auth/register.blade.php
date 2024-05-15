@@ -209,8 +209,8 @@
                             @csrf
                       <div class="py-3">
                         <div class="mb-4">
-                          <input type="text" class="form-control @error('username') is-invalid @enderror form-control-lg form-control-alt" id="login-username" name="username" placeholder="Username" required autocomplete="username" autofocus>
-                          @error('username')
+                          <input type="text" class="form-control @error('name') is-invalid @enderror form-control-lg form-control-alt" id="login-username" name="name" placeholder="Enter Name" required autocomplete="name" autofocus>
+                          @error('name')
                             <span class="invalid-feedback" role="alert">
                                 <strong>{{ $message }}</strong>
                             </span>

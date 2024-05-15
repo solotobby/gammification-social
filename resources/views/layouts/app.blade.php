@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
-    <title>Social</title>
+    <title>Dashmix - Bootstrap 5 Admin Template UI Framework</title>
 
     <meta name="description" content="Dashmix - Bootstrap 5 Admin Template &amp; UI Framework created by pixelcave">
     <meta name="author" content="pixelcave">
@@ -20,29 +20,29 @@
 
     <!-- Icons -->
     <!-- The following icons can be replaced with your own, they are used by desktop and mobile browsers -->
-    <link rel="shortcut icon" href="{{ asset('src/assets/media/favicons/favicon.png') }} ">
-    <link rel="icon" type="image/png" sizes="192x192" href="assets/media/favicons/favicon-192x192.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="assets/media/favicons/apple-touch-icon-180x180.png">
+    <link rel="shortcut icon" href="{{ asset('src/assets/media/favicons/favicon.png') }}">
+    <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('src/assets/media/favicons/favicon-192x192.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('src/assets/media/favicons/apple-touch-icon-180x180.png') }}">
     <!-- END Icons -->
 
     <!-- Stylesheets -->
     <!-- Page JS Plugins CSS -->
     <link rel="stylesheet" href="{{ asset('src/assets/js/plugins/highlightjs/styles/atom-one-dark.css') }}">
-    <link rel="stylesheet" href="{{ asset('src/assets/js/plugins/magnific-popup/magnific-popup.css')}}">
+    <link rel="stylesheet" href="{{ asset('src/assets/js/plugins/magnific-popup/magnific-popup.css') }}">
 
     <!-- Dashmix framework -->
-    <link rel="stylesheet" id="css-main" href="{{ asset('src/assets/css/dashmix.min.css')}}">
+    <link rel="stylesheet" id="css-main" href="{{ asset('src/assets/css/dashmix.min.css') }}">
+
+    @vite([
+      // 'resources/sass/app.scss', 
+      // 'resources/js/app.js'
+      ])
+    @livewireStyles 
 
     <!-- You can include a specific file from css/themes/ folder to alter the default color theme of the template. eg: -->
     <!-- <link rel="stylesheet" id="css-theme" href="assets/css/themes/xwork.min.css"> -->
-    <link rel="stylesheet" id="css-theme" href="{{ asset('src/assets/css/themes/xmodern.min.css')}}">
     <!-- END Stylesheets -->
-    @vite([
-        // 'resources/sass/app.scss', 
-        'resources/js/app.js'
-        ])
-    @livewireStyles  
-</head>
+  </head>
 
   <body>
     <!-- Page Container -->
@@ -101,205 +101,450 @@
 
         'sidebar-dark page-header-dark dark-mode'   Enable dark mode (light sidebar/header is not supported with dark mode)
     -->
-    <div id="page-container" class="sidebar-dark enable-page-overlay side-scroll page-header-fixed page-header-dark main-content-boxed">
+    <div id="page-container" class="sidebar-o sidebar-dark enable-page-overlay side-scroll page-header-fixed main-content-narrow">
       <!-- Side Overlay-->
       <aside id="side-overlay">
         <!-- Side Header -->
-        <div class="bg-primary">
-          <div class="content-header">
-            <div class="fs-lg fw-light text-white">
-              <i class="fa fa-users me-1"></i> People
-            </div>
+        <div class="bg-image" style="background-image: url('assets/media/various/bg_side_overlay_header.jpg');">
+          <div class="bg-primary-op">
+            <div class="content-header">
+              <!-- User Avatar -->
+              <a class="img-link me-1" href="be_pages_generic_profile.html">
+                <img class="img-avatar img-avatar48" src="assets/media/avatars/avatar10.jpg" alt="">
+              </a>
+              <!-- END User Avatar -->
 
-            <!-- Close Side Overlay -->
-            <!-- Layout API, functionality initialized in Template._uiApiLayout() -->
-            <a class="ms-auto text-white" href="javascript:void(0)" data-toggle="layout" data-action="side_overlay_close">
-              <i class="fa fa-times-circle"></i>
-            </a>
-            <!-- END Close Side Overlay -->
+              <!-- User Info -->
+              <div class="ms-2">
+                <a class="text-white fw-semibold" href="be_pages_generic_profile.html">George Taylor</a>
+                <div class="text-white-75 fs-sm">Full Stack Developer</div>
+              </div>
+              <!-- END User Info -->
+
+              <!-- Close Side Overlay -->
+              <!-- Layout API, functionality initialized in Template._uiApiLayout() -->
+              <a class="ms-auto text-white" href="javascript:void(0)" data-toggle="layout" data-action="side_overlay_close">
+                <i class="fa fa-times-circle"></i>
+              </a>
+              <!-- END Close Side Overlay -->
+            </div>
           </div>
         </div>
         <!-- END Side Header -->
 
         <!-- Side Content -->
         <div class="content-side">
-          <form class="push" action="db_social_compact.html" method="POST" onsubmit="return false;">
-            <div class="input-group">
-              <input class="form-control" placeholder="Search People..">
-              <span class="input-group-text">
-                <i class="fa fa-fw fa-search"></i>
-              </span>
-            </div>
-          </form>
-          <div class="block pull-x">
-            <!-- Online -->
-            <div class="block-content block-content-sm block-content-full bg-body">
-              <span class="text-uppercase fs-sm fw-bold">Online</span>
-            </div>
-            <div class="block-content">
-              <ul class="nav-items">
-                <li>
-                  <a class="d-flex py-2" href="javascript:void(0)">
-                    <div class="flex-shrink-0 mx-3 overlay-container">
-                      <img class="img-avatar img-avatar48" src="assets/media/avatars/avatar1.jpg" alt="">
-                      <span class="overlay-item item item-tiny item-circle border border-2 border-white bg-success"></span>
+          <!-- Side Overlay Tabs -->
+          <div class="block block-transparent pull-x pull-t mb-0">
+            <ul class="nav nav-tabs nav-tabs-block nav-justified" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="so-settings-tab" data-bs-toggle="tab" data-bs-target="#so-settings" role="tab" aria-controls="so-settings" aria-selected="true">
+                  <i class="fa fa-fw fa-cog"></i>
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="so-people-tab" data-bs-toggle="tab" data-bs-target="#so-people" role="tab" aria-controls="so-people" aria-selected="false">
+                  <i class="far fa-fw fa-user-circle"></i>
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="so-profile-tab" data-bs-toggle="tab" data-bs-target="#so-profile" role="tab" aria-controls="so-profile" aria-selected="false">
+                  <i class="far fa-fw fa-edit"></i>
+                </button>
+              </li>
+            </ul>
+            <div class="block-content tab-content overflow-hidden">
+              <!-- Settings Tab -->
+              <div class="tab-pane pull-x fade fade-up show active" id="so-settings" role="tabpanel" aria-labelledby="so-settings-tab" tabindex="0">
+                <div class="block mb-0">
+                  <!-- Color Themes -->
+                  <!-- Toggle Themes functionality initialized in Template._uiHandleTheme() -->
+                  <div class="block-content block-content-sm block-content-full bg-body">
+                    <span class="text-uppercase fs-sm fw-bold">Color Themes</span>
+                  </div>
+                  <div class="block-content block-content-full">
+                    <div class="row g-sm text-center">
+                      <div class="col-4 mb-1">
+                        <a class="d-block py-3 text-white fs-sm fw-semibold bg-default" data-toggle="theme" data-theme="default" href="#">
+                          Default
+                        </a>
+                      </div>
+                      <div class="col-4 mb-1">
+                        <a class="d-block py-3 text-white fs-sm fw-semibold bg-xwork" data-toggle="theme" data-theme="assets/css/themes/xwork.min.css" href="#">
+                          xWork
+                        </a>
+                      </div>
+                      <div class="col-4 mb-1">
+                        <a class="d-block py-3 text-white fs-sm fw-semibold bg-xmodern" data-toggle="theme" data-theme="assets/css/themes/xmodern.min.css" href="#">
+                          xModern
+                        </a>
+                      </div>
+                      <div class="col-4 mb-1">
+                        <a class="d-block py-3 text-white fs-sm fw-semibold bg-xeco" data-toggle="theme" data-theme="assets/css/themes/xeco.min.css" href="#">
+                          xEco
+                        </a>
+                      </div>
+                      <div class="col-4 mb-1">
+                        <a class="d-block py-3 text-white fs-sm fw-semibold bg-xsmooth" data-toggle="theme" data-theme="assets/css/themes/xsmooth.min.css" href="#">
+                          xSmooth
+                        </a>
+                      </div>
+                      <div class="col-4 mb-1">
+                        <a class="d-block py-3 text-white fs-sm fw-semibold bg-xinspire" data-toggle="theme" data-theme="assets/css/themes/xinspire.min.css" href="#">
+                          xInspire
+                        </a>
+                      </div>
+                      <div class="col-4 mb-1">
+                        <a class="d-block py-3 text-white fs-sm fw-semibold bg-xdream" data-toggle="theme" data-theme="assets/css/themes/xdream.min.css" href="#">
+                          xDream
+                        </a>
+                      </div>
+                      <div class="col-4 mb-1">
+                        <a class="d-block py-3 text-white fs-sm fw-semibold bg-xpro" data-toggle="theme" data-theme="assets/css/themes/xpro.min.css" href="#">
+                          xPro
+                        </a>
+                      </div>
+                      <div class="col-4 mb-1">
+                        <a class="d-block py-3 text-white fs-sm fw-semibold bg-xplay" data-toggle="theme" data-theme="assets/css/themes/xplay.min.css" href="#">
+                          xPlay
+                        </a>
+                      </div>
+                      <div class="col-12">
+                        <a class="d-block py-3 bg-body-dark fw-semibold text-dark" href="be_ui_color_themes.html">All Color Themes</a>
+                      </div>
                     </div>
-                    <div class="flex-grow-1">
-                      <div class="fw-semibold">Lori Moore</div>
-                      <div class="fs-sm text-muted">Photographer</div>
-                    </div>
-                  </a>
-                </li>
-                <li>
-                  <a class="d-flex py-2" href="javascript:void(0)">
-                    <div class="flex-shrink-0 mx-3 overlay-container">
-                      <img class="img-avatar img-avatar48" src="assets/media/avatars/avatar14.jpg" alt="">
-                      <span class="overlay-item item item-tiny item-circle border border-2 border-white bg-success"></span>
-                    </div>
-                    <div class="flex-grow-1">
-                      <div class="fw-semibold">Jeffrey Shaw</div>
-                      <div class="fw-normal fs-sm text-muted">Web Designer</div>
-                    </div>
-                  </a>
-                </li>
-                <li>
-                  <a class="d-flex py-2" href="javascript:void(0)">
-                    <div class="flex-shrink-0 mx-3 overlay-container">
-                      <img class="img-avatar img-avatar48" src="assets/media/avatars/avatar2.jpg" alt="">
-                      <span class="overlay-item item item-tiny item-circle border border-2 border-white bg-success"></span>
-                    </div>
-                    <div class="flex-grow-1">
-                      <div class="fw-semibold">Alice Moore</div>
-                      <div class="fw-normal fs-sm text-muted">Web Developer</div>
-                    </div>
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <!-- Online -->
+                  </div>
+                  <!-- END Color Themes -->
 
-            <!-- Busy -->
-            <div class="block-content block-content-sm block-content-full bg-body">
-              <span class="text-uppercase fs-sm fw-bold">Busy</span>
-            </div>
-            <div class="block-content">
-              <ul class="nav-items">
-                <li>
-                  <a class="d-flex py-2" href="javascript:void(0)">
-                    <div class="flex-shrink-0 mx-3 overlay-container">
-                      <img class="img-avatar img-avatar48" src="assets/media/avatars/avatar8.jpg" alt="">
-                      <span class="overlay-item item item-tiny item-circle border border-2 border-white bg-danger"></span>
+                  <!-- Sidebar -->
+                  <div class="block-content block-content-sm block-content-full bg-body">
+                    <span class="text-uppercase fs-sm fw-bold">Sidebar</span>
+                  </div>
+                  <div class="block-content block-content-full">
+                    <div class="row g-sm text-center">
+                      <div class="col-6 mb-1">
+                        <a class="d-block py-3 bg-body-dark fw-semibold text-dark" data-toggle="layout" data-action="sidebar_style_dark" href="javascript:void(0)">Dark</a>
+                      </div>
+                      <div class="col-6 mb-1">
+                        <a class="d-block py-3 bg-body-dark fw-semibold text-dark" data-toggle="layout" data-action="sidebar_style_light" href="javascript:void(0)">Light</a>
+                      </div>
                     </div>
-                    <div class="flex-grow-1">
-                      <div class="fw-semibold">Carol White</div>
-                      <div class="fw-normal fs-sm text-muted">UI Designer</div>
-                    </div>
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <!-- END Busy -->
+                  </div>
+                  <!-- END Sidebar -->
 
-            <!-- Away -->
-            <div class="block-content block-content-sm block-content-full bg-body">
-              <span class="text-uppercase fs-sm fw-bold">Away</span>
-            </div>
-            <div class="block-content">
-              <ul class="nav-items">
-                <li>
-                  <a class="d-flex py-2" href="javascript:void(0)">
-                    <div class="flex-shrink-0 mx-3 overlay-container">
-                      <img class="img-avatar img-avatar48" src="assets/media/avatars/avatar15.jpg" alt="">
-                      <span class="overlay-item item item-tiny item-circle border border-2 border-white bg-warning"></span>
+                  <!-- Header -->
+                  <div class="block-content block-content-sm block-content-full bg-body">
+                    <span class="text-uppercase fs-sm fw-bold">Header</span>
+                  </div>
+                  <div class="block-content block-content-full">
+                    <div class="row g-sm text-center mb-2">
+                      <div class="col-6 mb-1">
+                        <a class="d-block py-3 bg-body-dark fw-semibold text-dark" data-toggle="layout" data-action="header_style_dark" href="javascript:void(0)">Dark</a>
+                      </div>
+                      <div class="col-6 mb-1">
+                        <a class="d-block py-3 bg-body-dark fw-semibold text-dark" data-toggle="layout" data-action="header_style_light" href="javascript:void(0)">Light</a>
+                      </div>
+                      <div class="col-6 mb-1">
+                        <a class="d-block py-3 bg-body-dark fw-semibold text-dark" data-toggle="layout" data-action="header_mode_fixed" href="javascript:void(0)">Fixed</a>
+                      </div>
+                      <div class="col-6 mb-1">
+                        <a class="d-block py-3 bg-body-dark fw-semibold text-dark" data-toggle="layout" data-action="header_mode_static" href="javascript:void(0)">Static</a>
+                      </div>
                     </div>
-                    <div class="flex-grow-1">
-                      <div class="fw-semibold">Albert Ray</div>
-                      <div class="fw-normal fs-sm text-muted">Copywriter</div>
-                    </div>
-                  </a>
-                </li>
-                <li>
-                  <a class="d-flex py-2" href="javascript:void(0)">
-                    <div class="flex-shrink-0 mx-3 overlay-container">
-                      <img class="img-avatar img-avatar48" src="assets/media/avatars/avatar6.jpg" alt="">
-                      <span class="overlay-item item item-tiny item-circle border border-2 border-white bg-warning"></span>
-                    </div>
-                    <div class="flex-grow-1">
-                      <div class="fw-semibold">Laura Carr</div>
-                      <div class="fw-normal fs-sm text-muted">Writer</div>
-                    </div>
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <!-- END Away -->
+                  </div>
+                  <!-- END Header -->
 
-            <!-- Offline -->
-            <div class="block-content block-content-sm block-content-full bg-body">
-              <span class="text-uppercase fs-sm fw-bold">Offline</span>
-            </div>
-            <div class="block-content">
-              <ul class="nav-items">
-                <li>
-                  <a class="d-flex py-2" href="javascript:void(0)">
-                    <div class="flex-shrink-0 mx-3 overlay-container">
-                      <img class="img-avatar img-avatar48" src="assets/media/avatars/avatar11.jpg" alt="">
-                      <span class="overlay-item item item-tiny item-circle border border-2 border-white bg-muted"></span>
+                  <!-- Content -->
+                  <div class="block-content block-content-sm block-content-full bg-body">
+                    <span class="text-uppercase fs-sm fw-bold">Content</span>
+                  </div>
+                  <div class="block-content block-content-full">
+                    <div class="row g-sm text-center">
+                      <div class="col-6 mb-1">
+                        <a class="d-block py-3 bg-body-dark fw-semibold text-dark" data-toggle="layout" data-action="content_layout_boxed" href="javascript:void(0)">Boxed</a>
+                      </div>
+                      <div class="col-6 mb-1">
+                        <a class="d-block py-3 bg-body-dark fw-semibold text-dark" data-toggle="layout" data-action="content_layout_narrow" href="javascript:void(0)">Narrow</a>
+                      </div>
+                      <div class="col-12 mb-1">
+                        <a class="d-block py-3 bg-body-dark fw-semibold text-dark" data-toggle="layout" data-action="content_layout_full_width" href="javascript:void(0)">Full Width</a>
+                      </div>
                     </div>
-                    <div class="flex-grow-1">
-                      <div class="fw-semibold">Jack Greene</div>
-                      <div class="fw-normal fs-sm text-muted">Teacher</div>
-                    </div>
-                  </a>
-                </li>
-                <li>
-                  <a class="d-flex py-2" href="javascript:void(0)">
-                    <div class="flex-shrink-0 mx-3 overlay-container">
-                      <img class="img-avatar img-avatar48" src="assets/media/avatars/avatar5.jpg" alt="">
-                      <span class="overlay-item item item-tiny item-circle border border-2 border-white bg-muted"></span>
-                    </div>
-                    <div class="flex-grow-1">
-                      <div class="fw-semibold">Susan Day</div>
-                      <div class="fw-normal fs-sm text-muted">Photographer</div>
-                    </div>
-                  </a>
-                </li>
-                <li>
-                  <a class="d-flex py-2" href="javascript:void(0)">
-                    <div class="flex-shrink-0 mx-3 overlay-container">
-                      <img class="img-avatar img-avatar48" src="assets/media/avatars/avatar1.jpg" alt="">
-                      <span class="overlay-item item item-tiny item-circle border border-2 border-white bg-muted"></span>
-                    </div>
-                    <div class="flex-grow-1">
-                      <div class="fw-semibold">Danielle Jones</div>
-                      <div class="fw-normal fs-sm text-muted">Front-end Developer</div>
-                    </div>
-                  </a>
-                </li>
-                <li>
-                  <a class="d-flex py-2" href="javascript:void(0)">
-                    <div class="flex-shrink-0 mx-3 overlay-container">
-                      <img class="img-avatar img-avatar48" src="assets/media/avatars/avatar12.jpg" alt="">
-                      <span class="overlay-item item item-tiny item-circle border border-2 border-white bg-muted"></span>
-                    </div>
-                    <div class="flex-grow-1">
-                      <div class="fw-semibold">Wayne Garcia</div>
-                      <div class="fw-normal fs-sm text-muted">UX Specialist</div>
-                    </div>
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <!-- END Offline -->
+                  </div>
+                  <!-- END Content -->
 
-            <!-- Add People -->
-            <div class="block-content border-top">
-              <a class="btn btn-alt-primary w-100" href="javascript:void(0)">
-                <i class="fa fa-fw fa-plus opacity-50 me-1"></i> Add People
-              </a>
+                  <!-- Layout API -->
+                  <div class="block-content block-content-full border-top">
+                    <a class="btn w-100 btn-alt-primary" href="be_layout_api.html">
+                      <i class="fa fa-fw fa-flask me-1"></i> Layout API
+                    </a>
+                  </div>
+                  <!-- END Layout API -->
+                </div>
+              </div>
+              <!-- END Settings Tab -->
+
+              <!-- People -->
+              <div class="tab-pane pull-x fade fade-up" id="so-people" role="tabpanel" aria-labelledby="so-people-tab" tabindex="0">
+                <div class="block mb-0">
+                  <!-- Online -->
+                  <div class="block-content block-content-sm block-content-full bg-body">
+                    <span class="text-uppercase fs-sm fw-bold">Online</span>
+                  </div>
+                  <div class="block-content">
+                    <ul class="nav-items">
+                      <li>
+                        <a class="d-flex py-2" href="be_pages_generic_profile.html">
+                          <div class="flex-shrink-0 mx-3 overlay-container">
+                            <img class="img-avatar img-avatar48" src="assets/media/avatars/avatar5.jpg" alt="">
+                            <span class="overlay-item item item-tiny item-circle border border-2 border-white bg-success"></span>
+                          </div>
+                          <div class="flex-grow-1">
+                            <div class="fw-semibold">Sara Fields</div>
+                            <div class="fs-sm text-muted">Photographer</div>
+                          </div>
+                        </a>
+                      </li>
+                      <li>
+                        <a class="d-flex py-2" href="be_pages_generic_profile.html">
+                          <div class="flex-shrink-0 mx-3 overlay-container">
+                            <img class="img-avatar img-avatar48" src="assets/media/avatars/avatar15.jpg" alt="">
+                            <span class="overlay-item item item-tiny item-circle border border-2 border-white bg-success"></span>
+                          </div>
+                          <div class="flex-grow-1">
+                            <div class="fw-semibold">David Fuller</div>
+                            <div class="fw-normal fs-sm text-muted">Web Designer</div>
+                          </div>
+                        </a>
+                      </li>
+                      <li>
+                        <a class="d-flex py-2" href="be_pages_generic_profile.html">
+                          <div class="flex-shrink-0 mx-3 overlay-container">
+                            <img class="img-avatar img-avatar48" src="assets/media/avatars/avatar3.jpg" alt="">
+                            <span class="overlay-item item item-tiny item-circle border border-2 border-white bg-success"></span>
+                          </div>
+                          <div class="flex-grow-1">
+                            <div class="fw-semibold">Amber Harvey</div>
+                            <div class="fw-normal fs-sm text-muted">Web Developer</div>
+                          </div>
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                  <!-- Online -->
+
+                  <!-- Busy -->
+                  <div class="block-content block-content-sm block-content-full bg-body">
+                    <span class="text-uppercase fs-sm fw-bold">Busy</span>
+                  </div>
+                  <div class="block-content">
+                    <ul class="nav-items">
+                      <li>
+                        <a class="d-flex py-2" href="be_pages_generic_profile.html">
+                          <div class="flex-shrink-0 mx-3 overlay-container">
+                            <img class="img-avatar img-avatar48" src="assets/media/avatars/avatar1.jpg" alt="">
+                            <span class="overlay-item item item-tiny item-circle border border-2 border-white bg-danger"></span>
+                          </div>
+                          <div class="flex-grow-1">
+                            <div class="fw-semibold">Andrea Gardner</div>
+                            <div class="fw-normal fs-sm text-muted">UI Designer</div>
+                          </div>
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                  <!-- END Busy -->
+
+                  <!-- Away -->
+                  <div class="block-content block-content-sm block-content-full bg-body">
+                    <span class="text-uppercase fs-sm fw-bold">Away</span>
+                  </div>
+                  <div class="block-content">
+                    <ul class="nav-items">
+                      <li>
+                        <a class="d-flex py-2" href="be_pages_generic_profile.html">
+                          <div class="flex-shrink-0 mx-3 overlay-container">
+                            <img class="img-avatar img-avatar48" src="assets/media/avatars/avatar11.jpg" alt="">
+                            <span class="overlay-item item item-tiny item-circle border border-2 border-white bg-warning"></span>
+                          </div>
+                          <div class="flex-grow-1">
+                            <div class="fw-semibold">Wayne Garcia</div>
+                            <div class="fw-normal fs-sm text-muted">Copywriter</div>
+                          </div>
+                        </a>
+                      </li>
+                      <li>
+                        <a class="d-flex py-2" href="be_pages_generic_profile.html">
+                          <div class="flex-shrink-0 mx-3 overlay-container">
+                            <img class="img-avatar img-avatar48" src="assets/media/avatars/avatar1.jpg" alt="">
+                            <span class="overlay-item item item-tiny item-circle border border-2 border-white bg-warning"></span>
+                          </div>
+                          <div class="flex-grow-1">
+                            <div class="fw-semibold">Carol Ray</div>
+                            <div class="fw-normal fs-sm text-muted">Writer</div>
+                          </div>
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                  <!-- END Away -->
+
+                  <!-- Offline -->
+                  <div class="block-content block-content-sm block-content-full bg-body">
+                    <span class="text-uppercase fs-sm fw-bold">Offline</span>
+                  </div>
+                  <div class="block-content">
+                    <ul class="nav-items">
+                      <li>
+                        <a class="d-flex py-2" href="be_pages_generic_profile.html">
+                          <div class="flex-shrink-0 mx-3 overlay-container">
+                            <img class="img-avatar img-avatar48" src="assets/media/avatars/avatar11.jpg" alt="">
+                            <span class="overlay-item item item-tiny item-circle border border-2 border-white bg-muted"></span>
+                          </div>
+                          <div class="flex-grow-1">
+                            <div class="fw-semibold">Jesse Fisher</div>
+                            <div class="fw-normal fs-sm text-muted">Teacher</div>
+                          </div>
+                        </a>
+                      </li>
+                      <li>
+                        <a class="d-flex py-2" href="be_pages_generic_profile.html">
+                          <div class="flex-shrink-0 mx-3 overlay-container">
+                            <img class="img-avatar img-avatar48" src="assets/media/avatars/avatar7.jpg" alt="">
+                            <span class="overlay-item item item-tiny item-circle border border-2 border-white bg-muted"></span>
+                          </div>
+                          <div class="flex-grow-1">
+                            <div class="fw-semibold">Sara Fields</div>
+                            <div class="fw-normal fs-sm text-muted">Photographer</div>
+                          </div>
+                        </a>
+                      </li>
+                      <li>
+                        <a class="d-flex py-2" href="be_pages_generic_profile.html">
+                          <div class="flex-shrink-0 mx-3 overlay-container">
+                            <img class="img-avatar img-avatar48" src="assets/media/avatars/avatar7.jpg" alt="">
+                            <span class="overlay-item item item-tiny item-circle border border-2 border-white bg-muted"></span>
+                          </div>
+                          <div class="flex-grow-1">
+                            <div class="fw-semibold">Sara Fields</div>
+                            <div class="fw-normal fs-sm text-muted">Front-end Developer</div>
+                          </div>
+                        </a>
+                      </li>
+                      <li>
+                        <a class="d-flex py-2" href="be_pages_generic_profile.html">
+                          <div class="flex-shrink-0 mx-3 overlay-container">
+                            <img class="img-avatar img-avatar48" src="assets/media/avatars/avatar11.jpg" alt="">
+                            <span class="overlay-item item item-tiny item-circle border border-2 border-white bg-muted"></span>
+                          </div>
+                          <div class="flex-grow-1">
+                            <div class="fw-semibold">Jack Estrada</div>
+                            <div class="fw-normal fs-sm text-muted">UX Specialist</div>
+                          </div>
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                  <!-- END Offline -->
+
+                  <!-- Add People -->
+                  <div class="block-content block-content-full border-top">
+                    <a class="btn w-100 btn-alt-primary" href="javascript:void(0)">
+                      <i class="fa fa-fw fa-plus me-1 opacity-50"></i> Add People
+                    </a>
+                  </div>
+                  <!-- END Add People -->
+                </div>
+              </div>
+              <!-- END People -->
+
+              <!-- Profile -->
+              <div class="tab-pane pull-x fade fade-up" id="so-profile" role="tabpanel" aria-labelledby="so-profile-tab" tabindex="0">
+                <form action="be_pages_dashboard.html" method="POST" onsubmit="return false;">
+                  <div class="block mb-0">
+                    <!-- Personal -->
+                    <div class="block-content block-content-sm block-content-full bg-body">
+                      <span class="text-uppercase fs-sm fw-bold">Personal</span>
+                    </div>
+                    <div class="block-content block-content-full">
+                      <div class="mb-4">
+                        <label class="form-label">Username</label>
+                        <input type="text" readonly class="form-control" id="so-profile-username-static" value="Admin">
+                      </div>
+                      <div class="mb-4">
+                        <label class="form-label" for="so-profile-name">Name</label>
+                        <input type="text" class="form-control" id="so-profile-name" name="so-profile-name" value="George Taylor">
+                      </div>
+                      <div class="mb-4">
+                        <label class="form-label" for="so-profile-email">Email</label>
+                        <input type="email" class="form-control" id="so-profile-email" name="so-profile-email" value="g.taylor@example.com">
+                      </div>
+                    </div>
+                    <!-- END Personal -->
+
+                    <!-- Password Update -->
+                    <div class="block-content block-content-sm block-content-full bg-body">
+                      <span class="text-uppercase fs-sm fw-bold">Password Update</span>
+                    </div>
+                    <div class="block-content block-content-full">
+                      <div class="mb-4">
+                        <label class="form-label" for="so-profile-password">Current Password</label>
+                        <input type="password" class="form-control" id="so-profile-password" name="so-profile-password">
+                      </div>
+                      <div class="mb-4">
+                        <label class="form-label" for="so-profile-new-password">New Password</label>
+                        <input type="password" class="form-control" id="so-profile-new-password" name="so-profile-new-password">
+                      </div>
+                      <div class="mb-4">
+                        <label class="form-label" for="so-profile-new-password-confirm">Confirm New Password</label>
+                        <input type="password" class="form-control" id="so-profile-new-password-confirm" name="so-profile-new-password-confirm">
+                      </div>
+                    </div>
+                    <!-- END Password Update -->
+
+                    <!-- Options -->
+                    <div class="block-content block-content-sm block-content-full bg-body">
+                      <span class="text-uppercase fs-sm fw-bold">Options</span>
+                    </div>
+                    <div class="block-content">
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="" id="so-settings-status" name="so-settings-status">
+                        <label class="form-check-label fw-semibold" for="so-settings-status">Online Status</label>
+                      </div>
+                      <p class="text-muted fs-sm">
+                        Make your online status visible to other users of your app
+                      </p>
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="" id="so-settings-notifications" name="so-settings-notifications">
+                        <label class="form-check-label fw-semibold" for="so-settings-notifications">Notifications</label>
+                      </div>
+                      <p class="text-muted fs-sm">
+                        Receive desktop notifications regarding your projects and sales
+                      </p>
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="" id="so-settings-updates" name="so-settings-updates">
+                        <label class="form-check-label fw-semibold" for="so-settings-updates">Auto Updates</label>
+                      </div>
+                      <p class="text-muted fs-sm">
+                        If enabled, we will keep all your applications and servers up to date with the most recent features automatically
+                      </p>
+                    </div>
+                    <!-- END Options -->
+
+                    <!-- Submit -->
+                    <div class="block-content block-content-full border-top">
+                      <button type="submit" class="btn w-100 btn-alt-primary">
+                        <i class="fa fa-fw fa-save me-1 opacity-50"></i> Save
+                      </button>
+                    </div>
+                    <!-- END Submit -->
+                  </div>
+                </form>
+              </div>
+              <!-- END Profile -->
             </div>
-            <!-- END Add People -->
           </div>
+          <!-- END Side Overlay Tabs -->
         </div>
         <!-- END Side Content -->
       </aside>
@@ -319,140 +564,52 @@
       -->
       <nav id="sidebar" aria-label="Main Navigation">
         <!-- Side Header -->
-        <div class="content-header bg-primary">
-          <!-- Logo -->
-          <a class="text-dual d-inline-block" href="index.html">
-            <i class="fa fa-campground"></i>
-          </a>
-          <!-- END Logo -->
-
-          <!-- Options -->
-          <div>
-            <!-- Close Sidebar, Visible only on mobile screens -->
-            <a class="d-lg-none text-white ms-2" data-toggle="layout" data-action="sidebar_close" href="javascript:void(0)">
-              <i class="fa fa-times-circle"></i>
+        <div class="bg-header-dark">
+          <div class="content-header bg-white-5">
+            <!-- Logo -->
+            <a class="fw-semibold text-white tracking-wide" href="index.html">
+              <span class="smini-visible">
+                D<span class="opacity-75">x</span>
+              </span>
+              <span class="smini-hidden">
+                Dash<span class="opacity-75">mix</span>
+              </span>
             </a>
-            <!-- END Close Sidebar -->
+            <!-- END Logo -->
+
+            <!-- Options -->
+            <div>
+              <!-- Toggle Sidebar Style -->
+              <!-- Layout API, functionality initialized in Template._uiApiLayout() -->
+              <!-- Class Toggle, functionality initialized in Helpers.dmToggleClass() -->
+              <button type="button" class="btn btn-sm btn-alt-secondary" data-toggle="class-toggle" data-target="#sidebar-style-toggler" data-class="fa-toggle-off fa-toggle-on" onclick="Dashmix.layout('sidebar_style_toggle');Dashmix.layout('header_style_toggle');">
+                <i class="fa fa-toggle-off" id="sidebar-style-toggler"></i>
+              </button>
+              <!-- END Toggle Sidebar Style -->
+
+              <!-- Dark Mode -->
+              <!-- Layout API, functionality initialized in Template._uiApiLayout() -->
+              <button type="button" class="btn btn-sm btn-alt-secondary" data-toggle="class-toggle" data-target="#dark-mode-toggler" data-class="far fa" onclick="Dashmix.layout('dark_mode_toggle');">
+                <i class="far fa-moon" id="dark-mode-toggler"></i>
+              </button>
+              <!-- END Dark Mode -->
+
+              <!-- Close Sidebar, Visible only on mobile screens -->
+              <!-- Layout API, functionality initialized in Template._uiApiLayout() -->
+              <button type="button" class="btn btn-sm btn-alt-secondary d-lg-none" data-toggle="layout" data-action="sidebar_close">
+                <i class="fa fa-times-circle"></i>
+              </button>
+              <!-- END Close Sidebar -->
+            </div>
+            <!-- END Options -->
           </div>
-          <!-- END Options -->
         </div>
         <!-- END Side Header -->
 
         <!-- Sidebar Scrolling -->
         <div class="js-sidebar-scroll">
-          <!-- User Info -->
-          <div class="smini-hidden">
-            <div class="content-side content-side-full bg-black-10 d-flex align-items-center">
-              <a class="img-link d-inline-block" href="javascript:void(0)">
-                <img class="img-avatar img-avatar48 img-avatar-thumb" src="{{asset('src/assets/media/avatars/avatar8.jpg')}}" alt="">
-              </a>
-              <div class="ms-3">
-                <a class="fw-semibold text-dual" href="javascript:void(0)">Stella Smith</a>
-                <div class="fs-sm text-dual">Developer</div>
-              </div>
-            </div>
-          </div>
-          <!-- END User Info -->
-
           <!-- Side Navigation -->
-          <div class="content-side">
-            <ul class="nav-main">
-              <li class="nav-main-item">
-                <a class="nav-main-link" href="">
-                  <i class="nav-main-link-icon far fa-user-circle"></i>
-                  <span class="nav-main-link-name">My Profile</span>
-                </a>
-              </li>
-              <li class="nav-main-item">
-                <a class="nav-main-link" href="">
-                  <i class="nav-main-link-icon far fa-bell"></i>
-                  <span class="nav-main-link-name">Notifications</span>
-                  <span class="nav-main-link-badge badge rounded-pill bg-info">6</span>
-                </a>
-              </li>
-              <li class="nav-main-item">
-                <a class="nav-main-link" href="">
-                  <i class="nav-main-link-icon far fa-envelope-open"></i>
-                  <span class="nav-main-link-name">Messages</span>
-                  <span class="nav-main-link-badge badge rounded-pill bg-info">1</span>
-                </a>
-              </li>
-              <li class="nav-main-heading">Home</li>
-              <li class="nav-main-item">
-                <a class="nav-main-link active" href="db_social_compact.html">
-                  <i class="nav-main-link-icon far fa-newspaper"></i>
-                  <span class="nav-main-link-name">News Feed</span>
-                </a>
-              </li>
-              <li class="nav-main-item">
-                <a class="nav-main-link" href="">
-                  <i class="nav-main-link-icon far fa-gem"></i>
-                  <span class="nav-main-link-name">Marketplace</span>
-                </a>
-              </li>
-              <li class="nav-main-heading">Explore</li>
-              <li class="nav-main-item">
-                <a class="nav-main-link" href="">
-                  <i class="nav-main-link-icon far fa-calendar-alt"></i>
-                  <span class="nav-main-link-name">Events</span>
-                </a>
-              </li>
-              <li class="nav-main-item">
-                <a class="nav-main-link" href="">
-                  <i class="nav-main-link-icon far fa-user"></i>
-                  <span class="nav-main-link-name">Groups</span>
-                </a>
-              </li>
-              <li class="nav-main-item">
-                <a class="nav-main-link" href="">
-                  <i class="nav-main-link-icon far fa-file-alt"></i>
-                  <span class="nav-main-link-name">Pages</span>
-                  <span class="nav-main-link-badge badge rounded-pill bg-danger">32</span>
-                </a>
-              </li>
-              <li class="nav-main-item">
-                <a class="nav-main-link" href="">
-                  <i class="nav-main-link-icon far fa-images"></i>
-                  <span class="nav-main-link-name">Photos</span>
-                  <span class="nav-main-link-badge badge rounded-pill bg-warning">14</span>
-                </a>
-              </li>
-              <li class="nav-main-item">
-                <a class="nav-main-link nav-main-link-submenu" data-toggle="submenu" aria-haspopup="true" aria-expanded="false" href="#">
-                  <i class="nav-main-link-icon fa fa-plus"></i>
-                  <span class="nav-main-link-name">More</span>
-                </a>
-                <ul class="nav-main-submenu">
-                  <li class="nav-main-item">
-                    <a class="nav-main-link" href="">
-                      <i class="nav-main-link-icon far fa-clock"></i>
-                      <span class="nav-main-link-name">On This Day</span>
-                    </a>
-                  </li>
-                  <li class="nav-main-item">
-                    <a class="nav-main-link" href="">
-                      <i class="nav-main-link-icon far fa-newspaper"></i>
-                      <span class="nav-main-link-name">Pages Feed</span>
-                    </a>
-                  </li>
-                  <li class="nav-main-item">
-                    <a class="nav-main-link" href="">
-                      <i class="nav-main-link-icon fa fa-gamepad"></i>
-                      <span class="nav-main-link-name">Games</span>
-                      <span class="nav-main-link-badge badge rounded-pill bg-success">25</span>
-                    </a>
-                  </li>
-                </ul>
-              </li>
-              <li class="nav-main-heading">Dashboards</li>
-              <li class="nav-main-item">
-                <a class="nav-main-link" href="be_pages_dashboard_all.html">
-                  <i class="nav-main-link-icon fa fa-arrow-left"></i>
-                  <span class="nav-main-link-name">Go Back</span>
-                </a>
-              </li>
-            </ul>
-          </div>
+          @include('layouts.sidebar')
           <!-- END Side Navigation -->
         </div>
         <!-- END Sidebar Scrolling -->
@@ -464,64 +621,100 @@
         <!-- Header Content -->
         <div class="content-header">
           <!-- Left Section -->
-          <div class="d-flex align-items-center">
-            <!-- Logo -->
-            <a class="btn btn-alt-secondary me-2" href="index.html">
-              <i class="fa fa-campground"></i>
-            </a>
-            <!-- END Logo -->
+          <div class="space-x-1">
+            <!-- Toggle Sidebar -->
+            <!-- Layout API, functionality initialized in Template._uiApiLayout()-->
+            <button type="button" class="btn btn-alt-secondary" data-toggle="layout" data-action="sidebar_toggle">
+              <i class="fa fa-fw fa-bars"></i>
+            </button>
+            <!-- END Toggle Sidebar -->
 
             <!-- Open Search Section -->
             <!-- Layout API, functionality initialized in Template._uiApiLayout() -->
-            <button type="button" class="btn btn-alt-secondary d-lg-none" data-toggle="layout" data-action="header_search_on">
-              <i class="fa fa-fw fa-search"></i>
-            </button>
+            {{-- <button type="button" class="btn btn-alt-secondary" data-toggle="layout" data-action="header_search_on">
+              <i class="fa fa-fw opacity-50 fa-search"></i> <span class="ms-1 d-none d-sm-inline-block">Search</span>
+            </button> --}}
             <!-- END Open Search Section -->
-
-            <!-- Search form in larger screens -->
-            <form class="d-none d-lg-inline-block" action="be_pages_generic_search.html" method="POST">
-              <input type="text" class="form-control form-control-sm border-0 rounded-pill px-3" placeholder="Search.." id="page-header-search-input-full" name="page-header-search-input-full">
-            </form>
-            <!-- END Search form in larger screens -->
           </div>
           <!-- END Left Section -->
 
           <!-- Right Section -->
-          <div>
-            <!-- User Profile -->
-            <a class="btn btn-alt-secondary d-none d-sm-inline-block"  href="javascript:void(0)">
-              <i class="fa fa-user-circle opacity-50 me-1"></i> Stella
-            </a>
-            <!-- END User Profile -->
+          <div class="space-x-1">
+            <!-- User Dropdown -->
+            <div class="dropdown d-inline-block">
+              <button type="button" class="btn btn-alt-secondary" id="page-header-user-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fa fa-fw fa-user d-sm-none"></i>
+                <span class="d-none d-sm-inline-block">{{ auth()->user()->name }}</span>
+                <i class="fa fa-fw fa-angle-down opacity-50 ms-1 d-none d-sm-inline-block"></i>
+              </button>
+              <div class="dropdown-menu dropdown-menu-end p-0" aria-labelledby="page-header-user-dropdown">
+                <div class="bg-primary-dark rounded-top fw-semibold text-white text-center p-3">
+                  User Options
+                </div>
+                <div class="p-2">
+                  <a class="dropdown-item" href="be_pages_generic_profile.html">
+                    <i class="far fa-fw fa-user me-1"></i> Profile
+                  </a>
+                  <a class="dropdown-item d-flex align-items-center justify-content-between" href="be_pages_generic_inbox.html">
+                    <span><i class="far fa-fw fa-envelope me-1"></i> Inbox</span>
+                    <span class="badge bg-primary rounded-pill">3</span>
+                  </a>
+                  <a class="dropdown-item" href="be_pages_generic_invoice.html">
+                    <i class="far fa-fw fa-file-alt me-1"></i> Invoices
+                  </a>
+                  <div role="separator" class="dropdown-divider"></div>
+
+                  <!-- Toggle Side Overlay -->
+                  <!-- Layout API, functionality initialized in Template._uiApiLayout() -->
+                  <a class="dropdown-item" href="javascript:void(0)" data-toggle="layout" data-action="side_overlay_toggle">
+                    <i class="far fa-fw fa-building me-1"></i> Settings
+                  </a>
+                  <!-- END Side Overlay -->
+
+                  <div role="separator" class="dropdown-divider"></div>
+
+                    <a class="dropdown-item" href="{{ route('logout') }}"
+                       onclick="event.preventDefault();
+                                     document.getElementById('logout-form').submit();">
+                        <i class="far fa-fw fa-arrow-alt-circle-left me-1"></i> Sign Out
+                    </a>
+                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                        @csrf
+                    </form>
+               
+                </div>
+              </div>
+            </div>
+            <!-- END User Dropdown -->
 
             <!-- Notifications Dropdown -->
             <div class="dropdown d-inline-block">
               <button type="button" class="btn btn-alt-secondary" id="page-header-notifications-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="fa fa-fw fa-bell"></i>
               </button>
-              <div class="dropdown-menu dropdown-menu-end dropdown-menu-lg p-0" aria-labelledby="page-header-notifications-dropdown">
-                <div class="bg-primary-darker rounded-top fw-semibold text-white text-center p-3">
+              <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end p-0" aria-labelledby="page-header-notifications-dropdown">
+                <div class="bg-primary-dark rounded-top fw-semibold text-white text-center p-3">
                   Notifications
                 </div>
                 <ul class="nav-items my-2">
                   <li>
                     <a class="d-flex text-dark py-2" href="javascript:void(0)">
                       <div class="flex-shrink-0 mx-3">
-                        <i class="fa fa-fw fa-user-plus text-primary"></i>
+                        <i class="fa fa-fw fa-check-circle text-success"></i>
                       </div>
                       <div class="flex-grow-1 fs-sm pe-2">
-                        <div class="fw-semibold">John Doe send you a friend request!</div>
-                        <div class="text-muted">6 min ago</div>
+                        <div class="fw-semibold">App was updated to v5.6!</div>
+                        <div class="text-muted">3 min ago</div>
                       </div>
                     </a>
                   </li>
                   <li>
                     <a class="d-flex text-dark py-2" href="javascript:void(0)">
                       <div class="flex-shrink-0 mx-3">
-                        <i class="fa fa-fw fa-user-plus text-primary"></i>
+                        <i class="fa fa-fw fa-user-plus text-info"></i>
                       </div>
                       <div class="flex-grow-1 fs-sm pe-2">
-                        <div class="fw-semibold">Elisa Doe send you a friend request!</div>
+                        <div class="fw-semibold">New Subscriber was added! You now have 2580!</div>
                         <div class="text-muted">10 min ago</div>
                       </div>
                     </a>
@@ -529,44 +722,33 @@
                   <li>
                     <a class="d-flex text-dark py-2" href="javascript:void(0)">
                       <div class="flex-shrink-0 mx-3">
-                        <i class="fa fa-check-circle text-success"></i>
+                        <i class="fa fa-fw fa-times-circle text-danger"></i>
                       </div>
                       <div class="flex-grow-1 fs-sm pe-2">
-                        <div class="fw-semibold">Backup completed successfully!</div>
-                        <div class="text-muted">2 hours ago</div>
+                        <div class="fw-semibold">Server backup failed to complete!</div>
+                        <div class="text-muted">30 min ago</div>
                       </div>
                     </a>
                   </li>
                   <li>
                     <a class="d-flex text-dark py-2" href="javascript:void(0)">
                       <div class="flex-shrink-0 mx-3">
-                        <i class="fa fa-fw fa-user-plus text-primary"></i>
-                      </div>
-                      <div class="flex-grow-1 fs-sm pe-2">
-                        <div class="fw-semibold">George Smith send you a friend request!</div>
-                        <div class="text-muted">3 hours ago</div>
-                      </div>
-                    </a>
-                  </li>
-                  <li>
-                    <a class="d-flex text-dark py-2" href="javascript:void(0)">
-                      <div class="flex-shrink-0 mx-3">
-                        <i class="fa fa-exclamation-circle text-warning"></i>
+                        <i class="fa fa-fw fa-exclamation-circle text-warning"></i>
                       </div>
                       <div class="flex-grow-1 fs-sm pe-2">
                         <div class="fw-semibold">You are running out of space. Please consider upgrading your plan.</div>
-                        <div class="text-muted">1 day ago</div>
+                        <div class="text-muted">1 hour ago</div>
                       </div>
                     </a>
                   </li>
                   <li>
                     <a class="d-flex text-dark py-2" href="javascript:void(0)">
                       <div class="flex-shrink-0 mx-3">
-                        <i class="fa fa-envelope-open text-info"></i>
+                        <i class="fa fa-fw fa-plus-circle text-primary"></i>
                       </div>
                       <div class="flex-grow-1 fs-sm pe-2">
-                        <div class="fw-semibold">You have a new message!</div>
-                        <div class="text-muted">2 days ago</div>
+                        <div class="fw-semibold">New Sale! + $30</div>
+                        <div class="text-muted">2 hours ago</div>
                       </div>
                     </a>
                   </li>
@@ -582,656 +764,62 @@
 
             <!-- Toggle Side Overlay -->
             <!-- Layout API, functionality initialized in Template._uiApiLayout() -->
-            <button type="button" class="btn btn-alt-secondary" data-toggle="layout" data-action="side_overlay_toggle">
-              <i class="fa fa-fw fa-comment-alt"></i>
-            </button>
+           
             <!-- END Toggle Side Overlay -->
-
-            <!-- Toggle Sidebar -->
-            <!-- Layout API, functionality initialized in Template._uiApiLayout() -->
-            <button type="button" class="btn btn-alt-secondary d-lg-none" data-toggle="layout" data-action="sidebar_toggle">
-              <i class="fa fa-fw fa-bars"></i>
-            </button>
-            <!-- END Toggle Sidebar -->
           </div>
           <!-- END Right Section -->
         </div>
         <!-- END Header Content -->
 
         <!-- Header Search -->
-        <div id="page-header-search" class="overlay-header bg-primary">
-          <div class="content-header">
-            <form class="w-100" action="be_pages_generic_search.html" method="POST">
-              <div class="input-group">
-                <button type="button" class="btn btn-primary" data-toggle="layout" data-action="header_search_off">
-                  <i class="fa fa-fw fa-times-circle"></i>
-                </button>
-                <input type="text" class="form-control border-0" placeholder="Search your network.." id="page-header-search-input" name="page-header-search-input">
-              </div>
-            </form>
+        {{-- <div id="page-header-search" class="overlay-header bg-header-dark">
+          <div class="bg-white-10">
+            <div class="content-header">
+              <form class="w-100" action="be_pages_generic_search.html" method="POST">
+                <div class="input-group">
+                  <!-- Layout API, functionality initialized in Template._uiApiLayout() -->
+                  <button type="button" class="btn btn-alt-primary" data-toggle="layout" data-action="header_search_off">
+                    <i class="fa fa-fw fa-times-circle"></i>
+                  </button>
+                  <input type="text" class="form-control border-0" placeholder="Search or hit ESC.." id="page-header-search-input" name="page-header-search-input">
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
+        </div> --}}
         <!-- END Header Search -->
 
         <!-- Header Loader -->
         <!-- Please check out the Loaders page under Components category to see examples of showing/hiding it -->
-        <div id="page-header-loader" class="overlay-header bg-primary-darker">
-          <div class="content-header">
-            <div class="w-100 text-center">
-              <i class="fa fa-fw fa-2x fa-sun fa-spin text-white"></i>
+        {{-- <div id="page-header-loader" class="overlay-header bg-header-dark">
+          <div class="bg-white-10">
+            <div class="content-header">
+              <div class="w-100 text-center">
+                <i class="fa fa-fw fa-sun fa-spin text-white"></i>
+              </div>
             </div>
           </div>
-        </div>
+        </div> --}}
         <!-- END Header Loader -->
       </header>
       <!-- END Header -->
 
-      
+      <!-- Main Container -->
+      <main id="main-container">
 
-        <main id="main-container">
-              <!-- Page Content -->
-            <div class="content content-full">
-                <div class="row">
-                    <div class="col-lg-3 d-none d-lg-block">
-                      <!-- User and Main Navigation -->
-                      <div class="block block-bordered block-rounded bg-body">
-                        <div class="block-content">
-                          <div class="bg-body rounded p-2 mb-3 d-flex align-items-center">
-                            <a class="img-link d-inline-block" href="javascript:void(0)">
-                              <img class="img-avatar img-avatar48" src="{{asset('src/assets/media/avatars/avatar8.jpg')}}" alt="">
-                            </a>
-                            <div class="ms-3">
-                              <a class="fw-semibold" href="javascript:void(0)">Stella Smith</a>
-                              <div class="fs-sm text-muted">Developer</div>
-                            </div>
-                          </div>
-                          <ul class="nav-main">
-                            <li class="nav-main-item">
-                              <a class="nav-main-link" href="">
-                                <i class="nav-main-link-icon far fa-user-circle"></i>
-                                <span class="nav-main-link-name">My Profile</span>
-                              </a>
-                            </li>
-                            <li class="nav-main-item">
-                              <a class="nav-main-link" href="">
-                                <i class="nav-main-link-icon far fa-bell"></i>
-                                <span class="nav-main-link-name">Notifications</span>
-                                <span class="nav-main-link-badge badge rounded-pill bg-info">6</span>
-                              </a>
-                            </li>
-                            <li class="nav-main-item">
-                              <a class="nav-main-link" href="">
-                                <i class="nav-main-link-icon far fa-envelope-open"></i>
-                                <span class="nav-main-link-name">Messages</span>
-                                <span class="nav-main-link-badge badge rounded-pill bg-info">1</span>
-                              </a>
-                            </li>
-                            <li class="nav-main-heading">Home</li>
-                            <li class="nav-main-item">
-                              <a class="nav-main-link active" href="db_social_compact.html">
-                                <i class="nav-main-link-icon far fa-newspaper"></i>
-                                <span class="nav-main-link-name">News Feed</span>
-                              </a>
-                            </li>
-                            <li class="nav-main-item">
-                              <a class="nav-main-link" href="">
-                                <i class="nav-main-link-icon far fa-gem"></i>
-                                <span class="nav-main-link-name">Marketplace</span>
-                              </a>
-                            </li>
-                            <li class="nav-main-heading">Explore</li>
-                            <li class="nav-main-item">
-                              <a class="nav-main-link" href="">
-                                <i class="nav-main-link-icon far fa-calendar-alt"></i>
-                                <span class="nav-main-link-name">Events</span>
-                              </a>
-                            </li>
-                            <li class="nav-main-item">
-                              <a class="nav-main-link" href="">
-                                <i class="nav-main-link-icon far fa-user"></i>
-                                <span class="nav-main-link-name">Groups</span>
-                              </a>
-                            </li>
-                            <li class="nav-main-item">
-                              <a class="nav-main-link" href="">
-                                <i class="nav-main-link-icon far fa-file-alt"></i>
-                                <span class="nav-main-link-name">Pages</span>
-                                <span class="nav-main-link-badge badge rounded-pill bg-danger">32</span>
-                              </a>
-                            </li>
-                            <li class="nav-main-item">
-                              <a class="nav-main-link" href="">
-                                <i class="nav-main-link-icon far fa-images"></i>
-                                <span class="nav-main-link-name">Photos</span>
-                                <span class="nav-main-link-badge badge rounded-pill bg-warning">14</span>
-                              </a>
-                            </li>
-                            <li class="nav-main-item">
-                              <a class="nav-main-link nav-main-link-submenu" data-toggle="submenu" aria-haspopup="true" aria-expanded="false" href="#">
-                                <i class="nav-main-link-icon fa fa-plus"></i>
-                                <span class="nav-main-link-name">More</span>
-                              </a>
-                              <ul class="nav-main-submenu">
-                                <li class="nav-main-item">
-                                  <a class="nav-main-link" href="">
-                                    <i class="nav-main-link-icon far fa-clock"></i>
-                                    <span class="nav-main-link-name">On This Day</span>
-                                  </a>
-                                </li>
-                                <li class="nav-main-item">
-                                  <a class="nav-main-link" href="">
-                                    <i class="nav-main-link-icon far fa-newspaper"></i>
-                                    <span class="nav-main-link-name">Pages Feed</span>
-                                  </a>
-                                </li>
-                                <li class="nav-main-item">
-                                  <a class="nav-main-link" href="">
-                                    <i class="nav-main-link-icon fa fa-gamepad"></i>
-                                    <span class="nav-main-link-name">Games</span>
-                                    <span class="nav-main-link-badge badge rounded-pill bg-success">25</span>
-                                  </a>
-                                </li>
-                              </ul>
-                            </li>
-                            <li class="nav-main-heading">Dashboards</li>
-                            <li class="nav-main-item">
-                              {{-- <a class="nav-main-link" href="be_pages_dashboard_all.html">
-                                <i class="nav-main-link-icon fa fa-arrow-left"></i>
-                                <span class="nav-main-link-name">Go Back</span>
-                              </a> --}}
+        <!-- Page Content -->
+        <div class="content content-full content-boxed">
+         
+              <!-- Timeline -->
+              {{ $slot }}
 
-                              <a class="nav-main-link" href="{{ route('logout') }}"
-                              onclick="event.preventDefault();
-                                            document.getElementById('logout-form').submit();">
-                               {{ __('Logout') }}
-                           </a>
+              @yield('content')
 
-                           <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                               @csrf
-                           </form>
-                            </li>
-                          </ul>
-                        </div>
-                      </div>
-                      <!-- END User and Main Navigation -->
-                    </div>
-                    
-                    <div class="col-md-8 col-lg-6">
-                     
-                   
+        </div>
 
-                    {{--
-                      <!-- Timeline -->
-                      <!-- Update #1 -->
-                      <div class="block block-rounded block-bordered">
-                        <div class="block-header block-header-default">
-                          <div>
-                            <a class="img-link me-1" href="javascript:void(0)">
-                              <img class="img-avatar img-avatar32 img-avatar-thumb" src="assets/media/avatars/avatar1.jpg" alt="">
-                            </a>
-                            <a class="fw-semibold" href="javascript:void(0)">Laura Carr</a>
-                            <span class="fs-sm text-muted">3 hrs ago</span>
-                          </div>
-                          <div class="block-options">
-                            <div class="dropdown">
-                              <button type="button" class="btn-block-option dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
-                              <div class="dropdown-menu dropdown-menu-end">
-                                <a class="dropdown-item" href="javascript:void(0)">
-                                  <i class="far fa-fw fa-times-circle text-danger me-1"></i> Hide similar posts
-                                </a>
-                                <a class="dropdown-item" href="javascript:void(0)">
-                                  <i class="far fa-fw fa-thumbs-down text-warning me-1"></i> Stop following this user
-                                </a>
-                                <div role="separator" class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="javascript:void(0)">
-                                  <i class="fa fa-fw fa-exclamation-triangle me-1"></i> Report this post
-                                </a>
-                                <a class="dropdown-item" href="javascript:void(0)">
-                                  <i class="fa fa-fw fa-bookmark me-1"></i> Bookmark this post
-                                </a>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="block-content">
-                          <p>
-                            How to get started your HTML page:
-                          </p>
-                          <pre><code class="html">&lt;!doctype html&gt;
-                                &lt;html&gt;
-                                    &lt;head&gt;
-                                        &lt;meta charset=&quot;utf-8&quot;&gt;
-        
-                                        &lt;title&gt;Title&lt;/title&gt;
-                                    &lt;/head&gt;
-                                    &lt;body&gt;
-                                        &lt;!-- Your content --&gt;
-                                    &lt;/body&gt;
-                                &lt;/html&gt;</code></pre>
-                          <hr>
-                          <ul class="nav nav-pills fs-sm push">
-                            <li class="nav-item me-1">
-                              <a class="nav-link" href="javascript:void(0)">
-                                <i class="fa fa-thumbs-up opacity-50 me-1"></i> Like
-                              </a>
-                            </li>
-                            <li class="nav-item me-1">
-                              <a class="nav-link" href="javascript:void(0)">
-                                <i class="fa fa-comment-alt opacity-50 me-1"></i> Comment
-                              </a>
-                            </li>
-                            <li class="nav-item">
-                              <a class="nav-link" href="javascript:void(0)">
-                                <i class="fa fa-share-alt opacity-50 me-1"></i> Share
-                              </a>
-                            </li>
-                          </ul>
-                        </div>
-                        <div class="block-content block-content-full bg-body-light">
-                          <p class="fs-sm">
-                            <i class="fa fa-thumbs-up text-info"></i>
-                            <i class="fa fa-heart text-danger"></i>
-                            <i class="far fa-smile text-warning me-1"></i>
-                            <a class="fw-semibold" href="javascript:void(0)">Jeffrey Shaw</a>,
-                            <a class="fw-semibold" href="javascript:void(0)">Melissa Rice</a>,
-                            <a class="fw-semibold" href="javascript:void(0)">and 150 others</a>
-                          </p>
-                          <form action="db_social_compact.html" method="POST" onsubmit="return false;">
-                            <input type="text" class="form-control form-control-alt" placeholder="Write a comment..">
-                          </form>
-                          <div class="pt-3 fs-sm">
-                            <div class="d-flex">
-                              <a class="flex-shrink-0 img-link me-2" href="javascript:void(0)">
-                                <img class="img-avatar img-avatar32 img-avatar-thumb" src="assets/media/avatars/avatar8.jpg" alt="">
-                              </a>
-                              <div class="flex-grow-1">
-                                <p class="mb-1">
-                                  <a class="fw-semibold" href="javascript:void(0)">Carol Ray</a>
-                                  Vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc ac nisi vulputate fringilla. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam tincidunt sollicitudin sem nec ultrices. Sed at mi velit.
-                                </p>
-                                <p>
-                                  <a href="javascript:void(0)" class="me-1">Like</a>
-                                  <a href="javascript:void(0)">Comment</a>
-                                </p>
-                                <div class="d-flex">
-                                  <a class="flex-shrink-0 img-link me-2" href="javascript:void(0)">
-                                    <img class="img-avatar img-avatar32 img-avatar-thumb" src="assets/media/avatars/avatar11.jpg" alt="">
-                                  </a>
-                                  <div class="flex-grow-1">
-                                    <p class="mb-1">
-                                      <a class="fw-semibold" href="javascript:void(0)">Jose Parker</a>
-                                      Odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.
-                                    </p>
-                                    <p>
-                                      <a href="javascript:void(0)" class="me-1">Like</a>
-                                      <a href="javascript:void(0)">Comment</a>
-                                    </p>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <!-- END Update #1 -->
-        
-                      <!-- Update #2 -->
-                      <div class="block block-rounded block-bordered">
-                        <div class="block-header block-header-default">
-                          <div>
-                            <a class="img-link me-1" href="javascript:void(0)">
-                              <img class="img-avatar img-avatar32 img-avatar-thumb" src="assets/media/avatars/avatar11.jpg" alt="">
-                            </a>
-                            <a class="fw-semibold" href="javascript:void(0)">Ralph Murray</a>
-                            <span class="fs-sm text-muted">5 hrs ago</span>
-                          </div>
-                          <div class="block-options">
-                            <div class="dropdown">
-                              <button type="button" class="btn-block-option dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
-                              <div class="dropdown-menu dropdown-menu-end">
-                                <a class="dropdown-item" href="javascript:void(0)">
-                                  <i class="far fa-fw fa-times-circle text-danger me-1"></i> Hide similar posts
-                                </a>
-                                <a class="dropdown-item" href="javascript:void(0)">
-                                  <i class="far fa-fw fa-thumbs-down text-warning me-1"></i> Stop following this user
-                                </a>
-                                <div role="separator" class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="javascript:void(0)">
-                                  <i class="fa fa-fw fa-exclamation-triangle me-1"></i> Report this post
-                                </a>
-                                <a class="dropdown-item" href="javascript:void(0)">
-                                  <i class="fa fa-fw fa-bookmark me-1"></i> Bookmark this post
-                                </a>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="block-content">
-                          <p>Dolor posuere proin blandit accumsan senectus netus nullam curae, ornare laoreet adipiscing luctus mauris adipiscing pretium eget fermentum, tristique lobortis est ut metus lobortis tortor tincidunt himenaeos habitant quis dictumst proin odio sagittis purus mi, nec taciti vestibulum quis in sit varius lorem sit metus mi.</p>
-                          <hr>
-                          <ul class="nav nav-pills fs-sm push">
-                            <li class="nav-item me-1">
-                              <a class="nav-link" href="javascript:void(0)">
-                                <i class="fa fa-thumbs-up opacity-50 me-1"></i> Like
-                              </a>
-                            </li>
-                            <li class="nav-item me-1">
-                              <a class="nav-link" href="javascript:void(0)">
-                                <i class="fa fa-comment-alt opacity-50 me-1"></i> Comment
-                              </a>
-                            </li>
-                            <li class="nav-item">
-                              <a class="nav-link" href="javascript:void(0)">
-                                <i class="fa fa-share-alt opacity-50 me-1"></i> Share
-                              </a>
-                            </li>
-                          </ul>
-                        </div>
-                        <div class="block-content block-content-full bg-body-light">
-                          <p class="fs-sm">
-                            <i class="fa fa-heart text-danger"></i>
-                            <a class="fw-semibold" href="javascript:void(0)">Albert Ray</a>,
-                            <a class="fw-semibold" href="javascript:void(0)">Melissa Rice</a>,
-                            <a class="fw-semibold" href="javascript:void(0)">and 36 others</a>
-                          </p>
-                          <form action="db_social_compact.html" method="POST" onsubmit="return false;">
-                            <input type="text" class="form-control form-control-alt" placeholder="Write a comment..">
-                          </form>
-                        </div>
-                      </div>
-                      <!-- END Update #2 -->
-        
-                      <!-- Update #3 -->
-                      <div class="block block-rounded block-bordered">
-                        <div class="block-header block-header-default">
-                          <div>
-                            <a class="img-link me-1" href="javascript:void(0)">
-                              <img class="img-avatar img-avatar32 img-avatar-thumb" src="assets/media/avatars/avatar8.jpg" alt="">
-                            </a>
-                            <a class="fw-semibold" href="javascript:void(0)">Amanda Powell</a>
-                            <span class="fs-sm text-muted">8 hrs ago</span>
-                          </div>
-                          <div class="block-options">
-                            <div class="dropdown">
-                              <button type="button" class="btn-block-option dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
-                              <div class="dropdown-menu dropdown-menu-end">
-                                <a class="dropdown-item" href="javascript:void(0)">
-                                  <i class="far fa-fw fa-times-circle text-danger me-1"></i> Hide similar posts
-                                </a>
-                                <a class="dropdown-item" href="javascript:void(0)">
-                                  <i class="far fa-fw fa-thumbs-down text-warning me-1"></i> Stop following this user
-                                </a>
-                                <div role="separator" class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="javascript:void(0)">
-                                  <i class="fa fa-fw fa-exclamation-triangle me-1"></i> Report this post
-                                </a>
-                                <a class="dropdown-item" href="javascript:void(0)">
-                                  <i class="fa fa-fw fa-bookmark me-1"></i> Bookmark this post
-                                </a>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="block-content">
-                          <p>
-                            Our city escape continues..
-                          </p>
-                          <div class="row g-sm js-gallery img-fluid-100">
-                            <!-- Magnific Popup (.js-gallery class is initialized in Helpers.jqMagnific()) -->
-                            <!-- For more info and examples you can check out http://dimsemenov.com/plugins/magnific-popup/ -->
-                            <div class="col-4">
-                              <a class="img-link img-link-simple img-link-zoom-in img-lightbox" href="assets/media/photos/photo11@2x.jpg">
-                                <img class="img-fluid" src="assets/media/photos/photo11.jpg" alt="">
-                              </a>
-                            </div>
-                            <div class="col-4">
-                              <a class="img-link img-link-simple img-link-zoom-in img-lightbox" href="assets/media/photos/photo12@2x.jpg">
-                                <img class="img-fluid" src="assets/media/photos/photo12.jpg" alt="">
-                              </a>
-                            </div>
-                            <div class="col-4">
-                              <a class="img-link img-link-simple img-link-zoom-in img-lightbox" href="assets/media/photos/photo13@2x.jpg">
-                                <img class="img-fluid" src="assets/media/photos/photo13.jpg" alt="">
-                              </a>
-                            </div>
-                          </div>
-                          <hr>
-                          <ul class="nav nav-pills fs-sm push">
-                            <li class="nav-item me-1">
-                              <a class="nav-link" href="javascript:void(0)">
-                                <i class="fa fa-thumbs-up opacity-50 me-1"></i> Like
-                              </a>
-                            </li>
-                            <li class="nav-item me-1">
-                              <a class="nav-link" href="javascript:void(0)">
-                                <i class="fa fa-comment-alt opacity-50 me-1"></i> Comment
-                              </a>
-                            </li>
-                            <li class="nav-item">
-                              <a class="nav-link" href="javascript:void(0)">
-                                <i class="fa fa-share-alt opacity-50 me-1"></i> Share
-                              </a>
-                            </li>
-                          </ul>
-                        </div>
-                        <div class="block-content block-content-full bg-body-light">
-                          <p class="fs-sm">
-                            <i class="fa fa-thumbs-up text-info"></i>
-                            <i class="fa fa-heart text-danger"></i>
-                            <i class="far fa-smile text-warning me-1"></i>
-                            <a class="fw-semibold" href="javascript:void(0)">Betty Kelley</a>,
-                            <a class="fw-semibold" href="javascript:void(0)">Jose Parker</a>,
-                            <a class="fw-semibold" href="javascript:void(0)">and 43 others</a>
-                          </p>
-                          <form action="db_social_compact.html" method="POST" onsubmit="return false;">
-                            <input type="text" class="form-control form-control-alt" placeholder="Write a comment..">
-                          </form>
-                        </div>
-                      </div>
-                      <!-- END Update #3 -->
-        
-                      <!-- Update #4 -->
-                      <div class="block block-rounded block-bordered">
-                        <div class="block-header block-header-default">
-                          <div>
-                            <a class="img-link me-1" href="javascript:void(0)">
-                              <img class="img-avatar img-avatar32 img-avatar-thumb" src="assets/media/avatars/avatar8.jpg" alt="">
-                            </a>
-                            <a class="fw-semibold" href="javascript:void(0)">Helen Jacobs</a>
-                            <span class="fs-sm text-muted">15 hrs ago</span>
-                          </div>
-                          <div class="block-options">
-                            <div class="dropdown">
-                              <button type="button" class="btn-block-option dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
-                              <div class="dropdown-menu dropdown-menu-end">
-                                <a class="dropdown-item" href="javascript:void(0)">
-                                  <i class="far fa-fw fa-times-circle text-danger me-1"></i> Hide similar posts
-                                </a>
-                                <a class="dropdown-item" href="javascript:void(0)">
-                                  <i class="far fa-fw fa-thumbs-down text-warning me-1"></i> Stop following this user
-                                </a>
-                                <div role="separator" class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="javascript:void(0)">
-                                  <i class="fa fa-fw fa-exclamation-triangle me-1"></i> Report this post
-                                </a>
-                                <a class="dropdown-item" href="javascript:void(0)">
-                                  <i class="fa fa-fw fa-bookmark me-1"></i> Bookmark this post
-                                </a>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="block-content">
-                          <p>Dolor posuere proin blandit accumsan senectus netus nullam curae, ornare laoreet adipiscing luctus mauris adipiscing pretium eget fermentum, tristique lobortis est ut metus lobortis tortor tincidunt himenaeos habitant quis dictumst proin odio sagittis purus mi, nec taciti vestibulum quis in sit varius lorem sit metus mi.</p>
-                          <p>Dolor posuere proin blandit accumsan senectus netus nullam curae, ornare laoreet adipiscing luctus mauris adipiscing pretium eget fermentum, tristique lobortis est ut metus lobortis tortor tincidunt himenaeos habitant quis dictumst proin odio sagittis purus mi, nec taciti vestibulum quis in sit varius lorem sit metus mi.</p>
-                          <hr>
-                          <ul class="nav nav-pills fs-sm push">
-                            <li class="nav-item me-1">
-                              <a class="nav-link" href="javascript:void(0)">
-                                <i class="fa fa-thumbs-up opacity-50 me-1"></i> Like
-                              </a>
-                            </li>
-                            <li class="nav-item me-1">
-                              <a class="nav-link" href="javascript:void(0)">
-                                <i class="fa fa-comment-alt opacity-50 me-1"></i> Comment
-                              </a>
-                            </li>
-                            <li class="nav-item">
-                              <a class="nav-link" href="javascript:void(0)">
-                                <i class="fa fa-share-alt opacity-50 me-1"></i> Share
-                              </a>
-                            </li>
-                          </ul>
-                        </div>
-                        <div class="block-content block-content-full bg-body-light">
-                          <p class="fs-sm">
-                            <i class="fa fa-thumbs-up text-info"></i>
-                            <a class="fw-semibold" href="javascript:void(0)">Laura Carr</a>,
-                            <a class="fw-semibold" href="javascript:void(0)">Carl Wells</a>,
-                            <a class="fw-semibold" href="javascript:void(0)">and 5 others</a>
-                          </p>
-                          <form action="db_social_compact.html" method="POST" onsubmit="return false;">
-                            <input type="text" class="form-control form-control-alt" placeholder="Write a comment..">
-                          </form>
-                        </div>
-                      </div>
-                      <!-- END Update #4 -->
-                      <!-- END Timeline --> --}}
-
-
-                      {{ $slot  }}
-
-                      @yield('content')
-                    </div>
-
-
-
-                    <div class="col-md-4 col-lg-3">
-                      <!-- Group Suggestions -->
-                      <div class="block block-bordered block-rounded bg-body">
-                        <div class="block-content block-content-full">
-                          <div class="row g-sm mb-2">
-                            <div class="col-6">
-                              <img class="img-fluid" src="assets/media/photos/photo18.jpg" alt="">
-                            </div>
-                            <div class="col-6">
-                              <img class="img-fluid" src="assets/media/photos/photo16.jpg" alt="">
-                            </div>
-                          </div>
-                          <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                              <a class="fw-semibold" href="javascript:void(0)">Hiking</a>
-                              <div class="fs-sm text-muted">68k Members</div>
-                            </div>
-                            <a class="btn btn-sm btn-alt-secondary d-inline-block" href="javascript:void(0)">
-                              <i class="fa fa-fw fa-plus-circle"></i>
-                            </a>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="block block-bordered block-rounded bg-body">
-                        <div class="block-content block-content-full">
-                          <div class="row g-sm mb-2">
-                            <div class="col-6">
-                              <img class="img-fluid" src="assets/media/photos/photo12.jpg" alt="">
-                            </div>
-                            <div class="col-6">
-                              <img class="img-fluid" src="assets/media/photos/photo13.jpg" alt="">
-                            </div>
-                          </div>
-                          <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                              <a class="fw-semibold" href="javascript:void(0)">Travel Photos</a>
-                              <div class="fs-sm text-muted">65k Members</div>
-                            </div>
-                            <a class="btn btn-sm btn-alt-secondary d-inline-block" href="javascript:void(0)">
-                              <i class="fa fa-fw fa-plus-circle"></i>
-                            </a>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="block block-bordered block-rounded bg-body">
-                        <div class="block-content block-content-full">
-                          <div class="row g-sm mb-2">
-                            <div class="col-6">
-                              <img class="img-fluid" src="assets/media/photos/photo22.jpg" alt="">
-                            </div>
-                            <div class="col-6">
-                              <img class="img-fluid" src="assets/media/photos/photo23.jpg" alt="">
-                            </div>
-                          </div>
-                          <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                              <a class="fw-semibold" href="javascript:void(0)">Coding Frenzy</a>
-                              <div class="fs-sm text-muted">109k Members</div>
-                            </div>
-                            <a class="btn btn-sm btn-alt-secondary d-inline-block" href="javascript:void(0)">
-                              <i class="fa fa-fw fa-plus-circle"></i>
-                            </a>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="block block-bordered block-rounded bg-body">
-                        <div class="block-content block-content-full">
-                          <div class="row g-sm mb-2">
-                            <div class="col-6">
-                              <img class="img-fluid" src="assets/media/photos/photo9.jpg" alt="">
-                            </div>
-                            <div class="col-6">
-                              <img class="img-fluid" src="assets/media/photos/photo6.jpg" alt="">
-                            </div>
-                          </div>
-                          <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                              <a class="fw-semibold" href="javascript:void(0)">Nature Lovers</a>
-                              <div class="fs-sm text-muted">32k Members</div>
-                            </div>
-                            <a class="btn btn-sm btn-alt-secondary d-inline-block" href="javascript:void(0)">
-                              <i class="fa fa-fw fa-plus-circle"></i>
-                            </a>
-                          </div>
-                        </div>
-                      </div>
-                      <!-- END Group Suggestions -->
-                    </div>
-        
-                  </div>
-
-                {{-- Chat area --}}
-            {{-- <div class="block block-mode-pinned">
-                    <!-- Chat #4 Header -->
-                    <div class="block-header block-header-default">
-                    <h3 class="block-title">
-                        <img class="img-avatar img-avatar32" src="assets/media/avatars/avatar7.jpg" alt="">
-                        <span class="fs-sm fw-semibold ms-2">Lisa Smith</span>
-                    </h3>
-                    <div class="block-options">
-                        <button type="button" class="btn-block-option" data-toggle="block-option" data-action="content_toggle"></button>
-                        <button type="button" class="btn-block-option" data-toggle="block-option" data-action="close">
-                        <i class="si si-close"></i>
-                        </button>
-                    </div>
-                    </div>
-                    <!-- END Chat #4 Header -->
-
-                    <!-- Chat #4 Messages -->
-                    <div class="js-chat-messages block-content block-content-full text-break overflow-y-auto" data-chat-id="4" style="height: 300px;"></div>
-
-                    <!-- Chat #4 Input -->
-                    <div class="js-chat-form block-content p-2 bg-body-light">
-                    <form action="db_social_compact.html" method="POST">
-                        <input type="text" class="js-chat-input form-control form-control-alt" data-target-chat-id="4" placeholder="Type a message..">
-                    </form>
-                    </div>
-                    <!-- END Chat #4 Input -->
-            </div> --}}
-            
-            </div>
-        </main>
-
-        {{-- <main class="py-4">
-            @yield('content')
-        </main> --}}
+        </div>
+        <!-- END Page Content -->
+      </main>
       <!-- END Main Container -->
 
       <!-- Footer -->
@@ -1268,20 +856,5 @@
 
     <!-- Page JS Helpers (Highlight.js + Magnific Popup Plugins) -->
     <script>Dashmix.helpersOnLoad(['js-highlightjs', 'jq-magnific-popup']);</script>
-
-    <!-- Page JS Code -->
-    <script src="{{ asset('src/assets/js/pages/be_comp_chat.min.js')}}"></script>
-    <script>
-      Dashmix.onLoad(function () {
-        // Add demonstration headers and messages for Chat #4
-        Chat.addHeader(4, 'Yesterday');
-        Chat.addMessage(4, 'Hi there!');
-        Chat.addHeader(4, 'Today', 'self');
-        Chat.addMessage(4, 'Hey, how are you?', 'self');
-      });
-    </script>
-     @livewireScripts
   </body>
 </html>
-
-
