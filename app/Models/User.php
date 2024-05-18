@@ -3,16 +3,20 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use App\Traits\UuidTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Testing\Fluent\Concerns\Has;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles, UuidTrait;
 
     /**
      * The attributes that are mass assignable.
@@ -48,4 +52,41 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public function posts(){
+        return $this->hasMany(Post::class);
+    }
+
+    public function scopeWithPostStats(Builder $query, $userId)
+    {
+        return $query->where('id', $userId)
+                     ->withCount(['posts as total_likes' => function ($query) {
+                         $query->select(DB::raw('sum(likes)'));
+                     }])
+                     ->withCount(['posts as total_views' => function ($query) {
+                         $query->select(DB::raw('sum(views)'));
+                     }])
+                     ->withCount(['posts as total_comments' => function ($query) {
+                         $query->select(DB::raw('count(comments)'));
+                     }]);
+    }
+
+
+
+    public function getTotalLikesAttribute()
+    {
+        return $this->posts()->sum('likes');
+    }
+
+    public function getTotalViewsAttribute()
+    {
+        return $this->posts()->sum('views');
+    }
+
+    public function getTotalCommentsAttribute()
+    {
+        return $this->posts()->sum('comments');
+    }
+
+    
 }

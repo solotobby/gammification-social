@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
-    <title>Dashmix - Bootstrap 5 Admin Template UI Framework</title>
+    <title>Payhankey</title>
 
     <meta name="description" content="Dashmix - Bootstrap 5 Admin Template &amp; UI Framework created by pixelcave">
     <meta name="author" content="pixelcave">
@@ -569,10 +569,10 @@
             <!-- Logo -->
             <a class="fw-semibold text-white tracking-wide" href="index.html">
               <span class="smini-visible">
-                D<span class="opacity-75">x</span>
+                P<span class="opacity-75">H</span>
               </span>
               <span class="smini-hidden">
-                Dash<span class="opacity-75">mix</span>
+                Pay<span class="opacity-75">Hankey</span>
               </span>
             </a>
             <!-- END Logo -->
@@ -582,16 +582,16 @@
               <!-- Toggle Sidebar Style -->
               <!-- Layout API, functionality initialized in Template._uiApiLayout() -->
               <!-- Class Toggle, functionality initialized in Helpers.dmToggleClass() -->
-              <button type="button" class="btn btn-sm btn-alt-secondary" data-toggle="class-toggle" data-target="#sidebar-style-toggler" data-class="fa-toggle-off fa-toggle-on" onclick="Dashmix.layout('sidebar_style_toggle');Dashmix.layout('header_style_toggle');">
+              {{-- <button type="button" class="btn btn-sm btn-alt-secondary" data-toggle="class-toggle" data-target="#sidebar-style-toggler" data-class="fa-toggle-off fa-toggle-on" onclick="Dashmix.layout('sidebar_style_toggle');Dashmix.layout('header_style_toggle');">
                 <i class="fa fa-toggle-off" id="sidebar-style-toggler"></i>
-              </button>
+              </button> --}}
               <!-- END Toggle Sidebar Style -->
 
               <!-- Dark Mode -->
               <!-- Layout API, functionality initialized in Template._uiApiLayout() -->
-              <button type="button" class="btn btn-sm btn-alt-secondary" data-toggle="class-toggle" data-target="#dark-mode-toggler" data-class="far fa" onclick="Dashmix.layout('dark_mode_toggle');">
+              {{-- <button type="button" class="btn btn-sm btn-alt-secondary" data-toggle="class-toggle" data-target="#dark-mode-toggler" data-class="far fa" onclick="Dashmix.layout('dark_mode_toggle');">
                 <i class="far fa-moon" id="dark-mode-toggler"></i>
-              </button>
+              </button> --}}
               <!-- END Dark Mode -->
 
               <!-- Close Sidebar, Visible only on mobile screens -->

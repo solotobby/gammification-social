@@ -11,12 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('wallets', function (Blueprint $table) {
+        Schema::create('user_views', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('user_id')->string();
-            $table->string('balance');
-            $table->string('currency');
-            $table->string('level')->nullable();
+            $table->uuid('user_id')->nullable();
+            $table->uuid('post_id')->string();
             $table->timestamps();
         });
     }
@@ -26,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('wallets');
+        Schema::dropIfExists('user_views');
     }
 };
