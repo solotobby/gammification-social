@@ -12,8 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('posts', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('user_id');
+            $table->uuid('id')->primary();
+            $table->uuid('user_id')->string();
+            $table->string('unicode');
             $table->longText('content');
             $table->bigInteger('views')->default(0);
             $table->bigInteger('views_external')->default(0);

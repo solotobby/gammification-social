@@ -9,7 +9,11 @@
           <div class="ms-3 flex-grow-1 text-center text-md-start my-3 my-md-0">
             <h1 class="fs-4 fw-bold mb-1">{{ auth()->user()->name }}</h1>
             <h2 class="fs-sm fw-medium text-muted mb-0">
-              <a href="javascript:void(0)" class="text-muted">4,5k Followers</a> &bull; <a href="javascript:void(0)" class="text-muted">100 Following</a>
+              {{-- <a href="javascript:void(0)" class="text-muted">4,5k Followers</a> &bull;  --}}
+              {{-- <a href="javascript:void(0)" class="text-muted">100 Following</a> &bull; --}}
+              <a href="javascript:void(0)" class="text-muted">{{$user->total_views }} Views</a> &bull;
+              <a href="javascript:void(0)" class="text-muted">{{ $user->total_likes }} Likes</a> &bull;
+              <a href="javascript:void(0)" class="text-muted">{{ $user->total_comments }} Comments</a>
             </h2>
           </div>
           <div class="space-x-1">
@@ -53,7 +57,7 @@
         
         <!-- Update #2 -->
                 @forelse ($timelines as $timeline)
-                    <div wire:poll.visible.10s class="block block-rounded block-bordered" id="timelines">
+                    <div wire:poll.visible.1s class="block block-rounded block-bordered" id="timelines">
                         <div class="block-header block-header-default">
                         <div>
                             <a class="img-link me-1" href="javascript:void(0)">
@@ -84,7 +88,7 @@
                         </div>
                         </div>
                         <div class="block-content">
-                            <a href="">
+                            <a href="{{ url('show/'.$timeline->id) }}">
                                 <p style="color: dimgrey">
                                     {{ $timeline->content }}
                                 </p>
@@ -92,9 +96,15 @@
                         <hr>
                         <ul class="nav nav-pills fs-sm push">
                             <li class="nav-item me-1">
-                            <a class="nav-link" href="javascript:void(0)">
-                                <i class="fa fa-thumbs-up opacity-50 me-1"></i> 134k
-                            </a>
+                                @if($timeline->userLikes()->count() > 0)
+                                    <a class="nav-link"  wire:click="dislike({{$timeline->unicode}})" href="javascript:void(0)">
+                                        <i class="fa fa-thumbs-down opacity-50 me-1"></i> {{ $timeline->likes }}
+                                    </a>
+                                @else
+                                    <a class="nav-link"  wire:click="like({{$timeline->unicode}})" href="javascript:void(0)">
+                                        <i class="fa fa-thumbs-up opacity-50 me-1"></i> {{ $timeline->likes }}
+                                    </a>
+                                @endif
                             </li>
                             <li class="nav-item me-1">
                             <a class="nav-link" href="javascript:void(0)">
@@ -103,7 +113,7 @@
                             </li>
                             <li class="nav-item">
                             <a class="nav-link" href="javascript:void(0)">
-                                <i class="fa fa-eye opacity-50 me-1"></i> 1.6M
+                                <i class="fa fa-eye opacity-50 me-1"></i> {{$timeline->views}}
                             </a>
                             </li>
                         </ul>

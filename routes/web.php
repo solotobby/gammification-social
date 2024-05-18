@@ -4,6 +4,7 @@ use App\Livewire\CreateProduct;
 use App\Livewire\User\Profile;
 use App\Livewire\User\ShowPost;
 use App\Livewire\User\Timeline;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -28,6 +29,10 @@ Route::group(['namespace' => 'auth'], function () {
     Route::get('validate/api', [\App\Http\Controllers\GeneralController::class, 'validateApi']);
     Route::get('success', [\App\Http\Controllers\GeneralController::class, 'success']);
     Route::get('error', [\App\Http\Controllers\GeneralController::class, 'error']);
+
+
+    // Route::get('show/{query}', ShowPost::class)->name('show');
+
 
     // Route::get('');
 });

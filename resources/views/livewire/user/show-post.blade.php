@@ -1,7 +1,7 @@
 <div>
     <div class="row">
         <div class="col-md-8">
-            <div wire:poll.visible.10s class="block block-rounded block-bordered" id="timelines">
+            <div wire:poll.visible.2s class="block block-rounded block-bordered" id="timelines">
                 <div class="block-header block-header-default">
                 <div>
                     <a class="img-link me-1" href="javascript:void(0)">
@@ -32,20 +32,20 @@
                 </div>
                 </div>
                 <div class="block-content">
-                    <a href="#" wire:click="show({{$timeline->id}})">
+                    {{-- <a href="#" wire:click="show({{$timeline->id}})"> --}}
                         <p style="color: dimgrey">
                             {{ $timeline->content }}
                         </p>
-                    </a>
+                    {{-- </a> --}}
                 <hr>
                 <ul class="nav nav-pills fs-sm push">
                     <li class="nav-item me-1">
                         @if($timeline->userLikes()->count() > 0)
-                        <a class="nav-link"  wire:click="dislike({{$timeline->id}})" href="javascript:void(0)">
+                        <a class="nav-link"  wire:click="dislike({{$timeline->unicode}})" href="javascript:void(0)">
                             <i class="fa fa-thumbs-down opacity-50 me-1"></i> {{ $timeline->likes }}
                         </a>
                         @else
-                            <a class="nav-link"  wire:click="like({{$timeline->id}})" href="javascript:void(0)">
+                            <a class="nav-link"  wire:click="like({{$timeline->unicode}})" href="javascript:void(0)">
                                 <i class="fa fa-thumbs-up opacity-50 me-1"></i> {{ $timeline->likes }}
                             </a>
                         @endif
@@ -57,7 +57,7 @@
                     </li>
                     <li class="nav-item">
                     <a class="nav-link" href="javascript:void(0)">
-                        <i class="fa fa-eye opacity-50 me-1"></i> 1.6M
+                        <i class="fa fa-eye opacity-50 me-1"></i> {{$timeline->views}}
                     </a>
                     </li>
                 </ul>
@@ -94,6 +94,94 @@
                     </div> --}}
                 </div>
             </div>
+        </div>
+        <div class="col-md-4">
+            <!-- Group Suggestions -->
+            <div class="block block-rounded bg-body-dark">
+            <div class="block-content block-content-full">
+                <div class="row g-sm mb-2">
+                <div class="col-6">
+                    <img class="img-fluid" src="assets/media/photos/photo18.jpg" alt="">
+                </div>
+                <div class="col-6">
+                    <img class="img-fluid" src="assets/media/photos/photo16.jpg" alt="">
+                </div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <a class="fw-semibold" href="javascript:void(0)">Hiking</a>
+                    <div class="fs-sm text-muted">68k Members</div>
+                </div>
+                <a class="btn btn-sm btn-alt-secondary d-inline-block" href="javascript:void(0)">
+                    <i class="fa fa-fw fa-plus-circle"></i>
+                </a>
+                </div>
+            </div>
+            </div>
+            <div class="block block-rounded bg-body-dark">
+            <div class="block-content block-content-full">
+                <div class="row g-sm mb-2">
+                <div class="col-6">
+                    <img class="img-fluid" src="assets/media/photos/photo12.jpg" alt="">
+                </div>
+                <div class="col-6">
+                    <img class="img-fluid" src="assets/media/photos/photo13.jpg" alt="">
+                </div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <a class="fw-semibold" href="javascript:void(0)">Travel Photos</a>
+                    <div class="fs-sm text-muted">65k Members</div>
+                </div>
+                <a class="btn btn-sm btn-alt-secondary d-inline-block" href="javascript:void(0)">
+                    <i class="fa fa-fw fa-plus-circle"></i>
+                </a>
+                </div>
+            </div>
+            </div>
+            <div class="block block-rounded bg-body-dark">
+            <div class="block-content block-content-full">
+                <div class="row g-sm mb-2">
+                <div class="col-6">
+                    <img class="img-fluid" src="assets/media/photos/photo22.jpg" alt="">
+                </div>
+                <div class="col-6">
+                    <img class="img-fluid" src="assets/media/photos/photo23.jpg" alt="">
+                </div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <a class="fw-semibold" href="javascript:void(0)">Coding Frenzy</a>
+                    <div class="fs-sm text-muted">109k Members</div>
+                </div>
+                <a class="btn btn-sm btn-alt-secondary d-inline-block" href="javascript:void(0)">
+                    <i class="fa fa-fw fa-plus-circle"></i>
+                </a>
+                </div>
+            </div>
+            </div>
+            <div class="block block-rounded bg-body-dark">
+            <div class="block-content block-content-full">
+                <div class="row g-sm mb-2">
+                <div class="col-6">
+                    <img class="img-fluid" src="assets/media/photos/photo9.jpg" alt="">
+                </div>
+                <div class="col-6">
+                    <img class="img-fluid" src="assets/media/photos/photo6.jpg" alt="">
+                </div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <a class="fw-semibold" href="javascript:void(0)">Nature Lovers</a>
+                    <div class="fs-sm text-muted">32k Members</div>
+                </div>
+                <a class="btn btn-sm btn-alt-secondary d-inline-block" href="javascript:void(0)">
+                    <i class="fa fa-fw fa-plus-circle"></i>
+                </a>
+                </div>
+            </div>
+            </div>
+            <!-- END Group Suggestions -->
         </div>
     </div>
 </div>

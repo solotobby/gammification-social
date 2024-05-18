@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('timelines', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('user_id');
+            $table->uuid('id')->primary();
+            $table->uuid('user_id')->string();
             $table->longText('content');
             $table->bigInteger('views')->default(0);
             $table->bigInteger('clicks')->default(0);

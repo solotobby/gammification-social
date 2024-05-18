@@ -6,9 +6,9 @@ use App\Traits\UuidTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class AccessCode extends Model
+class Level extends Model
 {
     use HasFactory, UuidTrait;
 
-    protected $fillable = ['tx_id', 'name', 'email', 'code', 'amount', 'is_active'];
+    protected $fillable =  ['name', 'amount', 'reg_bonus', 'ref_bonus', 'min_withdrawal', 'earning_per_view', 'earning_per_like', 'earning_per_comment'];
 }

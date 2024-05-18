@@ -6,9 +6,10 @@ use App\Traits\UuidTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class AccessCode extends Model
+class UserView extends Model
 {
     use HasFactory, UuidTrait;
 
-    protected $fillable = ['tx_id', 'name', 'email', 'code', 'amount', 'is_active'];
+    protected $fillable = ['user_id', 'post_id'];
+    
 }

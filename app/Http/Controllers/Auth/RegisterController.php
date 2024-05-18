@@ -62,12 +62,12 @@ class RegisterController extends Controller
          // return $validated;
  
           $accessCode = AccessCode::where('code', $validated['access_code'])->where('is_active', true)->first();
-         if($accessCode){
-             $accessCode->is_active = false;
-             $accessCode->save();
-         }else{
-             return back()->with('error', 'Invalid Access Code');
-         }
+            if($accessCode){
+                $accessCode->is_active = false;
+                $accessCode->save();
+            }else{
+                return back()->with('error', 'Invalid Access Code');
+            }
  
  
          $user = User::create([

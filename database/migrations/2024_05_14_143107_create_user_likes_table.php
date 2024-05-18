@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('user_likes', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('user_id')->nullable();
-            $table->unsignedBigInteger('post_id');
+            $table->uuid('id')->primary();
+            $table->uuid('user_id')->nullable();
+            $table->uuid('post_id')->string();
             $table->timestamps();
         });
     }

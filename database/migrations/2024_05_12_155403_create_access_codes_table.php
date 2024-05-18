@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('access_codes', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->string('tx_id');
             $table->string('name');
             $table->string('email');
