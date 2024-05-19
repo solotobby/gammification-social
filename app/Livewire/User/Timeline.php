@@ -19,6 +19,8 @@ class Timeline extends Component
     #[Validate('required|string')]
     public $content = '';
 
+    public $message = '';
+
     protected $listeners=['refresh'=>'$refresh'];
 
     public function timelines(){
@@ -66,12 +68,16 @@ class Timeline extends Component
 
     }
 
-    public function showTimeline($id){
+    // public function comment(){
+    //     dd($this->message);
+    // }
+
+    // public function showTimeline($id){
         
-        $this->postId = $id;
-        return redirect('show/'.$this->postId);//->route('show', ['query' => $this->postId]);
+    //     $this->postId = $id;
+    //     return redirect('show/'.$this->postId);//->route('show', ['query' => $this->postId]);
        
-    }
+    // }
 
     public function render()
     {

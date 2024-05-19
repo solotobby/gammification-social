@@ -52,7 +52,7 @@
                     </li>
                     <li class="nav-item me-1">
                     <a class="nav-link" href="javascript:void(0)">
-                        <i class="fa fa-comment-alt opacity-50 me-1"></i> 17k
+                        <i class="fa fa-comment-alt opacity-50 me-1"></i> {{$timeline->comments}}
                     </a>
                     </li>
                     <li class="nav-item">
@@ -60,38 +60,50 @@
                         <i class="fa fa-eye opacity-50 me-1"></i> {{$timeline->views}}
                     </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="javascript:void(0)">
+                            <i class="fa fa-share opacity-50 me-1"></i>
+                        </a>
+                    </li>
                 </ul>
                 </div>
                 <div class="block-content block-content-full bg-body-light">
-                    <p class="fs-sm">
+                    {{-- <p class="fs-sm">
                     <i class="fa fa-thumbs-up text-info"></i>
                     <i class="fa fa-heart text-danger"></i>
                     <i class="far fa-smile text-warning me-1"></i>
                     <a class="fw-semibold" href="javascript:void(0)">Brian Cruz</a>,
                     <a class="fw-semibold" href="javascript:void(0)">Lori Grant</a>,
                     <a class="fw-semibold" href="javascript:void(0)">and 150 others</a>
-                    </p>
-                    <form action="db_social_compact.html" method="POST" onsubmit="return false;">
-                    <input type="text" class="form-control form-control-alt" placeholder="Write a comment..">
+                    </p> --}}
+                   <form method="POST" wire:submit.prevent="comment">
+                        <input type="text" wire:model="message" name="message"  :value="old('message')" class="form-control form-control-alt" placeholder="Write a comment.." required>
                     </form>
-                    {{-- <div class="pt-3 fs-sm">
-                    <div class="d-flex">
-                        <a class="flex-shrink-0 img-link me-2" href="javascript:void(0)">
-                        <img class="img-avatar img-avatar32 img-avatar-thumb" src="{{asset('src/assets/media/avatars/avatar3.jpg')}}" alt="">
-                        </a>
-                        <div class="flex-grow-1">
-                        <p class="mb-1">
-                            <a class="fw-semibold" href="javascript:void(0)">Andrea Gardner</a>
-                            Vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc ac nisi vulputate fringilla. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam tincidunt sollicitudin sem nec ultrices. Sed at mi velit.
-                        </p>
-                        <p>
-                            <a href="javascript:void(0)" class="me-1">Like</a>
-                            <a href="javascript:void(0)">Comment</a>
-                        </p>
-                        
+                    <div class="pt-3 fs-sm">
+
+                        @foreach ($comments as $comment)
+                        <div class="d-flex">
+                            <a class="flex-shrink-0 img-link me-2" href="javascript:void(0)">
+                            <img class="img-avatar img-avatar32 img-avatar-thumb" src="{{asset('src/assets/media/avatars/avatar3.jpg')}}" alt="">
+                            </a>
+                            <div class="flex-grow-1">
+                                <p class="mb-1">
+                                    <a class="fw-semibold" href="javascript:void(0)">{{ $comment->user->name }}</a>   <span class="fs-sm text-muted">{{$comment->created_at?->shortAbsoluteDiffForHumans()}} ago</span> <br>
+                                    {{ $comment->message }}
+                                </p>
+                            </div>
                         </div>
-                    </div>
-                    </div> --}}
+                        @endforeach
+
+                        @if ($this->page <= $this->timeline->postComments()->paginate($this->perPage)->lastPage())
+                           
+                                <p> 
+                                    <a href="javascript:void(0)" wire:click="loadMore">See More</a>
+                                </p>
+                           
+                        @endif
+                       
+                    </div> 
                 </div>
             </div>
         </div>
