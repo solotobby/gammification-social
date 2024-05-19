@@ -27,4 +27,8 @@ class Post extends Model
         return $this->belongsToMany(User::class, 'user_views', 'post_id');
     }
 
+    public function postComments(){
+        return $this->hasMany(Comment::class)->orderBy('created_at', 'desc');
+    }
+
 }

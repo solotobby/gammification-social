@@ -2,10 +2,12 @@
 
 namespace App\Livewire\User;
 
+use App\Models\Comment;
 use App\Models\Post;
 use App\Models\UserLike;
 use App\Models\UserView;
 use Livewire\Component;
+use Livewire\Attributes\Validate;
 
 class ShowPost extends Component
 {
@@ -15,25 +17,40 @@ class ShowPost extends Component
 
     public $id;
 
+    public $comments = [];
+    public $perPage = 5;
+    public $page = 1;
+
+
+    #[Validate('required|string')]
+    public $message = '';
+
     public function mount($query){
         $this->postQuery = $query;
-        $this->timeline = Post::where('id', $this->postQuery)->first();
-        
-       $regView = UserView::where(['user_id' => auth()->user()->id, 'post_id' => $this->timeline->id])->first();
+        $this->timeline = Post::with(['postComments'])->where('id', $this->postQuery)->first();
+        // Load initial comments
+        $this->loadMore();
+
+        $regView = UserView::where(['user_id' => auth()->user()->id, 'post_id' => $this->timeline->id])->first();
         if(!$regView){
             UserView::create(['user_id' => auth()->user()->id, 'post_id' => $this->timeline->id]);
             $this->timeline->views += 1;
             $this->timeline->save(); 
         }
-        // $this->viewCount($this->postQuery);
+       
     }
 
-    public function viewCount($id){
-        $post = Post::where('id', $id)->first();
-        $post->views += 1;
-        $post->save(); 
-        return $post;
+    public function loadMore()
+    {
+        $additionalComments = $this->timeline->postComments()
+            ->orderBy('created_at', 'asc')
+            ->paginate($this->perPage, ['*'], 'page', $this->page);
+
+        $this->comments = array_merge($this->comments, $additionalComments->items());
+        $this->page++;
     }
+
+  
 
     public function like($id){
         
@@ -55,11 +72,22 @@ class ShowPost extends Component
          
      }
 
+     public function comment(){
+        Comment::create(['user_id' => auth()->user()->id, 'post_id' =>$this->postQuery, 'message' =>  $this->message]);
+        $pst = Post::where(['id' => $this->postQuery])->first();
+        $pst->comments += 1;
+        $pst->save();
 
+        $this->reset('message');
+        // $this->timelines->push($timelines);
+        $this->dispatch('user.show-post');
+    }
 
-    
     public function render()
     {
-        return view('livewire.user.show-post', ['post' => Post::where('id', $this->postQuery)->first()]);
+        return view('livewire.user.show-post', [
+            'post' => $this->timeline,
+            'comments' => $this->comments
+        ]);
     }
 }

@@ -81,14 +81,19 @@
                                 @endif
                             </li>
                             <li class="nav-item me-1">
-                            <a class="nav-link" href="javascript:void(0)" wire:click="log()">
-                                <i class="fa fa-comment-alt opacity-50 me-1"></i> 17k
+                            <a class="nav-link" href="{{ url('show/'.$timeline->id) }}">
+                                <i class="fa fa-comment-alt opacity-50 me-1"></i> {{$timeline->comments }}
                             </a>
                             </li>
-                            <li class="nav-item">
+                            <li class="nav-item me-1">
                             <a class="nav-link" href="javascript:void(0)">
                                 <i class="fa fa-eye opacity-50 me-1"></i> {{$timeline->views}}
                             </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="javascript:void(0)">
+                                    <i class="fa fa-share opacity-50 me-1"></i>
+                                </a>
                             </li>
                         </ul>
                         </div>
@@ -101,9 +106,9 @@
                               <a class="fw-semibold" href="javascript:void(0)">Lori Grant</a>,
                               <a class="fw-semibold" href="javascript:void(0)">and 150 others</a>
                             </p>
-                            <form action="db_social_compact.html" method="POST" onsubmit="return false;">
-                              <input type="text" class="form-control form-control-alt" placeholder="Write a comment..">
-                            </form>
+                            {{-- <form method="POST" wire:submit.prevent="comment">
+                              <input type="text" wire:model="message" name="message"  :value="old('message')" class="form-control form-control-alt" placeholder="Write a comment..">
+                            </form> --}}
                             {{-- <div class="pt-3 fs-sm">
                               <div class="d-flex">
                                 <a class="flex-shrink-0 img-link me-2" href="javascript:void(0)">
