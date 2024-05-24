@@ -82,17 +82,17 @@
                     <div class="pt-3 fs-sm">
 
                         @foreach ($comments as $comment)
-                        <div class="d-flex">
-                            <a class="flex-shrink-0 img-link me-2" href="javascript:void(0)">
-                            <img class="img-avatar img-avatar32 img-avatar-thumb" src="{{asset('src/assets/media/avatars/avatar3.jpg')}}" alt="">
-                            </a>
-                            <div class="flex-grow-1">
-                                <p class="mb-1">
-                                    <a class="fw-semibold" href="javascript:void(0)">{{ $comment->user->name }}</a>   <span class="fs-sm text-muted">{{$comment->created_at?->shortAbsoluteDiffForHumans()}} ago</span> <br>
-                                    {{ $comment->message }}
-                                </p>
+                            <div class="d-flex">
+                                <a class="flex-shrink-0 img-link me-2" href="javascript:void(0)">
+                                <img class="img-avatar img-avatar32 img-avatar-thumb" src="{{asset('src/assets/media/avatars/avatar3.jpg')}}" alt="">
+                                </a>
+                                <div class="flex-grow-1">
+                                    <p class="mb-1">
+                                        <a class="fw-semibold" href="javascript:void(0)">{{ $comment->user->name }}</a>   <span class="fs-sm text-muted">{{$comment->created_at?->shortAbsoluteDiffForHumans()}} ago</span> <br>
+                                        {{ $comment->message }}
+                                    </p>
+                                </div>
                             </div>
-                        </div>
                         @endforeach
 
                         @if ($this->page <= $this->timeline->postComments()->paginate($this->perPage)->lastPage())

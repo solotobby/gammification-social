@@ -7,7 +7,10 @@ use App\Models\Post;
 use App\Models\UserLike;
 use App\Models\UserView;
 use Livewire\Component;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Validate;
+
+#[On('user.show-post')]
 
 class ShowPost extends Component
 {
@@ -21,13 +24,15 @@ class ShowPost extends Component
     public $perPage = 5;
     public $page = 1;
 
-
     #[Validate('required|string')]
     public $message = '';
+
+    protected $listeners = ['commentAdded' => '$refresh'];
 
     public function mount($query){
         $this->postQuery = $query;
         $this->timeline = Post::with(['postComments'])->where('id', $this->postQuery)->first();
+        // $this->comments;
         // Load initial comments
         $this->loadMore();
 
@@ -80,14 +85,15 @@ class ShowPost extends Component
 
         $this->reset('message');
         // $this->timelines->push($timelines);
-        $this->dispatch('user.show-post');
+        $this->dispatch('commentAdded');
+        // $this->redirect(url('show/'.$this->postQuery));
     }
 
     public function render()
     {
         return view('livewire.user.show-post', [
             'post' => $this->timeline,
-            'comments' => $this->comments
+            // 'comments' => $this->comments
         ]);
     }
 }

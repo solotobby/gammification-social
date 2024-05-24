@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AccessCode;
+use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
@@ -109,4 +110,28 @@ class GeneralController extends Controller
         return 'Error processing payment';
     }
 
+    public function showPost($id){
+        
+        $timeline = Post::with(['postComments' => function($query) {
+            $query->paginate(15); // Load initial 5 comments
+        }])->where('id', $id)->firstOrFail();
+
+        $timeline->views_external += 1;
+        $timeline->save(); 
+
+        return view('showPost', ['timeline' => $timeline] );
+    }
+
+
+    public function loadMoreComments(Request $request){
+        $postId = $request->post_id;
+        $page = $request->page;
+
+        $comments = Post::findOrFail($postId)->postComments()->paginate(5, ['*'], 'page', $page);
+
+        return response()->json([
+            'comments' => $comments->items(),
+            'next_page_url' => $comments->nextPageUrl()
+        ]);
+    }
 }

@@ -1,9 +1,11 @@
 <?php
 
 use App\Livewire\CreateProduct;
+use App\Livewire\User\PostAnalytics;
 use App\Livewire\User\Profile;
 use App\Livewire\User\ShowPost;
 use App\Livewire\User\Timeline;
+use App\Livewire\ViewPost;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -23,6 +25,7 @@ Route::group(['namespace' => 'auth'], function () {
     Route::get('/', function () {
         return view('welcome');
     });
+
     Route::post('process/reg', [\App\Http\Controllers\Auth\RegisterController::class, 'regUser'])->name('reg.user');
     Route::get('access/code', [\App\Http\Controllers\GeneralController::class, 'accessCode']);
     Route::post('process/access/code', [\App\Http\Controllers\GeneralController::class, 'processAccessCode']);
@@ -31,10 +34,10 @@ Route::group(['namespace' => 'auth'], function () {
     Route::get('error', [\App\Http\Controllers\GeneralController::class, 'error']);
 
 
-    // Route::get('show/{query}', ShowPost::class)->name('show');
+    // Route::get('post/{id}', [\App\Http\Controllers\GeneralController::class, 'showPost']);
+    Route::get('/post/{id}/comments', [\App\Http\Controllers\GeneralController::class, 'loadMoreComments'])->name('post.comments.load_more');
 
 
-    // Route::get('');
 });
 
 Auth::routes();
@@ -44,21 +47,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('user/home', [\App\Http\Controllers\HomeController::class, 'userHome'])->name('user.home');
     Route::get('admin/home', [\App\Http\Controllers\HomeController::class, 'adminHome'])->name('admin.home');
 
+    Route::get('post/{username}/{id}', ViewPost::class);
+
     Route::get('timeline', Timeline::class);
     Route::get('profile', Profile::class);
     Route::get('show/{query}', ShowPost::class)->name('show');
+    Route::get('post/timeline/{id}/analytics', PostAnalytics::class);
 });
-
-
-
-// Route::get('/', function () {
-//     return view('welcome');
-// });
-
-
-
-// Auth::routes();
-// // Route::get('create/product', [])
-// Route::get('timeline', Timeline::class);
-// // Route::post('product', Timeline::class);
-// Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
