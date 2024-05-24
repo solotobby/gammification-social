@@ -29,7 +29,7 @@
         
         <!-- Update #2 -->
                 @forelse ($timelines as $timeline)
-                    <div wire:poll.visible.10s class="block block-rounded block-bordered" id="timelines">
+                    <div wire:poll.visible.107s class="block block-rounded block-bordered" id="timelines">
                         <div class="block-header block-header-default">
                         <div>
                             <a class="img-link me-1" href="javascript:void(0)">
@@ -42,9 +42,11 @@
                             <div class="dropdown">
                             <button type="button" class="btn-block-option dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
                             <div class="dropdown-menu dropdown-menu-end">
-                                <a class="dropdown-item" href="javascript:void(0)">
-                                <i class="far fa-fw fa-times-circle text-danger me-1"></i> Hide similar posts
-                                </a>
+                                @if(auth()->user()->id == $timeline->user_id)
+                                    <a class="dropdown-item" href="{{ url('post/timeline/'.$timeline->id.'/analytics') }}">
+                                        <i class="far fa-fw fa-eye text-success me-1"></i> View Posts Analytics
+                                    </a>
+                                @endif
                                 <a class="dropdown-item" href="javascript:void(0)">
                                 <i class="far fa-fw fa-thumbs-down text-warning me-1"></i> Stop following this user
                                 </a>
@@ -70,25 +72,24 @@
                             <li class="nav-item me-1">
                                 @if($timeline->userLikes()->count() > 0)
                                 
-                                <a class="nav-link"  wire:click="dislike({{$timeline->unicode}})" href="javascript:void(0)">
-                                    <i class="fa fa-thumbs-down opacity-50 me-1"></i> {{ $timeline->likes }}
-                                </a>
+                                    <a class="nav-link"  wire:click="dislike({{$timeline->unicode}})" href="javascript:void(0)">
+                                        <i class="fa fa-thumbs-down opacity-50 me-1"></i> {{ $timeline->likes }}
+                                    </a>
                                 @else
-                               
                                     <a class="nav-link"  wire:click="like({{$timeline->unicode}})" href="javascript:void(0)">
                                         <i class="fa fa-thumbs-up opacity-50 me-1"></i> {{ $timeline->likes }}
                                     </a>
                                 @endif
                             </li>
                             <li class="nav-item me-1">
-                            <a class="nav-link" href="{{ url('show/'.$timeline->id) }}">
-                                <i class="fa fa-comment-alt opacity-50 me-1"></i> {{$timeline->comments }}
-                            </a>
+                                <a class="nav-link" href="{{ url('show/'.$timeline->id) }}">
+                                    <i class="fa fa-comment-alt opacity-50 me-1"></i> {{$timeline->comments }}
+                                </a>
                             </li>
                             <li class="nav-item me-1">
-                            <a class="nav-link" href="javascript:void(0)">
-                                <i class="fa fa-eye opacity-50 me-1"></i> {{$timeline->views}}
-                            </a>
+                                <a class="nav-link" href="javascript:void(0)">
+                                    <i class="fa fa-eye opacity-50 me-1"></i> {{$timeline->views}}
+                                </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="javascript:void(0)">
@@ -139,47 +140,50 @@
 
         <div class="col-md-4">
             <!-- Group Suggestions -->
-            <div class="block block-rounded bg-body-dark">
-            <div class="block-content block-content-full">
-                <div class="row g-sm mb-2">
-                <div class="col-6">
-                    <img class="img-fluid" src="assets/media/photos/photo18.jpg" alt="">
-                </div>
-                <div class="col-6">
-                    <img class="img-fluid" src="assets/media/photos/photo16.jpg" alt="">
-                </div>
-                </div>
-                <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <a class="fw-semibold" href="javascript:void(0)">Hiking</a>
-                    <div class="fs-sm text-muted">68k Members</div>
-                </div>
-                <a class="btn btn-sm btn-alt-secondary d-inline-block" href="javascript:void(0)">
-                    <i class="fa fa-fw fa-plus-circle"></i>
-                </a>
-                </div>
-            </div>
-            </div>
-            <div class="block block-rounded bg-body-dark">
-            <div class="block-content block-content-full">
-                <div class="row g-sm mb-2">
-                <div class="col-6">
-                    <img class="img-fluid" src="assets/media/photos/photo12.jpg" alt="">
-                </div>
-                <div class="col-6">
-                    <img class="img-fluid" src="assets/media/photos/photo13.jpg" alt="">
-                </div>
-                </div>
-                <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <a class="fw-semibold" href="javascript:void(0)">Travel Photos</a>
-                    <div class="fs-sm text-muted">65k Members</div>
-                </div>
-                <a class="btn btn-sm btn-alt-secondary d-inline-block" href="javascript:void(0)">
-                    <i class="fa fa-fw fa-plus-circle"></i>
-                </a>
+            @foreach ($highestEngagement as $high)
+            <div  class="block block-rounded bg-body-dark">
+                <div class="block-content block-content-full">
+                    <div class="row g-sm mb-2">
+                    <div class="col-6">
+                        <img class="img-fluid" src="assets/media/photos/photo18.jpg" alt="">
+                    </div>
+                    <div class="col-6">
+                        <img class="img-fluid" src="assets/media/photos/photo16.jpg" alt="">
+                    </div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <a class="fw-semibold" href="javascript:void(0)">{{$high->user->name}}</a>
+                        <div class="fs-sm text-muted">{{ $high->total }} Members</div>
+                    </div>
+                    <a class="btn btn-sm btn-alt-secondary d-inline-block" href="javascript:void(0)">
+                        <i class="fa fa-fw fa-plus-circle"></i>
+                    </a>
+                    </div>
                 </div>
             </div>
+            @endforeach
+            
+            {{-- <div class="block block-rounded bg-body-dark">
+                <div class="block-content block-content-full">
+                    <div class="row g-sm mb-2">
+                    <div class="col-6">
+                        <img class="img-fluid" src="assets/media/photos/photo12.jpg" alt="">
+                    </div>
+                    <div class="col-6">
+                        <img class="img-fluid" src="assets/media/photos/photo13.jpg" alt="">
+                    </div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <a class="fw-semibold" href="javascript:void(0)">Travel Photos</a>
+                        <div class="fs-sm text-muted">65k Members</div>
+                    </div>
+                    <a class="btn btn-sm btn-alt-secondary d-inline-block" href="javascript:void(0)">
+                        <i class="fa fa-fw fa-plus-circle"></i>
+                    </a>
+                    </div>
+                </div>
             </div>
             <div class="block block-rounded bg-body-dark">
             <div class="block-content block-content-full">
@@ -222,7 +226,7 @@
                 </a>
                 </div>
             </div>
-            </div>
+            </div> --}}
             <!-- END Group Suggestions -->
         </div>
 

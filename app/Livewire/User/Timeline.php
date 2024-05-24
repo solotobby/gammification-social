@@ -13,7 +13,7 @@ use Livewire\Attributes\On;
 class Timeline extends Component
 {
     public $count = 0;
-    public $timelines, $id, $long;
+    public $timelines, $id, $long, $highestEngagement;
 
     public $postId;
     #[Validate('required|string')]
@@ -25,11 +25,24 @@ class Timeline extends Component
 
     public function timelines(){
         return Post::where('status', 'LIVE')->orderBy('created_at', 'desc')->get();//Post::all();
-     }
+    }
+
+    public function highestEngagement(){
+  
+        return Post::with(['user:id,name'])->select('user_id', \DB::raw('SUM(views + views_external + likes + likes_external + comments) as total'))
+                ->groupBy('user_id')
+                ->orderByDesc('total')
+                ->limit(5)
+                ->get();
+                
+    }
 
 
     public function mount(){
         $this->timelines = $this->timelines();
+        $this->highestEngagement = $this->highestEngagement();
+
+        // dd($this->highestEngagement());
     }
 
     
