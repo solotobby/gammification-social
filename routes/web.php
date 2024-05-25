@@ -36,7 +36,6 @@ Route::group(['namespace' => 'auth'], function () {
     Route::get('success', [\App\Http\Controllers\GeneralController::class, 'success']);
     Route::get('error', [\App\Http\Controllers\GeneralController::class, 'error']);
 
-
     // Route::get('post/{id}', [\App\Http\Controllers\GeneralController::class, 'showPost']);
     Route::get('/post/{id}/comments', [\App\Http\Controllers\GeneralController::class, 'loadMoreComments'])->name('post.comments.load_more');
 
@@ -53,7 +52,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('post/{username}/{id}', ViewPost::class);
 
     Route::get('timeline', Timeline::class);
-    Route::get('profile', Profile::class);
+   
     Route::get('profile/{id}', ViewProfile::class);
     Route::get('show/{query}', ShowPost::class)->name('show');
     Route::get('post/timeline/{id}/analytics', PostAnalytics::class);

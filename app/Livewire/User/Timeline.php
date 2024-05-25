@@ -5,6 +5,7 @@ namespace App\Livewire\User;
 use App\Models\Post;
 use App\Models\Timeline as ModelsTimeline;
 use App\Models\UserLike;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 use Livewire\Attributes\On;
@@ -13,7 +14,10 @@ use Livewire\Attributes\On;
 class Timeline extends Component
 {
     public $count = 0;
-    public $timelines, $id, $long, $highestEngagement;
+    public $timelines, $id, $long, $highestEngagement; 
+
+  
+    public $isLiked;
 
     public $postId;
     #[Validate('required|string')]
@@ -24,32 +28,13 @@ class Timeline extends Component
     protected $listeners=['refresh'=>'$refresh'];
 
     public function timelines(){
-       return Post::where('status', 'LIVE')->orderBy('created_at', 'desc')->get();//Post::all();
+       return Post::with('likes')->where('status', 'LIVE')->orderBy('created_at', 'desc')->get();//Post::all();
 
-        // $eng = Post::with(['user:id,name'])->select('user_id', \DB::raw('SUM(views + views_external + likes + likes_external + comments) as total'))
-        //         ->groupBy('user_id')->orderByDesc('total')->limit(5)->get();
-        // $data['timelines'] = $tm;
-        // $data['engagement'] = $eng;
-        // return $data;
-    }
-
-    public function highestEngagement(){
-  
-        return Post::with(['user:id,name'])->select('user_id', \DB::raw('SUM(views + views_external + likes + likes_external + comments) as total'))
-                ->groupBy('user_id')
-                ->orderByDesc('total')
-                ->limit(5)
-                ->get();
-                
     }
 
 
     public function mount(){
         $this->timelines = $this->timelines();
-        // dd($this->timelines);
-        $this->highestEngagement = $this->highestEngagement();
-
-        // dd($this->highestEngagement());
     }
 
     
@@ -72,6 +57,23 @@ class Timeline extends Component
          UserLike::where(['user_id' => auth()->user()->id, 'post_id' => $post->id])->delete();
          $this->dispatch('user.timeline');
          
+     }
+
+     public function toggleLike($postId){
+
+        $post = Post::where('unicode', $postId)->first();
+
+        if ($post->isLikedBy(Auth::user())) {
+            $post->likes()->where('user_id', Auth::id())->delete();
+            $post->decrement('likes');
+        } else {
+            $post->likes()->create(['user_id' => Auth::id()]);
+            $post->increment('likes');
+        }
+
+        $this->timelines();
+
+        $this->dispatch('user.timeline');
      }
 
 
