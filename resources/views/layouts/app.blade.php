@@ -103,7 +103,7 @@
     -->
     <div id="page-container" class="sidebar-o sidebar-dark enable-page-overlay side-scroll page-header-fixed main-content-narrow">
       <!-- Side Overlay-->
-      <aside id="side-overlay">
+      {{-- <aside id="side-overlay">
         <!-- Side Header -->
         <div class="bg-image" style="background-image: url('assets/media/various/bg_side_overlay_header.jpg');">
           <div class="bg-primary-op">
@@ -547,7 +547,7 @@
           <!-- END Side Overlay Tabs -->
         </div>
         <!-- END Side Content -->
-      </aside>
+      </aside> --}}
       <!-- END Side Overlay -->
 
       <!-- Sidebar -->
@@ -649,25 +649,25 @@
               </button>
               <div class="dropdown-menu dropdown-menu-end p-0" aria-labelledby="page-header-user-dropdown">
                 <div class="bg-primary-dark rounded-top fw-semibold text-white text-center p-3">
-                  User Options
+                  {{ auth()->user()->name }} - Level 1
                 </div>
                 <div class="p-2">
-                  <a class="dropdown-item" href="be_pages_generic_profile.html">
+                  <a class="dropdown-item" href="{{ url('profile/'.auth()->user()->id) }}">
                     <i class="far fa-fw fa-user me-1"></i> Profile
                   </a>
-                  <a class="dropdown-item d-flex align-items-center justify-content-between" href="be_pages_generic_inbox.html">
+                  {{-- <a class="dropdown-item d-flex align-items-center justify-content-between" href="be_pages_generic_inbox.html">
                     <span><i class="far fa-fw fa-envelope me-1"></i> Inbox</span>
                     <span class="badge bg-primary rounded-pill">3</span>
-                  </a>
-                  <a class="dropdown-item" href="be_pages_generic_invoice.html">
-                    <i class="far fa-fw fa-file-alt me-1"></i> Invoices
+                  </a> --}}
+                  <a class="dropdown-item" href="{{ url('analytics') }}">
+                    <i class="si si-bar-chart me-1"></i> Analytics
                   </a>
                   <div role="separator" class="dropdown-divider"></div>
 
                   <!-- Toggle Side Overlay -->
                   <!-- Layout API, functionality initialized in Template._uiApiLayout() -->
-                  <a class="dropdown-item" href="javascript:void(0)" data-toggle="layout" data-action="side_overlay_toggle">
-                    <i class="far fa-fw fa-building me-1"></i> Settings
+                  <a class="dropdown-item" href="{{ url('settings') }}">
+                    <i class="si si-settings me-1"></i> Settings
                   </a>
                   <!-- END Side Overlay -->
 

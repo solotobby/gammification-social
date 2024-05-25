@@ -2,15 +2,18 @@
     <ul class="nav-main">
       <li class="nav-main-item">
         <a class="nav-main-link" href="{{ url('home') }}">
-          <i class="nav-main-link-icon fa fa-location-arrow"></i>
+          <i class="nav-main-link-icon fa fa-home"></i>
           <span class="nav-main-link-name">Dashboard</span>
        
         </a>
-        <a class="nav-main-link" href="{{ url('profile') }}">
+        <a class="nav-main-link" href="{{ url('profile/'.auth()->user()->id) }}">
             <i class="nav-main-link-icon fa fa-user"></i>
             <span class="nav-main-link-name">Profile</span>
-           
         </a>
+        <a class="nav-main-link" href="{{ url('analytics') }}">
+          <i class="nav-main-link-icon si si-bar-chart"></i>
+          <span class="nav-main-link-name">Analytics</span>
+      </a>
         <a class="nav-main-link" href="{{ url('profile') }}">
             <i class="nav-main-link-icon fa fa-table"></i>
             <span class="nav-main-link-name">Leaderboard</span>

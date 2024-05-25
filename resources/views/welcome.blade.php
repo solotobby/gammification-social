@@ -81,10 +81,9 @@
         <div class="container">
             <div class="row align-items-center justify-content-center">
                 <div class="col-lg-6">
-                    <h1 class="hero-1-title fw-bold text-shadow mb-4">Creative Landing Page</h1>
+                    <h1 class="hero-1-title fw-bold text-shadow mb-4">Monetise your Posts</h1>
                     <div class="w-75 mb-5 mb-lg-0">
-                        <p class="text-muted mb-5 pb-5 font-size-17">A creative & modern landing page with Lezir
-                            template & We love make things amazing.</p>
+                        <p class="text-muted mb-5 pb-5 font-size-17">The social media that pays you for every posts, views, comments and likes</p>
                         <p><span class="font-size-20 me-2">🥳️</span>Nemo enim ipsam voluptatem quia
                             voluptas
                             sit aspernatur that is fugit.</p>
@@ -116,8 +115,7 @@
                             <div class="icon-xxl uim-icon-primary"><i class="uim uim-cube"></i></div>
                         </div>
                         <h3 class="">Why Choose Us ?</h3>
-                        <p class="text-muted mb-4">Nam libero tempore cum soluta as nobis est eligendi optio cumque
-                            nihile impedite quo minus id quod maxime.</p>
+                        <p class="text-muted mb-4">Payhankey pays you for every engagement you get on short posts, facts, quizzes and teasers. You earn from your FIRST post.</p>
                         <a href="#" class="btn btn-outline-primary">Learn More</a>
                     </div>
                 </div>
@@ -128,17 +126,15 @@
                                 <div class="wc-box-icon">
                                     <i class="mdi mdi-collage"></i>
                                 </div>
-                                <h5 class="fw-bold mb-2 wc-title mt-4">Easy To Use</h5>
-                                <p class="text-muted mb-0 font-size-15 wc-subtitle">Sed ut perspiciatis unde omnis iste
-                                    natus error sit voluptatem.</p>
+                                <h5 class="fw-bold mb-2 wc-title mt-4">Earn on the Go</h5>
+                                <p class="text-muted mb-0 font-size-15 wc-subtitle">Earn up to $3 registration bonus. Make money from every post.</p>
                             </div>
                             <div class="wc-box rounded text-center wc-box-primary p-4">
                                 <div class="wc-box-icon">
                                     <i class="mdi mdi-trending-up"></i>
                                 </div>
                                 <h5 class="fw-bold mb-2 wc-title mt-4">Grow Your Revenue</h5>
-                                <p class="text-muted mb-0 font-size-15 wc-subtitle">Sed ut perspiciatis unde omnis iste
-                                    natus error sit voluptatem.</p>
+                                <p class="text-muted mb-0 font-size-15 wc-subtitle">Earn up to $3 on every friend you refer to Payhankey.</p>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -147,16 +143,14 @@
                                     <i class="mdi mdi-security"></i>
                                 </div>
                                 <h5 class="fw-bold mb-2 wc-title mt-4">Analytics Security</h5>
-                                <p class="text-muted mb-0 font-size-15 wc-subtitle">Sed ut perspiciatis unde omnis iste
-                                    natus error sit voluptatem.</p>
+                                <p class="text-muted mb-0 font-size-15 wc-subtitle">share your posts freely to increase your revenue.</p>
                             </div>
                             <div class="wc-box rounded text-center wc-box-primary p-4">
                                 <div class="wc-box-icon">
                                     <i class="mdi mdi-database-lock"></i>
                                 </div>
-                                <h5 class="fw-bold mb-2 wc-title mt-4">Data Privacy</h5>
-                                <p class="text-muted mb-0 font-size-15 wc-subtitle">Sed ut perspiciatis unde omnis iste
-                                    natus error sit voluptatem.</p>
+                                <h5 class="fw-bold mb-2 wc-title mt-4">Withdraw Anytime</h5>
+                                <p class="text-muted mb-0 font-size-15 wc-subtitle">Withdraw your earnings via Paypal or USDT.</p>
                             </div>
                         </div>
                     </div>
@@ -257,13 +251,15 @@
                         <div class="pricing-icon-bg my-4">
                             <i class="mdi mdi-account h1"></i>
                         </div>
-                        <h4 class="title mb-3">Simple</h4>
-                        <h1 class="fw-bold mb-0"><b><sup class="h4 me-2 fw-bold">$</sup>19</b></h1>
-                        <p class="text-muted font-weight-semibold">User / Month</p>
+                        <h4 class="title mb-3">Beginner</h4>
+                        <h1 class="fw-bold mb-0"><b><sup class="h4 me-2 fw-bold">$</sup>6</b></h1>
+                        <p class="text-muted font-weight-semibold">Reg. fee</p>
                         <ul class="list-unstyled pricing-item mb-4">
-                            <li class="text-muted">Bandwidth: 1GB</li>
-                            <li class="text-muted">Onlinespace: 500MB</li>
-                            <li class="text-muted">Support: Yes</li>
+                            <li class="text-muted">SignUp Bonus: $1</li>
+                            <li class="text-muted">Referral Bonus: $1</li>
+                            <li class="text-muted">every 1,000 views: $1</li>
+                            <li class="text-muted">every 1,000 likes: $0.4</li>
+                            <li class="text-muted">every 1,000 comments: $0.5</li>
                         </ul>
                         <a href="#" class="btn btn-outline-primary pr-btn">Buy Now</a>
                         <div class="mt-4">
@@ -278,13 +274,15 @@
                         <div class="pricing-icon-bg my-4">
                             <i class="mdi mdi-account-multiple h1"></i>
                         </div>
-                        <h4 class="title mb-3">Basic</h4>
-                        <h1 class="fw-bold mb-0"><b><sup class="h4 me-2 fw-bold">$</sup>49</b></h1>
-                        <p class="text-muted font-weight-semibold">User / Month</p>
+                        <h4 class="title mb-3">Creator(Popular)</h4>
+                        <h1 class="fw-bold mb-0"><b><sup class="h4 me-2 fw-bold">$</sup>10</b></h1>
+                        <p class="text-muted font-weight-semibold">Reg. fee</p>
                         <ul class="list-unstyled pricing-item mb-4">
-                            <li class="text-muted">Bandwidth: 2GB</li>
-                            <li class="text-muted">Onlinespace: 1GB</li>
-                            <li class="text-muted">Support: Yes</li>
+                            <li class="text-muted">SignUp Bonus: $2</li>
+                            <li class="text-muted">Referral Bonus: $3</li>
+                            <li class="text-muted">every 1,000 views: $2</li>
+                            <li class="text-muted">every 1,000 likes: $0.6</li>
+                            <li class="text-muted">every 1,000 comments: $0.7</li>
                         </ul>
                         <a href="#" class="btn btn-primary pr-btn">Buy Now</a>
                         <div class="mt-4">
@@ -299,13 +297,15 @@
                         <div class="pricing-icon-bg my-4">
                             <i class="mdi mdi-account-group h1"></i>
                         </div>
-                        <h4 class="title mb-3">Pro</h4>
-                        <h1 class="fw-bold mb-0"><b><sup class="h4 me-2 fw-bold">$</sup>89</b></h1>
-                        <p class="text-muted font-weight-semibold">User / Month</p>
+                        <h4 class="title mb-3">Influencer</h4>
+                        <h1 class="fw-bold mb-0"><b><sup class="h4 me-2 fw-bold">$</sup>20</b></h1>
+                        <p class="text-muted font-weight-semibold">Reg. fee</p>
                         <ul class="list-unstyled pricing-item mb-4">
-                            <li class="text-muted">Bandwidth: 3GB</li>
-                            <li class="text-muted">Onlinespace: 1.5GB</li>
-                            <li class="text-muted">Support: Yes</li>
+                            <li class="text-muted">SignUp Bonus: $5</li>
+                            <li class="text-muted">Referral Bonus: $5</li>
+                            <li class="text-muted">every 1,000 views: $4</li>
+                            <li class="text-muted">every 1,000 likes: $0.7</li>
+                            <li class="text-muted">every 1,000 comments: $1</li>
                         </ul>
                         <a href="#" class="btn btn-outline-primary pr-btn">Buy Now</a>
                         <div class="mt-4">
