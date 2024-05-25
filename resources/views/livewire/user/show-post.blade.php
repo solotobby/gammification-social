@@ -40,7 +40,17 @@
                 <hr>
                 <ul class="nav nav-pills fs-sm push">
                     <li class="nav-item me-1">
-                        @if($timeline->userLikes()->count() > 0)
+                        @if($timeline->isLikedBy(auth()->user()))
+                                        <a class="nav-link"  wire:click="toggleLike({{$timeline->unicode}})" href="javascript:void(0)">
+                                            <i class="fa fa-thumbs-down opacity-50 me-1"></i> {{ $timeline->likes }}
+                                        </a>
+                                @else
+                                        <a class="nav-link"  wire:click="toggleLike({{$timeline->unicode}})" href="javascript:void(0)">
+                                            <i class="fa fa-thumbs-up opacity-50 me-1"></i> {{ $timeline->likes }}
+                                        </a>
+                                @endif
+                                
+                        {{-- @if($timeline->userLikes()->count() > 0)
                         <a class="nav-link"  wire:click="dislike({{$timeline->unicode}})" href="javascript:void(0)">
                             <i class="fa fa-thumbs-down opacity-50 me-1"></i> {{ $timeline->likes }}
                         </a>
@@ -48,7 +58,7 @@
                             <a class="nav-link"  wire:click="like({{$timeline->unicode}})" href="javascript:void(0)">
                                 <i class="fa fa-thumbs-up opacity-50 me-1"></i> {{ $timeline->likes }}
                             </a>
-                        @endif
+                        @endif --}}
                     </li>
                     <li class="nav-item me-1">
                     <a class="nav-link" href="javascript:void(0)">

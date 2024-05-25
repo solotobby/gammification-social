@@ -6,6 +6,7 @@ use App\Models\Comment;
 use App\Models\Post;
 use App\Models\UserLike;
 use App\Models\UserView;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Validate;
@@ -30,6 +31,12 @@ class ShowPost extends Component
     protected $listeners = ['commentAdded' => '$refresh'];
 
     public function mount($query){
+        
+       $this->timeline($query);
+    }
+
+    public function timeline($query){
+
         $this->postQuery = $query;
         $this->timeline = Post::with(['postComments'])->where('id', $this->postQuery)->first();
         // $this->comments;
@@ -42,7 +49,7 @@ class ShowPost extends Component
             $this->timeline->views += 1;
             $this->timeline->save(); 
         }
-       
+
     }
 
     public function loadMore()
@@ -55,7 +62,22 @@ class ShowPost extends Component
         $this->page++;
     }
 
-  
+    public function toggleLike($postId){
+
+        $post = Post::where('unicode', $postId)->first();
+        
+        if ($post->isLikedBy(Auth::user())) {
+            $post->likes()->where('user_id', Auth::id())->delete();
+            $post->decrement('likes');
+        } else {
+            $post->likes()->create(['user_id' => Auth::id()]);
+            $post->increment('likes');
+        }
+
+        $this->timeline($post->id);
+
+        // $this->dispatch('user.timeline');
+     }
 
     public function like($id){
         

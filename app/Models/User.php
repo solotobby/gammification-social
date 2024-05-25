@@ -88,5 +88,22 @@ class User extends Authenticatable
         return $this->posts()->sum('comments');
     }
 
+    //like methods 
+    public function likes()
+    {
+        return $this->hasMany(UserLike::class);
+    }
+
+    public function like(Post $post)
+    {
+        return $this->likes()->create(['post_id' => $post->id]);
+    }
+
+    public function unlike(Post $post)
+    {
+        return $this->likes()->where('post_id', $post->id)->delete();
+    }
+
+
     
 }

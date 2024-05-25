@@ -30,7 +30,7 @@
         <!-- Update #2 -->
                 @forelse ($timelines as $timeline)
                 {{-- wire:poll.visible.2.5s --}}
-                    <div wire:poll.visible.2.5s  class="block block-rounded block-bordered" id="timelines">
+                    <div wire:poll.visible.30s  class="block block-rounded block-bordered" id="timelines">
                         <div class="block-header block-header-default">
                         <div>
                             <a class="img-link me-1" href="{{ url('profile/'.$timeline->user->id) }}">
@@ -71,16 +71,19 @@
                         <hr>
                         <ul class="nav nav-pills fs-sm push">
                             <li class="nav-item me-1">
-                                @if($timeline->userLikes()->count() > 0)
-                                
-                                    <a class="nav-link"  wire:click="dislike({{$timeline->unicode}})" href="javascript:void(0)">
-                                        <i class="fa fa-thumbs-down opacity-50 me-1"></i> {{ $timeline->likes }}
-                                    </a>
+
+                            
+                                @if($timeline->isLikedBy(auth()->user()))
+                                        <a class="nav-link"  wire:click="toggleLike({{$timeline->unicode}})" href="javascript:void(0)">
+                                            <i class="fa fa-thumbs-down opacity-50 me-1"></i> {{ $timeline->likes }}
+                                        </a>
                                 @else
-                                    <a class="nav-link"  wire:click="like({{$timeline->unicode}})" href="javascript:void(0)">
-                                        <i class="fa fa-thumbs-up opacity-50 me-1"></i> {{ $timeline->likes }}
-                                    </a>
+                                        <a class="nav-link"  wire:click="toggleLike({{$timeline->unicode}})" href="javascript:void(0)">
+                                            <i class="fa fa-thumbs-up opacity-50 me-1"></i> {{ $timeline->likes }}
+                                        </a>
                                 @endif
+
+                                
                             </li>
                             <li class="nav-item me-1">
                                 <a class="nav-link" href="{{ url('show/'.$timeline->id) }}">
