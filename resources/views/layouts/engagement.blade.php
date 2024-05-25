@@ -14,7 +14,7 @@
             <div class="d-flex justify-content-between align-items-center">
             <div>
                 <a class="fw-semibold" href="{{url('profile/'.$high->user->id)}}">{{$high->user->name}}</a>
-                <div class="fs-sm text-muted">{{ $high->total }} Members</div>
+                <div class="fs-sm text-muted">{{ $high->total }} Engagements</div>
             </div>
             <a class="btn btn-sm btn-alt-secondary d-inline-block" href="{{url('profile/'.$high->user->id)}}">
                 <i class="fa fa-fw fa-plus-circle"></i>

@@ -79,36 +79,19 @@ class ShowPost extends Component
         // $this->dispatch('user.timeline');
      }
 
-    public function like($id){
-        
-        $post =  Post::where('unicode', $id)->first();
-        $post->likes += 1;
-        $post->save(); 
-        UserLike::create(['user_id' => auth()->user()->id, 'post_id' => $post->id]);
-        $this->dispatch('user.show-post', $post->id);
-        
-     }
- 
-     public function dislike($id){
-     
-         $post =  Post::where('unicode', $id)->first();
-         $post->likes -= 1;
-         $post->save(); 
-         UserLike::where(['user_id' => auth()->user()->id, 'post_id' => $post->id])->delete();
-         $this->dispatch('user.show-post');
-         
-     }
+   
 
      public function comment(){
         Comment::create(['user_id' => auth()->user()->id, 'post_id' =>$this->postQuery, 'message' =>  $this->message]);
-        $pst = Post::where(['id' => $this->postQuery])->first();
+        $pst = Post::with(['postComments'])->where(['id' => $this->postQuery])->first();
         $pst->comments += 1;
         $pst->save();
 
         $this->reset('message');
-        // $this->timelines->push($timelines);
-        $this->dispatch('commentAdded');
+        $this->timeline->push($pst);
+        // $this->dispatch('commentAdded');
         // $this->redirect(url('show/'.$this->postQuery));
+        // $this->dispatch($pst->id);
     }
 
     public function render()
