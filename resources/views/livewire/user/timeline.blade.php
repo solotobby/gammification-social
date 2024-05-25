@@ -29,13 +29,14 @@
         
         <!-- Update #2 -->
                 @forelse ($timelines as $timeline)
-                    <div wire:poll.visible.107s class="block block-rounded block-bordered" id="timelines">
+                {{-- wire:poll.visible.2.5s --}}
+                    <div wire:poll.visible.2.5s  class="block block-rounded block-bordered" id="timelines">
                         <div class="block-header block-header-default">
                         <div>
-                            <a class="img-link me-1" href="javascript:void(0)">
+                            <a class="img-link me-1" href="{{ url('profile/'.$timeline->user->id) }}">
                             <img class="img-avatar img-avatar32 img-avatar-thumb" src="{{asset('src/assets/media/avatars/avatar11.jpg')}}" alt="">
                             </a>
-                            <a class="fw-semibold" href="javascript:void(0)">{{$timeline->user->name}}</a>
+                            <a class="fw-semibold" href="{{ url('profile/'.$timeline->user->id) }}">{{$timeline->user->name}}</a>
                             <span class="fs-sm text-muted">{{$timeline->created_at?->shortAbsoluteDiffForHumans()}} ago</span>
                         </div>
                         <div class="block-options">
@@ -138,97 +139,7 @@
 
         </div>
 
-        <div class="col-md-4">
-            <!-- Group Suggestions -->
-            @foreach ($highestEngagement as $high)
-            <div  class="block block-rounded bg-body-dark">
-                <div class="block-content block-content-full">
-                    <div class="row g-sm mb-2">
-                    <div class="col-6">
-                        <img class="img-fluid" src="assets/media/photos/photo18.jpg" alt="">
-                    </div>
-                    <div class="col-6">
-                        <img class="img-fluid" src="assets/media/photos/photo16.jpg" alt="">
-                    </div>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <a class="fw-semibold" href="javascript:void(0)">{{$high->user->name}}</a>
-                        <div class="fs-sm text-muted">{{ $high->total }} Members</div>
-                    </div>
-                    <a class="btn btn-sm btn-alt-secondary d-inline-block" href="javascript:void(0)">
-                        <i class="fa fa-fw fa-plus-circle"></i>
-                    </a>
-                    </div>
-                </div>
-            </div>
-            @endforeach
-            
-            {{-- <div class="block block-rounded bg-body-dark">
-                <div class="block-content block-content-full">
-                    <div class="row g-sm mb-2">
-                    <div class="col-6">
-                        <img class="img-fluid" src="assets/media/photos/photo12.jpg" alt="">
-                    </div>
-                    <div class="col-6">
-                        <img class="img-fluid" src="assets/media/photos/photo13.jpg" alt="">
-                    </div>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <a class="fw-semibold" href="javascript:void(0)">Travel Photos</a>
-                        <div class="fs-sm text-muted">65k Members</div>
-                    </div>
-                    <a class="btn btn-sm btn-alt-secondary d-inline-block" href="javascript:void(0)">
-                        <i class="fa fa-fw fa-plus-circle"></i>
-                    </a>
-                    </div>
-                </div>
-            </div>
-            <div class="block block-rounded bg-body-dark">
-            <div class="block-content block-content-full">
-                <div class="row g-sm mb-2">
-                <div class="col-6">
-                    <img class="img-fluid" src="assets/media/photos/photo22.jpg" alt="">
-                </div>
-                <div class="col-6">
-                    <img class="img-fluid" src="assets/media/photos/photo23.jpg" alt="">
-                </div>
-                </div>
-                <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <a class="fw-semibold" href="javascript:void(0)">Coding Frenzy</a>
-                    <div class="fs-sm text-muted">109k Members</div>
-                </div>
-                <a class="btn btn-sm btn-alt-secondary d-inline-block" href="javascript:void(0)">
-                    <i class="fa fa-fw fa-plus-circle"></i>
-                </a>
-                </div>
-            </div>
-            </div>
-            <div class="block block-rounded bg-body-dark">
-            <div class="block-content block-content-full">
-                <div class="row g-sm mb-2">
-                <div class="col-6">
-                    <img class="img-fluid" src="assets/media/photos/photo9.jpg" alt="">
-                </div>
-                <div class="col-6">
-                    <img class="img-fluid" src="assets/media/photos/photo6.jpg" alt="">
-                </div>
-                </div>
-                <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <a class="fw-semibold" href="javascript:void(0)">Nature Lovers</a>
-                    <div class="fs-sm text-muted">32k Members</div>
-                </div>
-                <a class="btn btn-sm btn-alt-secondary d-inline-block" href="javascript:void(0)">
-                    <i class="fa fa-fw fa-plus-circle"></i>
-                </a>
-                </div>
-            </div>
-            </div> --}}
-            <!-- END Group Suggestions -->
-        </div>
+        @include('layouts.engagement')
 
     </div>
 

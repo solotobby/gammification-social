@@ -1,10 +1,13 @@
 <?php
 
 use App\Livewire\CreateProduct;
+use App\Livewire\User\Analytics;
 use App\Livewire\User\PostAnalytics;
 use App\Livewire\User\Profile;
+use App\Livewire\User\Settings;
 use App\Livewire\User\ShowPost;
 use App\Livewire\User\Timeline;
+use App\Livewire\User\ViewProfile;
 use App\Livewire\ViewPost;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -51,6 +54,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('timeline', Timeline::class);
     Route::get('profile', Profile::class);
+    Route::get('profile/{id}', ViewProfile::class);
     Route::get('show/{query}', ShowPost::class)->name('show');
     Route::get('post/timeline/{id}/analytics', PostAnalytics::class);
+    Route::get('analytics', Analytics::class);
+    Route::get('settings', Settings::class);
 });
