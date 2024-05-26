@@ -30,7 +30,7 @@ Route::group(['namespace' => 'auth'], function () {
     });
 
     Route::post('process/reg', [\App\Http\Controllers\Auth\RegisterController::class, 'regUser'])->name('reg.user');
-    Route::get('access/code', [\App\Http\Controllers\GeneralController::class, 'accessCode']);
+    Route::get('access/code/{level}', [\App\Http\Controllers\GeneralController::class, 'accessCode']);
     Route::post('process/access/code', [\App\Http\Controllers\GeneralController::class, 'processAccessCode']);
     Route::get('validate/api', [\App\Http\Controllers\GeneralController::class, 'validateApi']);
     Route::get('success', [\App\Http\Controllers\GeneralController::class, 'success']);

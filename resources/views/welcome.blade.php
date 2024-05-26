@@ -38,8 +38,8 @@
         <div class="container">
             <!-- LOGO -->
             <a class="navbar-brand logo" href="{{ url('/') }}">
-                <img src="{{asset('asset/images/logo-dark.png')}}" alt="" class="logo-dark" height="24" />
-                <img src="{{asset('asset/images/logo-light.png')}}" alt="" class="logo-light" height="24" />
+                <img src="{{asset('logo.jpeg')}}" alt="" class="logo-dark" height="34" />
+                <img src="{{asset('logo.jpeg')}}" alt="" class="logo-light" height="34" />
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
                 aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
@@ -261,7 +261,7 @@
                             <li class="text-muted">every 1,000 likes: $0.4</li>
                             <li class="text-muted">every 1,000 comments: $0.5</li>
                         </ul>
-                        <a href="#" class="btn btn-outline-primary pr-btn">Buy Now</a>
+                        <a href="{{ url('access/code/beginner') }}" class="btn btn-outline-primary pr-btn">Buy Now</a>
                         <div class="mt-4">
                             <div class="hero-bottom-img">
                                 <img src="{{asset('asset/images/pricing-bottom-bg.png')}}" alt="" class="img-fluid d-block mx-auto">
@@ -284,7 +284,7 @@
                             <li class="text-muted">every 1,000 likes: $0.6</li>
                             <li class="text-muted">every 1,000 comments: $0.7</li>
                         </ul>
-                        <a href="#" class="btn btn-primary pr-btn">Buy Now</a>
+                        <a href="{{ url('access/code/creator') }}" class="btn btn-primary pr-btn">Buy Now</a>
                         <div class="mt-4">
                             <div class="hero-bottom-img">
                                 <img src="images/pricing-bottom-bg.png" alt="" class="img-fluid d-block mx-auto">
@@ -307,7 +307,7 @@
                             <li class="text-muted">every 1,000 likes: $0.7</li>
                             <li class="text-muted">every 1,000 comments: $1</li>
                         </ul>
-                        <a href="#" class="btn btn-outline-primary pr-btn">Buy Now</a>
+                        <a href="{{ url('access/code/influencer') }}" class="btn btn-outline-primary pr-btn">Buy Now</a>
                         <div class="mt-4">
                             <div class="hero-bottom-img">
                                 <img src="images/pricing-bottom-bg.png" alt="" class="img-fluid d-block mx-auto">
