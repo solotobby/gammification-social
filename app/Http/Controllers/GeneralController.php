@@ -10,8 +10,14 @@ use Illuminate\Support\Str;
 
 class GeneralController extends Controller
 {
-    public function accessCode(){
-        return view('get_access_code');
+    public function accessCode($level){
+        if($level == 'beginner' || $level == 'creator' || $level == 'influencer' ){
+           
+            return view('get_access_code', ['level' => $level]);
+        }else{
+            return redirect('/');
+        }
+       
     }
 
     public function processAccessCode(Request $request){

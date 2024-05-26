@@ -38,8 +38,8 @@
         <div class="container">
             <!-- LOGO -->
             <a class="navbar-brand logo" href="{{ url('/') }}">
-                <img src="{{asset('asset/images/logo-dark.png')}}" alt="" class="logo-dark" height="24" />
-                <img src="{{asset('asset/images/logo-light.png')}}" alt="" class="logo-light" height="24" />
+                <img src="{{asset('logo.jpeg')}}" alt="" class="logo-dark" height="24" />
+                <img src="{{asset('logo.jpeg')}}" alt="" class="logo-light" height="24" />
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
                 aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
@@ -146,83 +146,34 @@
     <!-- Blog End -->
 
     <!-- Contact Us Start -->
-    <section class="section bg-light" id="contact">
+  
+
+    <section class="section feather-bg-img" style="background-image: url(asset/images/features-bg-img-1.png)">
         <div class="container">
             <div class="row justify-content-center">
-                <div class="col-lg-6">
-                    <div class="text-center mb-5">
-                        <h3 class="title mb-3">Get Access Code</h3>
-                        <p class="text-muted font-size-15">Et harum quidem rerum facilis est et expedita distinctio nam
-                            libero tempore cum soluta nobis eligendi cumque.
-                        </p>
-                    </div>
-                </div>
-            </div>
-            <div class="row justify-content-center">
-                <div class="col-lg-7 align-self-center">
-                    <div class="custom-form mb-5 mb-lg-0">
-                        <form method="post" action="{{ url('process/access/code') }}" name="myForm" onsubmit="validateForm()">
-                            @csrf
-                            <p id="error-msg"></p>
-                            <div id="simple-msg"></div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="name">Name*</label>
-                                        <input name="name" id="name" type="text" class="form-control"
-                                            placeholder="Your name..." required>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="email">Email Address*</label>
-                                        <input name="email" id="email" type="email" class="form-control"
-                                            placeholder="Your email..." required>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-lg-12">
-                                    <div class="form-group">
-                                        <label for="comments">Message*</label>
-                                        <textarea name="comments" id="comments" rows="4" class="form-control"
-                                            placeholder="Your message..." required></textarea>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-sm-12">
-                                    <button type="submit" id="submit" class="btn btn-primary">Get Access Code
-                                        <i class="icon-size-15 ms-2 icon" data-feather="send"></i></button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
                 <div class="col-lg-5 align-self-center">
-                    <div class="contact-detail text-muted ms-lg-5">
-                        <p class=""><i class="icon-xs icon me-1" data-feather="mail"></i> :
-                            <span>support@website.com</span>
-                        </p>
-                        {{-- <p class=""><i class="icon-xs icon me-1" data-feather="link"></i> : <span>www.website.com</span>
-                        </p> --}}
-                        
-                        <p class=""><i class="icon-xs icon me-1" data-feather="instagram"></i> : <span>1644 Deer Ridge
-                            Drive Rochelle Park, NJ 07662</span>
-                        </p>
-                        {{-- <p class=""><i class="icon-xs icon me-1" data-feather="phone-call"></i> : <span>(+001) 123 456
-                                7890</span></p> --}}
-                        {{-- <p class=""><i class="icon-xs icon me-1" data-feather="clock"></i> : <span>9:00 AM - 6:00
-                                PM</span></p> --}}
-                        <p class=""><i class="icon-xs icon me-1" data-feather="twitter"></i> : <span>1644 Deer Ridge
-                                Drive Rochelle Park, NJ 07662</span>
-                        </p>
-                        <p class=""><i class="icon-xs icon me-1" data-feather="facebook"></i> : <span>1644 Deer Ridge
-                            Drive Rochelle Park, NJ 07662</span>
-                        </p>
-                        <p class=""><i class="icon-xs icon me-1" data-feather="x"></i> : <span>1644 Deer Ridge
-                            Drive Rochelle Park, NJ 07662</span>
-                        </p>
+                    <p class="font-weight-medium text-uppercase mb-2"><i
+                            class="mdi mdi-chart-bubble h2 text-primary me-1 align-middle"></i> Early Bird Offer </p>
+                    {{-- <h3 class="font-weight-semibold line-height-1_4 mb-4">We do the work you <b>stay focused</b> on
+                        <b>your customers</b>.
+                    </h3> --}}
+                    <h3 class="title mb-3">Get Access Code for {{ ucfirst($level) }}</h3>
+
+                    <p class="text-muted font-size-15 mb-4">Temporibus autem quibusdam et aut officiis debitis aut rerum
+                        a necessitatibus saepe eveniet ut et voluptates repudiandae sint molestiae non recusandae
+                        itaque.</p>
+                    <p class="text-muted mb-2"><i class="icon-xs me-1" data-feather="server"></i> Donec pede justo
+                        fringilla vel nec.</p>
+                    <p class="text-muted"><i class="icon-xs me-1" data-feather="rss"></i> Cras ultricies mi eu turpis
+                        hendrerit fringilla.</p>
+                    <div class="mt-5">
+                        <a href="#" class="btn btn-primary me-2">Get Dollar - </a>
+                        <a href="#" class="btn btn-soft-primary">Get in Naiara - </a>
+                    </div>
+                </div>
+                <div class="col-lg-6 offset-lg-1 align-self-center">
+                    <div class="mt-4 mt-lg-0">
+                        <img src="{{asset('asset/images/features-img-1.png')}}" alt="" class="img-fluid d-block mx-auto">
                     </div>
                 </div>
             </div>
