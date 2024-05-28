@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8" />
-    <title>Payhankey</title>
+    <title>Payhankey | Monetize your posts, comments and views to earn daily</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Premium Bootstrap 4 Landing Page Template" />
     <meta name="keywords" content="bootstrap 4, premium, marketing, multipurpose" />
@@ -56,9 +56,9 @@
                     <li class="nav-item">
                         <a data-scroll href="#pricing" class="nav-link">Pricing</a>
                     </li>
-                    <li class="nav-item">
+                    {{-- <li class="nav-item">
                         <a data-scroll href="#blog" class="nav-link">Blog</a>
-                    </li>
+                    </li> --}}
                     <li class="nav-item">
                         <a data-scroll href="#contact" class="nav-link">Contact Us</a>
                     </li>
@@ -114,7 +114,7 @@
                         </div>
                         <h3 class="">Why Choose Us ?</h3>
                         <p class="text-muted mb-4">Payhankey pays you for every engagement you get on short posts, facts, quizzes and teasers. You earn from your FIRST post.</p>
-                        <a href="#" class="btn btn-outline-primary">Learn More</a>
+                        <a href="{{ url('/#pricing') }}" class="btn btn-outline-primary">Get Started</a>
                     </div>
                 </div>
                 <div class="col-lg-8 align-self-center">
@@ -122,10 +122,10 @@
                         <div class="col-md-6">
                             <div class="wc-box rounded text-center wc-box-primary p-4 mt-md-5">
                                 <div class="wc-box-icon">
-                                    <i class="mdi mdi-collage"></i>
+                                    <i class="mdi mdi-cash"></i>
                                 </div>
                                 <h5 class="fw-bold mb-2 wc-title mt-4">Earn on the Go</h5>
-                                <p class="text-muted mb-0 font-size-15 wc-subtitle">Earn up to $3 registration bonus. Make money from every post.</p>
+                                <p class="text-muted mb-0 font-size-15 wc-subtitle">Earn up to $5 signup bonus. Make money from every post.</p>
                             </div>
                             <div class="wc-box rounded text-center wc-box-primary p-4">
                                 <div class="wc-box-icon">
@@ -138,14 +138,14 @@
                         <div class="col-md-6">
                             <div class="wc-box rounded text-center wc-box-primary p-4">
                                 <div class="wc-box-icon">
-                                    <i class="mdi mdi-security"></i>
+                                    <i class="mdi mdi-chart-line"></i>
                                 </div>
-                                <h5 class="fw-bold mb-2 wc-title mt-4">Analytics Security</h5>
-                                <p class="text-muted mb-0 font-size-15 wc-subtitle">share your posts freely to increase your revenue.</p>
+                                <h5 class="fw-bold mb-2 wc-title mt-4">Analytics</h5>
+                                <p class="text-muted mb-0 font-size-15 wc-subtitle">Monitor your growth and Revenue on the go</p>
                             </div>
                             <div class="wc-box rounded text-center wc-box-primary p-4">
                                 <div class="wc-box-icon">
-                                    <i class="mdi mdi-database-lock"></i>
+                                    <i class="mdi mdi-account-cash"></i>
                                 </div>
                                 <h5 class="fw-bold mb-2 wc-title mt-4">Withdraw Anytime</h5>
                                 <p class="text-muted mb-0 font-size-15 wc-subtitle">Withdraw your earnings via Paypal or USDT.</p>
@@ -166,8 +166,9 @@
                 <div class="col-lg-6">
                     <div class="text-center mb-5">
                         <h3 class="title mb-3">Awesome Features</h3>
-                        <p class="text-muted font-size-15">Et harum quidem rerum facilis est et expedita distinctio nam
-                            libero tempore cum soluta nobis eligendi cumque.</p>
+                        <p class="text-muted font-size-15">
+                            We are removing every monetization barrier for all creators globally.
+                        </p>
                     </div>
                 </div>
             </div>
@@ -181,65 +182,40 @@
 
                 <div class="col-lg-5 offset-lg-1 align-self-center">
                     <p class="font-weight-medium text-uppercase mb-2"><i
-                            class="mdi mdi-chart-bubble h2 text-primary me-1 align-middle"></i> Creative Features</p>
-                    <h3 class="font-weight-semibold line-height-1_4 mb-4">Build <b>community</b> & <b>conversion</b>
-                        with our suite of <b>social tool</b></h3>
-                    <p class="text-muted font-size-15 mb-4">Temporibus autem quibusdam et aut officiis debitis aut rerum
-                        a necessitatibus saepe eveniet ut et voluptates repudiandae sint molestiae non recusandae
-                        itaque.</p>
-                    <p class="text-muted mb-2"><i class="icon-xs me-1" data-feather="layout"></i> Donec pede justo
+                            class="mdi mdi-chart-bubble h2 text-primary me-1 align-middle"></i> Earning Made Easy</p>
+                    <h3 class="font-weight-semibold line-height-1_4 mb-4">
+                       
+                        We pay you for your <b>Likes</b>, <b>Comments</b>
+                       and <b>Views</b></h3>
+                    <p class="text-muted font-size-15 mb-4">Payhankey allows you to make short posts, facts, quizzes and teasers. Earn signup bonus and referral bonuses when you refer your friends.</p>
+                    {{-- <p class="text-muted mb-2"><i class="icon-xs me-1" data-feather="layout"></i> Donec pede justo
                         fringilla vel nec.</p>
                     <p class="text-muted"><i class="icon-xs me-1" data-feather="life-buoy"></i> Cras ultricies mi eu
-                        turpis hendrerit fringilla.</p>
+                        turpis hendrerit fringilla.</p> --}}
                     <div class="mt-5">
-                        <a href="#" class="btn btn-primary me-2">Read More</a>
-                        <a href="#" class="btn btn-soft-primary">Buy Now</a>
+                        <a href="{{ url('/#pricing')}}" class="btn btn-primary me-2">Learn More</a>
+                        <a href="{{ url('register') }}" class="btn btn-soft-primary">Get Started</a>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="section feather-bg-img" style="background-image: url(asset/images/features-bg-img-1.png)">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-5 align-self-center">
-                    <p class="font-weight-medium text-uppercase mb-2"><i
-                            class="mdi mdi-chart-bubble h2 text-primary me-1 align-middle"></i> Creative Features</p>
-                    <h3 class="font-weight-semibold line-height-1_4 mb-4">We do the work you <b>stay focused</b> on
-                        <b>your customers</b>.
-                    </h3>
-                    <p class="text-muted font-size-15 mb-4">Temporibus autem quibusdam et aut officiis debitis aut rerum
-                        a necessitatibus saepe eveniet ut et voluptates repudiandae sint molestiae non recusandae
-                        itaque.</p>
-                    <p class="text-muted mb-2"><i class="icon-xs me-1" data-feather="server"></i> Donec pede justo
-                        fringilla vel nec.</p>
-                    <p class="text-muted"><i class="icon-xs me-1" data-feather="rss"></i> Cras ultricies mi eu turpis
-                        hendrerit fringilla.</p>
-                    <div class="mt-5">
-                        <a href="#" class="btn btn-primary me-2">Read More</a>
-                        <a href="#" class="btn btn-soft-primary">Buy Now</a>
-                    </div>
-                </div>
-                <div class="col-lg-6 offset-lg-1 align-self-center">
-                    <div class="mt-4 mt-lg-0">
-                        <img src="{{asset('asset/images/features-img-1.png')}}" alt="" class="img-fluid d-block mx-auto">
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
     <!-- Features End -->
 
     <!-- Pricing Start -->
     <section class="section bg-light" id="pricing">
         <div class="container">
             <div class="row justify-content-center">
-                <div class="col-lg-6">
+                <div class="col-lg-8">
                     <div class="text-center mb-5">
-                        <h3 class="title mb-3">Choose Your Plan</h3>
-                        <p class="text-muted font-size-15">Et harum quidem rerum facilis est et expedita distinctio nam
-                            libero tempore cum soluta nobis eligendi cumque.</p>
+                        <h3 class="title mb-3">How do you want to start?</h3>
+                        <p class="text-muted font-size-15"> Start earning daily on Payhankey 
+                            instead of waiting for many subscribers, followers or unending watch hours requirement 
+                            for monetization somewhere else.</p>
+                            <p>
+                                <strong>Get an Access Code to Get Started</strong>
+                            </p>
                     </div>
                 </div>
             </div>
@@ -250,7 +226,7 @@
                             <i class="mdi mdi-account h1"></i>
                         </div>
                         <h4 class="title mb-3">Beginner</h4>
-                        <h1 class="fw-bold mb-0"><b><sup class="h4 me-2 fw-bold">$</sup>6</b></h1>
+                        <h1 class="fw-bold mb-0"><b><sup class="h4 me-2 fw-bold">$</sup>5</b></h1>
                         <p class="text-muted font-weight-semibold">Reg. fee</p>
                         <ul class="list-unstyled pricing-item mb-4">
                             <li class="text-muted">SignUp Bonus: $1</li>
@@ -259,7 +235,7 @@
                             <li class="text-muted">every 1,000 likes: $0.4</li>
                             <li class="text-muted">every 1,000 comments: $0.5</li>
                         </ul>
-                        <a href="{{ url('access/code/beginner') }}" class="btn btn-outline-primary pr-btn">Buy Now</a>
+                        <a href="{{ url('access/code/beginner') }}" class="btn btn-outline-primary pr-btn">Get Access Code</a>
                         <div class="mt-4">
                             <div class="hero-bottom-img">
                                 <img src="{{asset('asset/images/pricing-bottom-bg.png')}}" alt="" class="img-fluid d-block mx-auto">
@@ -282,7 +258,7 @@
                             <li class="text-muted">every 1,000 likes: $0.6</li>
                             <li class="text-muted">every 1,000 comments: $0.7</li>
                         </ul>
-                        <a href="{{ url('access/code/creator') }}" class="btn btn-primary pr-btn">Buy Now</a>
+                        <a href="{{ url('access/code/creator') }}" class="btn btn-primary pr-btn">Get Access Code</a>
                         <div class="mt-4">
                             <div class="hero-bottom-img">
                                 <img src="images/pricing-bottom-bg.png" alt="" class="img-fluid d-block mx-auto">
@@ -305,7 +281,7 @@
                             <li class="text-muted">every 1,000 likes: $0.7</li>
                             <li class="text-muted">every 1,000 comments: $1</li>
                         </ul>
-                        <a href="{{ url('access/code/influencer') }}" class="btn btn-outline-primary pr-btn">Buy Now</a>
+                        <a href="{{ url('access/code/influencer') }}" class="btn btn-outline-primary pr-btn">Get Access Code</a>
                         <div class="mt-4">
                             <div class="hero-bottom-img">
                                 <img src="images/pricing-bottom-bg.png" alt="" class="img-fluid d-block mx-auto">
@@ -319,7 +295,7 @@
     <!-- Pricing End -->
 
     <!-- Blog start -->
-    <section class="section blog" id="blog">
+    {{-- <section class="section blog" id="blog">
         <div class="container">
             <div class="row justify-content-center">
                 <div class="col-lg-6">
@@ -382,7 +358,7 @@
                 </div>
             </div>
         </div>
-    </section>
+    </section> --}}
     <!-- Blog End -->
 
     <!-- Contact Us Start -->
@@ -392,64 +368,25 @@
                 <div class="col-lg-6">
                     <div class="text-center mb-5">
                         <h3 class="title mb-3">Contact Us</h3>
-                        <p class="text-muted font-size-15">Et harum quidem rerum facilis est et expedita distinctio nam
-                            libero tempore cum soluta nobis eligendi cumque.</p>
+                        <p class="text-muted font-size-15">
+                            We'll love to hear from you and learn how best to assist you monetize your posts and content. Kindly send us a mail and we will be glad to help.
+                        </p>
                     </div>
                 </div>
             </div>
             <div class="row justify-content-center">
-                <div class="col-lg-7 align-self-center">
-                    <div class="custom-form mb-5 mb-lg-0">
-                        <form method="post" name="myForm" onsubmit="return validateForm()">
-                            <p id="error-msg"></p>
-                            <div id="simple-msg"></div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="name">Name*</label>
-                                        <input name="name" id="name" type="text" class="form-control"
-                                            placeholder="Your name...">
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="email">Email Address*</label>
-                                        <input name="email" id="email" type="email" class="form-control"
-                                            placeholder="Your email...">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-lg-12">
-                                    <div class="form-group">
-                                        <label for="comments">Message*</label>
-                                        <textarea name="comments" id="comments" rows="4" class="form-control"
-                                            placeholder="Your message..."></textarea>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-sm-12">
-                                    <button type="submit" id="submit" name="send" class="btn btn-primary">Send Message
-                                        <i class="icon-size-15 ms-2 icon" data-feather="send"></i></button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-                <div class="col-lg-5 align-self-center">
+                
+                <div class="col-lg-6 align-self-center">
                     <div class="contact-detail text-muted ms-lg-5">
+
                         <p class=""><i class="icon-xs icon me-1" data-feather="mail"></i> :
-                            <span>support@website.com</span>
+                            <span>support@payhankey.com</span>
                         </p>
-                        <p class=""><i class="icon-xs icon me-1" data-feather="link"></i> : <span>www.website.com</span>
+                       
+                        <p class=""><i class="icon-xs icon me-1" data-feather="map-pin"></i> : <span>
+                            1309 Coffeen Avenue, 1200 Sheridan Wyoming, 82801</span>
                         </p>
-                        <p class=""><i class="icon-xs icon me-1" data-feather="phone-call"></i> : <span>(+001) 123 456
-                                7890</span></p>
-                        <p class=""><i class="icon-xs icon me-1" data-feather="clock"></i> : <span>9:00 AM - 6:00
-                                PM</span></p>
-                        <p class=""><i class="icon-xs icon me-1" data-feather="map-pin"></i> : <span>1644 Deer Ridge
-                                Drive Rochelle Park, NJ 07662</span></p>
+
                     </div>
                 </div>
             </div>
@@ -461,11 +398,12 @@
     <section class="footer" style="background-image: url(images/footer-bg.png)">
         <div class="container">
             <div class="row">
-                <div class="col-lg-4">
+                <div class="col-lg-12">
                     <div class="mb-5">
                         <img src="images/logo-light.png" alt="" class="" height="24">
-                        <p class="text-white-50 my-4 font-size-15">Cras ultricies mi eu turpis sit hendrerit fringilla
-                            vestibulum ante ipsum primis in faucibus ultrices posuere cubilia.</p>
+                        <p class="text-white-50 my-4 font-size-15">
+                            Payhankey allows you to make short posts, facts, quizzes and teasers. Earn signup bonus and referral bonuses when you refer your friends.
+                        </p>
                         <ul class="list-inline footer-social-icon-content">
                             <li class="list-inline-item me-4"><a href="#" class="footer-social-icon facebook"><i
                                         class="" data-feather="facebook"></i></a></li>
@@ -478,39 +416,7 @@
                         </ul>
                     </div>
                 </div>
-                <div class="col-lg-7 offset-lg-1">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <h6 class="text-white text-uppercase mb-3">About Us</h6>
-                            <ul class="list-unstyled footer-sub-menu">
-                                <li><a href="#" class="footer-link">Works</a></li>
-                                <li><a href="#" class="footer-link">Strategy</a></li>
-                                <li><a href="#" class="footer-link">Releases</a></li>
-                                <li><a href="#" class="footer-link">Press</a></li>
-                                <li><a href="#" class="footer-link">Mission</a></li>
-                            </ul>
-                        </div>
-                        <div class="col-md-4">
-                            <h6 class="text-white text-uppercase mb-3">Customers</h6>
-                            <ul class="list-unstyled footer-sub-menu">
-                                <li><a href="#" class="footer-link">Tranding</a></li>
-                                <li><a href="#" class="footer-link">Popular</a></li>
-                                <li><a href="#" class="footer-link">Customers</a></li>
-                                <li><a href="#" class="footer-link">Features</a></li>
-                            </ul>
-                        </div>
-                        <div class="col-md-4">
-                            <h6 class="text-white text-uppercase mb-3">Support</h6>
-                            <ul class="list-unstyled footer-sub-menu">
-                                <li><a href="#" class="footer-link">Developers</a></li>
-                                <li><a href="#" class="footer-link">Support</a></li>
-                                <li><a href="#" class="footer-link">Customer Service</a></li>
-                                <li><a href="#" class="footer-link">Get Started</a></li>
-                                <li><a href="#" class="footer-link">Guide</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
+                
             </div>
         </div>
     </section>
@@ -520,7 +426,7 @@
                 <div class="col-lg-12">
                     <div class="text-center">
                         <p class="text-white-50 font-size-15 mb-0">
-                            <script>document.write(new Date().getFullYear())</script> © Lezir. Design By Themesbrand
+                            <script>document.write(new Date().getFullYear())</script> © Payhankey.com
                         </p>
                     </div>
                 </div>

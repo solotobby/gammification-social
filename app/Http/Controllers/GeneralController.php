@@ -12,8 +12,32 @@ class GeneralController extends Controller
 {
     public function accessCode($level){
         if($level == 'beginner' || $level == 'creator' || $level == 'influencer' ){
-           
-            return view('get_access_code', ['level' => $level]);
+
+            if($level == 'beginner'){
+                $amountDollar = '5';
+                $amountNaira = '7,500';
+                $nairaLink = 'https://flutterwave.com/pay/ohd7jfk6wgzq';
+                $dollarLink = 'https://flutterwave.com/pay/2o3kzkdj0shm';
+            }elseif($level == 'creator'){
+                $amountDollar = '10';
+                $amountNaira = '15,000';
+                $nairaLink = 'https://flutterwave.com/pay/5lzof7tt5ykj';
+                $dollarLink = 'https://flutterwave.com/pay/elba42t3nw7m';
+            }else{
+                $amountDollar = '20';
+                $amountNaira = '30,000';
+                $nairaLink = 'https://flutterwave.com/pay/kljctf1pziei';
+                $dollarLink = 'https://flutterwave.com/pay/4dhkdzur56fz';
+            }
+
+
+            return view('get_access_code', [
+                        'level' => $level, 
+                        'amountDollar' => $amountDollar, 
+                        'amountNaira' => $amountNaira,
+                        'nairalink' => $nairaLink,
+                        'dollarlink' => $dollarLink
+                    ]);
         }else{
             return redirect('/');
         }

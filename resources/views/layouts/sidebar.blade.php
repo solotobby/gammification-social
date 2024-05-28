@@ -14,10 +14,10 @@
           <i class="nav-main-link-icon si si-bar-chart"></i>
           <span class="nav-main-link-name">Analytics</span>
       </a>
-        {{-- <a class="nav-main-link" href="{{ url('profile') }}">
-            <i class="nav-main-link-icon fa fa-table"></i>
-            <span class="nav-main-link-name">Leaderboard</span>
-        </a> --}}
+        <a class="nav-main-link" href="{{ url('settings') }}">
+            <i class="nav-main-link-icon si si-settings"></i>
+            <span class="nav-main-link-name">Settings</span>
+        </a>
       </li>
       
       {{-- <li class="nav-main-heading">Pages</li>

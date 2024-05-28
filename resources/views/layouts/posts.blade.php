@@ -163,6 +163,12 @@
                         <i class="fab fa-linkedin-in fa-2x opacity-50 me-1"></i>
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="https://pinterest.com/pin/create/button/?url={{ urlencode($url) }}" target="_blank">
+                        <i class="fab fa-pinterest-p fa-2x opacity-50 me-1"></i>
+                    </a>
+                </li>
+                
                 {{-- <button type="button" class="btn btn-primary push mb-md-0" data-bs-toggle="modal" data-bs-target="#modal-block-fromright">Block Design</button> --}}
                 {{-- <button type="button" class="btn btn-alt-primary push mb-md-0" data-bs-toggle="modal" data-bs-target="#modal-default-fromright">Default</button> --}}
             </ul>

@@ -189,7 +189,7 @@
                     <img src="{{asset('logo.png')}}" alt="" class="logo-light" height="54" />
                     {{-- <span class="text-dark">Dash</span><span class="text-primary">mix</span> --}}
                   </a>
-                  <p class="text-uppercase fw-bold fs-sm text-muted">Sign Up</p>
+                  <p class="text-uppercase fw-bold fs-sm text-muted">Register</p>
                 </div>
                 <!-- END Header -->
 
