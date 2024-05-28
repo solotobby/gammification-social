@@ -14,6 +14,8 @@
     <link href="{{asset('asset/css/bootstrap.min.css')}}" rel="stylesheet" type="text/css" />
     <link href="{{asset('asset/css/materialdesignicons.min.css')}}" rel="stylesheet" type="text/css" />
     <link href="{{asset('asset/css/style.min.css')}}" rel="stylesheet" type="text/css" />
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    
 </head>
 
 <body>
@@ -48,20 +50,20 @@
             <div class="collapse navbar-collapse" id="navbarCollapse">
                 <ul class="navbar-nav mx-auto navbar-center" id="navbar-navlist">
                     <li class="nav-item">
-                        <a data-scroll href="{{ url('/#home') }}" class="nav-link">Home</a>
+                        <a data-scroll href="{{ url('/') }}" class="nav-link">Home</a>
                     </li>
                     <li class="nav-item">
                         <a data-scroll href="#features" class="nav-link">Features</a>
                     </li>
                     <li class="nav-item">
-                        <a data-scroll href="{{ url('/#pricing') }}" class="nav-link">Pricing</a>
-                    </li>
-                    <li class="nav-item">
-                        <a data-scroll href="{{ url('/#blog') }}" class="nav-link">Blog</a>
+                        <a data-scroll href="{{ url('#pricing') }}" class="nav-link">Pricing</a>
                     </li>
                     {{-- <li class="nav-item">
-                        <a data-scroll href="{{ url('/#contact') }}#contact" class="nav-link">Contact Us</a>
+                        <a data-scroll href="{{ url('#blog') }}" class="nav-link">Blog</a>
                     </li> --}}
+                    <li class="nav-item">
+                        <a data-scroll href="{{ url('#contact') }}#contact" class="nav-link">Contact Us</a>
+                    </li>
                 </ul>
                 <ul class="navbar-nav navbar-center">
                     <li class="nav-item">
@@ -159,16 +161,20 @@
                     </h3> --}}
                     <h3 class="title mb-3">Get Access Code for {{ ucfirst($level) }}</h3>
 
-                    <p class="text-muted font-size-15 mb-4">Temporibus autem quibusdam et aut officiis debitis aut rerum
-                        a necessitatibus saepe eveniet ut et voluptates repudiandae sint molestiae non recusandae
-                        itaque.</p>
-                    <p class="text-muted mb-2"><i class="icon-xs me-1" data-feather="server"></i> Donec pede justo
-                        fringilla vel nec.</p>
-                    <p class="text-muted"><i class="icon-xs me-1" data-feather="rss"></i> Cras ultricies mi eu turpis
-                        hendrerit fringilla.</p>
+                    <p class="text-muted font-size-15 mb-4">
+                        An Access code is your unique passkey to 
+                        create an account on Payhankey. Once payment is successful and confirmed, 
+                        your access code will be sent to your registered email address.
+                    </p>
+                    
                     <div class="mt-5">
-                        <a href="#" class="btn btn-primary me-2">Get Dollar - </a>
-                        <a href="#" class="btn btn-soft-primary">Get in Naiara - </a>
+                        <a href="{{ $dollarlink }}" target="_blank" class="btn btn-primary me-2">Pay in Dollar - ${{ $amountDollar }}</a>
+                        <a href="{{ $nairalink }}" target="_blank" class="btn btn-soft-primary">Pay in Naira - &#8358;{{ $amountNaira }}</a>
+                    </div>
+                    <hr>
+                    <div class="">
+                        {{-- <p class="text-muted font-size-15 mb-4">Pay  ${{ $amountDollar }} to the USDT wallet address below</p> --}}
+                        <a href="{{ $nairalink }}" target="_blank" class="btn btn-soft-primary" data-toggle="modal" data-target="#exampleModal">Pay with USDT - ${{ $amountDollar }}</a>
                     </div>
                 </div>
                 <div class="col-lg-6 offset-lg-1 align-self-center">
@@ -176,20 +182,66 @@
                         <img src="{{asset('asset/images/features-img-1.png')}}" alt="" class="img-fluid d-block mx-auto">
                     </div>
                 </div>
+
+                    <!-- Button trigger modal -->
+
+  
+                <!-- Modal -->
+                <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Pay with USDT - ${{ $amountDollar }}</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        </div>
+                        <div class="modal-body">
+                            Copy the wallet address below to make a payment of ${{ $amountDollar }}. <b>Only USDT (TRC20) is acceptable with the Address</b>
+                            <br>
+                            
+                            <b><i>TDq4Lg25Vbr9BxZpsWc1WcuW2UmuqnnSZZ</i></b>
+
+                            <button type="button" onclick="copyToClipboard('TDq4Lg25Vbr9BxZpsWc1WcuW2UmuqnnSZZ')" class="btn btn-xs btn-primary mt-3" data-bs-dismiss="modal">Copy USDT Address</button>
+                            <br><br>
+                            Send evidence of payment to support@payhankey.com immediately after payment.
+                        </div>
+                        <div class="modal-footer">
+                        {{-- <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button> --}}
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+
+
+
             </div>
         </div>
     </section>
     <!-- Contact Us End -->
 
+    <script>
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                alert('Address copied to clipboard');
+            }, function(err) {
+                alert('Could not copy text: ', err);
+            });
+        }
+    </script>
+
+
     <!-- Footer Start -->
     <section class="footer" style="background-image: url(images/footer-bg.png)">
         <div class="container">
             <div class="row">
-                <div class="col-lg-4">
+                <div class="col-lg-12">
                     <div class="mb-5">
                         <img src="images/logo-light.png" alt="" class="" height="24">
-                        <p class="text-white-50 my-4 font-size-15">Cras ultricies mi eu turpis sit hendrerit fringilla
-                            vestibulum ante ipsum primis in faucibus ultrices posuere cubilia.</p>
+                        <p class="text-white-50 my-4 font-size-15">
+                            Payhankey allows you to make short posts, facts, quizzes and teasers. Earn signup bonus and referral bonuses when you refer your friends.
+                        </p>
                         <ul class="list-inline footer-social-icon-content">
                             <li class="list-inline-item me-4"><a href="#" class="footer-social-icon facebook"><i
                                         class="" data-feather="facebook"></i></a></li>
@@ -202,39 +254,7 @@
                         </ul>
                     </div>
                 </div>
-                <div class="col-lg-7 offset-lg-1">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <h6 class="text-white text-uppercase mb-3">About Us</h6>
-                            <ul class="list-unstyled footer-sub-menu">
-                                <li><a href="#" class="footer-link">Works</a></li>
-                                <li><a href="#" class="footer-link">Strategy</a></li>
-                                <li><a href="#" class="footer-link">Releases</a></li>
-                                <li><a href="#" class="footer-link">Press</a></li>
-                                <li><a href="#" class="footer-link">Mission</a></li>
-                            </ul>
-                        </div>
-                        <div class="col-md-4">
-                            <h6 class="text-white text-uppercase mb-3">Customers</h6>
-                            <ul class="list-unstyled footer-sub-menu">
-                                <li><a href="#" class="footer-link">Tranding</a></li>
-                                <li><a href="#" class="footer-link">Popular</a></li>
-                                <li><a href="#" class="footer-link">Customers</a></li>
-                                <li><a href="#" class="footer-link">Features</a></li>
-                            </ul>
-                        </div>
-                        <div class="col-md-4">
-                            <h6 class="text-white text-uppercase mb-3">Support</h6>
-                            <ul class="list-unstyled footer-sub-menu">
-                                <li><a href="#" class="footer-link">Developers</a></li>
-                                <li><a href="#" class="footer-link">Support</a></li>
-                                <li><a href="#" class="footer-link">Customer Service</a></li>
-                                <li><a href="#" class="footer-link">Get Started</a></li>
-                                <li><a href="#" class="footer-link">Guide</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
+                
             </div>
         </div>
     </section>
@@ -244,7 +264,7 @@
                 <div class="col-lg-12">
                     <div class="text-center">
                         <p class="text-white-50 font-size-15 mb-0">
-                            <script>document.write(new Date().getFullYear())</script> © Lezir. Design By Themesbrand
+                            <script>document.write(new Date().getFullYear())</script> © Payhankey.com
                         </p>
                     </div>
                 </div>
@@ -265,6 +285,11 @@
     <script src="{{asset('asset/js/unicons.js')}}"></script>
     <!-- Main Js -->
     <script src="{{asset('asset/js/app.js')}}"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
 
 </body>
 

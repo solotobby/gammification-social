@@ -28,7 +28,7 @@ class ShowPost extends Component
     #[Validate('required|string')]
     public $message = '';
 
-    protected $listeners = ['commentAdded' => '$refresh'];
+    protected $listeners = ['refreshComments' => 'refreshComments'];
 
     public function mount($query){
         
@@ -39,7 +39,9 @@ class ShowPost extends Component
 
         $this->postQuery = $query;
         $this->timeline = Post::with(['postComments'])->where('id', $this->postQuery)->first();
+        
         // $this->comments;
+
         // Load initial comments
         $this->loadMore();
 
@@ -49,6 +51,9 @@ class ShowPost extends Component
             $this->timeline->views += 1;
             $this->timeline->save(); 
         }
+
+        // Load initial comments
+        // $this->refreshComments();
 
     }
 
@@ -60,6 +65,7 @@ class ShowPost extends Component
 
         $this->comments = array_merge($this->comments, $additionalComments->items());
         $this->page++;
+        
     }
 
     public function toggleLike($postId){
@@ -88,17 +94,24 @@ class ShowPost extends Component
         $pst->save();
 
         $this->reset('message');
-        $this->timeline->push($pst);
-        // $this->dispatch('commentAdded');
-        // $this->redirect(url('show/'.$this->postQuery));
-        // $this->dispatch($pst->id);
+        // $this->timeline->push($pst);
+        $this->dispatch('refreshComments');
+
+    }
+
+    public function refreshComments()
+    {
+        // Load initial comments
+        $this->timeline = Post::with(['postComments'])->where('id', $this->postQuery)->first();
+       
     }
 
     public function render()
     {
-        return view('livewire.user.show-post', [
-            'post' => $this->timeline,
-            // 'comments' => $this->comments
-        ]);
+        // $comments = $this->timeline->postComments()->paginate($this->perPage, ['*'], 'page', $this->page);
+
+        return view('livewire.user.show-post');
+
+        // return view('livewire.user.show-post');
     }
 }
