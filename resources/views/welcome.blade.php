@@ -54,7 +54,7 @@
                         <a data-scroll href="#features" class="nav-link">Features</a>
                     </li>
                     <li class="nav-item">
-                        <a data-scroll href="#pricing" class="nav-link">Pricing</a>
+                        <a data-scroll href="#pricing" class="nav-link">Access Code</a>
                     </li>
                     {{-- <li class="nav-item">
                         <a data-scroll href="#blog" class="nav-link">Blog</a>
@@ -83,7 +83,7 @@
                 <div class="col-lg-6">
                     <h1 class="hero-1-title fw-bold text-shadow mb-4">Monetise your Posts</h1>
                     <div class="w-75 mb-5 mb-lg-0">
-                        <p class="text-muted mb-5 pb-5 font-size-17">The social media that pays you for every posts, views, comments and likes</p>
+                        <p class="text-muted mb-5 pb-5 font-size-17">The social media that pays you for every posts, views, comments and likes.</p>
                         <p><span class="font-size-20 me-2">🥳️</span>Join our mailing list to receive updates before creating an account.</p>
                         <div class="subscribe-form">
                             <form action="#">
@@ -227,7 +227,7 @@
                         </div>
                         <h4 class="title mb-3">Beginner</h4>
                         <h1 class="fw-bold mb-0"><b><sup class="h4 me-2 fw-bold">$</sup>5</b></h1>
-                        <p class="text-muted font-weight-semibold">Reg. fee</p>
+                        <p class="text-muted font-weight-semibold">Access fee</p>
                         <ul class="list-unstyled pricing-item mb-4">
                             <li class="text-muted">SignUp Bonus: $1</li>
                             <li class="text-muted">Referral Bonus: $1</li>
@@ -250,7 +250,7 @@
                         </div>
                         <h4 class="title mb-3">Creator(Popular)</h4>
                         <h1 class="fw-bold mb-0"><b><sup class="h4 me-2 fw-bold">$</sup>10</b></h1>
-                        <p class="text-muted font-weight-semibold">Reg. fee</p>
+                        <p class="text-muted font-weight-semibold">Access fee</p>
                         <ul class="list-unstyled pricing-item mb-4">
                             <li class="text-muted">SignUp Bonus: $2</li>
                             <li class="text-muted">Referral Bonus: $3</li>
@@ -273,7 +273,7 @@
                         </div>
                         <h4 class="title mb-3">Influencer</h4>
                         <h1 class="fw-bold mb-0"><b><sup class="h4 me-2 fw-bold">$</sup>20</b></h1>
-                        <p class="text-muted font-weight-semibold">Reg. fee</p>
+                        <p class="text-muted font-weight-semibold">Access fee</p>
                         <ul class="list-unstyled pricing-item mb-4">
                             <li class="text-muted">SignUp Bonus: $5</li>
                             <li class="text-muted">Referral Bonus: $5</li>
