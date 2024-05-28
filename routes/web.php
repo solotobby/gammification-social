@@ -36,7 +36,7 @@ Route::group(['namespace' => 'auth'], function () {
     Route::get('success', [\App\Http\Controllers\GeneralController::class, 'success']);
     Route::get('error', [\App\Http\Controllers\GeneralController::class, 'error']);
 
-    // Route::get('post/{id}', [\App\Http\Controllers\GeneralController::class, 'showPost']);
+    Route::get('post/{id}', [\App\Http\Controllers\GeneralController::class, 'showPost']);
     Route::get('/post/{id}/comments', [\App\Http\Controllers\GeneralController::class, 'loadMoreComments'])->name('post.comments.load_more');
 
 
