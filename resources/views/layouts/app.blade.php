@@ -4,11 +4,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
-    <title>Payhankey</title>
+    <title>Payhankey | Monetize your posts, comments and views to earn daily</title>
 
-    <meta name="description" content="Dashmix - Bootstrap 5 Admin Template &amp; UI Framework created by pixelcave">
-    <meta name="author" content="pixelcave">
-    <meta name="robots" content="index, follow">
+    <meta name="description" content=" Monetize your posts, comments and views to earn daily">
+    <meta name="author" content="Payhankey">
+    <meta name="robots" content="index, follow, money, post, posts, comments, comment, views, view">
 
     <!-- Open Graph Meta -->
     <meta property="og:title" content="Dashmix - Bootstrap 5 Admin Template &amp; UI Framework">
@@ -31,7 +31,7 @@
     <link rel="stylesheet" href="{{ asset('src/assets/js/plugins/magnific-popup/magnific-popup.css') }}">
 
     <!-- Dashmix framework -->
-    <link rel="stylesheet" id="css-main" href="{{ asset('src/assets/css/dashmix.min.css') }}">
+    <link rel="stylesheet" id="css-main" href="{{ asset('src/assets/css/dashmix.css') }}">
 
     @vite([
       // 'resources/sass/app.scss', 
@@ -571,8 +571,9 @@
               <span class="smini-visible">
                 P<span class="opacity-75">H</span>
               </span>
-              <span class="smini-hidden">
-                <img src="{{asset('logo.png')}}" alt="" class="logo-light" height="24" />
+              <span class="smini-hidden"> 
+                
+                <img src="{{asset('logo.png')}}" alt="" class="logo-light" height="34" />
                 {{-- Pay<span class="opacity-75">Hankey</span> --}}
               </span>
             </a>

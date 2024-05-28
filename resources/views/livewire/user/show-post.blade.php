@@ -34,7 +34,7 @@
                 <div class="block-content">
                     {{-- <a href="#" wire:click="show({{$timeline->id}})"> --}}
                         <p style="color: dimgrey">
-                            {{ $timeline->content }}
+                            {!! $timeline->content !!}
                         </p>
                     {{-- </a> --}}
                 <hr>
@@ -67,7 +67,7 @@
                     </li>
                     <li class="nav-item">
                     <a class="nav-link" href="javascript:void(0)">
-                        <i class="fa fa-eye opacity-50 me-1"></i> {{$timeline->views}}
+                        <i class="fa fa-eye opacity-50 me-1"></i> {{ $timeline->views }}
                     </a>
                     </li>
                     <li class="nav-item">

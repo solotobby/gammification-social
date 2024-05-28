@@ -84,9 +84,7 @@
                     <h1 class="hero-1-title fw-bold text-shadow mb-4">Monetise your Posts</h1>
                     <div class="w-75 mb-5 mb-lg-0">
                         <p class="text-muted mb-5 pb-5 font-size-17">The social media that pays you for every posts, views, comments and likes</p>
-                        <p><span class="font-size-20 me-2">🥳️</span>Nemo enim ipsam voluptatem quia
-                            voluptas
-                            sit aspernatur that is fugit.</p>
+                        <p><span class="font-size-20 me-2">🥳️</span>Join our mailing list to receive updates before creating an account.</p>
                         <div class="subscribe-form">
                             <form action="#">
                                 <input type="text" placeholder="Enter email...">

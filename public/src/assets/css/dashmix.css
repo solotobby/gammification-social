@@ -18927,7 +18927,7 @@ button.bg-header-light:focus {
 }
 
 .bg-header-dark {
-  background-color: #055bbb !important;
+  background-color: #fff !important;
 }
 
 a.bg-header-dark:hover, a.bg-header-dark:focus,

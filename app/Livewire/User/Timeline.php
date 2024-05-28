@@ -39,25 +39,25 @@ class Timeline extends Component
 
     
 
-    public function like($id){
+    // public function like($id){
         
-        $post =  Post::where('unicode', $id)->first();
-        $post->likes += 1;
-        $post->save(); 
-        UserLike::create(['user_id' => auth()->user()->id, 'post_id' => $post->id]);
-        $this->dispatch('user.timeline');
+    //     $post =  Post::where('unicode', $id)->first();
+    //     $post->likes += 1;
+    //     $post->save(); 
+    //     UserLike::create(['user_id' => auth()->user()->id, 'post_id' => $post->id]);
+    //     $this->dispatch('user.timeline');
         
-     }
+    //  }
  
-     public function dislike($id){
+    //  public function dislike($id){
      
-         $post =  Post::where('unicode', $id)->first();
-         $post->likes -= 1;
-         $post->save(); 
-         UserLike::where(['user_id' => auth()->user()->id, 'post_id' => $post->id])->delete();
-         $this->dispatch('user.timeline');
+    //      $post =  Post::where('unicode', $id)->first();
+    //      $post->likes -= 1;
+    //      $post->save(); 
+    //      UserLike::where(['user_id' => auth()->user()->id, 'post_id' => $post->id])->delete();
+    //      $this->dispatch('user.timeline');
          
-     }
+    //  }
 
      public function toggleLike($postId){
 
@@ -79,7 +79,9 @@ class Timeline extends Component
 
     public function post(){
 
-        $timelines = Post::create(['user_id' => auth()->user()->id, 'content' => $this->content, 'unicode' => time()]);
+        // dd($this->convertUrlsToLinks($this->content));
+
+        $timelines = Post::create(['user_id' => auth()->user()->id, 'content' => $this->convertUrlsToLinks($this->content), 'unicode' => time()]);
         $this->reset('content');
 
         $this->timelines->push($timelines);
@@ -88,6 +90,31 @@ class Timeline extends Component
 
         session()->flash('success', 'Posted Created Successfully');
 
+    }
+
+    private function convertUrlsToLinks($text)
+    {
+
+        // $pattern = '/\b(?:https?:\/\/|www\.|[\w-]+\.[\w-]+\.[\w-]+)\S*\b/i';
+        // $replacement = '<a href="$0" target="_blank" rel="noopener noreferrer">$0</a>';
+        // $text = preg_replace($pattern, $replacement, $text);
+
+        // // Add "http://" prefix if missing
+        // return preg_replace_callback(
+        //     '/<a href="([^"]+)"/i',
+        //     function ($matches) {
+        //         $url = $matches[1];
+        //         if (!preg_match('/^https?:\/\//i', $url)) {
+        //             $url = 'http://' . $url;
+        //         }
+        //         return '<a href="' . $url . '"';
+        //     },
+        //     $text
+        // );
+
+        $pattern = '/\b(?:https?:\/\/|www\.)\S+\b/';
+        $replacement = '<a href="$0" target="_blank" rel="noopener noreferrer">$0</a>';
+        return preg_replace($pattern, $replacement, $text);
     }
 
     // public function comment(){
