@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('access_codes', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->uuid('level_id');
             $table->string('tx_id');
             $table->string('name');
             $table->string('email');

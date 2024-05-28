@@ -10,5 +10,5 @@ class AccessCode extends Model
 {
     use HasFactory, UuidTrait;
 
-    protected $fillable = ['tx_id', 'name', 'email', 'code', 'amount', 'is_active'];
+    protected $fillable = ['tx_id', 'name', 'email', 'code', 'amount', 'is_active', 'level_id'];
 }
