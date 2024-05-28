@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AccessCode;
+use App\Models\Level;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -42,6 +43,32 @@ class GeneralController extends Controller
             return redirect('/');
         }
        
+    }
+
+    public function validateCode(){
+        $level = Level::all();
+        return view('send_access_code', ['levels' => $level]);
+    }
+
+    public function processValidateCode(Request $request){
+        // return $request;
+
+        // return [$request->validationCode, env('LOG_CHANNEL')];
+
+        if($request->validationCode == 'LONZETY'){
+            $code = $this->generateCode(7);
+            //  return [$name, $email, $this->generateCode(7)];
+            $ref = time();
+            $chekIfNotRedeemed = AccessCode::where('email', $request->email)->where('tx_id', $ref)->where('is_active', true)->first();
+            if($chekIfNotRedeemed){
+                return redirect('error');
+            }
+            AccessCode::create(['tx_id' => $ref,'name' =>$request->name, 'email' => $request->email, 'amount' => '6', 'code' => $code]);
+            return redirect('success');
+
+        }else{
+            return 'no show';
+        }
     }
 
     public function processAccessCode(Request $request){

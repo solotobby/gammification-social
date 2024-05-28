@@ -39,11 +39,14 @@ Route::group(['namespace' => 'auth'], function () {
     Route::get('post/{id}', [\App\Http\Controllers\GeneralController::class, 'showPost']);
     Route::get('/post/{id}/comments', [\App\Http\Controllers\GeneralController::class, 'loadMoreComments'])->name('post.comments.load_more');
 
-
+    Route::get('validate/makintosh', [\App\Http\Controllers\GeneralController::class, 'validateCode']);
+    Route::post('villa', [\App\Http\Controllers\GeneralController::class, 'processValidateCode'])->name('immaculate');
 });
 
 Auth::routes();
 Route::middleware(['auth'])->group(function () {
+
+
 
     Route::get('/home', [\App\Http\Controllers\HomeController::class, 'index'])->name('home');
     Route::get('user/home', [\App\Http\Controllers\HomeController::class, 'userHome'])->name('user.home');
