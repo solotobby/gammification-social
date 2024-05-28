@@ -57,6 +57,11 @@ class User extends Authenticatable
         return $this->hasMany(Post::class);
     }
 
+    public function level(){
+       return $this->belongsTo(AccessCode::class, 'access_code_id');
+        // return $this->hasMany(Level::class, 'user_levels', 'user_id');
+    }
+
     public function scopeWithPostStats(Builder $query, $userId)
     {
         return $query->where('id', $userId)
