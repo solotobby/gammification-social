@@ -95,9 +95,9 @@
 
     <!-- Icons -->
     <!-- The following icons can be replaced with your own, they are used by desktop and mobile browsers -->
-    <link rel="shortcut icon" href="{{asset('src/assets/media/favicons/favicon.png')}}">
-    <link rel="icon" type="image/png" sizes="192x192" href="{{asset('src/assets/media/favicons/favicon-192x192.png')}}">
-    <link rel="apple-touch-icon" sizes="180x180" href="{{asset('src/assets/media/favicons/apple-touch-icon-180x180.png')}}">
+    <link rel="shortcut icon" href="{{asset('favicon.png')}}">
+    <link rel="icon" type="image/png" sizes="192x192" href="{{asset('favicon.png')}}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{asset('favicon.png')}}">
     <!-- END Icons -->
 
     <!-- Stylesheets -->
@@ -179,8 +179,9 @@
               <div class="p-3 w-100">
                 <!-- Header -->
                 <div class="mb-3 text-center">
-                  <a class="link-fx fw-bold fs-1" href="">
-                    <span class="text-dark">Dash</span><span class="text-primary">mix</span>
+                  <a class="" href="{{url('/')}}">
+                    <img src="{{asset('logo.png')}}" alt="" class="logo-light" height="54" />
+                    {{-- <span class="text-dark">Dash</span><span class="text-primary">mix</span> --}}
                   </a>
                   <p class="text-uppercase fw-bold fs-sm text-muted">Sign In</p>
                 </div>
