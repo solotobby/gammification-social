@@ -212,3 +212,17 @@
     no posts
 @endforelse
 
+{{-- @if($timelines->hasMorePages())
+        <button wire:click="loadMore">Load More</button>
+    @endif
+
+    <script>
+        document.addEventListener('livewire:load', function () {
+            Livewire.on('user.timeline', function () {
+                // Scroll to top or do something after post creation
+            });
+        });
+    </script> --}}
+
+
+
