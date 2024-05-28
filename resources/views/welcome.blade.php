@@ -9,7 +9,7 @@
     <meta name="keywords" content="bootstrap 4, premium, marketing, multipurpose" />
     <meta content="Themesbrand" name="author" />
     <!-- favicon -->
-    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="shortcut icon" href="{{asset('favicon.png')}}">
     <!-- css -->
     <link href="{{asset('asset/css/bootstrap.min.css')}}" rel="stylesheet" type="text/css" />
     <link href="{{asset('asset/css/materialdesignicons.min.css')}}" rel="stylesheet" type="text/css" />
@@ -38,8 +38,8 @@
         <div class="container">
             <!-- LOGO -->
             <a class="navbar-brand logo" href="{{ url('/') }}">
-                <img src="{{asset('logo.jpeg')}}" alt="" class="logo-dark" height="34" />
-                <img src="{{asset('logo.jpeg')}}" alt="" class="logo-light" height="34" />
+                <img src="{{asset('logo.png')}}" alt="" class="logo-dark" height="34" />
+                <img src="{{asset('logo.png')}}" alt="" class="logo-light" height="34" />
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
                 aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
