@@ -85,18 +85,18 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
-    <title>Register</title>
+    <title>Sign Up</title>
 
-    <meta name="description" content="Dashmix - Bootstrap 5 Admin Template &amp; UI Framework created by pixelcave">
-    <meta name="author" content="pixelcave">
+    <meta name="description" content="Payhankey | Monetize your posts, comments and views to earn daily">
+    <meta name="author" content="payhankey">
     <meta name="robots" content="index, follow">
 
     <!-- Open Graph Meta -->
-    <meta property="og:title" content="Dashmix - Bootstrap 5 Admin Template &amp; UI Framework">
-    <meta property="og:site_name" content="Dashmix">
-    <meta property="og:description" content="Dashmix - Bootstrap 5 Admin Template &amp; UI Framework created by pixelcave">
+    <meta property="og:title" content="Payhankey | Monetize your posts, comments and views to earn daily">
+    <meta property="og:site_name" content="payhankey">
+    <meta property="og:description" content="Payhankey | Monetize your posts, comments and views to earn daily">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="">
+    <meta property="og:url" content="https://payhankey.com">
     <meta property="og:image" content="">
 
     <!-- Icons -->
@@ -189,7 +189,7 @@
                     <img src="{{asset('logo.png')}}" alt="" class="logo-light" height="54" />
                     {{-- <span class="text-dark">Dash</span><span class="text-primary">mix</span> --}}
                   </a>
-                  <p class="text-uppercase fw-bold fs-sm text-muted">Register</p>
+                  <p class="text-uppercase fw-bold fs-sm text-muted">Sign Up</p>
                 </div>
                 <!-- END Header -->
 
@@ -243,7 +243,7 @@
                         </div>
                       </div>
                       <div class="mb-4">
-                        <small><a href="{{ url('access/code') }}" target="_blank" alt="How to get Access code">Get Access Code</a></small>
+                        {{-- <small><a href="{{ url('access/code') }}" target="_blank" alt="How to get Access code">Get Access Code</a></small> --}}
                         <input type="text" class="form-control @error('access_code') is-invalid @enderror form-control-lg form-control-alt" id="access_code" name="access_code" placeholder="Access Code" required>
                           @error('password')
                             <span class="invalid-feedback" role="alert">
@@ -279,7 +279,7 @@
             <div class="hero-static col-md-6 d-none d-md-flex align-items-md-center justify-content-md-center text-md-center">
               <div class="p-3">
                 <p class="display-4 fw-bold text-white mb-3">
-                  Welcome to the future
+                  Monetize your Posts
                 </p>
                 <p class="fs-lg fw-semibold text-white-75 mb-0">
                   Copyright &copy; <span data-toggle="year-copy"></span>

@@ -79,18 +79,18 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
-    <title>Login</title>
+    <title>Sign In</title>
 
-    <meta name="description" content="Dashmix - Bootstrap 5 Admin Template &amp; UI Framework created by pixelcave">
-    <meta name="author" content="pixelcave">
+    <meta name="description" content="Payhankey | Monetize your posts, comments and views to earn daily">
+    <meta name="author" content="Payhankey">
     <meta name="robots" content="index, follow">
 
     <!-- Open Graph Meta -->
-    <meta property="og:title" content="Dashmix - Bootstrap 5 Admin Template &amp; UI Framework">
-    <meta property="og:site_name" content="Dashmix">
-    <meta property="og:description" content="Dashmix - Bootstrap 5 Admin Template &amp; UI Framework created by pixelcave">
+    <meta property="og:title" content="Payhankey | Monetize your posts, comments and views to earn daily">
+    <meta property="og:site_name" content="payhankey">
+    <meta property="og:description" content="Payhankey | Monetize your posts, comments and views to earn daily">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="">
+    <meta property="og:url" content="https://payhankey.com">
     <meta property="og:image" content="">
 
     <!-- Icons -->
@@ -183,7 +183,7 @@
                     <img src="{{asset('logo.png')}}" alt="" class="logo-light" height="54" />
                     {{-- <span class="text-dark">Dash</span><span class="text-primary">mix</span> --}}
                   </a>
-                  <p class="text-uppercase fw-bold fs-sm text-muted">Login</p>
+                  <p class="text-uppercase fw-bold fs-sm text-muted">Sign In</p>
                 </div>
                 <!-- END Header -->
 
@@ -208,10 +208,10 @@
                           <i class="fa fa-fw fa-sign-in-alt opacity-50 me-1"></i> Sign In
                         </button>
                         <p class="mt-3 mb-0 d-lg-flex justify-content-lg-between">
-                            Not Registered?
-                          {{-- <a class="btn btn-sm btn-alt-secondary d-block d-lg-inline-block mb-1" href="op_auth_reminder.html">
+                            {{-- Not Registered? --}}
+                          <a class="btn btn-sm btn-alt-secondary d-block d-lg-inline-block mb-1" href="{{ route('password.request') }}">
                             <i class="fa fa-exclamation-triangle opacity-50 me-1"></i> Forgot password
-                          </a> --}}
+                          </a>
                           <a class="btn btn-sm btn-alt-secondary d-block d-lg-inline-block mb-1" href="{{ url('register') }}">
                             <i class="fa fa-plus opacity-50 me-1"></i> Sign Up Here
                           </a>
@@ -229,7 +229,7 @@
             <div class="hero-static col-md-6 d-none d-md-flex align-items-md-center justify-content-md-center text-md-center">
               <div class="p-3">
                 <p class="display-4 fw-bold text-white mb-3">
-                  Welcome to the future
+                  Monetize your Posts
                 </p>
                 <p class="fs-lg fw-semibold text-white-75 mb-0">
                   Copyright &copy; <span data-toggle="year-copy"></span>
