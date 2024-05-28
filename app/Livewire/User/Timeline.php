@@ -79,9 +79,10 @@ class Timeline extends Component
 
     public function post(){
 
-        // dd($this->convertUrlsToLinks($this->content));
+        $content = $this->convertUrlsToLinks($this->content);
+        // $content = nl2br(e($content));
 
-        $timelines = Post::create(['user_id' => auth()->user()->id, 'content' => $this->convertUrlsToLinks($this->content), 'unicode' => time()]);
+        $timelines = Post::create(['user_id' => auth()->user()->id, 'content' => $content, 'unicode' => time()]);
         $this->reset('content');
 
         $this->timelines->push($timelines);
@@ -95,23 +96,7 @@ class Timeline extends Component
     private function convertUrlsToLinks($text)
     {
 
-        // $pattern = '/\b(?:https?:\/\/|www\.|[\w-]+\.[\w-]+\.[\w-]+)\S*\b/i';
-        // $replacement = '<a href="$0" target="_blank" rel="noopener noreferrer">$0</a>';
-        // $text = preg_replace($pattern, $replacement, $text);
-
-        // // Add "http://" prefix if missing
-        // return preg_replace_callback(
-        //     '/<a href="([^"]+)"/i',
-        //     function ($matches) {
-        //         $url = $matches[1];
-        //         if (!preg_match('/^https?:\/\//i', $url)) {
-        //             $url = 'http://' . $url;
-        //         }
-        //         return '<a href="' . $url . '"';
-        //     },
-        //     $text
-        // );
-
+        
         $pattern = '/\b(?:https?:\/\/|www\.)\S+\b/';
         $replacement = '<a href="$0" target="_blank" rel="noopener noreferrer">$0</a>';
         return preg_replace($pattern, $replacement, $text);
