@@ -56,7 +56,7 @@
                         <a data-scroll href="#features" class="nav-link">Features</a>
                     </li>
                     <li class="nav-item">
-                        <a data-scroll href="{{ url('#pricing') }}" class="nav-link">Pricing</a>
+                        <a data-scroll href="{{ url('#pricing') }}" class="nav-link">Access Code</a>
                     </li>
                     {{-- <li class="nav-item">
                         <a data-scroll href="{{ url('#blog') }}" class="nav-link">Blog</a>
