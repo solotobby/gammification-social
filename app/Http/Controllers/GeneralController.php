@@ -51,19 +51,22 @@ class GeneralController extends Controller
     }
 
     public function processValidateCode(Request $request){
-        // return $request;
+        
 
         // return [$request->validationCode, env('LOG_CHANNEL')];
 
         if($request->validationCode == 'LONZETY'){
             $code = $this->generateCode(7);
-            //  return [$name, $email, $this->generateCode(7)];
+           
             $ref = time();
+             $level = Level::where('id', $request->level)->first();
             $chekIfNotRedeemed = AccessCode::where('email', $request->email)->where('tx_id', $ref)->where('is_active', true)->first();
             if($chekIfNotRedeemed){
                 return redirect('error');
             }
-            AccessCode::create(['tx_id' => $ref,'name' =>$request->name, 'email' => $request->email, 'amount' => '6', 'code' => $code]);
+
+            AccessCode::create(['tx_id' => $ref,'name' =>$level->name, 'email' => $request->email, 'amount' => $level->amount, 'code' => $code, 'level_id' => $level->id]);
+            
             return redirect('success');
 
         }else{

@@ -651,7 +651,7 @@
               </button>
               <div class="dropdown-menu dropdown-menu-end p-0" aria-labelledby="page-header-user-dropdown">
                 <div class="bg-primary-dark rounded-top fw-semibold text-white text-center p-3">
-                  {{ auth()->user()->name }} - Level 1
+                  {{ auth()->user()->level->name }}
                 </div>
                 <div class="p-2">
                   <a class="dropdown-item" href="{{ url('profile/'.auth()->user()->id) }}">

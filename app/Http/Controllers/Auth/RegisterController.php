@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AccessCode;
 use App\Models\LoginPoint;
 use App\Models\User;
+use App\Models\UserLevel;
 use App\Models\Wallet;
 use Illuminate\Support\Str;
 use Illuminate\Foundation\Auth\RegistersUsers;
@@ -80,9 +81,12 @@ class RegisterController extends Controller
              'access_code_id' => $accessCode->id
          ]);
        
-     
+         UserLevel::create(['user_id' => $user->id, 'level_id' => $accessCode->level_id]);
+         
          $roleId = Role::where('name', 'user')->first()->id;
          $user->assignRole($roleId);
+
+
          
          Wallet::create(['user_id' => $user->id, 'balance' => '0.00', 'currency' => 'USD', 'level' => 'Freemuim']);
         
