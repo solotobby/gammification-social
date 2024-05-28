@@ -66,7 +66,7 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#modal-block-fromright">
+                <a class="nav-link" href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#modal-block-fromright-{{ $timeline->id }}">
                     <i class="fa fa-share opacity-50 me-1"></i>
                 </a>
             </li>
@@ -108,7 +108,7 @@
     </div>
 
  <!-- From Right Block Modal -->
- <div class="modal fade" id="modal-block-fromright" tabindex="-1" role="dialog" aria-labelledby="modal-block-fromright" aria-hidden="true">
+ <div class="modal fade" id="modal-block-fromright-{{ $timeline->id }}" tabindex="-1" role="dialog" aria-labelledby="modal-block-fromright" aria-hidden="true">
     <div class="modal-dialog modal-dialog-fromright" role="document">
       <div class="modal-content">
         <div class="block block-rounded block-themed block-transparent mb-0">
@@ -126,6 +126,8 @@
             </p>
             <p>
                 {{ url('post/'.$timeline->id) }}
+
+               
             </p>
 
             <?php 
@@ -133,6 +135,9 @@
             $url = url('post/'.$timeline->id);
             ?>
 
+            
+            <button type="button" onclick="copyToClipboard('{{ $url }}')" class="btn btn-sm btn-alt-secondary" data-bs-dismiss="modal">Copy Link</button>
+            <hr>
             <ul class="nav nav-pills fs-sm push">
                 <li class="nav-item me-1">
     
@@ -193,8 +198,17 @@
         </div>
     </div> --}}
       <!-- END From Right Default Modal -->
-
+      <script>
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                alert('Link copied to clipboard');
+            }, function(err) {
+                alert('Could not copy text: ', err);
+            });
+        }
+    </script>
 
 @empty
     no posts
 @endforelse
+
