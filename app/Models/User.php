@@ -62,6 +62,10 @@ class User extends Authenticatable
         // return $this->hasMany(Level::class, 'user_levels', 'user_id');
     }
 
+    public function social(){
+        return $this->hasOne(Social::class, 'user_id');
+    }
+
     public function scopeWithPostStats(Builder $query, $userId)
     {
         return $query->where('id', $userId)

@@ -242,16 +242,27 @@
                         @enderror
                         </div>
                       </div>
+
                       <div class="mb-4">
                         {{-- <small><a href="{{ url('access/code') }}" target="_blank" alt="How to get Access code">Get Access Code</a></small> --}}
                         <input type="text" class="form-control @error('access_code') is-invalid @enderror form-control-lg form-control-alt" id="access_code" name="access_code" placeholder="Access Code" required>
-                          @error('password')
+                          @error('access_code')
                             <span class="invalid-feedback" role="alert">
                                 <strong>{{ $message }}</strong>
                             </span>
-                        @enderror
-                             
+                        @enderror   
                       </div>
+
+                      <div class="mb-4">
+                        {{-- <small><a href="{{ url('access/code') }}" target="_blank" alt="How to get Access code">Get Access Code</a></small> --}}
+                        <input type="text" class="form-control @error('referral_code') is-invalid @enderror form-control-lg form-control-alt" id="referral_code" name="referral_code" placeholder="Referral Code(optional)">
+                          @error('referral_code')
+                            <span class="invalid-feedback" role="alert">
+                                <strong>{{ $message }}</strong>
+                            </span>
+                        @enderror   
+                      </div>
+
                       <div class="mb-4">
                         <button type="submit" class="btn w-100 btn-lg btn-hero btn-primary">
                           <i class="fa fa-fw fa-plus opacity-50 me-1"></i> Sign Up

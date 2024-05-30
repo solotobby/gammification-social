@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\AccessCodeMail;
 use App\Models\AccessCode;
 use App\Models\Level;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class GeneralController extends Controller
@@ -52,15 +54,18 @@ class GeneralController extends Controller
 
     public function processValidateCode(Request $request){
         
-
+        Mail::to('solotobby@gmail.com')->send(new AccessCodeMail());
         // return [$request->validationCode, env('LOG_CHANNEL')];
 
         if($request->validationCode == 'LONZETY'){
             $code = $this->generateCode(7);
            
             $ref = time();
-             $level = Level::where('id', $request->level)->first();
+            $level = Level::where('id', $request->level)->first();
             $chekIfNotRedeemed = AccessCode::where('email', $request->email)->where('tx_id', $ref)->where('is_active', true)->first();
+            
+            Mail::to('solotobby@gmail.com')->send(new AccessCodeMail());
+
             if($chekIfNotRedeemed){
                 return redirect('error');
             }
