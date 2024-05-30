@@ -11,14 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('wallets', function (Blueprint $table) {
+        Schema::create('transactions', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('user_id')->string();
-            $table->string('balance');
-            $table->string('promoter_balance');
-            $table->string('referral_balance');
+            $table->uuid('user_id');
+            $table->string('ref');
+            $table->string('amount');
             $table->string('currency');
-            $table->string('level')->nullable();
+            $table->string('status');
+            $table->string('type');
+            $table->string('action');
+            $table->string('description');
             $table->timestamps();
         });
     }
@@ -28,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('wallets');
+        Schema::dropIfExists('transactions');
     }
 };

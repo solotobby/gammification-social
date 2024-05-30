@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\AccessCode;
 use App\Models\LoginPoint;
+use App\Models\Referral;
+use App\Models\Transaction;
 use App\Models\User;
 use App\Models\UserLevel;
 use App\Models\Wallet;
@@ -57,7 +59,8 @@ class RegisterController extends Controller
              'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
              // 'password' => ['required', 'string', 'min:8', 'confirmed'],
              'password' => ['required', 'string', 'min:8'],
-             'access_code' => ['required', 'string']
+             'access_code' => ['required', 'string'],
+             'referral_code' => ['sometimes']
          ]);
  
          // return $validated;
@@ -82,14 +85,46 @@ class RegisterController extends Controller
          ]);
        
          UserLevel::create(['user_id' => $user->id, 'level_id' => $accessCode->level_id]);
-         
+
          $roleId = Role::where('name', 'user')->first()->id;
          $user->assignRole($roleId);
 
-
-         
-         Wallet::create(['user_id' => $user->id, 'balance' => '0.00', 'currency' => 'USD', 'level' => 'Freemuim']);
+         Wallet::create(['user_id' => $user->id, 'balance' => $accessCode->level->reg_bonus, 'promoter_balance' => '0.00', 'referral_balance' => '0.00', 'currency' => 'USD', 'level' => $accessCode->level->name]);
         
+         Transaction::create([
+            'user_id' => $user->id,
+            'ref' => time(),
+            'amount' => $accessCode->level->reg_bonus,
+            'currency' => 'USD',
+            'status' => 'successful',
+            'type' => 'reg_bonus',
+            'action' => 'Credit',
+            'description' => 'Reg Bonus for '.$user->name
+         ]);
+
+         if(!empty($validated['referral_code'])){
+            $validateReferralCode = User::where('referral_code', $validated['referral_code'])->first();
+            if($validateReferralCode){
+                Referral::create(['user_id' => $user->id, 'referral_id' => $validateReferralCode->id]);
+            }
+
+            $refWallet = Wallet::where('user_id', $validateReferralCode->id)->first();
+            $refWallet->referral_balance += $accessCode->level->ref_bonus;
+            $refWallet->save();
+
+            Transaction::create([
+                'user_id' => $validateReferralCode->id,
+                'ref' => time(),
+                'amount' => $accessCode->level->ref_bonus,
+                'currency' => 'USD',
+                'status' => 'successful',
+                'type' => 'ref_bonus',
+                'action' => 'Credit',
+                'description' => 'Referral Bonus from '.$user->name
+             ]);
+
+         }
+
          if ($user) {
              Auth::login($user);
              return redirect('home');

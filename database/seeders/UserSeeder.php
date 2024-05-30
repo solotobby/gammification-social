@@ -28,7 +28,7 @@ class UserSeeder extends Seeder
             $reg = User::create($user);
             $reg->assignRole($roleId);
 
-            Wallet::create(['user_id' => $reg->id, 'balance' => '0.00', 'currency' => 'USD']);
+            Wallet::create(['user_id' => $reg->id, 'balance' => '0.00', 'promoter_balance' => '0.00', 'referral_balance' => '0.00', 'currency' => 'USD']);
 
         }
     }

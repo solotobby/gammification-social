@@ -6,9 +6,9 @@ use App\Traits\UuidTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Wallet extends Model
+class Social extends Model
 {
     use HasFactory, UuidTrait;
 
-    protected $fillable = ['user_id', 'promoter_balance', 'referral_balance', 'balance', 'currency', 'level'];
+    protected $fillable = ['user_id', 'facebook', 'twitter', 'instagram', 'pinterest', 'tiktok', 'linkedin'];
 }

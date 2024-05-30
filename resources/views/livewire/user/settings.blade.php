@@ -23,7 +23,7 @@
            
         </div>
     </div>
-  </div>
+    </div>
 <!-- END Hero -->
 
 
@@ -36,12 +36,12 @@
           <span class="d-none d-sm-inline">Profile</span>
         </button>
       </li>
-      {{-- <li class="nav-item">
+      <li class="nav-item">
         <button class="nav-link space-x-1" id="account-password-tab" data-bs-toggle="tab" data-bs-target="#account-password" role="tab" aria-controls="account-password" aria-selected="false">
           <i class="fa fa-asterisk d-sm-none"></i>
-          <span class="d-none d-sm-inline">Password</span>
+          <span class="d-none d-sm-inline">Socials</span>
         </button>
-      </li> --}}
+      </li>
       {{-- <li class="nav-item">
         <button class="nav-link space-x-1" id="account-connections-tab" data-bs-toggle="tab" data-bs-target="#account-connections" role="tab" aria-controls="account-connections" aria-selected="false">
           <i class="fa fa-share-alt d-sm-none"></i>
@@ -71,7 +71,7 @@
               </div>
               <div class="mb-4">
                 <label class="form-label" for="dm-profile-edit-name">Name</label>
-                <input type="text" class="form-control" id="dm-profile-edit-name" name="dm-profile-edit-name" placeholder="Enter your name.." value="{{  auth()->user()->name }}" readonly>
+                <input type="text" class="form-control" id="dm-profile-edit-name" name="dm-profile-edit-name" placeholder="Enter your name.." value="{{ auth()->user()->name }}" readonly>
               </div>
               <div class="mb-4">
                 <label class="form-label" for="dm-profile-edit-email">Email Address</label>
@@ -79,54 +79,79 @@
               </div>
               <div class="mb-4">
                 <label class="form-label" for="dm-profile-edit-job-title">Level</label>
-                <input type="text" class="form-control" id="dm-profile-edit-job-title" name="dm-profile-edit-job-title" placeholder="Add your job title.." value="Level 1" readonly>
+                <input type="text" class="form-control" id="dm-profile-edit-job-title" name="dm-profile-edit-job-title" placeholder="Add your job title.." value="{{ auth()->user()->level->name }}" readonly>
               </div>
               <div class="mb-4">
                 <label class="form-label" for="dm-profile-edit-company">Activation Code</label>
-                <input type="text" class="form-control" id="dm-profile-edit-company" name="dm-profile-edit-company" value="@ProXdesign" readonly>
+                <input type="text" class="form-control" id="dm-profile-edit-company" name="dm-profile-edit-company" value="{{ auth()->user()->level->code }}" readonly>
               </div>
               <div class="mb-4">
+                <label class="form-label" for="dm-profile-edit-company">Referral Code</label>
+                <input type="text" class="form-control" id="dm-profile-edit-company" name="dm-profile-edit-company" value="{{ auth()->user()->referral_code }}" readonly>
+              </div>
+
+              {{-- <div class="mb-4">
                 <label class="form-label">Your Avatar</label>
                 <div class="push">
                   <img class="img-avatar" src="{{ asset('src/assets/media/avatars/avatar13.jpg')}}" alt="">
                 </div>
                 <label class="form-label" for="dm-profile-edit-avatar">Choose a new avatar</label>
                 <input class="form-control" type="file" id="dm-profile-edit-avatar">
-              </div>
-              <button type="submit" class="btn btn-alt-primary">
+              </div> --}}
+              {{-- <button type="submit" class="btn btn-alt-primary">
                 <i class="fa fa-check-circle opacity-50 me-1"></i> Update Profile
-              </button>
+              </button> --}}
             </form>
           </div>
         </div>
       </div>
+
       <div class="tab-pane" id="account-password" role="tabpanel" aria-labelledby="account-password-tab" tabindex="0">
         <div class="row push p-sm-2 p-lg-4">
           <div class="offset-xl-1 col-xl-4 order-xl-1">
             <p class="bg-body-light p-4 rounded-3 text-muted fs-sm">
-              Changing your sign in password is an easy way to keep your account secure.
+              Add your social media handle for easy tagging
             </p>
           </div>
           <div class="col-xl-6 order-xl-0">
-            <form action="be_pages_generic_profile_v2_edit.html" method="POST" onsubmit="return false;">
+            <form action="" method="POST" onsubmit="" wire:submit.prevent="updateSocial">
               <div class="mb-4">
-                <label class="form-label" for="dm-profile-edit-password">Current Password</label>
-                <input type="password" class="form-control" id="dm-profile-edit-password" name="dm-profile-edit-password">
+                <label class="form-label" for="dm-profile-edit-password">Facebook</label>
+                <input type="text" class="form-control" id="dm-profile-edit-password" wire:model="facebook" value="{{ auth()->user()->social->facebook }}">
               </div>
               <div class="row mb-4">
                 <div class="col-12">
-                  <label class="form-label" for="dm-profile-edit-password-new">New Password</label>
-                  <input type="password" class="form-control" id="dm-profile-edit-password-new" name="dm-profile-edit-password-new">
+                  <label class="form-label" for="dm-profile-edit-password-new">TikTok</label>
+                  <input type="text" class="form-control" id="dm-profile-edit-password-new" wire:model="tiktok">
                 </div>
               </div>
               <div class="row mb-4">
                 <div class="col-12">
-                  <label class="form-label" for="dm-profile-edit-password-new-confirm">Confirm New Password</label>
-                  <input type="password" class="form-control" id="dm-profile-edit-password-new-confirm" name="dm-profile-edit-password-new-confirm">
+                  <label class="form-label" for="dm-profile-edit-password-new-confirm">Instagram</label>
+                  <input type="text" class="form-control" id="dm-profile-edit-password-new-confirm" wire:model="instagram">
+                </div>
+              </div>
+              <div class="row mb-4">
+                <div class="col-12">
+                  <label class="form-label" for="dm-profile-edit-password-new-confirm">X</label>
+                  <input type="text" class="form-control" id="dm-profile-edit-password-new-confirm" wire:model="twitter">
+                </div>
+              </div>
+              <div class="row mb-4">
+                <div class="col-12">
+                  <label class="form-label" for="dm-profile-edit-password-new-confirm">LinkedIn</label>
+                  <input type="text" class="form-control" id="dm-profile-edit-password-new-confirm" wire:model="linkedin">
+                </div>
+              </div>
+
+              <div class="row mb-4">
+                <div class="col-12">
+                  <label class="form-label" for="dm-profile-edit-password-new-confirm">Pinterest</label>
+                  <input type="text" class="form-control" id="dm-profile-edit-password-new-confirm" wire:model="pinterest">
                 </div>
               </div>
               <button type="submit" class="btn btn-alt-primary">
-                <i class="fa fa-check-circle opacity-50 me-1"></i> Update Password
+                <i class="fa fa-check-circle opacity-50 me-1"></i> Update Social
               </button>
             </form>
           </div>
