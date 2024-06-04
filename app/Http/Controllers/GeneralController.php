@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Mail\AccessCodeMail;
 use App\Models\AccessCode;
 use App\Models\Level;
+use App\Models\Partner;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -185,6 +186,28 @@ class GeneralController extends Controller
         $timeline->save(); 
 
         return view('showpost', ['timeline' => $timeline] );
+    }
+
+    public function partner(Request $request){
+        
+        $validated = $request->validate([
+            'email' => 'bail|required|email|unique:partners|max:255',
+            'name' => 'required|string',
+            'phone' => 'required|numeric',
+            'identification' => 'required|string',
+            'country' => 'required|string',
+        ]);
+
+        Partner::create(['name' => $validated['name'], 'email' => $validated['email'], 'phone' => $validated['phone'], 'identification' => $validated['identification'], 'country' => $validated['country']]);
+
+        return back()->with('success', 'You have successfully applied to become a Partner on Payhankey. An email has been sent to you for a short video call');
+
+    }
+
+    public function viewPartner($id){
+        $partner = Partner::find($id);//->firstOrFail();
+        $codes = AccessCode::where(['partner_id'=> $id, 'is_active' => true])->get();
+        return view('view_partner', ['partner' => $partner, 'codes' => $codes]);
     }
 
 

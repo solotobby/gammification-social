@@ -48,17 +48,20 @@
             <div class="collapse navbar-collapse" id="navbarCollapse">
                 <ul class="navbar-nav mx-auto navbar-center" id="navbar-navlist">
                     <li class="nav-item">
-                        <a data-scroll href="#home" class="nav-link">Home</a>
+                        <a data-scroll href="{{ url('/') }}" class="nav-link">Home</a>
                     </li>
                     <li class="nav-item">
                         <a data-scroll href="#features" class="nav-link">Features</a>
                     </li>
-                    <li class="nav-item">
-                        <a data-scroll href="#pricing" class="nav-link">Access Code</a>
-                    </li>
                     {{-- <li class="nav-item">
-                        <a data-scroll href="#blog" class="nav-link">Blog</a>
+                        <a data-scroll href="#pricing" class="nav-link">Access Code</a>
                     </li> --}}
+                    <li class="nav-item">
+                        <a data-scroll href="#faq" class="nav-link">FAQ</a>
+                    </li>
+                    <li class="nav-item">
+                        <a data-scroll href="#partner" class="nav-link">Become a Partner</a>
+                    </li>
                     <li class="nav-item">
                         <a data-scroll href="#contact" class="nav-link">Contact Us</a>
                     </li>
@@ -81,16 +84,16 @@
         <div class="container">
             <div class="row align-items-center justify-content-center">
                 <div class="col-lg-6">
-                    <h1 class="hero-1-title fw-bold text-shadow mb-4">Monetise your Posts</h1>
+                    <h1 class="hero-1-title fw-bold text-shadow mb-4">Monetize your Posts</h1>
                     <div class="w-75 mb-5 mb-lg-0">
-                        <p class="text-muted mb-5 pb-5 font-size-17">The social media that pays you for every posts, views, comments and likes.</p>
-                        <p><span class="font-size-20 me-2">🥳️</span>Join our mailing list to receive updates before creating an account.</p>
+                        <p class="text-muted mb-5 pb-5 font-size-17">The social media that pays you for every posts, views, comments and likes. Withdraw your earnings anytime. Minimum withdrawal of $20.</p>
+                        {{-- <p><span class="font-size-20 me-2">🥳️</span>Join our mailing list to receive updates before creating an account.</p>
                         <div class="subscribe-form">
                             <form action="#">
                                 <input type="text" placeholder="Enter email...">
                                 <button type="submit" class="btn btn-primary">Subscribe</button>
                             </form>
-                        </div>
+                        </div> --}}
                     </div>
                 </div>
                 <div class="col-lg-6 col-md-10">
@@ -200,6 +203,61 @@
             </div>
         </div>
     </section>
+    <section class="section feather-bg-img" style="background-image: url(asset/images/features-bg-img-1.png)" id="partner">
+        <div class="container">
+            
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            @if (session('success'))
+                <div class="alert alert-success" role="alert">
+                    {{ session('success') }}
+                </div>
+            @endif
+
+
+            <div class="row justify-content-center">
+                <div class="col-lg-5 align-self-center">
+                    <p class="font-weight-medium text-uppercase mb-2"><i
+                            class="mdi mdi-chart-bubble h2 text-primary me-1 align-middle"></i> Become our Partner </p>
+                    {{-- <h3 class="font-weight-semibold line-height-1_4 mb-4">We do the work you <b>stay focused</b> on
+                        <b>your customers</b>.
+                    </h3> --}}
+                    <h3 class="title mb-3">Earn more as a Partner</h3>
+
+                    <p class="text-muted font-size-15 mb-4">
+                        As a partner, you can buy bulk access codes at a discounted price and resell to your friends and family. This makes you earn affiliate commissions and partner commissions. Our partners earn up to $500 daily.
+                    </p>
+                    
+                    <div class="mt-5">
+                        <a href="" target="_blank" data-bs-toggle="modal" data-bs-target="#exampleModalCenter-1" class="btn btn-primary me-2">Become a Partner </a>
+                        {{-- <a href="" target="_blank" class="btn btn-soft-primary">Pay in Naira  </a> --}}
+                    </div>
+                    
+                </div>
+                <div class="col-lg-6 offset-lg-1 align-self-center">
+                    <div class="mt-4 mt-lg-0">
+                        <img src="{{asset('asset/images/features-img-1.png')}}" alt="" class="img-fluid d-block mx-auto">
+                    </div>
+                </div>
+
+                    <!-- Button trigger modal -->
+
+  
+               
+
+
+
+            </div>
+        </div>
+    </section>
 
     <!-- Features End -->
 
@@ -294,6 +352,8 @@
     </section>
     <!-- Pricing End -->
 
+   
+
     <!-- Blog start -->
     {{-- <section class="section blog" id="blog">
         <div class="container">
@@ -360,6 +420,8 @@
         </div>
     </section> --}}
     <!-- Blog End -->
+
+   
 
     <!-- Contact Us Start -->
     <section class="section bg-light" id="contact">
@@ -436,7 +498,7 @@
     <!-- Footer End -->
 
     <!-- login Modal Start -->
-    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-hidden="true">
+    {{-- <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content login-page">
                 <div class="modal-body">
@@ -487,7 +549,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> --}}
     <!-- login Modal End -->
 
     <!-- Register Modal Start-->
@@ -496,22 +558,42 @@
             <div class="modal-content login-page">
                 <div class="modal-body">
                     <div class="text-center">
-                        <h3 class="title mb-4">Welcome To Lezir</h3>
-                        <h4 class="text-uppercase text-primary"><b>Register</b></h4>
+                        <h3 class="title mb-4">Welcome To Payhankey</h3>
+                        <h4 class="text-uppercase text-primary"><b>Register as Partner</b></h4>
                     </div>
                     <div class="login-form mt-4">
-                        <form>
+                        <form action="{{ route('partner') }}" method="POST">
+                            @csrf
                             <div class="form-group">
-                                <label for="exampleInputUsername">User Name</label>
-                                <input type="text" class="form-control" id="exampleInputUsername"
-                                    placeholder="Enter Name">
+                                <label for="exampleInputUsername">Full Name</label>
+                                <input type="text" class="form-control" name="name" id="exampleInputUsername"
+                                    placeholder="Enter Name" required>
                             </div>
                             <div class="form-group">
                                 <label for="exampleInputEmail2">Email</label>
-                                <input type="email" class="form-control" id="exampleInputEmail2"
-                                    placeholder="Youremail@gmail.com">
+                                <input type="email" class="form-control" name="email" id="exampleInputEmail2"
+                                    placeholder="Youremail@gmail.com" required>
                             </div>
                             <div class="form-group">
+                                <label for="exampleInputEmail2">Phone Number</label>
+                                <input type="text" class="form-control" name="phone" id="exampleInputEmail2"
+                                    placeholder="Youremail@gmail.com" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputEmail2">Govt. issued Id. Card</label>
+                                    <select class="form-control" name="identification" required>
+                                        <option>National Identity Number (NIN)</option>
+                                        <option>Passport</option>
+                                    </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputEmail2">Country</label>
+                                    <select class="form-control" name="country" required>
+                                        <option>Nigeria</option>
+                                        <option>Germany</option>
+                                    </select>
+                            </div>
+                            {{-- <div class="form-group">
                                 <label for="exampleInputPassword2">Password</label>
                                 <input type="password" class="form-control" id="exampleInputPassword2"
                                     placeholder="Password">
@@ -520,13 +602,13 @@
                             <div class="custom-control custom-checkbox">
                                 <input type="checkbox" class="custom-control-input" id="customCheck2">
                                 <label class="custom-control-label font-size-15" for="customCheck2">Remember Me</label>
-                            </div>
+                            </div> --}}
                             <div class="text-center mt-4">
                                 <button type="submit" class="btn btn-primary">Register <i class="icon-size-15 icon ms-1"
                                         data-feather="arrow-right-circle"></i></button>
                             </div>
                         </form>
-                        <div class="position-relative text-center mt-4">
+                        {{-- <div class="position-relative text-center mt-4">
                             <span class="login-border"></span>
                             <p class="social-login text-muted font-size-17">Social Login</p>
                         </div>
@@ -541,7 +623,7 @@
                                 <li class="list-inline-item"><a href="#" class="login-social-icon icon-success"><i
                                             class="icon-xs" data-feather="linkedin"></i></a></li>
                             </ul>
-                        </div>
+                        </div> --}}
                     </div>
                 </div>
             </div>
