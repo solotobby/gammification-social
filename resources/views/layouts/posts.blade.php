@@ -6,7 +6,7 @@
             <a class="img-link me-1" href="{{ url('profile/'.$timeline->user->id) }}">
             <img class="img-avatar img-avatar32 img-avatar-thumb" src="{{asset('src/assets/media/avatars/avatar11.jpg')}}" alt="">
             </a>
-            <a class="fw-semibold" href="{{ url('profile/'.$timeline->user->id) }}">{{$timeline->user->name}}</a>
+            <a class="fw-semibold" href="{{ url('profile/'.$timeline->user->id) }}" >{{$timeline->user->name}}</a>
             <span class="fs-sm text-muted">{{$timeline->created_at?->shortAbsoluteDiffForHumans()}} ago</span>
         </div>
         <div class="block-options">
@@ -18,7 +18,7 @@
                         <i class="far fa-fw fa-eye text-success me-1"></i> View Posts Analytics
                     </a>
                 @endif
-                <a class="dropdown-item" href="javascript:void(0)">
+                {{-- <a class="dropdown-item" href="javascript:void(0)">
                 <i class="far fa-fw fa-thumbs-down text-warning me-1"></i> Stop following this user
                 </a>
                 <div role="separator" class="dropdown-divider"></div>
@@ -27,7 +27,7 @@
                 </a>
                 <a class="dropdown-item" href="javascript:void(0)">
                 <i class="fa fa-fw fa-bookmark me-1"></i> Bookmark this post
-                </a>
+                </a> --}}
             </div>
             </div>
         </div>
