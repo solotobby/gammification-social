@@ -15,7 +15,7 @@
                     ${{ $wallets->balance }}
                   </p>
                   <p class="text-muted mb-0">
-                    Main Balance
+                    Main Balance <span><small>(Earnings from content monetization)</small></span>
                   </p>
                 </div>
               </div>
@@ -32,7 +32,7 @@
                     ${{ $wallets->referral_balance }}
                   </p>
                   <p class="text-muted mb-0">
-                    Referral Balance
+                    Referral Balance <span><small>(Earnings from inviting peopl on Payhankey)</small></span>
                   </p>
                 </div>
               </div>
@@ -49,7 +49,7 @@
                     ${{ $wallets->promoter_balance }}
                   </p>
                   <p class="text-muted mb-0">
-                    Promotion Balance
+                    Promotion Balance <span><small>(Earnings from promoting Payhankey)</small></span>
                   </p>
                 </div>
               </div>
@@ -63,10 +63,10 @@
                 </div>
                 <div class="ms-3 text-end">
                   <p class="fs-3 fw-medium mb-0">
-                   8942
+                   $0
                   </p>
                   <p class="text-muted mb-0">
-                    Total Withdrawal
+                    Total Withdrawal <span><small>(Earnings withdrawn from your wallet)</small></span>
                   </p>
                 </div>
               </div>
@@ -87,7 +87,7 @@
                 @if(empty($wallets->usdt_wallet_address))
                     <form action="" method="POST" onsubmit="" wire:submit.prevent="updateUSDTWallet">
                         <div class="mb-4">
-                        <label class="form-label" for="dm-profile-edit-password">USDT Wallet Address</label>
+                        <label class="form-label" for="dm-profile-edit-password">USDT Wallet Address(TRC 20)</label>
                         <input type="text" class="form-control" id="dm-profile-edit-password" wire:model="usdt_wallet_address" placeholder="Enter Withdrawal Wallet Address" value="{{ $wallets->usdt_wallet_address }}" required>
                         </div>
                         <button type="submit" class="btn btn-alt-primary">
@@ -96,18 +96,11 @@
                     </form>
                 @else
 
-                    Your Wallet Address: {{ $wallets->usdt_wallet_address }}
+                    USDT Wallet Address: {{  maskCode($wallets->usdt_wallet_address) }}
 
-                    
                 @endif
                 
-
-                
-
             </div>
-
         </div>
-    
-
-    
+        
 </div>

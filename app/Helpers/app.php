@@ -23,3 +23,15 @@ if(!function_exists('transaction')){
         // ->get();
     }
 }
+if(!function_exists('maskCode')){
+    function maskCode($code) {
+        $length = strlen($code);
+        if ($length <= 8) {
+            return $code; // If the code is 8 characters or less, don't mask it
+        }
+        $firstFour = substr($code, 0, 4);
+        $lastFour = substr($code, -4);
+        $masked = str_repeat('*', $length - 8);
+        return $firstFour . $masked . $lastFour;
+    }
+}

@@ -42,6 +42,9 @@ Route::group(['namespace' => 'auth'], function () {
 
     Route::get('validate/makintosh', [\App\Http\Controllers\GeneralController::class, 'validateCode']);
     Route::post('villa', [\App\Http\Controllers\GeneralController::class, 'processValidateCode'])->name('immaculate');
+
+    Route::post('partner', [\App\Http\Controllers\GeneralController::class, 'partner'])->name('partner');
+    Route::get('partner/{id}', [\App\Http\Controllers\GeneralController::class, 'viewPartner']);
 });
 
 Auth::routes();
