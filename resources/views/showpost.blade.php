@@ -216,8 +216,8 @@
     $(document).ready(function() {
         $('#like').on('click', function() {
             // alert('clicked');
-            var postId=$(this).data('post');
-            alert(postId);
+            // var postId=$(this).data('post');
+            // alert(postId);
 
             
         });

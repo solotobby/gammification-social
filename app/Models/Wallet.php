@@ -10,5 +10,5 @@ class Wallet extends Model
 {
     use HasFactory, UuidTrait;
 
-    protected $fillable = ['user_id', 'promoter_balance', 'referral_balance', 'balance', 'currency', 'level'];
+    protected $fillable = ['user_id', 'promoter_balance', 'referral_balance', 'balance', 'currency', 'level', 'usdt_wallet_address'];
 }

@@ -73,6 +73,40 @@
             </a>
           </div>
         </div>
+
+        <div class="row">
+
+            <div class="col-md-6 col-xl-6">
+                
+                @if(session()->has('success'))
+                    <div class="alert alert-success" role="alert">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
+                @if(empty($wallets->usdt_wallet_address))
+                    <form action="" method="POST" onsubmit="" wire:submit.prevent="updateUSDTWallet">
+                        <div class="mb-4">
+                        <label class="form-label" for="dm-profile-edit-password">USDT Wallet Address</label>
+                        <input type="text" class="form-control" id="dm-profile-edit-password" wire:model="usdt_wallet_address" placeholder="Enter Withdrawal Wallet Address" value="{{ $wallets->usdt_wallet_address }}" required>
+                        </div>
+                        <button type="submit" class="btn btn-alt-primary">
+                        <i class="fa fa-check-circle opacity-50 me-1"></i> Add Withdrawal Wallet
+                        </button>
+                    </form>
+                @else
+
+                    Your Wallet Address: {{ $wallets->usdt_wallet_address }}
+
+                    
+                @endif
+                
+
+                
+
+            </div>
+
+        </div>
     
 
     
