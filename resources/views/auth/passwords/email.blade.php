@@ -78,7 +78,7 @@
 
     <!-- Stylesheets -->
     <!-- Dashmix framework -->
-    <link rel="stylesheet" id="css-main" href="{{asset('src/assets/css/dashmix.min.css')}}">
+    <link rel="stylesheet" id="css-main" href="{{asset('src/assets/css/dashmix.css')}}">
 
     <!-- You can include a specific file from css/themes/ folder to alter the default color theme of the template. eg: -->
     <!-- <link rel="stylesheet" id="css-theme" href="assets/css/themes/xwork.min.css"> -->
