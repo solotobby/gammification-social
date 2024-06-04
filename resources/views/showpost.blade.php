@@ -14,7 +14,7 @@
                 <a class="fw-semibold" href="javascript:void(0)">{{$timeline->user->name}}</a>
                 <span class="fs-sm text-muted">{{$timeline->created_at?->shortAbsoluteDiffForHumans()}} ago</span>
             </div>
-            <div class="block-options">
+            {{-- <div class="block-options">
                 <div class="dropdown">
                 <button type="button" class="btn-block-option dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
                 <div class="dropdown-menu dropdown-menu-end">
@@ -33,7 +33,7 @@
                     </a>
                 </div>
                 </div>
-            </div>
+            </div> --}}
             </div>
             <div class="block-content">
                 {{-- <a href="#" wire:click="show({{$timeline->id}})"> --}}
@@ -44,15 +44,7 @@
             <hr>
             <ul class="nav nav-pills fs-sm push">
                 <li class="nav-item me-1">
-                    {{-- @if($timeline->userLikes()->count() > 0)
-                    <a class="nav-link"  wire:click="dislike({{$timeline->unicode}})" href="javascript:void(0)">
-                        <i class="fa fa-thumbs-down opacity-50 me-1"></i> {{ $timeline->likes+$timeline->likes_external }}
-                    </a>
-                    @else
-                        <a class="nav-link"  wire:click="like({{$timeline->unicode}})" href="javascript:void(0)">
-                            <i class="fa fa-thumbs-up opacity-50 me-1"></i> {{ $timeline->likes+$timeline->likes_external }}
-                        </a>
-                    @endif --}}
+                    
 
                     <a class="nav-link" id="like" data-type="like" data-post="{{ $timeline->id }}" href="javascript:void(0)">
                         <i class="fa fa-thumbs-up opacity-50 me-1"></i> <span id="likesCount"> {{$timeline->likes+$timeline->likes_external }}</span>
@@ -60,20 +52,21 @@
 
                 </li>
                 <li class="nav-item me-1">
-                <a class="nav-link" href="javascript:void(0)">
-                    <i class="fa fa-comment-alt opacity-50 me-1"></i> {{$timeline->comments}}
-                </a>
-                </li>
-                <li class="nav-item">
-                <a class="nav-link" href="javascript:void(0)">
-                    <i class="fa fa-eye opacity-50 me-1"></i> {{$timeline->views+$timeline->views_external}}
-                </a>
+                    <a class="nav-link" href="javascript:void(0)">
+                        <i class="fa fa-comment-alt opacity-50 me-1"></i> {{$timeline->comments}}
+                    </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="javascript:void(0)">
+                        <i class="fa fa-eye opacity-50 me-1"></i> {{$timeline->views+$timeline->views_external}}
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#modal-block-fromright-{{ $timeline->id }}">
                         <i class="fa fa-share opacity-50 me-1"></i>
                     </a>
                 </li>
+                
             </ul>
             </div>
             <div class="block-content block-content-full bg-body-light">
@@ -128,94 +121,93 @@
         @endif
 
     </div>
-    <div class="col-md-4">
-        <!-- Group Suggestions -->
-        <div class="block block-rounded bg-body-dark">
-        <div class="block-content block-content-full">
-            <div class="row g-sm mb-2">
-            <div class="col-6">
-                <img class="img-fluid" src="assets/media/photos/photo18.jpg" alt="">
+
+
+    <!-- From Right Block Modal -->
+    <div class="modal fade" id="modal-block-fromright-{{ $timeline->id }}" tabindex="-1" role="dialog" aria-labelledby="modal-block-fromright" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-fromright" role="document">
+        <div class="modal-content">
+            <div class="block block-rounded block-themed block-transparent mb-0">
+            <div class="block-header bg-primary-dark">
+                <h3 class="block-title">Share Post</h3>
+                <div class="block-options">
+                <button type="button" class="btn-block-option" data-bs-dismiss="modal" aria-label="Close">
+                    <i class="fa fa-fw fa-times"></i>
+                </button>
+                </div>
             </div>
-            <div class="col-6">
-                <img class="img-fluid" src="assets/media/photos/photo16.jpg" alt="">
+            <div class="block-content">
+                <p>
+                Share this Post on all social media and make money when people view, like or comment on the post
+                </p>
+                <p>
+                    {{ url('post/'.$timeline->id) }}
+
+                
+                </p>
+
+                <?php 
+                
+                $url = url('post/'.$timeline->id);
+                ?>
+
+                
+                <button type="button" onclick="copyToClipboard('{{ $url }}')" class="btn btn-sm btn-alt-secondary" data-bs-dismiss="modal">Copy Link</button>
+                <hr>
+                <ul class="nav nav-pills fs-sm push">
+                    <li class="nav-item me-1">
+        
+                    
+                        <a class="nav-link"  href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode($url) }}" target="_blank">
+                            <i class="fab fa-facebook fa-2x opacity-50 me-1"></i> 
+                        </a>
+        
+                        
+                    </li>
+                    <li class="nav-item me-1">
+                        <a class="nav-link" href="https://twitter.com/intent/tweet?url={{ urlencode($url) }}&text=Check%20this%20out!" target="_blank">
+                            <i class="fab fa-square-x-twitter fa-2x opacity-50 me-1"></i> 
+                        </a>
+                    </li>
+                    <li class="nav-item me-1">
+                        <a class="nav-link" href="https://www.instagram.com/?url={{ urlencode($url) }}" target="_blank">
+                            <i class="fab fa-instagram fa-2x opacity-50 me-1"></i> 
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://www.linkedin.com/shareArticle?mini=true&url={{ urlencode($url) }}" target="_blank">
+                            <i class="fab fa-linkedin-in fa-2x opacity-50 me-1"></i>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://pinterest.com/pin/create/button/?url={{ urlencode($url) }}" target="_blank">
+                            <i class="fab fa-pinterest-p fa-2x opacity-50 me-1"></i>
+                        </a>
+                    </li>
+                    {{-- <button type="button" class="btn btn-primary push mb-md-0" data-bs-toggle="modal" data-bs-target="#modal-block-fromright">Block Design</button> --}}
+                    {{-- <button type="button" class="btn btn-alt-primary push mb-md-0" data-bs-toggle="modal" data-bs-target="#modal-default-fromright">Default</button> --}}
+                </ul>
+
             </div>
+            <div class="block-content block-content-full text-end bg-body">
+                {{-- <button type="button" class="btn btn-sm btn-alt-secondary" data-bs-dismiss="modal">Close</button> --}}
+                <button type="button" class="btn btn-sm btn-primary" data-bs-dismiss="modal">Close</button>
             </div>
-            <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <a class="fw-semibold" href="javascript:void(0)">Hiking</a>
-                <div class="fs-sm text-muted">68k Members</div>
-            </div>
-            <a class="btn btn-sm btn-alt-secondary d-inline-block" href="javascript:void(0)">
-                <i class="fa fa-fw fa-plus-circle"></i>
-            </a>
             </div>
         </div>
         </div>
-        <div class="block block-rounded bg-body-dark">
-        <div class="block-content block-content-full">
-            <div class="row g-sm mb-2">
-            <div class="col-6">
-                <img class="img-fluid" src="assets/media/photos/photo12.jpg" alt="">
-            </div>
-            <div class="col-6">
-                <img class="img-fluid" src="assets/media/photos/photo13.jpg" alt="">
-            </div>
-            </div>
-            <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <a class="fw-semibold" href="javascript:void(0)">Travel Photos</a>
-                <div class="fs-sm text-muted">65k Members</div>
-            </div>
-            <a class="btn btn-sm btn-alt-secondary d-inline-block" href="javascript:void(0)">
-                <i class="fa fa-fw fa-plus-circle"></i>
-            </a>
-            </div>
-        </div>
-        </div>
-        <div class="block block-rounded bg-body-dark">
-        <div class="block-content block-content-full">
-            <div class="row g-sm mb-2">
-            <div class="col-6">
-                <img class="img-fluid" src="assets/media/photos/photo22.jpg" alt="">
-            </div>
-            <div class="col-6">
-                <img class="img-fluid" src="assets/media/photos/photo23.jpg" alt="">
-            </div>
-            </div>
-            <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <a class="fw-semibold" href="javascript:void(0)">Coding Frenzy</a>
-                <div class="fs-sm text-muted">109k Members</div>
-            </div>
-            <a class="btn btn-sm btn-alt-secondary d-inline-block" href="javascript:void(0)">
-                <i class="fa fa-fw fa-plus-circle"></i>
-            </a>
-            </div>
-        </div>
-        </div>
-        <div class="block block-rounded bg-body-dark">
-        <div class="block-content block-content-full">
-            <div class="row g-sm mb-2">
-            <div class="col-6">
-                <img class="img-fluid" src="assets/media/photos/photo9.jpg" alt="">
-            </div>
-            <div class="col-6">
-                <img class="img-fluid" src="assets/media/photos/photo6.jpg" alt="">
-            </div>
-            </div>
-            <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <a class="fw-semibold" href="javascript:void(0)">Nature Lovers</a>
-                <div class="fs-sm text-muted">32k Members</div>
-            </div>
-            <a class="btn btn-sm btn-alt-secondary d-inline-block" href="javascript:void(0)">
-                <i class="fa fa-fw fa-plus-circle"></i>
-            </a>
-            </div>
-        </div>
-        </div>
-        <!-- END Group Suggestions -->
     </div>
+  <!-- END From Right Block Modal -->
+        <script>
+                function copyToClipboard(text) {
+                    navigator.clipboard.writeText(text).then(function() {
+                        alert('Link copied to clipboard');
+                    }, function(err) {
+                        alert('Could not copy text: ', err);
+                    });
+                }
+        </script>
+    @include('layouts.engagement')
 </div>
 
 @endsection

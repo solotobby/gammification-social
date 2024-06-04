@@ -6,16 +6,16 @@
 
     <title>Payhankey | Monetize your posts, comments and views to earn daily</title>
 
-    <meta name="description" content=" Monetize your posts, comments and views to earn daily">
+    <meta name="description" content="Monetize your posts, comments and views to earn daily">
     <meta name="author" content="Payhankey">
     <meta name="robots" content="index, follow, money, post, posts, comments, comment, views, view">
 
     <!-- Open Graph Meta -->
-    <meta property="og:title" content="Dashmix - Bootstrap 5 Admin Template &amp; UI Framework">
-    <meta property="og:site_name" content="Dashmix">
-    <meta property="og:description" content="Dashmix - Bootstrap 5 Admin Template &amp; UI Framework created by pixelcave">
+    <meta property="og:title" content="Payhankey | Monetize your posts, comments and views to earn daily">
+    <meta property="og:site_name" content="Payhankey">
+    <meta property="og:description" content="Monetize your posts, comments and views to earn daily">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="">
+    <meta property="og:url" content="https:payhankey.com">
     <meta property="og:image" content="">
 
     <!-- Icons -->

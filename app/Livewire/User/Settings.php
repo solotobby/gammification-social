@@ -19,12 +19,12 @@ class Settings extends Component
     public $linkedin = '';
 
     public function mount(){
-        $this->facebook = auth()->user()->social->facebook;
-        $this->twitter = auth()->user()->social->twitter;
-        $this->instagram = auth()->user()->social->instagram;
-        $this->linkedin = auth()->user()->social->linkedin;
-        $this->pinterest = auth()->user()->social->pinterest;
-        $this->tiktok = auth()->user()->social->tiktok;
+        $this->facebook = @auth()->user()->social->facebook;
+        $this->twitter = @auth()->user()->social->twitter;
+        $this->instagram = @auth()->user()->social->instagram;
+        $this->linkedin = @auth()->user()->social->linkedin;
+        $this->pinterest = @auth()->user()->social->pinterest;
+        $this->tiktok = @auth()->user()->social->tiktok;
     }
   
     public function updateSocial(){
