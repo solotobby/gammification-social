@@ -184,7 +184,7 @@ class GeneralController extends Controller
         $timeline->views_external += 1;
         $timeline->save(); 
 
-        return view('showPost', ['timeline' => $timeline] );
+        return view('showpost', ['timeline' => $timeline] );
     }
 
 
