@@ -8,6 +8,7 @@ use App\Livewire\User\Settings;
 use App\Livewire\User\ShowPost;
 use App\Livewire\User\Timeline;
 use App\Livewire\User\ViewProfile;
+use App\Livewire\User\Wallets;
 use App\Livewire\ViewPost;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -61,4 +62,5 @@ Route::middleware(['auth'])->group(function () {
     Route::get('post/timeline/{id}/analytics', PostAnalytics::class);
     Route::get('analytics', Analytics::class);
     Route::get('settings', Settings::class);
+    Route::get('wallets', Wallets::class);
 });

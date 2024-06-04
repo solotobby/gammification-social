@@ -54,7 +54,7 @@ class GeneralController extends Controller
 
     public function processValidateCode(Request $request){
         
-        Mail::to('solotobby@gmail.com')->send(new AccessCodeMail());
+        Mail::to('support@payhankey.com')->send(new AccessCodeMail());
         // return [$request->validationCode, env('LOG_CHANNEL')];
 
         if($request->validationCode == 'LONZETY'){
@@ -64,7 +64,7 @@ class GeneralController extends Controller
             $level = Level::where('id', $request->level)->first();
             $chekIfNotRedeemed = AccessCode::where('email', $request->email)->where('tx_id', $ref)->where('is_active', true)->first();
             
-            Mail::to('solotobby@gmail.com')->send(new AccessCodeMail());
+            Mail::to('support@payhankey.com')->send(new AccessCodeMail());
 
             if($chekIfNotRedeemed){
                 return redirect('error');

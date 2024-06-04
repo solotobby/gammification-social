@@ -6,10 +6,18 @@
           <span class="nav-main-link-name">Dashboard</span>
        
         </a>
+        @if(Auth::user())
         <a class="nav-main-link" href="{{ url('profile/'.auth()->user()->id) }}">
             <i class="nav-main-link-icon fa fa-user"></i>
             <span class="nav-main-link-name">Profile</span>
         </a>
+        @else
+
+          <a class="nav-main-link" href="{{ url('register') }}">
+            <i class="nav-main-link-icon fa fa-user"></i>
+            <span class="nav-main-link-name">Profile</span>
+          </a>
+        @endif
         <a class="nav-main-link" href="{{ url('analytics') }}">
           <i class="nav-main-link-icon si si-bar-chart"></i>
           <span class="nav-main-link-name">Analytics</span>
@@ -18,6 +26,10 @@
             <i class="nav-main-link-icon si si-settings"></i>
             <span class="nav-main-link-name">Settings</span>
         </a>
+        <a class="nav-main-link" href="{{ url('wallets') }}">
+          <i class="nav-main-link-icon fa fa-wallet"></i>
+          <span class="nav-main-link-name">Wallets</span>
+      </a>
       </li>
       
       {{-- <li class="nav-main-heading">Pages</li>

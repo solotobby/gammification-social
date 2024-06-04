@@ -117,7 +117,7 @@
             <form action="" method="POST" onsubmit="" wire:submit.prevent="updateSocial">
               <div class="mb-4">
                 <label class="form-label" for="dm-profile-edit-password">Facebook</label>
-                <input type="text" class="form-control" id="dm-profile-edit-password" wire:model="facebook" value="{{ auth()->user()->social->facebook }}">
+                <input type="text" class="form-control" id="dm-profile-edit-password" wire:model="facebook" >
               </div>
               <div class="row mb-4">
                 <div class="col-12">
