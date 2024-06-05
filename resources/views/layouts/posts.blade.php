@@ -6,31 +6,33 @@
             <a class="img-link me-1" href="{{ url('profile/'.$timeline->user->id) }}">
             <img class="img-avatar img-avatar32 img-avatar-thumb" src="{{asset('src/assets/media/avatars/avatar11.jpg')}}" alt="">
             </a>
-            <a class="fw-semibold" href="{{ url('profile/'.$timeline->user->id) }}" >{{$timeline->user->name}}</a>
+            <a class="fw-semibold" href="{{ url('profile/'.$timeline->user->id) }}" style="color: #5A4FDC" >{{$timeline->user->name}}</a>
             <span class="fs-sm text-muted">{{$timeline->created_at?->shortAbsoluteDiffForHumans()}} ago</span>
         </div>
-        <div class="block-options">
-            <div class="dropdown">
-            <button type="button" class="btn-block-option dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
-            <div class="dropdown-menu dropdown-menu-end">
-                @if(auth()->user()->id == $timeline->user_id)
-                    <a class="dropdown-item" href="{{ url('post/timeline/'.$timeline->id.'/analytics') }}">
-                        <i class="far fa-fw fa-eye text-success me-1"></i> View Posts Analytics
-                    </a>
-                @endif
-                {{-- <a class="dropdown-item" href="javascript:void(0)">
-                <i class="far fa-fw fa-thumbs-down text-warning me-1"></i> Stop following this user
-                </a>
-                <div role="separator" class="dropdown-divider"></div>
-                <a class="dropdown-item" href="javascript:void(0)">
-                <i class="fa fa-fw fa-exclamation-triangle me-1"></i> Report this post
-                </a>
-                <a class="dropdown-item" href="javascript:void(0)">
-                <i class="fa fa-fw fa-bookmark me-1"></i> Bookmark this post
-                </a> --}}
-            </div>
-            </div>
-        </div>
+        @if(auth()->user()->id == $timeline->user_id)
+          <div class="block-options">
+              <div class="dropdown">
+                <button type="button" class="btn-block-option dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
+                  <div class="dropdown-menu dropdown-menu-end">
+                    
+                          <a class="dropdown-item" href="{{ url('post/timeline/'.$timeline->id.'/analytics') }}">
+                              <i class="far fa-fw fa-eye text-success me-1"></i> View Posts Analytics
+                          </a>
+                      
+                      {{-- <a class="dropdown-item" href="javascript:void(0)">
+                      <i class="far fa-fw fa-thumbs-down text-warning me-1"></i> Stop following this user
+                      </a>
+                      <div role="separator" class="dropdown-divider"></div>
+                      <a class="dropdown-item" href="javascript:void(0)">
+                      <i class="fa fa-fw fa-exclamation-triangle me-1"></i> Report this post
+                      </a>
+                      <a class="dropdown-item" href="javascript:void(0)">
+                      <i class="fa fa-fw fa-bookmark me-1"></i> Bookmark this post
+                      </a> --}}
+                  </div>
+              </div>
+          </div>
+        @endif
         </div>
         <div class="block-content">
             <a href="{{ url('show/'.$timeline->id) }}" style="color: dimgrey">
@@ -39,17 +41,17 @@
                 </p>
             </a>
         <hr>
-        <ul class="nav nav-pills fs-sm push">
+        <ul class="nav nav-pills fs-sm push " style="color: #5A4FDC">
             <li class="nav-item me-1">
 
             
                 @if($timeline->isLikedBy(auth()->user()))
                         <a class="nav-link"  wire:click="toggleLike({{$timeline->unicode}})" href="javascript:void(0)">
-                            <i class="fa fa-thumbs-down opacity-50 me-1"></i> {{ $timeline->likes }}
+                            <i class="fa fa-thumbs-down opacity-50 me-1"></i> {{ $timeline->likes + $timeline->likes_external }}
                         </a>
                 @else
                         <a class="nav-link"  wire:click="toggleLike({{$timeline->unicode}})" href="javascript:void(0)">
-                            <i class="fa fa-thumbs-up opacity-50 me-1"></i> {{ $timeline->likes }}
+                            <i class="fa fa-thumbs-up opacity-50 me-1"></i> {{ $timeline->likes + $timeline->likes_external }}
                         </a>
                 @endif
 
@@ -62,7 +64,7 @@
             </li>
             <li class="nav-item me-1">
                 <a class="nav-link" href="javascript:void(0)">
-                    <i class="fa fa-eye opacity-50 me-1"></i> {{$timeline->views}}
+                    <i class="fa fa-eye opacity-50 me-1"></i> {{$timeline->views + $timeline->views_external }}
                 </a>
             </li>
             <li class="nav-item">
@@ -75,14 +77,14 @@
         </ul>
         </div>
         <div class="block-content block-content-full bg-body-light">
-            <p class="fs-sm">
+            {{-- <p class="fs-sm">
               <i class="fa fa-thumbs-up text-info"></i>
               <i class="fa fa-heart text-danger"></i>
               <i class="far fa-smile text-warning me-1"></i>
               <a class="fw-semibold" href="javascript:void(0)">Brian Cruz</a>,
               <a class="fw-semibold" href="javascript:void(0)">Lori Grant</a>,
               <a class="fw-semibold" href="javascript:void(0)">and 150 others</a>
-            </p>
+            </p> --}}
             {{-- <form method="POST" wire:submit.prevent="comment">
               <input type="text" wire:model="message" name="message"  :value="old('message')" class="form-control form-control-alt" placeholder="Write a comment..">
             </form> --}}

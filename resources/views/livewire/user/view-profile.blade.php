@@ -11,8 +11,8 @@
                 <h2 class="fs-sm fw-medium text-muted mb-0">
                 {{-- <a href="javascript:void(0)" class="text-muted">4,5k Followers</a> &bull;  --}}
                 {{-- <a href="javascript:void(0)" class="text-muted">100 Following</a> &bull; --}}
-                <a href="javascript:void(0)" class="text-muted">{{$user->total_views }} Views</a> &bull;
-                <a href="javascript:void(0)" class="text-muted">{{ $user->total_likes }} Likes</a> &bull;
+                <a href="javascript:void(0)" class="text-muted">{{$user->total_views+$user->total_views_external }} Views</a> &bull;
+                <a href="javascript:void(0)" class="text-muted">{{ $user->total_likes+$user->total_likes_external }} Likes</a> &bull;
                 <a href="javascript:void(0)" class="text-muted">{{ $user->total_comments }} Comments</a>
                 </h2>
             </div>

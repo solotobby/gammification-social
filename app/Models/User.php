@@ -75,8 +75,18 @@ class User extends Authenticatable
         return $query->where('id', $userId)
                      ->withCount(['posts as total_likes' => function ($query) {
                          $query->select(DB::raw('sum(likes)'));
+                        
+                     }])
+                     ->withCount(['posts as total_likes_external' => function ($query) {
+                        
+                         $query->select(DB::raw('sum(likes_external)'));
+                     }])
+                     ->withCount(['posts as total_views_external' => function ($query) {
+                        
+                         $query->select(DB::raw('sum(views_external)'));
                      }])
                      ->withCount(['posts as total_views' => function ($query) {
+                       
                          $query->select(DB::raw('sum(views)'));
                      }])
                      ->withCount(['posts as total_comments' => function ($query) {
