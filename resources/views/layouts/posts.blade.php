@@ -47,11 +47,11 @@
             
                 @if($timeline->isLikedBy(auth()->user()))
                         <a class="nav-link"  wire:click="toggleLike({{$timeline->unicode}})" href="javascript:void(0)">
-                            <i class="fa fa-thumbs-down opacity-50 me-1"></i> {{ $timeline->likes + $timeline->likes_external }}
+                            <i class="fa fa-thumbs-down opacity-50 me-1"></i> {{ $timeline->likes }}
                         </a>
                 @else
                         <a class="nav-link"  wire:click="toggleLike({{$timeline->unicode}})" href="javascript:void(0)">
-                            <i class="fa fa-thumbs-up opacity-50 me-1"></i> {{ $timeline->likes + $timeline->likes_external }}
+                            <i class="fa fa-thumbs-up opacity-50 me-1"></i> {{ $timeline->likes }}
                         </a>
                 @endif
 
