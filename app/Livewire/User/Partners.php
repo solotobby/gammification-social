@@ -54,17 +54,13 @@ class Partners extends Component
         if($validated['currency'] == 'USDT'){
             // return 
         }elseif($validated['currency'] == 'USD'){
-            $payment =  processPayment($finalAmount, $validated['currency'], 'USD');
+            $payment =  processPayment($finalAmount, 'USD', $validated['package'], $level, $quantity);
             return redirect($payment);
         }else{
-            $payment =  processPayment($finalAmount, $validated['currency'], 'NGN');
+
+            $payment =  processPayment($finalAmount*1500,  'NGN', $validated['package'], $level, $quantity);
             return redirect($payment);
         }
-       
-        
-
-       
-       
 
     }
 
