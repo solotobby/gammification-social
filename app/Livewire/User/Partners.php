@@ -73,7 +73,7 @@ class Partners extends Component
     public function mount(){
         $this->partners =  Partner::where(['email' => auth()->user()->email])->first();
 
-        if($this->partners->status == true){
+        if(@$this->partners->status == true){
             $this->slot = PartnerSlot::where(['partner_id' => $this->partners->id])->first();
         }
 
