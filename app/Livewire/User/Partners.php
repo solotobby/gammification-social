@@ -32,9 +32,7 @@ class Partners extends Component
         
         return redirect()->to('/partner');
 
-        // $this->reset(['phone', 'identification', 'country']);
-        //  session()->flash('success', 'Socials Updated Successfully');
-        // session()->flash('success', 'Successfully');
+        
     }
 
     public function purchaseSlot(){
