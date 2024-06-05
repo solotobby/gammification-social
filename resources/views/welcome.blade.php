@@ -425,6 +425,131 @@
     <!-- Blog End -->
 
    
+ <!-- Contact Us Start -->
+ <section class="section" id="faq">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="text-center mb-4">
+                    <h3 class="title mb-1">Frequently Asked Questions</h3>
+                    {{-- <p class="text-muted font-size-15">
+                        We'll love to hear from you and learn how best to assist you monetize your posts and content. Kindly send us a mail and we will be glad to help.
+                    </p> --}}
+                </div>
+
+                <div class="accordion" id="accordionExample">
+                    <div class="accordion-item">
+                      <h2 class="accordion-header" id="headingOne">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                            How do I earn on Payhankey?
+                        </button>
+                      </h2>
+                      <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                        <div class="accordion-body">
+                            <strong>Payhankey</strong> is the social media that helps you monetize your content without followers,
+                            subscribers or watch hours.On Payhankey, you can monetize your post, teasers and quizzes. You can earn up to $200 daily on views.
+                            Payhankey is amazing, you earn up to $5 for signing up alone apart from earnings for every comments, likes and views.
+                            You can also earn affiliate commissions when you refer your friends to sign up with your referral code. 
+                            <br>
+                            <strong>Payhankey</strong> also pays creators from viral videos made about Payhankey on other social media (TikTok, Instagram, YouTube, Facebook etc)
+                        </div>
+                      </div>
+                    </div>
+                    <div class="accordion-item">
+                      <h2 class="accordion-header" id="headingTwo">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                            Why do I need an access code?
+                        </button>
+                      </h2>
+                      <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+                        <div class="accordion-body">
+                            An access code is needed to complete registration on Payhankey. This gives you ACCESS to monetize your comments, posts, and views. You will be able to access your referral code to earn affiliate commissions and promotions commissions.
+                        </div>
+                      </div>
+                    </div>
+                    <div class="accordion-item">
+                      <h2 class="accordion-header" id="headingThree">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                            How do I earn promotion commissions 
+                        </button>
+                      </h2>
+                      <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
+                        <div class="accordion-body">
+                            To earn promotion commissions, make viral videos about Payhankey and tag us @payhankey
+                            You can earn up to $10 per 1000 views on each viral video daily.
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingThree-1">
+                          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree-1" aria-expanded="false" aria-controls="collapseThree-1">
+                            How can I be a verified partner 
+                          </button>
+                        </h2>
+                        <div id="collapseThree-1" class="accordion-collapse collapse" aria-labelledby="headingThree-1" data-bs-parent="#accordionExample">
+                          <div class="accordion-body">
+                            You can be a verified partner <a href="{{ url('register') }}">Register Here</a> to vend access codes to your friends and your referrals. Payhankey sells access codes to partners at discounted rates. 
+                            You can resell as a creator or affiliate to earn up to $500 daily. Simply make videos and ask your followers to get access codes from you.
+                            Only verified partners can sell access code on behalf of Payhankey.
+                            All verified partners will be listed
+                          </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingThree-2">
+                          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree-2" aria-expanded="false" aria-controls="collapseThree-2">
+                            How many times can I use an access code on Payhankey?
+                          </button>
+                        </h2>
+                        <div id="collapseThree-2" class="accordion-collapse collapse" aria-labelledby="headingThree-2" data-bs-parent="#accordionExample">
+                          <div class="accordion-body">
+                            Access codes can only be used once by a single user.
+                            How do I see my earnings 
+                            To see earnings, simply login to your dashboard and click on Analytics to see your earnings and analytics.
+                          </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingThree-3">
+                          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree-3" aria-expanded="false" aria-controls="collapseThree-3">
+                            How do I withdrawal my earnings?
+                          </button>
+                        </h2>
+                        <div id="collapseThree-3" class="accordion-collapse collapse" aria-labelledby="headingThree-3" data-bs-parent="#accordionExample">
+                          <div class="accordion-body">
+                            Payhankey allows all users to withdraw anytime once they have a minimum of $20. 
+                            To withdraw, Login to your dashboard to provide your withdrawal information.
+                          </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingThree-4">
+                          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree-4" aria-expanded="false" aria-controls="collapseThree-4">
+                            How much can I earn per view on Payhankey? 
+                          </button>
+                        </h2>
+                        <div id="collapseThree-4" class="accordion-collapse collapse" aria-labelledby="headingThree-4" data-bs-parent="#accordionExample">
+                          <div class="accordion-body">
+                            Payhankey pays for every  like, comment. Click here to see earnings
+                          </div>
+                        </div>
+                    </div>
+
+
+
+                </div>
+
+
+            </div>
+        </div>
+      
+    </div>
+</section>
+<!-- Contact Us End -->
 
     <!-- Contact Us Start -->
     <section class="section bg-light" id="contact">
