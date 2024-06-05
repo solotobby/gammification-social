@@ -79,7 +79,7 @@
       @else
                 <h2 class="content-heading">You're a Partner!</h2>
                 @if($partners->status == false)
-                    <div class="alert alert-info">You have successfully applied to become a partner. Check your email for a 15min introductory call with our team. </div>
+                    <div class="alert alert-info">You have successfully applied to become a partner. We have sent a link to your email for a 15min introductory call with our team. </div>
                 @else
                     
 

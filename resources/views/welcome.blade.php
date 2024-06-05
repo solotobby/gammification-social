@@ -534,7 +534,7 @@
                         </h2>
                         <div id="collapseThree-4" class="accordion-collapse collapse" aria-labelledby="headingThree-4" data-bs-parent="#accordionExample">
                           <div class="accordion-body">
-                            Payhankey pays for every  like, comment. Click here to see earnings
+                            Payhankey pays for every  like, comment. Click <a href="{{ url('register') }}"> here</a> to see earnings
                           </div>
                         </div>
                     </div>

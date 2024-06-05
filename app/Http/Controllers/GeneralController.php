@@ -119,31 +119,40 @@ class GeneralController extends Controller
          $url = request()->fullUrl();
         $url_components = parse_url($url);
         parse_str($url_components['query'], $params);
-
+        if($params['status'] == 'cancelled'){
+            return redirect('partner');
+        }
         $ref = $params['transaction_id']; 
 
         $response = $this->verifyFlutterwavePayment($ref);
 
-        // return $response['status'];
         if($response['status'] == 'success'){
-             $name = $response['data']['customer']['name'];
-             $email = $response['data']['customer']['email'];
-             $code = $this->generateCode(7);
-            //  return [$name, $email, $this->generateCode(7)];
-            $chekIfNotRedeemed = AccessCode::where('email', $email)->where('tx_id', $ref)->where('is_active', true)->first();
-            if($chekIfNotRedeemed){
-                return redirect('error');
-            }
-            AccessCode::create(['tx_id' => $ref,'name' => $name, 'email' => $email, 'amount' => '6', 'code' => $code]);
-            //send mail to the above email
-           
-            return redirect('success');
-            // return 'ok';
-
-        }else{
-            // return 'not ok';
-            return redirect('error');
+            dd($response);
+            
         }
+
+        
+
+        // return $response['status'];
+        // if($response['status'] == 'success'){
+        //      $name = $response['data']['customer']['name'];
+        //      $email = $response['data']['customer']['email'];
+        //      $code = $this->generateCode(7);
+        //     //  return [$name, $email, $this->generateCode(7)];
+        //     $chekIfNotRedeemed = AccessCode::where('email', $email)->where('tx_id', $ref)->where('is_active', true)->first();
+        //     if($chekIfNotRedeemed){
+        //         return redirect('error');
+        //     }
+        //     AccessCode::create(['tx_id' => $ref,'name' => $name, 'email' => $email, 'amount' => '6', 'code' => $code]);
+        //     //send mail to the above email
+           
+        //     return redirect('success');
+        //     // return 'ok';
+
+        // }else{
+        //     // return 'not ok';
+        //     return redirect('error');
+        // }
        
     }
 

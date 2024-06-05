@@ -16,20 +16,29 @@ if(!function_exists('engagement')){
 }
 
 if(!function_exists('processPayment')){
-    function processPayment($amount, $currency, $package){
+    function processPayment($amount, $currency, $package, $level, $quantity){
 
         $payload = [
             "tx_ref"=> Str::random(16),
             "amount"=> $amount,
             "currency"=> $currency,
-            "redirect_url"=> url('validate/apidsdsds'),//"https://webhook.site/9d0b00ba-9a69-44fa-a43d-a82c33c36fdc",
+            "redirect_url"=> url('validate/api'),//"https://webhook.site/9d0b00ba-9a69-44fa-a43d-a82c33c36fdc",
+            "meta"=> [
+                'package' => $package,
+                "level_id" =>$level->id,
+                "level_name" =>$level->name,
+                "number_of_slot" =>$quantity,
+                "unitprice" =>$level->amount,
+                "amount_paid" =>$amount,
+            ],
             "customer"=> [
                 "email"=> auth()->user()->email,
                 "name"=> auth()->user()->name
             ],
             "customizations"=> [
-                "title"=> "Payment for ".$package,
-                // "logo"=> "http://www.piedpiper.com/app/themes/joystick-v27/images/logo.png"
+                "title"=> "Payment for ".$quantity." ".$package." package",
+                "logo"=> "https://payhankey.com/logo.png"
+               
             ]
         ];
         
