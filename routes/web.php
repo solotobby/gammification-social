@@ -2,6 +2,7 @@
 
 use App\Livewire\CreateProduct;
 use App\Livewire\User\Analytics;
+use App\Livewire\User\Partners;
 use App\Livewire\User\PostAnalytics;
 use App\Livewire\User\Profile;
 use App\Livewire\User\Settings;
@@ -44,13 +45,13 @@ Route::group(['namespace' => 'auth'], function () {
     Route::post('villa', [\App\Http\Controllers\GeneralController::class, 'processValidateCode'])->name('immaculate');
 
     Route::post('partner', [\App\Http\Controllers\GeneralController::class, 'partner'])->name('partner');
-    Route::get('partner/{id}', [\App\Http\Controllers\GeneralController::class, 'viewPartner']);
+    Route::get('partners/listed/lots', [\App\Http\Controllers\GeneralController::class, 'viewPartner']);
+    Route::get('activate/{id}', [\App\Http\Controllers\GeneralController::class, 'viewPartnerActivate']);
+    
 });
 
 Auth::routes();
 Route::middleware(['auth'])->group(function () {
-
-
 
     Route::get('/home', [\App\Http\Controllers\HomeController::class, 'index'])->name('home');
     Route::get('user/home', [\App\Http\Controllers\HomeController::class, 'userHome'])->name('user.home');
@@ -66,4 +67,5 @@ Route::middleware(['auth'])->group(function () {
     Route::get('analytics', Analytics::class);
     Route::get('settings', Settings::class);
     Route::get('wallets', Wallets::class);
+    Route::get('partner', Partners::class);
 });

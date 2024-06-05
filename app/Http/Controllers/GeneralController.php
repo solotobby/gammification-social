@@ -6,6 +6,7 @@ use App\Mail\AccessCodeMail;
 use App\Models\AccessCode;
 use App\Models\Level;
 use App\Models\Partner;
+use App\Models\PartnerSlot;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -55,7 +56,7 @@ class GeneralController extends Controller
 
     public function processValidateCode(Request $request){
         
-        Mail::to('support@payhankey.com')->send(new AccessCodeMail());
+        // Mail::to('support@payhankey.com')->send(new AccessCodeMail());
         // return [$request->validationCode, env('LOG_CHANNEL')];
 
         if($request->validationCode == 'LONZETY'){
@@ -65,7 +66,7 @@ class GeneralController extends Controller
             $level = Level::where('id', $request->level)->first();
             $chekIfNotRedeemed = AccessCode::where('email', $request->email)->where('tx_id', $ref)->where('is_active', true)->first();
             
-            Mail::to('support@payhankey.com')->send(new AccessCodeMail());
+            Mail::to($request->email)->send(new AccessCodeMail($code));
 
             if($chekIfNotRedeemed){
                 return redirect('error');
@@ -204,10 +205,20 @@ class GeneralController extends Controller
 
     }
 
-    public function viewPartner($id){
-        $partner = Partner::find($id);//->firstOrFail();
-        $codes = AccessCode::where(['partner_id'=> $id, 'is_active' => true])->get();
-        return view('view_partner', ['partner' => $partner, 'codes' => $codes]);
+    public function viewPartner(){
+        $partners = Partner::all();//->firstOrFail();
+        // $codes = AccessCode::where(['partner_id'=> $id, 'is_active' => true])->get();
+        return view('view_partner', ['partners' => $partners]);
+    }
+
+    public function viewPartnerActivate($id){
+        $part = Partner::find($id);
+        $part->status = true;
+        $part->save();
+
+        PartnerSlot::create(['partner_id' => $id, 'beginner' => 0, 'creator' => 0, 'influencer' => 0]);
+
+        return redirect('partners/listed/lots');
     }
 
 

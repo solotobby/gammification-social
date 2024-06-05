@@ -86,7 +86,7 @@
                 <div class="col-lg-6">
                     <h1 class="hero-1-title fw-bold text-shadow mb-4">Monetize your Posts</h1>
                     <div class="w-75 mb-5 mb-lg-0">
-                        <p class="text-muted mb-5 pb-5 font-size-17">The social media that pays you for every posts, views, comments and likes. Withdraw your earnings anytime. Minimum withdrawal of $20.</p>
+                        <p class="text-muted mb-5 pb-5 font-size-17">The social media that pays you for every posts, views, comments and likes. Withdraw your earnings anytime. Minimum withdrawal is $20.</p>
                         {{-- <p><span class="font-size-20 me-2">🥳️</span>Join our mailing list to receive updates before creating an account.</p>
                         <div class="subscribe-form">
                             <form action="#">
@@ -233,12 +233,15 @@
                     <h3 class="title mb-3">Earn more as a Partner</h3>
 
                     <p class="text-muted font-size-15 mb-4">
-                        As a partner, you can buy bulk access codes at a discounted price and resell to your friends and family. This makes you earn affiliate commissions and partner commissions. Our partners earn up to $500 daily.
+                        As a partner, you can buy bulk access codes at a discounted price and resell 
+                        to your friends and family. This makes you earn affiliate commissions and partner 
+                        commissions. Our partners earn up to $500 daily. Resell Access Code directly from your dashboard.
                     </p>
                     
                     <div class="mt-5">
-                        <a href="" target="_blank" data-bs-toggle="modal" data-bs-target="#exampleModalCenter-1" class="btn btn-primary me-2">Become a Partner </a>
+                        <a href="{{ url('login') }}" target="_blank"  class="btn btn-primary me-2">Sell Access Code</a>
                         {{-- <a href="" target="_blank" class="btn btn-soft-primary">Pay in Naira  </a> --}}
+                        {{-- data-bs-toggle="modal" data-bs-target="#exampleModalCenter-1" --}}
                     </div>
                     
                 </div>
