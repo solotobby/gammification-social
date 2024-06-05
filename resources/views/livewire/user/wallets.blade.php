@@ -15,7 +15,7 @@
                     ${{ $wallets->balance }}
                   </p>
                   <p class="text-muted mb-0">
-                    Main Balance <span><small>(Earnings from content monetization)</small></span>
+                    Main Balance <span><small>(Earnings from signup bonus and content monetization)</small></span>
                   </p>
                 </div>
               </div>
@@ -32,7 +32,7 @@
                     ${{ $wallets->referral_balance }}
                   </p>
                   <p class="text-muted mb-0">
-                    Referral Balance <span><small>(Earnings from inviting peopl on Payhankey)</small></span>
+                    Referral Balance <span><small>(Earnings from inviting friends on Payhankey)</small></span>
                   </p>
                 </div>
               </div>

@@ -22,7 +22,9 @@
                       </p>
                 </div>
                 <div class="col-lg-6">
-                    
+                    <div class="alert alert-info">
+                        Our partners earn up to $500 daily by selling access codes on behalf of Payhankey. We sell access codes to you at 10% discount for you to invite your followers and fans. An individual or organisation can be our partner.
+                    </div>
                   <div class="mb-4">
                     <div class="input-group">
                       <span class="input-group-text">
