@@ -1,1 +1,3 @@
 Test Email!
+
+{{ $code }}

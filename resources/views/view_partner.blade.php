@@ -48,30 +48,33 @@
     <table id="example" class="table table-striped table-bordered" style="width:100%">
             <thead>
                 <tr>
-                    <th>Package</th>
-                    <th>Code</th>
-                    <th>Amount</th>
-                    <th>Active</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Country</th>
+                    <th>Phone</th>
+                    <th>Status</th>
                     {{-- <th>Start date</th>
                     <th>Salary</th> --}}
                 </tr>
             </thead>
             <tbody>
-                @foreach ($codes as $code)
+                @foreach ($partners as $partner)
                     <tr>
-                        <td>{{ $code->name }}</td>
-                        <td>*******</td>
-                        <td>${{ $code->amount}}</td>
-                        <td>{{ $code->is_active == true ? 'YES' : 'NO' }}</td>
+                        <td>{{ $partner->name }}</td>
+                        <td>{{ $partner->email }}</td>
+                        <td>{{ $partner->country}}</td>
+                        <td>{{ $partner->phone}}</td>
+                        <td><a href="{{ url('activate/'.$partner->id) }}"> {{ $partner->status == true ? 'YES' : 'NO' }}</a></td>
                     </tr>
                 @endforeach
             </tbody>
             <tfoot>
                 <tr>
-                    <th>Package</th>
-                    <th>Code</th>
-                    <th>Amount</th>
-                    <th>Acive</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Country</th>
+                  <th>Phone</th>
+                  <th>Status</th>
                 </tr>
             </tfoot>
         </table>

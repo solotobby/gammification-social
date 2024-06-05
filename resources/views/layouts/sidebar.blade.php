@@ -29,7 +29,12 @@
         <a class="nav-main-link" href="{{ url('wallets') }}">
           <i class="nav-main-link-icon fa fa-wallet"></i>
           <span class="nav-main-link-name">Wallets</span>
-      </a>
+        </a>
+        <a class="nav-main-link" href="{{ url('partner') }}">
+          
+          <i class="nav-main-link-icon fa fa-briefcase"></i>
+          <span class="nav-main-link-name">Become a Partner</span>
+        </a>
       </li>
       
       {{-- <li class="nav-main-heading">Pages</li>
