@@ -254,7 +254,7 @@
 
                       <div class="mb-4">
                         
-                        <input type="text" class="form-control @error('referral_code') is-invalid @enderror form-control-lg form-control-alt" id="referral_code" name="referral_code" placeholder="Referral Code(optional)">
+                        <input type="text" class="form-control @error('referral_code') is-invalid @enderror form-control-lg form-control-alt" id="referral_code" name="referral_code" value="{{ @$ref }}" placeholder="Referral Code(optional)">
                           @error('referral_code')
                             <span class="invalid-feedback" role="alert">
                                 <strong>{{ $message }}</strong>
