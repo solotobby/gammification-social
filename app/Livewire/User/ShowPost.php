@@ -4,6 +4,7 @@ namespace App\Livewire\User;
 
 use App\Models\Comment;
 use App\Models\Post;
+use App\Models\UserComment;
 use App\Models\UserLike;
 use App\Models\UserView;
 use Illuminate\Support\Facades\Auth;
@@ -92,6 +93,14 @@ class ShowPost extends Component
         $pst = Post::with(['postComments'])->where(['id' => $this->postQuery])->first();
         $pst->comments += 1;
         $pst->save();
+
+        $checkUniqueComment = UserComment::where(['user_id' => auth()->user()->id, 'post_id' => $this->postQuery])->first();
+        
+        if(!$checkUniqueComment){
+            if(auth()->user()->id != $pst->user_id){
+                UserComment::create(['user_id' => auth()->user()->id, 'post_id' => $this->postQuery]);
+            }
+        }
 
         $this->reset('message');
         // $this->timeline->push($pst);

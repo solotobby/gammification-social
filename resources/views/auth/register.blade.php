@@ -244,8 +244,7 @@
                       </div>
 
                       <div class="mb-4">
-                        {{-- <small><a href="{{ url('access/code') }}" target="_blank" alt="How to get Access code">Get Access Code</a></small> --}}
-                        <input type="text" class="form-control @error('access_code') is-invalid @enderror form-control-lg form-control-alt" id="access_code" name="access_code" placeholder="Access Code" required>
+                        <small><a href="{{ url('/#pricing') }}" target="_blank" alt="How to get Access code">Get Access Code</a></small><input type="text" class="form-control @error('access_code') is-invalid @enderror form-control-lg form-control-alt" id="access_code" name="access_code" placeholder="Access Code" required>
                           @error('access_code')
                             <span class="invalid-feedback" role="alert">
                                 <strong>{{ $message }}</strong>
@@ -254,7 +253,7 @@
                       </div>
 
                       <div class="mb-4">
-                        {{-- <small><a href="{{ url('access/code') }}" target="_blank" alt="How to get Access code">Get Access Code</a></small> --}}
+                        
                         <input type="text" class="form-control @error('referral_code') is-invalid @enderror form-control-lg form-control-alt" id="referral_code" name="referral_code" placeholder="Referral Code(optional)">
                           @error('referral_code')
                             <span class="invalid-feedback" role="alert">

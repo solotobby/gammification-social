@@ -24,6 +24,10 @@ class Post extends Model
         return $this->hasMany(UserLike::class);
     }
 
+    public function unpaidLikes(){
+        return $this->likes()->where('is_paid', false)->count();
+    }
+
     public function isLikedBy(User $user)
     {
         // return $this->likes->contains('user_id', $user->id);
@@ -34,6 +38,16 @@ class Post extends Model
         return $this->belongsToMany(User::class, 'user_likes', 'post_id');
     }
 
+
+    public function views(){
+        
+        return $this->hasMany(UserView::class);
+    }
+
+    public function unpaidViews(){
+        return $this->views()->where('is_paid', false)->count();
+    }
+
     public function userViews(){
         return $this->belongsToMany(User::class, 'user_views', 'post_id');
     }
@@ -41,5 +55,16 @@ class Post extends Model
     public function postComments(){
         return $this->hasMany(Comment::class)->orderBy('created_at', 'desc');
     }
+
+    public function comments(){
+        
+        return $this->hasMany(UserComment::class);
+    }
+
+    public function unpaidComments(){
+        return $this->comments()->where('is_paid', false)->count();
+    }
+
+
 
 }

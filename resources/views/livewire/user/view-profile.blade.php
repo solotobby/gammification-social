@@ -15,6 +15,10 @@
                 <a href="javascript:void(0)" class="text-muted">{{ $user->total_likes+$user->total_likes_external }} Likes</a> &bull;
                 <a href="javascript:void(0)" class="text-muted">{{ $user->total_comments }} Comments</a>
                 </h2>
+                <h2 class="fs-sm fw-medium text-muted mt-2">
+                    Referral Code:{{ auth()->user()->referral_code }}
+                </h2>
+               
             </div>
             <div class="space-x-1">
                 @if(auth()->user()->id == $user->id)
