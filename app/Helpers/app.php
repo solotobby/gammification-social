@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Level;
 use App\Models\Post;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
@@ -65,5 +66,45 @@ if(!function_exists('maskCode')){
         $lastFour = substr($code, -4);
         $masked = str_repeat('*', $length - 8);
         return $firstFour . $masked . $lastFour;
+    }
+}
+
+if(!function_exists('viewsAmountCalculator')){
+    function viewsAmountCalculator($count) {
+        
+        $earnings_per_1000_view = Level::where('name', auth()->user()->level->name)->first()->earning_per_view;
+        
+        $singleView = $earnings_per_1000_view / 1000;//0.0009; //dollar
+
+        return $count * $singleView;
+        // return floor($count/1000) * 0.9;
+        
+    }
+}
+
+if(!function_exists('likesAmountCalculator')){
+    function likesAmountCalculator($count) {
+        
+        $earnings_per_1000_like = Level::where('name', auth()->user()->level->name)->first()->earning_per_like;
+        
+        $singleView = $earnings_per_1000_like / 1000;//0.0009; //dollar
+        
+        return $count * $singleView;
+        // return floor($count/1000) * 0.9;
+        
+    }
+}
+
+
+if(!function_exists('commentsAmountCalculator')){
+    function commentsAmountCalculator($count) {
+        
+        $earnings_per_1000_comment = Level::where('name', auth()->user()->level->name)->first()->earning_per_comment;
+        
+        $singleView = $earnings_per_1000_comment / 1000; 
+        
+        return $count * $singleView;
+        // return floor($count/1000) * 0.9;
+        
     }
 }
