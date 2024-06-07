@@ -16,7 +16,7 @@
                 <a href="javascript:void(0)" class="text-muted">{{ $user->total_comments }} Comments</a>
                 </h2>
                 <h2 class="fs-sm fw-medium text-muted mt-2">
-                    Referral Code:{{ auth()->user()->referral_code }}
+                    Referral Code: {{ url('/reg?referral_code='.auth()->user()->referral_code) }}
                 </h2>
                
             </div>

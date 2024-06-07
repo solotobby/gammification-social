@@ -50,6 +50,15 @@ class RegisterController extends Controller
         $this->middleware('guest');
     }
 
+    public function reg(Request $request){
+        $validated = $request->validate([
+             'referral_code' => ['sometimes', 'string', 'max:255']
+         ]); 
+
+        //  return $validated;
+        return view('auth.register', ['ref' => $validated['referral_code']]);
+    }
+
     public function regUser(Request $request){
         // return $request;
         $validated = $request->validate([
@@ -60,11 +69,22 @@ class RegisterController extends Controller
              // 'password' => ['required', 'string', 'min:8', 'confirmed'],
              'password' => ['required', 'string', 'min:8'],
              'access_code' => ['required', 'string'],
-             'referral_code' => ['sometimes']
+             'referral_code' => ['sometimes', 'string', 'max:255']
          ]);
  
          // return $validated;
- 
+
+         if(!empty($validated['referral_code'])){
+             //validate referral code
+            $refffff = User::where(['referral_code' => $validated['referral_code']])->first();
+
+            if(!$refffff){
+                return back()->with('error', 'Invalid Referral Code');
+            }
+
+         }
+
+       
           $accessCode = AccessCode::where('code', $validated['access_code'])->where('is_active', true)->first();
             if($accessCode){
                 $accessCode->is_active = false;
@@ -97,7 +117,7 @@ class RegisterController extends Controller
             'amount' => $accessCode->level->reg_bonus,
             'currency' => 'USD',
             'status' => 'successful',
-            'type' => 'reg_bonus',
+            'type' => 'registration_bonus',
             'action' => 'Credit',
             'description' => 'Reg Bonus for '.$user->name
          ]);
@@ -118,7 +138,7 @@ class RegisterController extends Controller
                 'amount' => $accessCode->level->ref_bonus,
                 'currency' => 'USD',
                 'status' => 'successful',
-                'type' => 'ref_bonus',
+                'type' => 'referral_bonus',
                 'action' => 'Credit',
                 'description' => 'Referral Bonus from '.$user->name
              ]);

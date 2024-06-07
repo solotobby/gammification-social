@@ -30,6 +30,7 @@ Route::group(['namespace' => 'auth'], function () {
     Route::get('/', function () {
         return view('welcome');
     });
+    Route::get('reg', [\App\Http\Controllers\Auth\RegisterController::class, 'reg']);
 
     Route::post('process/reg', [\App\Http\Controllers\Auth\RegisterController::class, 'regUser'])->name('reg.user');
     Route::get('access/code/{level}', [\App\Http\Controllers\GeneralController::class, 'accessCode']);
