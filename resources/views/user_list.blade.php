@@ -45,37 +45,38 @@
 </div> --}}
 
 <div class="container mt-5" style="margin-top:10px;">
-  <h4 class="mb-3">Our Esteem Partners</h4>
+  <h4 class="mb-3">User List</h4>
     <table id="example" class="table table-striped table-bordered" style="width:100%">
             <thead>
                 <tr>
                     <th>Name</th>
                     <th>Email</th>
-                    <th>Country</th>
-                    <th>Phone</th>
-                    <th>Status</th>
+                    <th>Level</th>
+                    {{-- <th>Phone</th> --}}
+                    <th>Registered</th>
                     {{-- <th>Start date</th>
                     <th>Salary</th> --}}
                 </tr>
             </thead>
             <tbody>
-                @foreach ($partners as $partner)
+                @foreach ($users as $user)
                     <tr>
-                        <td>{{ $partner->name }}</td>
-                        <td>{{ $partner->email }}</td>
-                        <td>{{ $partner->country}}</td>
-                        <td>{{ $partner->phone}}</td>
-                        <td><a href="{{ url('activate/'.$partner->id) }}"> {{ $partner->status == true ? 'YES' : 'NO' }}</a></td>
+                        <td>{{ $user->name }}</td>
+                        <td>{{ $user->email }}</td>
+                       
+                        <td>{{ @$user->level->name}}</td>
+                        <td>{{ $user->created_at}}</td>
+                        {{-- <td><a href="{{ url('activate/'.$partner->id) }}"> {{ $partner->status == true ? 'YES' : 'NO' }}</a></td> --}}
                     </tr>
                 @endforeach
             </tbody>
             <tfoot>
                 <tr>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Country</th>
-                  <th>Phone</th>
-                  <th>Status</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Level</th>
+                    {{-- <th>Phone</th> --}}
+                    <th>Registered</th>
                 </tr>
             </tfoot>
         </table>
