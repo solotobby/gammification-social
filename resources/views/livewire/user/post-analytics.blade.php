@@ -119,7 +119,7 @@
                 {{ $unpaidComments }}
               </p>
               <p class="text-white-75 mb-0">
-                Monetizes Comments
+                Monetized Comments
               </p>
             </div>
           </div>
