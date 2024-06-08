@@ -8,10 +8,10 @@
         <div wire:poll.visible.2s class="block block-rounded block-bordered" id="timelines">
             <div class="block-header block-header-default">
             <div>
-                <a class="img-link me-1" href="javascript:void(0)">
+                <a class="img-link me-1" href="{{url('profile/'.$timeline->user->id)}}">
                 <img class="img-avatar img-avatar32 img-avatar-thumb" src="{{asset('src/assets/media/avatars/avatar11.jpg')}}" alt="">
                 </a>
-                <a class="fw-semibold" href="javascript:void(0)">{{$timeline->user->name}}</a>
+                <a class="fw-semibold" href="{{url('profile/'.$timeline->user->id)}}">{{$timeline->user->name}}</a>
                 <span class="fs-sm text-muted">{{$timeline->created_at?->shortAbsoluteDiffForHumans()}} ago</span>
             </div>
             {{-- <div class="block-options">
