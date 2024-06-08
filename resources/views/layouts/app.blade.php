@@ -27,8 +27,12 @@
 
     <!-- Stylesheets -->
     <!-- Page JS Plugins CSS -->
-    <link rel="stylesheet" href="{{ asset('src/assets/js/plugins/highlightjs/styles/atom-one-dark.css') }}">
-    <link rel="stylesheet" href="{{ asset('src/assets/js/plugins/magnific-popup/magnific-popup.css') }}">
+    {{-- <link rel="stylesheet" href="{{ asset('src/assets/js/plugins/highlightjs/styles/atom-one-dark.css') }}"> --}}
+    {{-- <link rel="stylesheet" href="{{ asset('src/assets/js/plugins/magnific-popup/magnific-popup.css') }}"> --}}
+
+    <link rel="stylesheet" href="{{ asset('src/assets/js/plugins/slick-carousel/slick.css')}}">
+    <link rel="stylesheet" href="{{ asset('src/assets/js/plugins/slick-carousel/slick-theme.css')}}">
+
 
     <!-- Dashmix framework -->
     <link rel="stylesheet" id="css-main" href="{{ asset('src/assets/css/dashmix.css') }}">
@@ -853,10 +857,14 @@
     <script src="{{ asset('src/assets/js/lib/jquery.min.js')}}"></script>
 
     <!-- Page JS Plugins -->
-    <script src="{{ asset('src/assets/js/plugins/highlightjs/highlight.pack.min.js')}}"></script>
-    <script src="{{ asset('src/assets/js/plugins/magnific-popup/jquery.magnific-popup.min.js')}}"></script>
+    {{-- <script src="{{ asset('src/assets/js/plugins/highlightjs/highlight.pack.min.js')}}"></script> --}}
+    {{-- <script src="{{ asset('src/assets/js/plugins/magnific-popup/jquery.magnific-popup.min.js')}}"></script> --}}
+
+    <script src="{{ asset('src/assets/js/plugins/slick-carousel/slick.min.js')}}"></script>
+
+    <script src="{{ asset('src/assets/js/pages/be_comp_onboarding.min.js')}}"></script>
 
     <!-- Page JS Helpers (Highlight.js + Magnific Popup Plugins) -->
-    <script>Dashmix.helpersOnLoad(['js-highlightjs', 'jq-magnific-popup']);</script>
+    {{-- <script>Dashmix.helpersOnLoad(['js-highlightjs', 'jq-magnific-popup']);</script> --}}
   </body>
 </html>
