@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\LoginPoint;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -54,5 +55,12 @@ class HomeController extends Controller
         {
             LoginPoint::create(['user_id' => $user->id, 'date' => $date, 'point' => '20']);
         }
+    }
+
+    public function completeOnboarding(){
+        $user = User::where(['id'=>auth()->user()->id])->first();
+        $user->is_onboarded = true;
+        $user->save();
+        return redirect('timeline');
     }
 }
