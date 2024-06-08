@@ -55,6 +55,8 @@ Route::group(['namespace' => 'auth'], function () {
     Route::post('validate/slot', [\App\Http\Controllers\TransactionController::class, 'validateSlot'])->name('validate.slot');
 
     Route::post('account/charge', [\App\Http\Controllers\WebhookController::class, 'handle']);
+
+    Route::get('user/list', [\App\Http\Controllers\GeneralController::class, 'userList']);
 });
 
 Auth::routes();

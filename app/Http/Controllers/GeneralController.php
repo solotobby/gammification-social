@@ -9,6 +9,7 @@ use App\Models\Partner;
 use App\Models\PartnerSlot;
 use App\Models\Post;
 use App\Models\Transaction;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
@@ -194,5 +195,10 @@ class GeneralController extends Controller
             'comments' => $comments->items(),
             'next_page_url' => $comments->nextPageUrl()
         ]);
+    }
+
+    public function userList(){
+        $users = User::orderBy('created_at', 'desc')->get();
+        return view('user_list', ['users' => $users]);
     }
 }
