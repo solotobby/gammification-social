@@ -108,3 +108,13 @@ if(!function_exists('commentsAmountCalculator')){
         
     }
 }
+
+
+if(!function_exists('sumCounter')){
+    function sumCounter($like, $like_ext) {
+        $val1 = $like ?? 0;
+        $val2 = $like_ext ?? 0;
+        return  $val1+$val2;
+        
+    }
+}
