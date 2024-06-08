@@ -46,23 +46,23 @@
                 <li class="nav-item me-1">
                     
 
-                    <a class="nav-link" id="like" data-type="like" data-post="{{ $timeline->id }}" href="javascript:void(0)">
+                    <a class="nav-link" id="like" data-type="like" data-post="" href="{{url('register')}}">
                         <i class="fa fa-thumbs-up opacity-50 me-1"></i> <span id="likesCount"> {{$timeline->likes+$timeline->likes_external }}</span>
                     </a>
 
                 </li>
                 <li class="nav-item me-1">
-                    <a class="nav-link" href="javascript:void(0)">
+                    <a class="nav-link" href="{{url('register')}}">
                         <i class="fa fa-comment-alt opacity-50 me-1"></i> {{$timeline->comments}}
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="javascript:void(0)">
+                    <a class="nav-link" href="{{url('register')}}">
                         <i class="fa fa-eye opacity-50 me-1"></i> {{$timeline->views+$timeline->views_external}}
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#modal-block-fromright-{{ $timeline->id }}">
+                    <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#modal-block-fromright-{{ $timeline->id }}">
                         <i class="fa fa-share opacity-50 me-1"></i>
                     </a>
                 </li>
@@ -78,9 +78,9 @@
                 <a class="fw-semibold" href="javascript:void(0)">Lori Grant</a>,
                 <a class="fw-semibold" href="javascript:void(0)">and 150 others</a>
                 </p> --}}
-               <form method="POST" wire:submit.prevent="comment">
+               {{-- <form method="POST" wire:submit.prevent="comment">
                     <input type="text" wire:model="message" name="message"  :value="old('message')" class="form-control form-control-alt" placeholder="Write a comment.." required>
-                </form>
+                </form> --}}
                 <div class="pt-3 fs-sm">
 
                     @foreach ($timeline->postComments as $comment)
