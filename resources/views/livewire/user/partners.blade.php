@@ -105,7 +105,7 @@
                                     {{ $slot->beginner }}
                                 </p>
                                 <p class="text-muted mb-0">
-                                  Begginer 
+                                  Beginner 
                                 </p>
                               </div>
                             </div>
@@ -201,9 +201,10 @@
                               </button>
                             </form>
                         </div>
+                      
 
-                        <h2 class="content-heading">Send Slot</h2>
-                        
+                        <h2 class="content-heading">Sell Slot</h2>
+
                         @if(session()->has('status'))
                             <div class="alert alert-success" role="alert">
                                 {{ session('status') }}

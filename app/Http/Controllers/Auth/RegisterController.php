@@ -69,7 +69,7 @@ class RegisterController extends Controller
              // 'password' => ['required', 'string', 'min:8', 'confirmed'],
              'password' => ['required', 'string', 'min:8'],
              'access_code' => ['required', 'string'],
-             'referral_code' => ['sometimes', 'string', 'max:255']
+             'referral_code' => ['sometimes']
          ]);
  
          // return $validated;
