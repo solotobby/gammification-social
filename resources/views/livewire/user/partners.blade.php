@@ -25,6 +25,15 @@
                     <div class="alert alert-info">
                         Our partners earn up to $500 daily by selling access codes on behalf of Payhankey. We sell access codes to you at 10% discount for you to invite your followers and fans. An individual or organisation can be our partner.
                     </div>
+                    <div class="mb-4">
+                      <div class="input-group">
+                        <span class="input-group-text">
+                          Display Name
+                        </span>
+                        <input type="text" class="form-control" id="example-group1-input1" wire:model="name">
+                        <div style="color: brown">@error('name') {{ $message }} @enderror</div>
+                      </div>
+                    </div>
                   <div class="mb-4">
                     <div class="input-group">
                       <span class="input-group-text">
@@ -54,8 +63,7 @@
                       </span>
                       <select class="form-control" wire:model="country" required>
                         <option value="">Select Country</option>
-                        <option>Nigeria</option>
-                        <option>Germany</option>
+                        @include('layouts.country_list')
                       </select>
                      
                     </div>
@@ -139,6 +147,18 @@
                         </div>
 
                         <h2 class="content-heading">Purchase Slot</h2>
+
+                        @if (session('success'))
+                            <div class="alert alert-success" role="alert">
+                                {{ session('success') }}
+                            </div>
+                        @endif
+                        @if (session('error'))
+                            <div class="alert alert-danger" role="alert">
+                                {{ session('error') }}
+                            </div>
+                        @endif
+
                         <div class="col-xl-6 order-xl-0">
                             <form action="" method="POST" onsubmit="" wire:submit.prevent="purchaseSlot">
                               <div class="mb-4">
@@ -181,8 +201,63 @@
                               </button>
                             </form>
                         </div>
+
+                        <h2 class="content-heading">Send Slot</h2>
+                        
+                        @if(session()->has('status'))
+                            <div class="alert alert-success" role="alert">
+                                {{ session('status') }}
+                            </div>
+                        @endif
+
+                        @if(session()->has('fail'))
+                            <div class="alert alert-danger" role="alert">
+                                {{ session('fail') }}
+                            </div>
+                        @endif
+
+
+                        <div class="col-xl-6 order-xl-0">
+                          <form action="" method="POST" onsubmit="" wire:submit.prevent="sendSlot">
+                            <div class="mb-4">
+                              <label class="form-label" for="dm-profile-edit-password">Package</label>
+                              <select wire:model="package" class="form-control" required>
+                                  <option value="">Select Package</option>
+                                  <option>Beginner</option>
+                                  <option>Creator</option>
+                                  <option>Influencer</option>
+                              </select>
+                              <div style="color: brown">@error('package') {{ $message }} @enderror</div>
+                            </div>
+                           
+                            <div class="mb-4">
+                              <label class="form-label" for="dm-profile-edit-password">Recipient Full Name</label>
+                              <input type="text" wire:model="full_name"  class="form-control" placeholder="Enter full name" required>
+                              <div style="color: brown">@error('full_name') {{ $message }} @enderror</div>
+                            </div>
+
+                            <div class="mb-4">
+                              <label class="form-label" for="dm-profile-edit-password">Recipient Email Address</label>
+                              <input type="text" wire:model="email"  class="form-control"  placeholder="Enter email adress">
+                              <div style="color: brown">@error('email') {{ $message }} @enderror</div>
+                            </div>
+
+                         
+                           
+                            <button type="submit" class="btn btn-alt-primary">
+                              <i class="fa fa-location opacity-50 me-1"></i> Send
+                            </button>
+                          </form>
+                      </div>
                        
                     </div>
+
+
+                 
+
+                    
+
+
 
 
                 @endif

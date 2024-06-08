@@ -45,37 +45,42 @@
 </div> --}}
 
 <div class="container mt-5" style="margin-top:10px;">
-  <h4 class="mb-3">Out Esteem Partners</h4>
+    <h4>Payment made By Partners</h4>
+
     <table id="example" class="table table-striped table-bordered" style="width:100%">
             <thead>
                 <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Country</th>
-                    <th>Phone</th>
+                    <th>Ref</th>
+                    <th>Display Name</th>
+                    <th>Amount</th>
+                    <th>Currency</th>
                     <th>Status</th>
+                    <th>Validate</th>
+                    {{-- <th>Status</th> --}}
                     {{-- <th>Start date</th>
                     <th>Salary</th> --}}
                 </tr>
             </thead>
             <tbody>
-                @foreach ($partners as $partner)
+                @foreach ($transactions as $partner)
                     <tr>
-                        <td>{{ $partner->name }}</td>
-                        <td>{{ $partner->email }}</td>
-                        <td>{{ $partner->country}}</td>
-                        <td>{{ $partner->phone}}</td>
-                        <td><a href="{{ url('activate/'.$partner->id) }}"> {{ $partner->status == true ? 'YES' : 'NO' }}</a></td>
+                        <td>{{ $partner->ref }}</td>
+                        <td>{{ @$partner->user->partner->name }}</td>
+                        <td>{{ $partner->amount }}</td>
+                        <td>{{ $partner->currency}}</td>
+                        <td>{{ $partner->status}}</td>
+                        <td><a href="{{ url('agent/validate/activate/transaction/'.$partner->ref) }}" class="btn btn-secondary"> Validate Payment </a></td>
                     </tr>
                 @endforeach
             </tbody>
             <tfoot>
                 <tr>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Country</th>
-                  <th>Phone</th>
-                  <th>Status</th>
+                  <th>Ref</th>
+                    <th>Display Name</th>
+                    <th>Amount</th>
+                    <th>Currency</th>
+                    <th>Status</th>
+                    <th>Validate</th>
                 </tr>
             </tfoot>
         </table>

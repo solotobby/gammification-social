@@ -35,7 +35,7 @@ Route::group(['namespace' => 'auth'], function () {
     Route::post('process/reg', [\App\Http\Controllers\Auth\RegisterController::class, 'regUser'])->name('reg.user');
     Route::get('access/code/{level}', [\App\Http\Controllers\GeneralController::class, 'accessCode']);
     Route::post('process/access/code', [\App\Http\Controllers\GeneralController::class, 'processAccessCode']);
-    Route::get('validate/api', [\App\Http\Controllers\GeneralController::class, 'validateApi']);
+   
     Route::get('success', [\App\Http\Controllers\GeneralController::class, 'success']);
     Route::get('error', [\App\Http\Controllers\GeneralController::class, 'error']);
 
@@ -49,6 +49,12 @@ Route::group(['namespace' => 'auth'], function () {
     Route::get('partners/listed/lots', [\App\Http\Controllers\GeneralController::class, 'viewPartner']);
     Route::get('activate/{id}', [\App\Http\Controllers\GeneralController::class, 'viewPartnerActivate']);
     
+    Route::get('view/agent/transaction', [\App\Http\Controllers\TransactionController::class, 'viewAgentTransaction']);
+    Route::get('agent/validate/activate/transaction/{id}', [\App\Http\Controllers\TransactionController::class, 'validateAgentTransaction']);
+
+    Route::post('validate/slot', [\App\Http\Controllers\TransactionController::class, 'validateSlot'])->name('validate.slot');
+
+    Route::post('account/charge', [\App\Http\Controllers\WebhookController::class, 'handle']);
 });
 
 Auth::routes();
@@ -58,6 +64,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('user/home', [\App\Http\Controllers\HomeController::class, 'userHome'])->name('user.home');
     Route::get('admin/home', [\App\Http\Controllers\HomeController::class, 'adminHome'])->name('admin.home');
     Route::get('complete/onboarding', [\App\Http\Controllers\HomeController::class, 'completeOnboarding'])->name('complete.onboarding');
+    Route::get('validate/api', [\App\Http\Controllers\HomeController::class, 'validateApi']);
     Route::get('post/{username}/{id}', ViewPost::class);
 
     Route::get('timeline', Timeline::class);

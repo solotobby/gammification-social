@@ -8,6 +8,7 @@ use App\Models\Level;
 use App\Models\Partner;
 use App\Models\PartnerSlot;
 use App\Models\Post;
+use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
@@ -115,57 +116,9 @@ class GeneralController extends Controller
         return json_decode($res->getBody()->getContents(), true)['data']['link'];
     }
 
-    public function validateApi(){
-         $url = request()->fullUrl();
-        $url_components = parse_url($url);
-        parse_str($url_components['query'], $params);
-        if($params['status'] == 'cancelled'){
-            return redirect('partner');
-        }
-        $ref = $params['transaction_id']; 
+    
 
-        $response = $this->verifyFlutterwavePayment($ref);
-
-        if($response['status'] == 'success'){
-            dd($response);
-            
-        }
-
-        
-
-        // return $response['status'];
-        // if($response['status'] == 'success'){
-        //      $name = $response['data']['customer']['name'];
-        //      $email = $response['data']['customer']['email'];
-        //      $code = $this->generateCode(7);
-        //     //  return [$name, $email, $this->generateCode(7)];
-        //     $chekIfNotRedeemed = AccessCode::where('email', $email)->where('tx_id', $ref)->where('is_active', true)->first();
-        //     if($chekIfNotRedeemed){
-        //         return redirect('error');
-        //     }
-        //     AccessCode::create(['tx_id' => $ref,'name' => $name, 'email' => $email, 'amount' => '6', 'code' => $code]);
-        //     //send mail to the above email
-           
-        //     return redirect('success');
-        //     // return 'ok';
-
-        // }else{
-        //     // return 'not ok';
-        //     return redirect('error');
-        // }
-       
-    }
-
-    public function verifyFlutterwavePayment($ref){
-        
-        $res = Http::withHeaders([
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-            'Authorization' => 'Bearer '.env('FL_SECRET_KEY')
-        ])->get('https://api.flutterwave.com/v3/transactions/'.$ref.'/verify')->throw();
-
-        return json_decode($res->getBody()->getContents(), true);
-    }
+   
 
     public function generateCode($number){
         $alph = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";

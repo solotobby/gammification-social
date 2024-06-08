@@ -11,7 +11,7 @@ class AccessCode extends Model
 {
     use HasFactory, UuidTrait;
 
-    protected $fillable = ['tx_id', 'name', 'email', 'code', 'amount', 'is_active', 'level_id'];
+    protected $fillable = ['tx_id', 'name', 'email', 'code', 'amount', 'is_active', 'level_id', 'recepient_name', 'recepient_email'];
 
     public function level(){
         return $this->belongsTo(Level::class, 'level_id');

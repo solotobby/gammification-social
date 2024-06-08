@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\LoginPoint;
+use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 
 class HomeController extends Controller
 {
@@ -62,5 +64,75 @@ class HomeController extends Controller
         $user->is_onboarded = true;
         $user->save();
         return redirect('timeline');
+    }
+
+    public function validateApi(){
+        $url = request()->fullUrl();
+       $url_components = parse_url($url);
+       parse_str($url_components['query'], $params);
+       if($params['status'] == 'cancelled'){
+           return redirect('partner');
+       }
+       $ref = $params['transaction_id']; 
+
+       $response = $this->verifyFlutterwavePayment($ref);
+
+       if($response['status'] == 'success'){
+          
+            
+            Transaction::create([
+               'user_id' => auth()->user()->id,
+               'ref' => $response['data']['tx_ref'],
+               'amount' => $response['data']['amount'],
+               'currency' => $response['data']['currency'],
+               'status' =>  $response['data']['status'],
+               'type' => 'slot_purchase',
+               'action' => 'Credit',
+               'description' => 'Agent payment by '.auth()->user()->name, 
+               'meta' => json_encode($response['data']['meta']),
+               'customer' => json_encode($response['data']['customer'])
+            ]);
+
+
+            return redirect('partner')->with('success', 'Payment received. Your slot will be allocated in less than 3 hours');
+
+           
+       }
+
+       
+
+       // return $response['status'];
+       // if($response['status'] == 'success'){
+       //      $name = $response['data']['customer']['name'];
+       //      $email = $response['data']['customer']['email'];
+       //      $code = $this->generateCode(7);
+       //     //  return [$name, $email, $this->generateCode(7)];
+       //     $chekIfNotRedeemed = AccessCode::where('email', $email)->where('tx_id', $ref)->where('is_active', true)->first();
+       //     if($chekIfNotRedeemed){
+       //         return redirect('error');
+       //     }
+       //     AccessCode::create(['tx_id' => $ref,'name' => $name, 'email' => $email, 'amount' => '6', 'code' => $code]);
+       //     //send mail to the above email
+          
+       //     return redirect('success');
+       //     // return 'ok';
+
+       // }else{
+       //     // return 'not ok';
+       //     return redirect('error');
+       // }
+      
+   }
+
+
+   public function verifyFlutterwavePayment($ref){
+        
+        $res = Http::withHeaders([
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer '.env('FL_SECRET_KEY')
+        ])->get('https://api.flutterwave.com/v3/transactions/'.$ref.'/verify')->throw();
+
+        return json_decode($res->getBody()->getContents(), true);
     }
 }

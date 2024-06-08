@@ -10,5 +10,9 @@ class Transaction extends Model
 {
     use HasFactory, UuidTrait;
 
-    protected $fillable = ['user_id', 'ref', 'amount', 'currency', 'status', 'type', 'action', 'description'];
+    protected $fillable = ['user_id', 'ref', 'amount', 'currency', 'status', 'type', 'action', 'description', 'meta', 'customer'];
+
+    public function user(){
+        return $this->belongsTo(User::class);
+    }
 }
