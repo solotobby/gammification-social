@@ -10,7 +10,10 @@ class Partner extends Model
 {
     use HasFactory, UuidTrait;
 
-    protected $fillable = ['name', 'email', 'phone', 'identification', 'country', 'code', 'validation', 'status'];
+    protected $fillable = [ 'user_id', 'name', 'email', 'phone', 'identification', 'country', 'code', 'validation', 'status'];
 
 
+    public function partnerSlot(){
+        return $this->hasOne(PartnerSlot::class);
+    }
 }

@@ -57,6 +57,10 @@ class User extends Authenticatable
         return $this->hasOne(Wallet::class, 'user_id');
     }
 
+    public function partner(){
+        return $this->hasOne(Partner::class, 'user_id');
+    }
+
     public function posts(){
         return $this->hasMany(Post::class);
     }

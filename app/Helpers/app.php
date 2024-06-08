@@ -25,7 +25,7 @@ if(!function_exists('processPayment')){
             "currency"=> $currency,
             "redirect_url"=> url('validate/api'),//"https://webhook.site/9d0b00ba-9a69-44fa-a43d-a82c33c36fdc",
             "meta"=> [
-                'package' => $package,
+                "package" => $package,
                 "level_id" =>$level->id,
                 "level_name" =>$level->name,
                 "number_of_slot" =>$quantity,
