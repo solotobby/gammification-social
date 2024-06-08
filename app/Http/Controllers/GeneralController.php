@@ -198,7 +198,7 @@ class GeneralController extends Controller
     }
 
     public function userList(){
-        $users = User::orderBy('created_at', 'desc')->get();
+        $users = User::role('user')->orderBy('created_at', 'desc')->get();
         return view('user_list', ['users' => $users]);
     }
 }

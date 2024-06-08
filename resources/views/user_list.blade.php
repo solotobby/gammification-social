@@ -45,7 +45,7 @@
 </div> --}}
 
 <div class="container mt-5" style="margin-top:10px;">
-  <h4 class="mb-3">User List</h4>
+  <h4 class="mb-3">User List - {{ $users->count() }}</h4>
     <table id="example" class="table table-striped table-bordered" style="width:100%">
             <thead>
                 <tr>

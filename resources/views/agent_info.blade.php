@@ -173,7 +173,11 @@
             <input type="hidden" name="package" value="{{ htmlspecialchars($data['package'])  }}">
             <input type="hidden" name="slot_number" value="{{ htmlspecialchars($data['number_of_slot']) }}">
             <input type="hidden" name="tx_ref" value="{{ $transaction->ref }}">
-        <button class="btn btn-success btn-custom" type="submit"><i class="fas fa-check"></i> Validate</button>
+            @if($transaction->status == 'allocated')
+            <button class="btn btn-success btn-custom" type="submit"><i class="fas fa-check"></i> Validate</button>
+            @else
+            <button class="btn btn-success btn-custom disabled" ><i class="fas fa-check"></i> Validated</button>
+            @endif
         <button class="btn btn-danger btn-custom"><i class="fas fa-times"></i> Reject</button>    
     </form>
      
