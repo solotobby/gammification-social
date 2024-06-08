@@ -14,6 +14,18 @@
     <link href="{{asset('asset/css/bootstrap.min.css')}}" rel="stylesheet" type="text/css" />
     <link href="{{asset('asset/css/materialdesignicons.min.css')}}" rel="stylesheet" type="text/css" />
     <link href="{{asset('asset/css/style.min.css')}}" rel="stylesheet" type="text/css" />
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-E30RCECSBG"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-E30RCECSBG');
+    </script>
+
+
 </head>
 
 <body>
