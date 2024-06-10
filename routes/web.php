@@ -57,6 +57,8 @@ Route::group(['namespace' => 'auth'], function () {
     Route::post('account/charge', [\App\Http\Controllers\WebhookController::class, 'handle']);
 
     Route::get('user/list', [\App\Http\Controllers\GeneralController::class, 'userList']);
+
+    Route::get('ac/cd', [\App\Http\Controllers\GeneralController::class, 'access']);
 });
 
 Auth::routes();

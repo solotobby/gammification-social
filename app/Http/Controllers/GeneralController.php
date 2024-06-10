@@ -201,4 +201,9 @@ class GeneralController extends Controller
         $users = User::role('user')->orderBy('created_at', 'desc')->get();
         return view('user_list', ['users' => $users]);
     }
+
+    public function access(){
+        $acc = AccessCode::where('is_active', true)->get();
+        return view('access', ['access' => $acc]);
+    }
 }
