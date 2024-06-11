@@ -23,8 +23,7 @@
       font-weight: bold;
     }
     td{
-    word-break:break;
-    
+      word-break:break;
     }
   </style>
 </head>

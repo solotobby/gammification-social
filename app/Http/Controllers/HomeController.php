@@ -93,10 +93,8 @@ class HomeController extends Controller
                'customer' => json_encode($response['data']['customer'])
             ]);
 
-
             return redirect('partner')->with('success', 'Payment received. Your slot will be allocated in less than 3 hours');
 
-           
        }
 
        
