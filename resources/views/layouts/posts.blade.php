@@ -1,4 +1,4 @@
-@forelse ($timelines as $timeline)
+@forelse ($posts as $timeline)
 {{-- wire:poll.visible.2.5s --}}
     <div wire:poll.visible.430s  class="block block-rounded block-bordered" id="timelines">
         <div class="block-header block-header-default">
@@ -219,6 +219,8 @@
 @empty
     no posts
 @endforelse
+
+<button wire:click='loadMore'  class="btn btn-alt-primary btn-sm">Load More</button>
 
 {{-- @if($timelines->hasMorePages())
         <button wire:click="loadMore">Load More</button>

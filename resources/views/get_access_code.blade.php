@@ -3,10 +3,10 @@
 
 <head>
     <meta charset="utf-8" />
-    <title>Pawo</title>
+    <title>Payhankey | Monetize your posts, comments and views to earn daily</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Premium Bootstrap 4 Landing Page Template" />
-    <meta name="keywords" content="bootstrap 4, premium, marketing, multipurpose" />
+    <meta name="description" content="Payhankey | Monetize your posts, comments and views to earn daily" />
+    <meta name="keywords" content="money, facebook. twitter, instagram premium, marketing, multipurpose" />
     <meta content="Themesbrand" name="author" />
     <!-- favicon -->
     <link rel="shortcut icon" href="{{asset('favicon.png')}}">
@@ -14,6 +14,7 @@
     <link href="{{asset('asset/css/bootstrap.min.css')}}" rel="stylesheet" type="text/css" />
     <link href="{{asset('asset/css/materialdesignicons.min.css')}}" rel="stylesheet" type="text/css" />
     <link href="{{asset('asset/css/style.min.css')}}" rel="stylesheet" type="text/css" />
+
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     
     <!-- Google tag (gtag.js) -->

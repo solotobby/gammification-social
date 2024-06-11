@@ -16,6 +16,8 @@ class ViewProfile extends Component
 
     public User $user;
 
+    public $perpage = 10;
+
     #[On('view-profile.{user.id}')] 
 
     public function mount($id){
@@ -27,7 +29,7 @@ class ViewProfile extends Component
         $this->id = $id;
         // dd($this->id);
         $this->user = User::withPostStats($this->id)->first();
-        $this->timelines = $this->user->posts()->where(['status'=>'LIVE', 'user_id' =>  $this->id])->orderBy('created_at', 'desc')->get();//$this->timelines();
+        $this->timelines = $this->user->posts()->where(['status'=>'LIVE', 'user_id' =>  $this->id])->orderBy('created_at', 'desc')->take($this->perpage)->get();//$this->timelines();
        
     }
 
@@ -73,8 +75,17 @@ class ViewProfile extends Component
          
      }
 
+     public function loadMore(){
+        $this->perpage += 10;
+
+     }
+
     public function render()
     {
-        return view('livewire.user.view-profile');
+        // $timelines = $this->timeline($this->id);
+
+        $timelines = $this->user->posts()->where(['status'=>'LIVE', 'user_id' =>  $this->id])->orderBy('created_at', 'desc')->take($this->perpage)->get();//$this->timelines();
+
+        return view('livewire.user.view-profile', ['posts' => $timelines]);
     }
 }

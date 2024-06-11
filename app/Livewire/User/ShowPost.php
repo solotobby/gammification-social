@@ -20,16 +20,16 @@ class ShowPost extends Component
 
     public $timeline;
 
-    public $id;
+    // public $id;
 
-    public $comments = [];
-    public $perPage = 5;
-    public $page = 1;
+    // public $comments = [];
+    // public $perPage = 5;
+    // public $page = 1;
 
-    #[Validate('required|string')]
-    public $message = '';
+    // #[Validate('required|string')]
+    // public $message = '';
 
-    protected $listeners = ['refreshComments' => 'refreshComments'];
+    // protected $listeners = ['refreshComments' => 'refreshComments'];
 
     public function mount($query){
         
@@ -44,7 +44,7 @@ class ShowPost extends Component
         // $this->comments;
 
         // Load initial comments
-        $this->loadMore();
+        // $this->loadMore();
 
         $regView = UserView::where(['user_id' => auth()->user()->id, 'post_id' => $this->timeline->id])->first();
         if(!$regView){
@@ -58,62 +58,62 @@ class ShowPost extends Component
 
     }
 
-    public function loadMore()
-    {
-        $additionalComments = $this->timeline->postComments()
-            ->orderBy('created_at', 'asc')
-            ->paginate($this->perPage, ['*'], 'page', $this->page);
+    // public function loadMore()
+    // {
+    //     $additionalComments = $this->timeline->postComments()
+    //         ->orderBy('created_at', 'asc')
+    //         ->paginate($this->perPage, ['*'], 'page', $this->page);
 
-        $this->comments = array_merge($this->comments, $additionalComments->items());
-        $this->page++;
+    //     $this->comments = array_merge($this->comments, $additionalComments->items());
+    //     $this->page++;
         
-    }
+    // }
 
-    public function toggleLike($postId){
+    // public function toggleLike($postId){
 
-        $post = Post::where('unicode', $postId)->first();
+    //     $post = Post::where('unicode', $postId)->first();
         
-        if ($post->isLikedBy(Auth::user())) {
-            $post->likes()->where('user_id', Auth::id())->delete();
-            $post->decrement('likes');
-        } else {
-            $post->likes()->create(['user_id' => Auth::id()]);
-            $post->increment('likes');
-        }
+    //     if ($post->isLikedBy(Auth::user())) {
+    //         $post->likes()->where('user_id', Auth::id())->delete();
+    //         $post->decrement('likes');
+    //     } else {
+    //         $post->likes()->create(['user_id' => Auth::id()]);
+    //         $post->increment('likes');
+    //     }
 
-        $this->timeline($post->id);
+    //     $this->timeline($post->id);
 
-        // $this->dispatch('user.timeline');
-     }
+    //     // $this->dispatch('user.timeline');
+    //  }
 
    
 
-     public function comment(){
-        Comment::create(['user_id' => auth()->user()->id, 'post_id' =>$this->postQuery, 'message' =>  $this->message]);
-        $pst = Post::with(['postComments'])->where(['id' => $this->postQuery])->first();
-        $pst->comments += 1;
-        $pst->save();
+    //  public function comment(){
+    //     Comment::create(['user_id' => auth()->user()->id, 'post_id' =>$this->postQuery, 'message' =>  $this->message]);
+    //     $pst = Post::with(['postComments'])->where(['id' => $this->postQuery])->first();
+    //     $pst->comments += 1;
+    //     $pst->save();
 
-        $checkUniqueComment = UserComment::where(['user_id' => auth()->user()->id, 'post_id' => $this->postQuery])->first();
+    //     $checkUniqueComment = UserComment::where(['user_id' => auth()->user()->id, 'post_id' => $this->postQuery])->first();
         
-        if(!$checkUniqueComment){
-            if(auth()->user()->id != $pst->user_id){
-                UserComment::create(['user_id' => auth()->user()->id, 'post_id' => $this->postQuery]);
-            }
-        }
+    //     if(!$checkUniqueComment){
+    //         if(auth()->user()->id != $pst->user_id){
+    //             UserComment::create(['user_id' => auth()->user()->id, 'post_id' => $this->postQuery]);
+    //         }
+    //     }
 
-        $this->reset('message');
-        // $this->timeline->push($pst);
-        $this->dispatch('refreshComments');
+    //     $this->reset('message');
+    //     // $this->timeline->push($pst);
+    //     $this->dispatch('refreshComments');
 
-    }
+    // }
 
-    public function refreshComments()
-    {
-        // Load initial comments
-        $this->timeline = Post::with(['postComments'])->where('id', $this->postQuery)->first();
+    // public function refreshComments()
+    // {
+    //     // Load initial comments
+    //     $this->timeline = Post::with(['postComments'])->where('id', $this->postQuery)->first();
        
-    }
+    // }
 
     public function render()
     {

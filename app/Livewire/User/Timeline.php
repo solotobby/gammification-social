@@ -14,16 +14,16 @@ use Livewire\Attributes\On;
 #[On('user.timeline')]
 class Timeline extends Component
 {
+
     public $count = 0;
+
     public $timelines, $id, $long, $highestEngagement; 
 
-  
     public $isLiked;
     
     // use WithPagination;
 
-    
-    public $perPage = 10;
+    public $perPage = 2;
 
     public $postId;
     #[Validate('required|string')]
@@ -35,18 +35,18 @@ class Timeline extends Component
     protected $listeners = ['refreshTimeline' => 'refreshTimeline'];
 
     public function timelines(){
-       return Post::with('likes')
+
+        return Post::with('likes')
                 ->where('status', 'LIVE')
                 ->orderBy('created_at', 'desc')
+                // ->take($this->perPage)
                 ->get();
-
     }
 
 
-    public function mount(){
-        $this->timelines = $this->timelines();
-       
-    }
+    // public function mount(){
+    //     $this->timelines = $this->timelines();
+    // }
 
      public function toggleLike($postId){
 
@@ -65,11 +65,11 @@ class Timeline extends Component
         $this->dispatch('user.timeline');
      }
 
-     public function loadMore()
-    {
-        $this->perPage += 10;
-        $this->timelines = $this->timelines();
-    }
+     public function loadMore(){
+        $this->perPage += 2;
+     }
+
+    
 
 
     public function post(){
@@ -104,12 +104,12 @@ class Timeline extends Component
 
     public function render()
     {
-        // $timelines= Post::with('likes')
-        //         ->where('status', 'LIVE')
-        //         ->orderBy('created_at', 'desc')
-        //         ->paginate($this->perPage);
+        $timelines= Post::with('likes')
+                ->where('status', 'LIVE')
+                ->orderBy('created_at', 'desc')
+                ->take($this->perPage)->get();
 
-        return view('livewire.user.timeline');
+        return view('livewire.user.timeline', ['timelines' => $timelines]);
     }
 
 }
