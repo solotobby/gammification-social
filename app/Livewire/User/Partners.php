@@ -28,6 +28,8 @@ class Partners extends Component
 
     public $partners, $slot;
     protected $listeners = ['refreshPartner' => 'refreshPartner'];
+
+    
     public function partner(){
 
         $validated = $this->validate([ 
@@ -41,7 +43,6 @@ class Partners extends Component
         
         return redirect()->to('/partner');
 
-        
     }
 
     public function purchaseSlot(){
@@ -74,6 +75,7 @@ class Partners extends Component
     }
 
     public function sendSlot(){
+
         $validated = $this->validate([ 
             'email' => 'required|email',
             'full_name' => 'required|string',
@@ -82,8 +84,6 @@ class Partners extends Component
         ]);
 
         $prtner = Partner::where('user_id', auth()->user()->id)->first();
-
-        // dd($prtner);
        
         $slot= $prtner->partnerSlot->id;
 
