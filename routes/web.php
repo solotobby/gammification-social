@@ -73,9 +73,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('validate/api', [\App\Http\Controllers\HomeController::class, 'validateApi']);
     Route::get('post/{username}/{id}', ViewPost::class);
 
-    Route::get('timeline', Timeline::class);
+    // Route::get('timeline', Timeline::class);
 
-    Route::get('posts', Posts::class);
+    Route::get('timeline', Posts::class);
    
     Route::get('profile/{id}', ViewProfile::class);
     // Route::get('show/{query}', ShowPost::class)->name('show');

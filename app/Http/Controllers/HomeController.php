@@ -33,8 +33,8 @@ class HomeController extends Controller
             return redirect()->route('admin.home');
         }else{
             $this->loginPoints(auth()->user());
-            // return redirect('timeline');
-            return redirect('posts');
+            return redirect('timeline');
+          
             // return redirect()->route('user.home');
         }
        
