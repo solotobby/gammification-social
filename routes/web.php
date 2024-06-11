@@ -4,8 +4,10 @@ use App\Livewire\CreateProduct;
 use App\Livewire\User\Analytics;
 use App\Livewire\User\Partners;
 use App\Livewire\User\PostAnalytics;
+use App\Livewire\User\Posts;
 use App\Livewire\User\Profile;
 use App\Livewire\User\Settings;
+use App\Livewire\User\ShowNewPosts;
 use App\Livewire\User\ShowPost;
 use App\Livewire\User\Timeline;
 use App\Livewire\User\ViewProfile;
@@ -72,9 +74,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('post/{username}/{id}', ViewPost::class);
 
     Route::get('timeline', Timeline::class);
+
+    Route::get('posts', Posts::class);
    
     Route::get('profile/{id}', ViewProfile::class);
-    Route::get('show/{query}', ShowPost::class)->name('show');
+    // Route::get('show/{query}', ShowPost::class)->name('show');
+    Route::get('show/{query}', ShowNewPosts::class);
     Route::get('post/timeline/{id}/analytics', PostAnalytics::class);
     Route::get('analytics', Analytics::class);
     Route::get('settings', Settings::class);
