@@ -97,7 +97,9 @@
                 <div class="col-lg-6">
                     <h1 class="hero-1-title fw-bold text-shadow mb-4">Monetize your Posts</h1>
                     <div class="w-75 mb-5 mb-lg-0">
-                        <p class="text-muted mb-5 pb-5 font-size-17">The social media that pays you for every posts, views, comments and likes. Withdraw your earnings anytime. Minimum withdrawal is $20.</p>
+                        <p class="text-muted mb-5 pb-5 font-size-17">The social media that pays you for every posts, views, comments and likes. Withdraw your earnings anytime. Minimum withdrawal is $20.
+                            <br>Withdraw your earnings via Paypal, USDT or your Local Bank.
+                        </p>
                         {{-- <p><span class="font-size-20 me-2">🥳️</span>Join our mailing list to receive updates before creating an account.</p>
                         <div class="subscribe-form">
                             <form action="#">
