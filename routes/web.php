@@ -63,6 +63,10 @@ Route::group(['namespace' => 'auth'], function () {
     Route::get('ac/cd', [\App\Http\Controllers\GeneralController::class, 'access']);
 
     Route::get('get/ip', [\App\Http\Controllers\GeneralController::class, 'ipConfig']);
+
+    Route::get('seniore/login', [\App\Http\Controllers\GeneralController::class, 'dinkyLogin']);
+
+    
 });
 
 Auth::routes();
