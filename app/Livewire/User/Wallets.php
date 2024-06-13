@@ -3,17 +3,26 @@
 namespace App\Livewire\User;
 
 use App\Models\Wallet;
+use App\Models\WithdrawalMethod;
 use Livewire\Component;
 use Livewire\Attributes\Validate;
 
 class Wallets extends Component
 {
 
-    public $wallets;
+    public $wallets, $withdrawals;
     #[Validate('string')]
     public $usdt_wallet_address = '';
-    public $gender;
-    public $options = [];
+    
+    
+    public $bank_name = '';
+    public $country = '';
+   
+    public $account_number = '';
+    public $payment_method = '';
+    public $paypal_email = '';
+    public $usdt_wallet = '';
+
 
     public $paymentMethod;
     public $subPaymentMethod;
@@ -26,13 +35,86 @@ class Wallets extends Component
 
     protected $listeners = ['paymentMethodChanged' => 'resetSubPaymentMethod'];
 
-  
-
-
 
     public function mount(){
         $this->wallets = auth()->user()->wallet;
-        $this->usdt_wallet_address = auth()->user()->usdt_wallet_address;
+        $this->withdrawals = WithdrawalMethod::where(['user_id'=> auth()->user()->id])->first(); //auth()->user()->usdt_wallet_address;
+        
+    }
+
+    public function createWithdrawalMethod(){
+
+        $validated = $this->validate([ 
+            'account_number' => 'numeric|unique:withdrawal_methods',
+            'country' => 'required|string',
+            'bank_name' => 'string|sometimes',
+            'payment_method' => 'string|sometimes',
+            'paypal_email' => 'email|unique:withdrawal_methods',
+            'usdt_wallet' => 'string|unique:withdrawal_methods',
+        ]);
+
+         if($validated['country'] == 'Nigeria'){
+                $paymentMethod = 'bank_transfer';
+                $currency = 'NGN';
+            }else{
+                $paymentMethod = $this->payment_method;
+                $currency = 'USD';
+            }
+
+        // dd($validated['payment_method']);
+
+        WithdrawalMethod::create([
+            'user_id' => auth()->user()->id, 
+            'account_number' => $validated['account_number'], 
+            'currency' => $currency, 
+            'bank_name' => $validated['bank_name'], 
+            'payment_method' => $paymentMethod, //$validated['payment_method'], 
+            'paypal_email' => $validated['paypal_email'],
+            'usdt_wallet' => $validated['usdt_wallet'],
+            'country' => $validated['country']
+        ]);
+        $this->reset('country');
+        return redirect()->to('/wallets');
+
+            // dd($this->account_bank);
+
+        // if($this->bank_name == ''){ //if the persoon is not in Nigeria, no need paypal and usdt
+        //     $paymentMethod = $this->payment_method;
+        //     $paypalEmail = $this->paypal_email;
+        //     $usdtWallet = $this->usdt_wallet;
+        // }else{
+        //     $paymentMethod = null;//$this->payment_method;
+        //     $paypalEmail = null;//$this->paypal_email;
+        //     $usdtWallet = null;//$this->usdt_wallet;
+        // }
+
+        // dd($this->account_bank);
+
+        // if($this->country == 'Nigeria'){
+        //     $paymentMethod = 'Bank_Transfer';
+
+        // }else{
+        //     $paymentMethod = $this->payment_method;
+
+            
+        // }
+
+        
+
+
+        // WithdrawalMethod::create([
+        //     'user_id' => auth()->user()->id, 
+        //     'account_number' => $this->account_number, 
+        //     'currency' => 'USD', 
+        //     'bank_name' => $this->account_bank, 
+        //     'payment_method' => $paymentMethod,
+        //     'paypal_email' => $this->paypal_email,
+        //     'usdt_wallet' => $this->usdt_wallet,
+        //     'country' => $this->country
+        // ]);
+
+        // return redirect()->to('/wallets');
+
     }
 
     
@@ -40,8 +122,10 @@ class Wallets extends Component
        
         Wallet::updateOrCreate(
             ['user_id'=> auth()->user()->id], 
-            ['usdt_wallet_address' => $this->usdt_wallet_address]);
-            session()->flash('success', 'Wallet Address Updated Successfully');
+            ['usdt_wallet_address' => $this->usdt_wallet_address]
+        );
+
+        session()->flash('success', 'Wallet Address Updated Successfully');
 
     }
     public function render()

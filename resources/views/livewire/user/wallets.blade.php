@@ -82,9 +82,9 @@
         </div>
 
         <div class="row">
-{{-- 
+
           <div class="col-md-12">
-            <form action="" method="POST">
+            <form action="" method="POST" wire:submit.prevent="createWithdrawalMethod">
               <div class="block block-rounded">
                 <div class="block-header block-header-default block-header">
                   <h3 class="block-title">Withdrawal Method</h3>
@@ -101,32 +101,37 @@
                     </div>
                 @endif
 
-                @if(empty($wallets->usdt_wallet_address))
+                @if(!$withdrawals)
                     <div class="block-content">
                       <div class="row justify-content-center py-sm-3 py-md-5">
                         <div class="col-sm-10 col-md-6">
                           <div class="mb-4">
                             <label class="form-label" >Select Country</label>
-                            <select class="form-control" id="country" name="country" onchange="handleCountryChange()">
+                            <select class="form-control" id="country" wire:model="country" onchange="handleCountryChange()" required>
                               <option value="">Select Country</option> 
+                              <option value="Nigeria">Nija</option> 
                               @include('layouts.country_list')
                             </select>
+                            <div style="color: brown">@error('country') {{ $message }} @enderror</div>
                           </div>
 
 
                           <div id="nigeriaOptions" style="display: none;" class="mb-0">
                             <hr>
                             <div class="form-group">
-                                <label for="bank">Select Bank</label>
-                                <select class="form-control" id="bank" name="bank">
-                                    <option value="naiara">Naiara</option>
+                                <label for="bank">Select Bank </label>
+                                <select class="form-control" id="bank" wire:model="bank_name">
+                                  <option value="">Choose One...</option>
+                                    <option value="Naiara">Naiara</option>
                                     <option value="kobo">Kobo</option>
                                 </select>
+                                <div style="color: brown">@error('bank_name') {{ $message }} @enderror</div>
                             </div>
                             <div class="form-group">
                                 <label for="accountNumber">Account Number</label>
-                                <input type="text" class="form-control" id="accountNumber" name="accountNumber" placeholder="Enter Account Number">
+                                <input type="text" class="form-control" id="accountNumber" wire:model="account_number" placeholder="Enter Account Number">
                             </div>
+                            <div style="color: brown">@error('account_number') {{ $message }} @enderror</div>
                             
                         </div>
 
@@ -135,21 +140,25 @@
                           <hr>
                           <div class="form-group mb-2">
                               <label for="paymentMethod">Select Payment Method</label>
-                              <select class="form-control" id="paymentMethod" name="paymentMethod">
-                                  <option value="paypal">PayPal</option>
+                              <select class="form-control" id="paymentMethod" name="paymentMethod" wire:model="payment_method">
+                                  <option value="">Choose One...</option>  
+                                <option value="paypal">PayPal</option>
                                   <option value="usdt">USDT Wallet</option>
                               </select>
+                              <div style="color: brown">@error('payment_method') {{ $message }} @enderror</div>
                           </div>
                           <div id="paypalFields" style="display: none;" class="mb-3">
                               <div class="form-group">
                                   <label for="paypalEmail">PayPal Email</label>
-                                  <input type="email" class="form-control" id="paypalEmail" name="paypalEmail" placeholder="Enter PayPal Email">
+                                  <input type="email" class="form-control" id="paypalEmail" name="paypalEmail" wire:model="paypal_email" placeholder="Enter PayPal Email">
+                                  <div style="color: brown">@error('paypal_email') {{ $message }} @enderror</div>
                               </div>
                           </div>
                           <div id="usdtFields" style="display: none;" class="mb-3">
                               <div class="form-group">
                                   <label for="usdtWallet">USDT Wallet Address</label>
-                                  <input type="text" class="form-control" id="usdtWallet" name="usdtWallet" placeholder="Enter USDT Wallet Address">
+                                  <input type="text" class="form-control" id="usdtWallet" name="usdtWallet" wire:model="usdt_wallet" placeholder="Enter USDT Wallet Address">
+                                  <div style="color: brown">@error('usdt_wallet') {{ $message }} @enderror</div>
                               </div>
                           </div>
                       </div>
@@ -161,33 +170,44 @@
                 @else
                   <div class="block-content">
                     <div class="row justify-content-center py-sm-3 py-md-5">
-                    USDT Wallet Address: {{  maskCode($wallets->usdt_wallet_address) }}
+                      @if($withdrawals->payment_method == 'usdt')
+                        <center class="mb-3"> <strong>Your preferred Payment method</strong></center>
+                        USDT Wallet Address: {{  maskCode($withdrawals->usdt_wallet) }}
+                      @elseif($withdrawals->payment_method == 'paypal')
+                      <center class="mb-3"> <strong>Your preferred Payment method</strong></center>
+                        PayPal Email: {{  maskCode($withdrawals->paypal_email) }}
+                        @else
+                        <center class="mb-3"> <strong>Your preferred Payment method</strong></center>
+                        Bank Name: {{  $withdrawals->bank_name }}<br>
+                        Account Number: {{ $withdrawals->account_number }}
+
+                        @endif
                     </div>
                   </div>
                 @endif 
 
                 <div class="block-content block-content-full block-content-sm bg-body-light text-end">
                
-                  @if(empty($wallets->usdt_wallet_address))
-                  <button type="submit" class="btn btn-sm btn-alt-primary">
-                    <i class="fa fa-check opacity-50 me-1"></i> Submit
-                  </button>
+                  @if(!$withdrawals)
+                    <button type="submit" class="btn btn-sm btn-alt-primary">
+                      <i class="fa fa-check opacity-50 me-1"></i> Submit
+                    </button>
                   @else
-                  <button type="button" class="btn btn-sm btn-alt-primary">
+                  {{-- <button type="button" class="btn btn-sm btn-alt-primary">
                     <i class="fa fa-check opacity-50 me-1" @disabled(true)></i> Submitted
-                  </button>
+                  </button> --}}
                   @endif
                 </div>
               </div>
             </form>
           </div>
---}}
 
 
 
 
 
-            <div class="col-md-6 col-xl-6">
+
+            {{-- <div class="col-md-6 col-xl-6">
                 
                 
 
@@ -210,7 +230,7 @@
 
                 @endif
                 
-            </div>
+            </div> --}}
         </div>
 
 
