@@ -164,7 +164,7 @@
                                     <i class="mdi mdi-account-cash"></i>
                                 </div>
                                 <h5 class="fw-bold mb-2 wc-title mt-4">Withdraw Anytime</h5>
-                                <p class="text-muted mb-0 font-size-15 wc-subtitle">Withdraw your earnings via Paypal or USDT.</p>
+                                <p class="text-muted mb-0 font-size-15 wc-subtitle">Withdraw your earnings via Paypal, USDT or to yout Local Bank</p>
                             </div>
                         </div>
                     </div>
