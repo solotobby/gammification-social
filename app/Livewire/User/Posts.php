@@ -3,6 +3,7 @@
 namespace App\Livewire\User;
 
 use App\Models\Post;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
@@ -59,13 +60,31 @@ class Posts extends Component
         // $this->dispatch('user.timeline');
      }
 
+    
 
 
     public function render()
     {
+        
         $posts = Post::take($this->perpage)
         ->orderBy('created_at', 'desc')
         ->get();
-        return view('livewire.user.posts', ['posts' => $posts]);
+        // Group posts by user_id
+        $groupedPosts = $posts->groupBy('user_id');
+
+        // Flatten the grouped collection in an interleaved manner
+        $interleavedPosts = new Collection();
+        while ($groupedPosts->isNotEmpty()) {
+            foreach ($groupedPosts as $userId => $userPosts) {
+                if ($userPosts->isNotEmpty()) {
+                    $interleavedPosts->push($userPosts->shift());
+                    if ($userPosts->isEmpty()) {
+                        $groupedPosts->forget($userId);
+                    }
+                }
+            }
+        }
+
+        return view('livewire.user.posts', ['posts' => $interleavedPosts]);
     }
 }
