@@ -44,7 +44,6 @@ class HomeController extends Controller
 
     public function userHome(){
         $this->loginPoints(auth()->user());
-        
         return view('user.home');
     }
 

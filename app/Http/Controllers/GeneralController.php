@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Stevebauman\Location\Facades\Location;
 
 class GeneralController extends Controller
 {
@@ -49,6 +50,11 @@ class GeneralController extends Controller
             return redirect('/');
         }
        
+    }
+
+    public function ipConfig(){
+        
+        return ipLocation();
     }
 
     public function validateCode(){

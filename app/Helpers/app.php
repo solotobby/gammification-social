@@ -4,6 +4,7 @@ use App\Models\Level;
 use App\Models\Post;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
+use Stevebauman\Location\Facades\Location;
 
 if(!function_exists('engagement')){
     function engagement(){
@@ -128,9 +129,22 @@ if(!function_exists('bankList')){
             'Authorization' => 'Bearer '.env('PAYSTACK_SECRET_KEY')
         ])->get($url)->throw();
 
-        return $bankList = json_decode($res->getBody()->getContents(), true)['data'];
+        return json_decode($res->getBody()->getContents(), true)['data'];
+    }
+}
 
+if(!function_exists('ipLocation')){
+    function ipLocation() {
+        if(env('APP_DEBUG') == true){
+            $ip = '31.205.133.91';
+        }else{
+            $ip = request()->getClientIp();
+        }
+       
+        $location = Location::get($ip);
         
+        return ['ip'=>$location->ip, 'country'=>$location->countryName, 'region'=>$location->regionName, 'city'=>$location->cityName];
+
     }
 }
 
