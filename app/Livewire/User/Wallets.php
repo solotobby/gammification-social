@@ -37,6 +37,7 @@ class Wallets extends Component
 
 
     public function mount(){
+       
         $this->wallets = auth()->user()->wallet;
         $this->withdrawals = WithdrawalMethod::where(['user_id'=> auth()->user()->id])->first(); //auth()->user()->usdt_wallet_address;
         
@@ -56,9 +57,45 @@ class Wallets extends Component
          if($validated['country'] == 'Nigeria'){
                 $paymentMethod = 'bank_transfer';
                 $currency = 'NGN';
-            }else{
+        }else{
                 $paymentMethod = $this->payment_method;
                 $currency = 'USD';
+        }
+
+            //validation
+            if($paymentMethod == 'bank_transfer'){
+
+                if($validated['bank_name'] == ''){
+                    session()->flash('fail', 'Bank Name is required');
+                    // Redirect back to the form
+                    return redirect()->back();
+                }
+
+                if($validated['account_number'] == ''){
+                    session()->flash('fail', 'Account Number is required');
+                    // Redirect back to the form
+                    return redirect()->back();
+                }
+
+            }
+
+            if($paymentMethod == 'paypal'){
+                if($validated['paypal_email'] == ''){
+                    session()->flash('fail', 'Paypal email is required');
+                    // Redirect back to the form
+                    return redirect()->back();
+                }
+
+                
+
+            }
+
+            if($paymentMethod == 'usdt'){
+                if($validated['usdt_wallet'] == ''){
+                    session()->flash('fail', 'USDT Wallet address is required');
+                    // Redirect back to the form
+                    return redirect()->back();
+                }
             }
 
         // dd($validated['payment_method']);

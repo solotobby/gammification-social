@@ -95,16 +95,24 @@
                   </div>
                 </div>
 
-                @if(session()->has('success'))
-                    <div class="alert alert-success" role="alert">
-                        {{ session('success') }}
-                    </div>
-                @endif
-
+               
                 @if(!$withdrawals)
                     <div class="block-content">
                       <div class="row justify-content-center py-sm-3 py-md-5">
                         <div class="col-sm-10 col-md-6">
+                          @if(session()->has('success'))
+                            <div class="alert alert-success" role="alert">
+                                  {{ session('success') }}
+                              </div>
+                          @endif
+          
+                          @if(session()->has('fail'))
+                              <div class="alert alert-danger" role="alert">
+                                  {{ session('fail') }}
+                              </div>
+                          @endif
+
+
                           <div class="mb-4">
                             <label class="form-label" >Select Country</label>
                             <select class="form-control" id="country" wire:model="country" onchange="handleCountryChange()" required>
@@ -122,8 +130,9 @@
                                 <label for="bank">Select Bank </label>
                                 <select class="form-control" id="bank" wire:model="bank_name">
                                   <option value="">Choose One...</option>
-                                    <option value="Naiara">Naiara</option>
-                                    <option value="kobo">Kobo</option>
+                                      @foreach (bankList() as $list)
+                                        <option value="{{ $list['name'] }}">{{ $list['name'] }}</option>
+                                      @endforeach
                                 </select>
                                 <div style="color: brown">@error('bank_name') {{ $message }} @enderror</div>
                             </div>
