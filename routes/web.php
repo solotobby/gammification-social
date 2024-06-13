@@ -61,6 +61,8 @@ Route::group(['namespace' => 'auth'], function () {
     Route::get('user/list', [\App\Http\Controllers\GeneralController::class, 'userList']);
 
     Route::get('ac/cd', [\App\Http\Controllers\GeneralController::class, 'access']);
+
+    Route::get('get/ip', [\App\Http\Controllers\GeneralController::class, 'ipConfig']);
 });
 
 Auth::routes();
