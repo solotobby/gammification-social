@@ -109,7 +109,7 @@
                             <label class="form-label" >Select Country</label>
                             <select class="form-control" id="country" wire:model="country" onchange="handleCountryChange()" required>
                               <option value="">Select Country</option> 
-                              <option value="Nigeria">Nija</option> 
+                            
                               @include('layouts.country_list')
                             </select>
                             <div style="color: brown">@error('country') {{ $message }} @enderror</div>
