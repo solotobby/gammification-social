@@ -135,12 +135,13 @@ if(!function_exists('bankList')){
 
 if(!function_exists('ipLocation')){
     function ipLocation() {
-        if(env('APP_DEBUG') == true){
-            $ip = '31.205.133.91';
-        }else{
-            $ip = request()->getClientIp();
-        }
+        // if(env('APP_DEBUG') == true){
+        //     $ip = '31.205.133.91';
+        // }else{
+          
+        // }
        
+        $ip = request()->getClientIp();
         $location = Location::get($ip);
         
         return ['ip'=>$location->ip, 'country'=>$location->countryName, 'region'=>$location->regionName, 'city'=>$location->cityName];
