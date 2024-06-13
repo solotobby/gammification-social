@@ -118,3 +118,19 @@ if(!function_exists('sumCounter')){
         
     }
 }
+
+if(!function_exists('bankList')){
+    function bankList() {
+        $url = 'https://api.paystack.co/bank?country=nigeria';
+        $res = Http::withHeaders([
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer '.env('PAYSTACK_SECRET_KEY')
+        ])->get($url)->throw();
+
+        return $bankList = json_decode($res->getBody()->getContents(), true)['data'];
+
+        
+    }
+}
+
