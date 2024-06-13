@@ -7,6 +7,7 @@ use App\Models\Post;
 use App\Models\User;
 use App\Models\UserComment;
 use App\Models\UserView;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\Attributes\Validate;
 
@@ -22,6 +23,26 @@ class ShowNewPosts extends Component
     public function mount($query){
         $this->postQuery = $query;
     }
+
+    
+
+      public function toggleLike($postId){
+
+        
+        $post = Post::where('unicode', $postId)->first();
+        
+        if ($post->isLikedBy(Auth::user())) {
+            $post->likes()->where('user_id', Auth::id())->delete();
+            $post->decrement('likes');
+        } else {
+            $post->likes()->create(['user_id' => Auth::id()]);
+            $post->increment('likes');
+        }
+
+        // $this->timeline($post->id);
+
+        // $this->dispatch('user.timeline');
+     }
 
     public function loadMoreComments(){
         $this->perpage += 10;
@@ -46,6 +67,9 @@ class ShowNewPosts extends Component
             // $this->dispatch('refreshComments');
     
         }
+
+
+
 
     public function render()
     {
