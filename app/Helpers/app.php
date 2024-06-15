@@ -72,7 +72,6 @@ if(!function_exists('maskCode')){
 
 if(!function_exists('viewsAmountCalculator')){
     function viewsAmountCalculator($unpaidViews,$unpaidExternalViews) {
-        
        
         $earnings_per_1000_view = Level::where('name', auth()->user()->level->name)->first()->earning_per_view;
         
@@ -83,9 +82,6 @@ if(!function_exists('viewsAmountCalculator')){
         $paidInternalViews = $unpaidViews * $singleView;
 
         return $paidExternalView+$paidInternalViews;
-
-
-        // return floor($count/1000) * 0.9;
         
     }
 }
