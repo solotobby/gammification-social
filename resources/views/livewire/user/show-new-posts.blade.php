@@ -30,7 +30,7 @@
                 @if(auth()->user()->id == $timeline->user_id)
                     <div class="block-options">
                         <div class="dropdown">
-                            <button type="button" class="btn-block-option dropdown-toggle text-muted" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><small>Analytics</small></button>
+                            <button type="button" class="btn-block-option dropdown-toggle text-muted" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
                                 <div class="dropdown-menu dropdown-menu-end">
                                 
                                     <a class="dropdown-item" href="{{ url('post/timeline/'.$timeline->id.'/analytics') }}">
