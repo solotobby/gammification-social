@@ -223,10 +223,10 @@
       You have not made any post. Click <a href="{{ url('timeline') }}">here</a> to start posting
     </div>
 @endforelse
-
-  @if($posts->count() > 10)
-      <button wire:click='loadMore'  class="btn btn-alt-primary btn-sm">Load More</button>
-  @endif
+<button wire:click='loadMore'  class="btn btn-alt-primary btn-sm">Load More</button>
+  {{-- @if(count($posts) > 10)
+      
+  @endif --}}
 
 {{-- @if($timelines->hasMorePages())
         <button wire:click="loadMore">Load More</button>
