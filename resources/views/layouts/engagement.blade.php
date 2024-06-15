@@ -13,7 +13,7 @@
             </div>
             <div class="d-flex justify-content-between align-items-center">
             <div>
-                <a class="fw-semibold" href="{{url('profile/'.$high->user->id)}}" style="color: #5A4FDC">{{$high->user->name}}</a>
+                <a class="fw-semibold" href="{{url('profile/'.$high->user->id)}}" style="color: #5A4FDC">{{displayName($high->user->name)}}</a>
                 <div class="fs-sm text-muted">{{ $high->total }} Engagements</div>
             </div>
             <a class="btn btn-sm btn-alt-secondary d-inline-block" href="{{url('profile/'.$high->user->id)}}">

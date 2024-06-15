@@ -6,7 +6,7 @@
             <a class="img-link me-1" href="{{ url('profile/'.$timeline->user->id) }}">
             <img class="img-avatar img-avatar32 img-avatar-thumb" src="{{asset('src/assets/media/avatars/avatar11.jpg')}}" alt="">
             </a>
-            <a class="fw-semibold" href="{{ url('profile/'.$timeline->user->id) }}" style="color: #5A4FDC" >{{$timeline->user->name}}</a>
+            <a class="fw-semibold" href="{{ url('profile/'.$timeline->user->id) }}" style="color: #5A4FDC" >{{displayName($timeline->user->name)}}</a>
             <span class="fs-sm text-muted">{{$timeline->created_at?->shortAbsoluteDiffForHumans()}} ago</span>
         </div>
         @if(auth()->user()->id == $timeline->user_id)
