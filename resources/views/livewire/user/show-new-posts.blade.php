@@ -30,11 +30,11 @@
                 @if(auth()->user()->id == $timeline->user_id)
                     <div class="block-options">
                         <div class="dropdown">
-                            <button type="button" class="btn-block-option dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
-                            <div class="dropdown-menu dropdown-menu-end">
+                            <button type="button" class="btn-block-option dropdown-toggle text-muted" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><small>Analytics</small></button>
+                                <div class="dropdown-menu dropdown-menu-end">
                                 
                                     <a class="dropdown-item" href="{{ url('post/timeline/'.$timeline->id.'/analytics') }}">
-                                        <i class="far fa-fw fa-eye text-success me-1"></i> View Posts Analytics
+                                        <i class="far fa-fw fa-eye text-success me-1"></i> View Posts Earnings
                                     </a>
                                 
                                 {{-- <a class="dropdown-item" href="javascript:void(0)">
@@ -97,6 +97,13 @@
                             <i class="fa fa-share opacity-50 me-1"></i>
                         </a>
                     </li>
+                    @if(auth()->user()->id == $timeline->user_id)
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url('post/timeline/'.$timeline->id.'/analytics') }}">
+                                <i class="si si-bar-chart opacity-50 me-1"></i>
+                            </a>
+                        </li>
+                    @endif
                 </ul>
                 </div>
                 <div class="block-content block-content-full bg-body-light">
