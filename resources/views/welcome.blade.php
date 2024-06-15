@@ -164,7 +164,7 @@
                                     <i class="mdi mdi-account-cash"></i>
                                 </div>
                                 <h5 class="fw-bold mb-2 wc-title mt-4">Withdraw Anytime</h5>
-                                <p class="text-muted mb-0 font-size-15 wc-subtitle">Withdraw your earnings via Paypal, USDT or to yout Local Bank</p>
+                                <p class="text-muted mb-0 font-size-15 wc-subtitle">Withdraw your earnings via Paypal, USDT or to your Local Bank</p>
                             </div>
                         </div>
                     </div>
@@ -263,14 +263,7 @@
                         <img src="{{asset('asset/images/features-img-1.png')}}" alt="" class="img-fluid d-block mx-auto">
                     </div>
                 </div>
-
                     <!-- Button trigger modal -->
-
-  
-               
-
-
-
             </div>
         </div>
     </section>
@@ -308,6 +301,8 @@
                             <li class="text-muted">every 1,000 views: $1</li>
                             <li class="text-muted">every 1,000 likes: $0.4</li>
                             <li class="text-muted">every 1,000 comments: $0.5</li>
+                            <li class="text-muted">Can Post Text and Links</li>
+                              
                         </ul>
                         <a href="{{ url('access/code/beginner') }}" class="btn btn-outline-primary pr-btn">Get Access Code</a>
                         <div class="mt-4">
@@ -331,6 +326,9 @@
                             <li class="text-muted">every 1,000 views: $2</li>
                             <li class="text-muted">every 1,000 likes: $0.6</li>
                             <li class="text-muted">every 1,000 comments: $0.7</li>
+                            <li class="text-muted">Can Post Text, Links and Images</li>
+                            {{-- <li class="text-muted">Can Post Images</li> --}}
+                            
                         </ul>
                         <a href="{{ url('access/code/creator') }}" class="btn btn-primary pr-btn">Get Access Code</a>
                         <div class="mt-4">
@@ -354,6 +352,9 @@
                             <li class="text-muted">every 1,000 views: $4</li>
                             <li class="text-muted">every 1,000 likes: $0.7</li>
                             <li class="text-muted">every 1,000 comments: $1</li>
+                            <li class="text-muted">Can Post Text, Links and Images</li>
+                            <li class="text-muted">Can Edit Post and Moderate Comments</li>
+                            
                         </ul>
                         <a href="{{ url('access/code/influencer') }}" class="btn btn-outline-primary pr-btn">Get Access Code</a>
                         <div class="mt-4">
