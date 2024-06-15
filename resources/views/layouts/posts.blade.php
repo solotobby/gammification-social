@@ -12,11 +12,13 @@
         @if(auth()->user()->id == $timeline->user_id)
           <div class="block-options">
               <div class="dropdown">
-                <button type="button" class="btn-block-option dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
+                
+                <button type="button" class="btn-block-option dropdown-toggle text-muted" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><small>Analytics</small></button>
+                
                   <div class="dropdown-menu dropdown-menu-end">
-                    
+                        
                           <a class="dropdown-item" href="{{ url('post/timeline/'.$timeline->id.'/analytics') }}">
-                              <i class="far fa-fw fa-eye text-success me-1"></i> View Posts Analytics
+                              <i class="far fa-fw fa-eye text-success me-1"></i> View Posts Earnings
                           </a>
                       
                       {{-- <a class="dropdown-item" href="javascript:void(0)">
