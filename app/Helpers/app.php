@@ -187,3 +187,14 @@ if(!function_exists('securityVerification')){
 
     }
 }
+
+
+if(!function_exists('displayName')){
+    function displayName($name) {
+
+        $bk = explode(' ', $name);
+
+        return $bk[0];
+
+    }
+}
