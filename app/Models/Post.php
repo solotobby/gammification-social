@@ -65,6 +65,14 @@ class Post extends Model
         return $this->comments()->where('is_paid', false)->count();
     }
 
+    public function externalViews(){
+        return $this->hasMany(ViewsExternal::class);
+    }
+
+    public function unpaidExternalViews(){
+        return $this->externalViews()->where('is_paid', false)->count();
+    }
+
 
 
 }

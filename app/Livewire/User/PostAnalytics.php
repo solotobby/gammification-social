@@ -8,7 +8,7 @@ use Livewire\Component;
 class PostAnalytics extends Component
 {
 
-    public $id, $post, $unpaidViews, $unpaidLikes, $unpaidComments;
+    public $id, $post, $unpaidViews, $unpaidLikes, $unpaidComments, $unpaidExternalViews;
 
     public function mount($id){
         $this->id = $id;
@@ -26,6 +26,8 @@ class PostAnalytics extends Component
         //unpaid comments
         $this->unpaidComments = $this->post->unpaidComments();
 
+        //unpaid external Views
+        $this->unpaidExternalViews = $this->post->unpaidExternalViews();
 
     }
     public function render()
