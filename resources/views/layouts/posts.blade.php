@@ -74,6 +74,14 @@
                     <i class="fa fa-share opacity-50 me-1"></i>
                 </a>
             </li>
+            @if(auth()->user()->id == $timeline->user_id)
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url('post/timeline/'.$timeline->id.'/analytics') }}">
+                    <i class="si si-bar-chart opacity-50 me-1"></i>
+                </a>
+            </li>
+           @endif
+
             {{-- <button type="button" class="btn btn-primary push mb-md-0" data-bs-toggle="modal" data-bs-target="#modal-block-fromright">Block Design</button> --}}
             {{-- <button type="button" class="btn btn-alt-primary push mb-md-0" data-bs-toggle="modal" data-bs-target="#modal-default-fromright">Default</button> --}}
         </ul>
