@@ -70,6 +70,10 @@
             </ul>
             </div>
             <div class="block-content block-content-full bg-body-light">
+               
+                <a class="fw-semibold" target="_blank" href="https://payhankey.com/#pricing">
+                    You can make money from your own comment, likes and views too on Payhankey    
+                </a>
                 {{-- <p class="fs-sm">
                 <i class="fa fa-thumbs-up text-info"></i>
                 <i class="fa fa-heart text-danger"></i>

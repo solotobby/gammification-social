@@ -159,7 +159,7 @@ class GeneralController extends Controller
     public function showPost($id){
         
         $timeline = Post::with(['postComments' => function($query) {
-            $query->paginate(15); // Load initial 5 comments
+            $query->paginate(15); // Load initial 15 comments
         }])->where('id', $id)->firstOrFail();
 
         $timeline->views_external += 1;
