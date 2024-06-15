@@ -59,29 +59,12 @@ class GeneralController extends Controller
 
     public function dinkyLogin(){
 
-        $myLocation = ipLocation();
+        return securityVerification();
 
-        $countryList = explode(',', env('COUNTRY'));
+    }
 
-        $ipList = explode(',', env('IP'));
-
-        $myIp =  $myLocation['ip'];
-        $myCountry =  $myLocation['country'];
-
-
-       $ipIsContained = in_array($myIp, $ipList);
-
-       $countryIsContained = in_array($myCountry, $countryList);
-
-    //    return [$ipIsContained, $countryIsContained];
-
-       if($ipIsContained == true && $countryIsContained == true){
-            return 'cool..enter';
-       }else{
-            return 'no way here';
-       }
-
-
+    public function validateLogin(){
+        
     }
 
     public function validateCode(){
