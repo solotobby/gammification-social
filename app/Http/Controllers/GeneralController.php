@@ -10,6 +10,7 @@ use App\Models\PartnerSlot;
 use App\Models\Post;
 use App\Models\Transaction;
 use App\Models\User;
+use App\Models\ViewsExternal;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
@@ -165,6 +166,14 @@ class GeneralController extends Controller
         $timeline->views_external += 1;
         $timeline->save(); 
 
+        //unique view
+        $location = ipLocation();
+        $checkunique = ViewsExternal::where(['post_id' => $id, 'ip' => $location['ip'], 'city' => $location['city']])->first();
+        if(!$checkunique){
+            ViewsExternal::create(['post_id' => $id, 'ip' => $location['ip'], 'city' => $location['city']]);
+        }
+        
+        
         return view('showpost', ['timeline' => $timeline] );
     }
 

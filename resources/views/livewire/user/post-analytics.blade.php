@@ -2,7 +2,7 @@
     <!-- Simple -->
     <h2 class="content-heading">Post Analytics - <i>{{ auth()->user()->level->name }}</i></h2>
     <div class="row">
-      <div class="col-md-6 col-xl-4">
+      <div class="col-md-6 col-xl-3">
         <a class="block block-rounded block-link-pop" href="javascript:void(0)">
           <div class="block-content block-content-full d-flex align-items-center justify-content-between">
             <div>
@@ -19,7 +19,7 @@
           </div>
         </a>
       </div>
-       <div class="col-md-6 col-xl-4">
+       <div class="col-md-6 col-xl-3">
         <a class="block block-rounded block-link-pop" href="javascript:void(0)">
           <div class="block-content block-content-full d-flex align-items-center justify-content-between">
             <div>
@@ -36,7 +36,26 @@
           </div>
         </a>
       </div>
-      <div class="col-md-6 col-xl-4">
+      <div class="col-md-6 col-xl-3">
+        <a class="block block-rounded block-link-pop" href="javascript:void(0)">
+          <div class="block-content block-content-full d-flex align-items-center justify-content-between">
+            <div>
+              <i class="fa fa-2x fa-eye text-primary"></i>
+            </div>
+            <div class="me-3 text-end">
+              <p class="fs-3 fw-medium mb-0">
+              
+                {{ $unpaidExternalViews }}
+              </p>
+              <p class="text-muted mb-0">
+                Unique External views
+              </p>
+            </div>
+            
+          </div>
+        </a>
+      </div>
+      <div class="col-md-6 col-xl-3">
         <a class="block block-rounded block-link-pop" href="javascript:void(0)">
           <div class="block-content block-content-full d-flex align-items-center justify-content-between">
             <div>
@@ -45,10 +64,10 @@
             <div class="me-3 text-end">
               <p class="fs-3 fw-medium mb-0">
               
-                ${{ viewsAmountCalculator($unpaidViews) }}
+                ${{ viewsAmountCalculator($unpaidViews,$unpaidExternalViews) }}
               </p>
               <p class="text-muted mb-0">
-                Views Revenue
+                All Views Revenue
               </p>
             </div>
             
@@ -211,7 +230,7 @@
                   </div>
                   <p class="text-white fs-3 fw-medium mt-3 mb-0">
                     <?php 
-                      $all = commentsAmountCalculator($unpaidComments) + likesAmountCalculator($unpaidLikes) + viewsAmountCalculator($unpaidViews);
+                      $all = commentsAmountCalculator($unpaidComments) + likesAmountCalculator($unpaidLikes) + viewsAmountCalculator($unpaidViews,$unpaidExternalViews);
                       ?>
                     ${{ $all }}
                   </p>

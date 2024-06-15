@@ -71,17 +71,31 @@ if(!function_exists('maskCode')){
 }
 
 if(!function_exists('viewsAmountCalculator')){
-    function viewsAmountCalculator($count) {
+    function viewsAmountCalculator($unpaidViews,$unpaidExternalViews) {
         
+       
         $earnings_per_1000_view = Level::where('name', auth()->user()->level->name)->first()->earning_per_view;
         
         $singleView = $earnings_per_1000_view / 1000;//0.0009; //dollar
 
-        return $count * $singleView;
+        $singleViewExternal = 1 /5000;
+        $paidExternalView = $unpaidExternalViews * $singleViewExternal;
+        $paidInternalViews = $unpaidViews * $singleView;
+
+        return $paidExternalView+$paidInternalViews;
+
+
         // return floor($count/1000) * 0.9;
         
     }
 }
+
+if(!function_exists('viewsRevenueCalculator')){
+    function viewsRevenueCalculator($unpaidViews,$unpaidExternalViews) {
+
+        return [$unpaidViews, $unpaidExternalViews];
+
+    }}
 
 if(!function_exists('likesAmountCalculator')){
     function likesAmountCalculator($count) {
