@@ -66,7 +66,7 @@ Route::group(['namespace' => 'auth'], function () {
 
     Route::get('seniore/login', [\App\Http\Controllers\GeneralController::class, 'dinkyLogin']);
 
-    
+
 });
 
 Auth::routes();
@@ -77,8 +77,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('admin/home', [\App\Http\Controllers\HomeController::class, 'adminHome'])->name('admin.home');
     Route::get('complete/onboarding', [\App\Http\Controllers\HomeController::class, 'completeOnboarding'])->name('complete.onboarding');
     Route::get('validate/api', [\App\Http\Controllers\HomeController::class, 'validateApi']);
-    Route::get('post/{username}/{id}', ViewPost::class);
-
+    
     // Route::get('timeline', Timeline::class);
 
     Route::get('timeline', Posts::class);

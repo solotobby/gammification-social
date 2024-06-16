@@ -3,6 +3,8 @@
 use App\Livewire\User\Posts;
 use App\Models\Level;
 use App\Models\Post;
+use App\Models\UserComment;
+use App\Models\UserLike;
 use App\Models\UserView;
 use App\Models\ViewsExternal;
 use App\Models\Wallet;
@@ -231,6 +233,35 @@ if(!function_exists('refreshWallet')){
             $view->is_paid = true;
             $view->save();
         }
+
+
+        //process Likes
+        $singleLikeInternal = $userLevel->earning_per_like / 1000;
+
+         //fetch/update all unpaid views
+         $internalLikes=UserLike::whereIn('post_id', $postIds)->where('is_paid', false)->get();
+         //updatewallet 
+         $wallet->promoter_balance +=  $singleLikeInternal*$internalLikes->count();
+         $wallet->save();
+         //reset to paid
+         foreach ($internalLikes as $view) {
+             $view->is_paid = true;
+             $view->save();
+         }
+
+         //process comments
+         $singleCommentInternal = $userLevel->earning_per_comment / 1000;
+         //fetch/update all unpaid views
+         $internalComments=UserComment::whereIn('post_id', $postIds)->where('is_paid', false)->get();
+         //updatewallet 
+         $wallet->promoter_balance +=  $singleCommentInternal*$internalComments->count();
+         $wallet->save();
+         //reset to paid
+         foreach ($internalComments as $view) {
+             $view->is_paid = true;
+             $view->save();
+         }
+
 
         return $wallet;
 
