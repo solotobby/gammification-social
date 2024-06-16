@@ -6,29 +6,52 @@ use App\Models\Post;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Validate;
+use Livewire\WithFileUploads;
 use Livewire\Component;
 
 class Posts extends Component
 {
+    use WithFileUploads;
+
+    
     public $perpage = 10;
 
     public $postId;
     #[Validate('required|string')]
     public $content = '';
+    
+    public $images = [];
+    public $imagePreviews = [];
+
+    protected $rules = [
+        'content' => 'required|string',
+        'images.*' => 'nullable|image|max:1024', // 1MB Max per image
+    ];
+
+    public function updatedImages()
+    {
+        $this->validate([
+            'images.*' => 'image|max:1024', // 1MB Max per image
+        ]);
+
+        $this->imagePreviews = [];
+        foreach ($this->images as $image) {
+            $this->imagePreviews[] = $image->temporaryUrl();
+        }
+    }
+
 
     public function loadMore(){
         $this->perpage += 10;
     }
 
     public function post(){
-
         $content = $this->convertUrlsToLinks($this->content);
-        // $content = nl2br(e($content));
 
         $timelines = Post::create(['user_id' => auth()->user()->id, 'content' => $content, 'unicode' => time()]);
         $this->reset('content');
 
-        // $this->timelines->push($timelines);
+        
 
         // $this->dispatch('refreshTimeline');
 
