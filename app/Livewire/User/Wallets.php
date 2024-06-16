@@ -30,6 +30,7 @@ class Wallets extends Component
     public $accountName;
     public $paypalEmail;
     public $usdtWallet;
+    public $currency;
 
     
 
@@ -56,11 +57,13 @@ class Wallets extends Component
 
          if($validated['country'] == 'Nigeria'){
                 $paymentMethod = 'bank_transfer';
-                $currency = 'NGN';
+                // $currency = 'NGN';
         }else{
                 $paymentMethod = $this->payment_method;
-                $currency = 'USD';
+                // $currency = 'USD';
         }
+
+        // dd($currency);
 
             //validation
             if($paymentMethod == 'bank_transfer'){
@@ -80,13 +83,13 @@ class Wallets extends Component
             }
 
             if($paymentMethod == 'paypal'){
+
+               
                 if($validated['paypal_email'] == ''){
                     session()->flash('fail', 'Paypal email is required');
                     // Redirect back to the form
                     return redirect()->back();
                 }
-
-                
 
             }
 
@@ -98,12 +101,14 @@ class Wallets extends Component
                 }
             }
 
+     
+
         // dd($validated['payment_method']);
 
         WithdrawalMethod::create([
             'user_id' => auth()->user()->id, 
             'account_number' => $validated['account_number'], 
-            'currency' => $currency, 
+            'currency' => 'USD', 
             'bank_name' => $validated['bank_name'], 
             'payment_method' => $paymentMethod, //$validated['payment_method'], 
             'paypal_email' => $validated['paypal_email'],
