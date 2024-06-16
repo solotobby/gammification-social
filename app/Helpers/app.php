@@ -1,7 +1,12 @@
 <?php
 
+use App\Livewire\User\Posts;
 use App\Models\Level;
 use App\Models\Post;
+use App\Models\UserView;
+use App\Models\ViewsExternal;
+use App\Models\Wallet;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
 use Stevebauman\Location\Facades\Location;
@@ -75,9 +80,10 @@ if(!function_exists('viewsAmountCalculator')){
        
         $earnings_per_1000_view = Level::where('name', auth()->user()->level->name)->first()->earning_per_view;
         
-        $singleView = $earnings_per_1000_view / 1000;//0.0009; //dollar
-
+        $singleView = $earnings_per_1000_view / 1000;
         $singleViewExternal = 1 /5000;
+
+
         $paidExternalView = $unpaidExternalViews * $singleViewExternal;
         $paidInternalViews = $unpaidViews * $singleView;
 
@@ -86,12 +92,6 @@ if(!function_exists('viewsAmountCalculator')){
     }
 }
 
-if(!function_exists('viewsRevenueCalculator')){
-    function viewsRevenueCalculator($unpaidViews,$unpaidExternalViews) {
-
-        return [$unpaidViews, $unpaidExternalViews];
-
-    }}
 
 if(!function_exists('likesAmountCalculator')){
     function likesAmountCalculator($count) {
@@ -193,8 +193,48 @@ if(!function_exists('displayName')){
     function displayName($name) {
 
         $bk = explode(' ', $name);
-
         return $bk[0];
 
     }
 }
+
+if(!function_exists('refreshWallet')){
+    function refreshWallet() {
+        $user = Auth::user();
+        //get user Wallet
+        $wallet = Wallet::where('user_id', $user->id)->first();
+        //get all posts this guy has
+        $postIds = Post::where('user_id', $user->id)->get(['id']);
+        $userLevel = Level::where('name', auth()->user()->level->name)->first(['name','earning_per_comment', 'earning_per_view', 'earning_per_like']);
+        
+        //processviews  - internal
+        $singleViewInternal =  $userLevel->earning_per_view / 1000; //amount per internal view
+        $singleViewExternal = 1 /5000; //amount per external view
+        //fetch/update all unpaid views
+        $internalViews=UserView::whereIn('post_id', $postIds)->where('is_paid', false)->get();
+        //updatewallet 
+        $wallet->promoter_balance +=  $singleViewInternal*$internalViews->count();
+        $wallet->save();
+        //reset to paid
+        foreach ($internalViews as $view) {
+            $view->is_paid = true;
+            $view->save();
+        }
+
+        //external
+        $externalViews = ViewsExternal::whereIn('post_id', $postIds)->where('is_paid', false)->get();
+        //updatewallet 
+        $wallet->promoter_balance +=  $singleViewExternal*$externalViews->count();
+        $wallet->save();
+        //reset to paid
+        foreach ($externalViews as $view) {
+            $view->is_paid = true;
+            $view->save();
+        }
+
+        return $wallet;
+
+    }
+}
+
+

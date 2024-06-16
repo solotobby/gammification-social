@@ -13,7 +13,7 @@ class Posts extends Component
 {
     use WithFileUploads;
 
-    
+
     public $perpage = 10;
 
     public $postId;
@@ -27,6 +27,8 @@ class Posts extends Component
         'content' => 'required|string',
         'images.*' => 'nullable|image|max:1024', // 1MB Max per image
     ];
+
+   
 
     public function updatedImages()
     {
