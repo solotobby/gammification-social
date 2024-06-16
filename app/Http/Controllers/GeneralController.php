@@ -26,17 +26,17 @@ class GeneralController extends Controller
                 $amountDollar = '5';
                 $amountNaira = '7,500';
                 $nairaLink = 'https://flutterwave.com/pay/ohd7jfk6wgzq';
-                $dollarLink = 'https://flutterwave.com/pay/2o3kzkdj0shm';
+                $dollarLink = 'https://buy.stripe.com/9AQ5la2KB7U80zCeUU';
             }elseif($level == 'creator'){
                 $amountDollar = '10';
                 $amountNaira = '15,000';
                 $nairaLink = 'https://flutterwave.com/pay/5lzof7tt5ykj';
-                $dollarLink = 'https://flutterwave.com/pay/elba42t3nw7m';
+                $dollarLink = 'https://buy.stripe.com/4gwaFu3OF7U82HK8wx';
             }else{
                 $amountDollar = '20';
                 $amountNaira = '30,000';
                 $nairaLink = 'https://flutterwave.com/pay/kljctf1pziei';
-                $dollarLink = 'https://flutterwave.com/pay/4dhkdzur56fz';
+                $dollarLink = 'https://buy.stripe.com/eVa9Bqfxn6Q48244gi';
             }
 
 
@@ -172,7 +172,7 @@ class GeneralController extends Controller
         if(!$checkunique){
             ViewsExternal::create(['post_id' => $id, 'ip' => $location['ip'], 'city' => $location['city']]);
         }
-        
+
         
         return view('showpost', ['timeline' => $timeline] );
     }
