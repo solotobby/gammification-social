@@ -262,7 +262,6 @@ if(!function_exists('refreshWallet')){
              $view->save();
          }
 
-
         return $wallet;
 
     }

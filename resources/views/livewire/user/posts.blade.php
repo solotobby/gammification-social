@@ -98,4 +98,9 @@
         </div>
         @include('layouts.engagement')
     </div>
+
+
+
+    @include('layouts.onboarding')
+
 </div>
