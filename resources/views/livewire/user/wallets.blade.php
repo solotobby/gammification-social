@@ -242,6 +242,8 @@
             </div> --}}
         </div>
 
+        @include('layouts.onboarding')
+
 
 
 

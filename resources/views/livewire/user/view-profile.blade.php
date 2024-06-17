@@ -73,4 +73,6 @@
    
 
 </div>
+
+@include('layouts.onboarding')
 </div>

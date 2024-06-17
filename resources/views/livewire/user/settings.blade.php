@@ -272,4 +272,6 @@
   <!-- END Edit Account -->
 
 
+  @include('layouts.onboarding')
+  
 </div>
