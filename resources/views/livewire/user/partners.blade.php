@@ -263,7 +263,5 @@
 
                 @endif
       @endif
-
-
       @include('layouts.onboarding')
 </div>

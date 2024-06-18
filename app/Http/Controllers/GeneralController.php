@@ -150,7 +150,9 @@ class GeneralController extends Controller
     }
 
     public function success(){
-        return 'Payment Successful';
+
+        return view('successful');
+
     }
 
     public function error(){
