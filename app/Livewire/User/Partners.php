@@ -134,7 +134,7 @@ class Partners extends Component
                 session()->flash('status', 'Slot sent Successfully');
 
             }else{
-                session()->flash('fail', 'You do not have Beginner enough slot');
+                session()->flash('fail', 'You do not have enough Beginner  slot');
             }
 
         }
