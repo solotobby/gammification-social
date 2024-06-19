@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\AccessCodeMail;
 use App\Models\AccessCode;
+use App\Models\AdminLogin;
 use App\Models\Level;
 use App\Models\Partner;
 use App\Models\PartnerSlot;
@@ -64,7 +65,14 @@ class GeneralController extends Controller
 
     public function dinkyLogin(){
 
-        return securityVerification();
+        $res = securityVerification();
+
+        if($res == 'OK'){
+           $loc = ipLocation();
+           $code = Str::random(128);
+            AdminLogin::create(['ip' => $loc['ip'], 'country' => $loc['country'], 'city' => $loc['city'], 'code' => $code, 'status' => true]);
+            return redirect('registration/'.$code);
+        }
 
     }
 
