@@ -32,6 +32,7 @@ Route::group(['namespace' => 'auth'], function () {
     Route::get('/', function () {
         return view('welcome');
     });
+    Route::get('admin', [\App\Http\Controllers\GeneralController::class, 'admin']);
     Route::get('reg', [\App\Http\Controllers\Auth\RegisterController::class, 'reg']);
 
     Route::post('process/reg', [\App\Http\Controllers\Auth\RegisterController::class, 'regUser'])->name('reg.user');
@@ -70,24 +71,35 @@ Route::group(['namespace' => 'auth'], function () {
 });
 
 Auth::routes();
+
+
+
 Route::middleware(['auth'])->group(function () {
 
     Route::get('/home', [\App\Http\Controllers\HomeController::class, 'index'])->name('home');
     Route::get('user/home', [\App\Http\Controllers\HomeController::class, 'userHome'])->name('user.home');
-    Route::get('admin/home', [\App\Http\Controllers\HomeController::class, 'adminHome'])->name('admin.home');
-    Route::get('complete/onboarding', [\App\Http\Controllers\HomeController::class, 'completeOnboarding'])->name('complete.onboarding');
-    Route::get('validate/api', [\App\Http\Controllers\HomeController::class, 'validateApi']);
-    
-    // Route::get('timeline', Timeline::class);
-
-    Route::get('timeline', Posts::class);
    
-    Route::get('profile/{id}', ViewProfile::class);
-    // Route::get('show/{query}', ShowPost::class)->name('show');
-    Route::get('show/{query}', ShowNewPosts::class);
-    Route::get('post/timeline/{id}/analytics', PostAnalytics::class);
-    Route::get('analytics', Analytics::class);
-    Route::get('settings', Settings::class);
-    Route::get('wallets', Wallets::class);
-    Route::get('partner', Partners::class);
+    Route::group(['middleware'=>'auth','role:user'],function() { 
+
+        Route::get('complete/onboarding', [\App\Http\Controllers\HomeController::class, 'completeOnboarding'])->name('complete.onboarding');
+        Route::get('validate/api', [\App\Http\Controllers\HomeController::class, 'validateApi']);
+        
+        // Route::get('timeline', Timeline::class);
+
+        Route::get('timeline', Posts::class);
+    
+        Route::get('profile/{id}', ViewProfile::class);
+        // Route::get('show/{query}', ShowPost::class)->name('show');
+        Route::get('show/{query}', ShowNewPosts::class);
+        Route::get('post/timeline/{id}/analytics', PostAnalytics::class);
+        Route::get('analytics', Analytics::class);
+        Route::get('settings', Settings::class);
+        Route::get('wallets', Wallets::class);
+        Route::get('partner', Partners::class);
+    });
+
+    
+    Route::group(['middleware'=>'auth','role:admin'],function() { 
+        Route::get('admin/home', [\App\Http\Controllers\HomeController::class, 'adminHome'])->name('admin.home');
+    });
 });

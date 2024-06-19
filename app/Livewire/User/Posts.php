@@ -49,11 +49,9 @@ class Posts extends Component
 
     public function post(){
         $content = $this->convertUrlsToLinks($this->content);
-
+        // $content = $this->convertUrlsToLinks($this->content);
         $timelines = Post::create(['user_id' => auth()->user()->id, 'content' => $content, 'unicode' => time()]);
         $this->reset('content');
-
-        
 
         // $this->dispatch('refreshTimeline');
 
