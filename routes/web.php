@@ -50,7 +50,7 @@ Route::group(['namespace' => 'auth'], function () {
 
     Route::get('validate/makintosh', [\App\Http\Controllers\GeneralController::class, 'validateCode']);
 
-    // Route::post('partner', [\App\Http\Controllers\GeneralController::class, 'partner'])->name('partner');
+    Route::post('partner', [\App\Http\Controllers\GeneralController::class, 'partner'])->name('partner');
     // Route::get('partners/listed/lots', [\App\Http\Controllers\GeneralController::class, 'viewPartner']);
     // Route::get('activate/{id}', [\App\Http\Controllers\GeneralController::class, 'viewPartnerActivate']);
     
