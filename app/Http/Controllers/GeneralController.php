@@ -191,21 +191,21 @@ class GeneralController extends Controller
         return view('showpost', ['timeline' => $timeline] );
     }
 
-    public function partner(Request $request){
+    // public function partner(Request $request){
         
-        $validated = $request->validate([
-            'email' => 'bail|required|email|unique:partners|max:255',
-            'name' => 'required|string',
-            'phone' => 'required|numeric',
-            'identification' => 'required|string',
-            'country' => 'required|string',
-        ]);
+    //     $validated = $request->validate([
+    //         'email' => 'bail|required|email|unique:partners|max:255',
+    //         'name' => 'required|string',
+    //         'phone' => 'required|numeric',
+    //         'identification' => 'required|string',
+    //         'country' => 'required|string',
+    //     ]);
 
-        Partner::create(['name' => $validated['name'], 'email' => $validated['email'], 'phone' => $validated['phone'], 'identification' => $validated['identification'], 'country' => $validated['country']]);
+    //     Partner::create(['name' => $validated['name'], 'email' => $validated['email'], 'phone' => $validated['phone'], 'identification' => $validated['identification'], 'country' => $validated['country']]);
 
-        return back()->with('success', 'You have successfully applied to become a Partner on Payhankey. An email has been sent to you for a short video call');
+    //     return back()->with('success', 'You have successfully applied to become a Partner on Payhankey. An email has been sent to you for a short video call');
 
-    }
+    // }
 
     public function viewPartner(){
         $partners = Partner::all();//->firstOrFail();
