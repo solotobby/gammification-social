@@ -27,7 +27,7 @@ class PartnerController extends Controller
             $part = Partner::find($id);
             $part->status = true;
             $part->save();
-            PartnerSlot::create(['partner_id' => $id, 'beginner' => 0, 'creator' => 0, 'influencer' => 0]);
+            PartnerSlot::create(['partner_id' => $part->id, 'beginner' => 0, 'creator' => 0, 'influencer' => 0]);
             return back()->with('success', 'Partner Activated');
          }
     }

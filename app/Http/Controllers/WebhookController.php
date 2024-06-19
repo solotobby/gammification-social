@@ -17,63 +17,63 @@ class WebhookController extends Controller
 
         if($event == 'charge.completed'){
             Webhook::create(['event' => $event, 'content' => $request]);
-            // $transactionRef = $request['data']['tx_ref']; //get tx ref from webhook
+            $transactionRef = $request['data']['tx_ref']; //get tx ref from webhook
 
-            // //validate transaction
-            // $transaction = Transaction::where('ref', $transactionRef)->first();
+            //validate transaction
+            $transaction = Transaction::where('ref', $transactionRef)->first();
 
-            // $string = $transaction->meta;
-            // $data = json_decode($string, true);
-            // $package = htmlspecialchars($data['package']);
-            // $slotNumber = htmlspecialchars($data['number_of_slot']);
+            $string = $transaction->meta;
+            $data = json_decode($string, true);
+            $package = htmlspecialchars($data['package']);
+            $slotNumber = htmlspecialchars($data['number_of_slot']);
 
-            // //get per info
-            // $partnerId = @$transaction->user->partner->id;
-            // $partner = PartnerSlot::where('partner_id', $partnerId)->first();
+            //get per info
+            $partnerId = @$transaction->user->partner->id;
+            $partner = PartnerSlot::where('partner_id', $partnerId)->first();
            
 
-            // if($partner->status == true){
-            //     if($package == 'Influencer'){
-            //         $partner->influencer += $slotNumber;
-            //         $partner->save();
+            if($partner->status == true){
+                if($package == 'Influencer'){
+                    $partner->influencer += $slotNumber;
+                    $partner->save();
 
-            //         $transaction->status = 'allocated';
-            //         $transaction->save();
+                    $transaction->status = 'allocated';
+                    $transaction->save();
 
-            //         // return response()->json(['status' => 'success']);
+                    // return response()->json(['status' => 'success']);
     
-            //         // $this->updateTx($request->tx_ref);
+                    // $this->updateTx($request->tx_ref);
     
-            //         // return back()->with('success', 'Influencer slot Updated successfully');
+                    // return back()->with('success', 'Influencer slot Updated successfully');
     
-            //     } elseif($package == 'Creator'){
-            //         $partner->creator += $slotNumber;
-            //         $partner->save();
+                } elseif($package == 'Creator'){
+                    $partner->creator += $slotNumber;
+                    $partner->save();
 
-            //         $transaction->status = 'allocated';
-            //         $transaction->save();
+                    $transaction->status = 'allocated';
+                    $transaction->save();
 
-            //         // return response()->json(['status' => 'success']);
+                    // return response()->json(['status' => 'success']);
     
-            //         // $this->updateTx($request->tx_ref);
+                    // $this->updateTx($request->tx_ref);
     
-            //         // return back()->with('success', 'Creator slot Updated successfully');
-            //     }else{
+                    // return back()->with('success', 'Creator slot Updated successfully');
+                }else{
     
-            //         $partner->beginner += $slotNumber;
-            //         $partner->save();
+                    $partner->beginner += $slotNumber;
+                    $partner->save();
 
-            //         $transaction->status = 'allocated';
-            //         $transaction->save();
+                    $transaction->status = 'allocated';
+                    $transaction->save();
 
-            //         // return response()->json(['status' => 'success']);
+                    // return response()->json(['status' => 'success']);
     
-            //         // $this->updateTx($request->tx_ref);
+                    // $this->updateTx($request->tx_ref);
     
-            //         // return back()->with('success', 'Beginner slot Updated successfully');
+                    // return back()->with('success', 'Beginner slot Updated successfully');
     
-            //     }
-            // }
+                }
+            }
 
 
             
