@@ -94,12 +94,74 @@ class HomeController extends Controller
                'customer' => json_encode($response['data']['customer'])
             ]);
 
+            if($transaction->status == 'successful'){
 
-           
+            // return $tx;
 
+            $string = $transaction->meta;
+            $data = json_decode($string, true);
+            $package = htmlspecialchars($data['package']);
+            $slotNumber = htmlspecialchars($data['number_of_slot']);
+
+            // return [$package, $slotNumber];
+
+             $partnerId = @$transaction->user->partner->id;
+
+             $partner = PartnerSlot::where('partner_id', $partnerId)->first();
+
+             if($partner->status == true){
+                if($package == 'Influencer'){
+                    $partner->influencer += $slotNumber;
+                    $partner->save();
+
+                    $transaction->status = 'allocated';
+                    $transaction->save();
+
+                    // return response()->json(['status' => 'success']);
+    
+                    // $this->updateTx($request->tx_ref);
+    
+                    // return back()->with('success', 'Influencer slot Updated successfully');
+    
+                } elseif($package == 'Creator'){
+                    $partner->creator += $slotNumber;
+                    $partner->save();
+
+                    $transaction->status = 'allocated';
+                    $transaction->save();
+
+                    // return response()->json(['status' => 'success']);
+    
+                    // $this->updateTx($request->tx_ref);
+    
+                    // return back()->with('success', 'Creator slot Updated successfully');
+                }else{
+    
+                    $partner->beginner += $slotNumber;
+                    $partner->save();
+
+                    $transaction->status = 'allocated';
+                    $transaction->save();
+
+                    // return response()->json(['status' => 'success']);
+    
+                    // $this->updateTx($request->tx_ref);
+    
+                    // return back()->with('success', 'Beginner slot Updated successfully');
+    
+                }
+            }
 
             return redirect('partner')->with('success', 'Payment received. Your slot will be allocated in less than 3 hours');
 
+            }else{
+                return redirect('partner')->with('error', 'Payment already processed!');
+            }
+
+
+
+
+           
        }
 
        
