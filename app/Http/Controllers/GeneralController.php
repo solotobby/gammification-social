@@ -87,16 +87,16 @@ class GeneralController extends Controller
            
             $ref = time();
             $level = Level::where('id', $request->level)->first();
-            $chekIfNotRedeemed = AccessCode::where('email', $request->email)->where('tx_id', $ref)->where('is_active', true)->first();
-            
-            Mail::to($request->email)->send(new AccessCodeMail($code));
 
+            $chekIfNotRedeemed = AccessCode::where('email', $request->email)->where('is_active', true)->first();
+            
             if($chekIfNotRedeemed){
                 return redirect('error');
             }
 
             AccessCode::create(['tx_id' => $ref,'name' =>$level->name, 'email' => $request->email, 'amount' => $level->amount, 'code' => $code, 'level_id' => $level->id]);
-            
+            Mail::to($request->email)->send(new AccessCodeMail($code));
+
             return redirect('success');
 
         }else{
