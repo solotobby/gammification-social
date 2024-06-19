@@ -94,99 +94,10 @@ class HomeController extends Controller
                'customer' => json_encode($response['data']['customer'])
             ]);
 
-            if($transaction->status == 'successful'){
-
-            // return $tx;
-
-            $string = $transaction->meta;
-            $data = json_decode($string, true);
-            $package = htmlspecialchars($data['package']);
-            $slotNumber = htmlspecialchars($data['number_of_slot']);
-
-            // return [$package, $slotNumber];
-
-             $partnerId = @$transaction->user->partner->id;
-
-             $partner = PartnerSlot::where('partner_id', $partnerId)->first();
-
-             if($partner->status == true){
-                if($package == 'Influencer'){
-                    $partner->influencer += $slotNumber;
-                    $partner->save();
-
-                    $transaction->status = 'allocated';
-                    $transaction->save();
-
-                    // return response()->json(['status' => 'success']);
-    
-                    // $this->updateTx($request->tx_ref);
-    
-                    // return back()->with('success', 'Influencer slot Updated successfully');
-    
-                } elseif($package == 'Creator'){
-                    $partner->creator += $slotNumber;
-                    $partner->save();
-
-                    $transaction->status = 'allocated';
-                    $transaction->save();
-
-                    // return response()->json(['status' => 'success']);
-    
-                    // $this->updateTx($request->tx_ref);
-    
-                    // return back()->with('success', 'Creator slot Updated successfully');
-                }else{
-    
-                    $partner->beginner += $slotNumber;
-                    $partner->save();
-
-                    $transaction->status = 'allocated';
-                    $transaction->save();
-
-                    // return response()->json(['status' => 'success']);
-    
-                    // $this->updateTx($request->tx_ref);
-    
-                    // return back()->with('success', 'Beginner slot Updated successfully');
-    
-                }
-            }
-
             return redirect('partner')->with('success', 'Payment received. Your slot will be allocated in less than 3 hours');
 
-            }else{
-                return redirect('partner')->with('error', 'Payment already processed!');
-            }
+        }
 
-
-
-
-           
-       }
-
-       
-
-       // return $response['status'];
-       // if($response['status'] == 'success'){
-       //      $name = $response['data']['customer']['name'];
-       //      $email = $response['data']['customer']['email'];
-       //      $code = $this->generateCode(7);
-       //     //  return [$name, $email, $this->generateCode(7)];
-       //     $chekIfNotRedeemed = AccessCode::where('email', $email)->where('tx_id', $ref)->where('is_active', true)->first();
-       //     if($chekIfNotRedeemed){
-       //         return redirect('error');
-       //     }
-       //     AccessCode::create(['tx_id' => $ref,'name' => $name, 'email' => $email, 'amount' => '6', 'code' => $code]);
-       //     //send mail to the above email
-          
-       //     return redirect('success');
-       //     // return 'ok';
-
-       // }else{
-       //     // return 'not ok';
-       //     return redirect('error');
-       // }
-      
    }
 
 
