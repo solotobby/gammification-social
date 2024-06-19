@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\LoginPoint;
+use App\Models\PartnerSlot;
 use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -67,7 +68,7 @@ class HomeController extends Controller
     }
 
     public function validateApi(){
-        $url = request()->fullUrl();
+         $url = request()->fullUrl();
        $url_components = parse_url($url);
        parse_str($url_components['query'], $params);
        if($params['status'] == 'cancelled'){
@@ -80,7 +81,7 @@ class HomeController extends Controller
        if($response['status'] == 'success'){
           
             
-            Transaction::create([
+        $transaction= Transaction::create([
                'user_id' => auth()->user()->id,
                'ref' => $response['data']['tx_ref'],
                'amount' => $response['data']['amount'],
@@ -92,6 +93,10 @@ class HomeController extends Controller
                'meta' => json_encode($response['data']['meta']),
                'customer' => json_encode($response['data']['customer'])
             ]);
+
+
+           
+
 
             return redirect('partner')->with('success', 'Payment received. Your slot will be allocated in less than 3 hours');
 

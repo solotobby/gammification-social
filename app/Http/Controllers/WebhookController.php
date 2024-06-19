@@ -29,8 +29,8 @@ class WebhookController extends Controller
 
             //get per info
             $partnerId = @$transaction->user->partner->id;
-            $partner = PartnerSlot::find($partnerId);//where('partner_id', $partnerId)->first();
-            // $partner = Partner::where('user_id', $transaction->user_id)->first();
+            $partner = PartnerSlot::where('partner_id', $partnerId)->first();
+           
 
             if($partner->status == true){
                 if($package == 'Influencer'){
