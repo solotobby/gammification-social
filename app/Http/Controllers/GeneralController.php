@@ -19,6 +19,10 @@ use Stevebauman\Location\Facades\Location;
 
 class GeneralController extends Controller
 {
+    public function admin(){
+        return view('admin.home');
+    }
+    
     public function accessCode($level){
         if($level == 'beginner' || $level == 'creator' || $level == 'influencer' ){
 

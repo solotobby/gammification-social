@@ -100,6 +100,7 @@
                     <div class="block-content">
                       <div class="row justify-content-center py-sm-3 py-md-5">
                         <div class="col-sm-10 col-md-6">
+                          
                           @if(session()->has('success'))
                             <div class="alert alert-success" role="alert">
                                   {{ session('success') }}
@@ -191,6 +192,7 @@
                         Account Number: {{ $withdrawals->account_number }}
 
                         @endif
+
                     </div>
                   </div>
                 @endif 

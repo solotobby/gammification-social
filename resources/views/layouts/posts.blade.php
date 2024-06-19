@@ -39,9 +39,10 @@
         <div class="block-content">
             <a href="{{ url('show/'.$timeline->id) }}" style="color: dimgrey">
                 <p style="color: dimgrey">
-                    {{-- {!! $timeline->content  !!} --}}
+                    {!! $timeline->content  !!}
 
-                    {!! nl2br(e($timeline->content)) !!}
+                    {{-- {!! nl2br(e($timeline->content)) !!} --}}
+
                 </p>
             </a>
         <hr>
