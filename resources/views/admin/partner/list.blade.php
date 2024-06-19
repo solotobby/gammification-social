@@ -33,7 +33,7 @@
                <th >Country</th>
                <th>Phone</th>
                <th >Status</th>
-               <th >Created</th>
+               {{-- <th >Created</th> --}}
              </tr>
            </thead>
            <tbody>
@@ -50,9 +50,9 @@
                     <a href="{{ url('partner/'.$partner->id.'/activate') }}" class="btn btn-sm btn-alt-warning"> {{ $partner->status == true ? 'Active' : 'Not Active' }}</a>
                     @endif
                     </td>
-                   <td>
+                   {{-- <td>
                      <em class="text-muted">{{$partner->created_at?->shortAbsoluteDiffForHumans()}} ago</em>
-                   </td>
+                   </td> --}}
                  </tr>
                @endforeach
            </tbody>
