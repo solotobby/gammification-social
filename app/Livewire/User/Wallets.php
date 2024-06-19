@@ -38,10 +38,10 @@ class Wallets extends Component
 
 
     public function mount(){
-       
+        refreshWallet();
         $this->wallets = auth()->user()->wallet;
         $this->withdrawals = WithdrawalMethod::where(['user_id'=> auth()->user()->id])->first(); //auth()->user()->usdt_wallet_address;
-        refreshWallet();
+       
     }
 
     public function createWithdrawalMethod(){
