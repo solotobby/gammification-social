@@ -13,7 +13,7 @@
     <div class="block block-rounded">
        <div class="block-header block-header-default">
          <h3 class="block-title">
-           Partner List
+           Partner Transaction
          </h3>
        </div>
        <div class="block-content block-content-full">
@@ -26,33 +26,24 @@
          <table class="table table-bordered table-striped table-vcenter js-dataTable-buttons">
            <thead>
              <tr>
-               {{-- <th class="text-center" style="width: 80px;">#</th> --}}
-               <th>Name</th>
-               <th >Email</th>
-               <th >Country</th>
-               <th>Phone</th>
-               <th >Status</th>
-               {{-- <th >Created</th> --}}
+                <th>Ref</th>
+                <th>Display Name</th>
+                <th>Amount</th>
+                <th>Currency</th>
+                <th>Status</th>
+                <th>Validate</th>
              </tr>
            </thead>
            <tbody>
-               @foreach ($partners as $partner)
-               <tr>
-                   <td>{{ $partner->name }}</td>
-                   <td>{{ $partner->email }}</td>
-                   <td>{{ $partner->country}}</td>
-                   <td>{{ $partner->phone}}</td>
-                   <td>
-                    @if($partner->status == true)
-                        <a href=" {{  url('partner/'.$partner->id)}}" class="btn btn-sm btn-alt-primary">View Account</a>
-                    @else
-                    <a href="{{ url('partner/'.$partner->id.'/activate') }}" class="btn btn-sm btn-alt-warning"> {{ $partner->status == true ? 'Active' : 'Not Active' }}</a>
-                    @endif
-                    </td>
-                   {{-- <td>
-                     <em class="text-muted">{{$partner->created_at?->shortAbsoluteDiffForHumans()}} ago</em>
-                   </td> --}}
-                 </tr>
+               @foreach ($transactions as $partner)
+                <tr>
+                    <td>{{ $partner->ref }}</td>
+                    <td>{{ @$partner->user->partner->name }}</td>
+                    <td>{{ $partner->amount }}</td>
+                    <td>{{ $partner->currency}}</td>
+                    <td>{{ $partner->status}}</td>
+                    <td><a href="{{ url('agent/validate/activate/transaction/'.$partner->ref) }}" class="btn btn-alt-secondary"> Validate Payment </a></td>
+                </tr>
                @endforeach
            </tbody>
          </table>

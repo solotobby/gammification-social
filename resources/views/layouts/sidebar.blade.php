@@ -29,9 +29,9 @@
           <span class="nav-main-link-name">Partner</span>
         </a>
 
-        <a class="nav-main-link" href="{{ url('partner/transaction') }}">
+        <a class="nav-main-link" href="{{ url('partner/payments') }}">
           <i class="nav-main-link-icon fa fa-list"></i>
-          <span class="nav-main-link-name">Partner Transaction</span>
+          <span class="nav-main-link-name">Partner Payments</span>
         </a>
        
       </li>
