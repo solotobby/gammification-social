@@ -215,7 +215,7 @@ if(!function_exists('refreshWallet')){
         //fetch/update all unpaid views
         $internalViews=UserView::whereIn('post_id', $postIds)->where('is_paid', false)->get();
         //updatewallet 
-        $wallet->promoter_balance +=  $singleViewInternal*$internalViews->count();
+        $wallet->balance +=  $singleViewInternal*$internalViews->count();
         $wallet->save();
         //reset to paid
         foreach ($internalViews as $view) {
@@ -226,7 +226,7 @@ if(!function_exists('refreshWallet')){
         //external
         $externalViews = ViewsExternal::whereIn('post_id', $postIds)->where('is_paid', false)->get();
         //updatewallet 
-        $wallet->promoter_balance +=  $singleViewExternal*$externalViews->count();
+        $wallet->balance +=  $singleViewExternal*$externalViews->count();
         $wallet->save();
         //reset to paid
         foreach ($externalViews as $view) {
@@ -241,7 +241,7 @@ if(!function_exists('refreshWallet')){
          //fetch/update all unpaid views
          $internalLikes=UserLike::whereIn('post_id', $postIds)->where('is_paid', false)->get();
          //updatewallet 
-         $wallet->promoter_balance +=  $singleLikeInternal*$internalLikes->count();
+         $wallet->balance +=  $singleLikeInternal*$internalLikes->count();
          $wallet->save();
          //reset to paid
          foreach ($internalLikes as $view) {
@@ -254,7 +254,7 @@ if(!function_exists('refreshWallet')){
          //fetch/update all unpaid views
          $internalComments=UserComment::whereIn('post_id', $postIds)->where('is_paid', false)->get();
          //updatewallet 
-         $wallet->promoter_balance +=  $singleCommentInternal*$internalComments->count();
+         $wallet->balance +=  $singleCommentInternal*$internalComments->count();
          $wallet->save();
          //reset to paid
          foreach ($internalComments as $view) {
