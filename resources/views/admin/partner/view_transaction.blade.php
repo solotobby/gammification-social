@@ -42,7 +42,7 @@
                     <td>{{ $partner->amount }}</td>
                     <td>{{ $partner->currency}}</td>
                     <td>{{ $partner->status}}</td>
-                    <td><a href="{{ url('agent/validate/activate/transaction/'.$partner->ref) }}" class="btn btn-alt-secondary"> Validate Payment </a></td>
+                    <td><a href="{{ url('partner/validate/activate/transaction/'.$partner->ref) }}" class="btn btn-alt-secondary"> Validate Payment </a></td>
                 </tr>
                @endforeach
            </tbody>
