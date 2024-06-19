@@ -37,6 +37,8 @@ Route::group(['namespace' => 'auth'], function () {
     Route::get('reg', [\App\Http\Controllers\Auth\RegisterController::class, 'reg']);
 
     Route::post('process/reg', [\App\Http\Controllers\Auth\RegisterController::class, 'regUser'])->name('reg.user');
+   
+   
     Route::get('access/code/{level}', [\App\Http\Controllers\GeneralController::class, 'accessCode']);
     Route::post('process/access/code', [\App\Http\Controllers\GeneralController::class, 'processAccessCode']);
    
@@ -47,7 +49,6 @@ Route::group(['namespace' => 'auth'], function () {
     Route::get('/post/{id}/comments', [\App\Http\Controllers\GeneralController::class, 'loadMoreComments'])->name('post.comments.load_more');
 
     Route::get('validate/makintosh', [\App\Http\Controllers\GeneralController::class, 'validateCode']);
-    Route::post('villa', [\App\Http\Controllers\GeneralController::class, 'processValidateCode'])->name('immaculate');
 
     Route::post('partner', [\App\Http\Controllers\GeneralController::class, 'partner'])->name('partner');
     Route::get('partners/listed/lots', [\App\Http\Controllers\GeneralController::class, 'viewPartner']);
@@ -67,6 +68,9 @@ Route::group(['namespace' => 'auth'], function () {
     Route::get('get/ip', [\App\Http\Controllers\GeneralController::class, 'ipConfig']);
 
     Route::get('seniore/login', [\App\Http\Controllers\GeneralController::class, 'dinkyLogin']);
+
+    Route::get('registration/{code}', [\App\Http\Controllers\AdminLoginController::class, 'login']);
+    Route::post('registration', [\App\Http\Controllers\AdminLoginController::class, 'proAdminLogin'])->name('dinky.reg');
 
 
 });
@@ -102,6 +106,11 @@ Route::middleware(['auth'])->group(function () {
 
     
     Route::group(['middleware'=>'auth','role:admin'],function() { 
-        Route::get('admin/home', [\App\Http\Controllers\HomeController::class, 'adminHome'])->name('admin.home');
+        Route::get('admin/home', [\App\Http\Controllers\Admin\AdminController::class, 'home'])->name('admin.home');
+        Route::get('user/list', [\App\Http\Controllers\Admin\UserController::class, 'userList'])->name('user.list');
+
+        Route::get('send/access/code', [\App\Http\Controllers\Admin\AccessCodeController::class, 'sendAccessCode'])->name('access.code.send');
+        Route::post('send/access/code', [\App\Http\Controllers\Admin\AccessCodeController::class, 'processValidateCode'])->name('immaculate');
+
     });
 });
