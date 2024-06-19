@@ -2,6 +2,7 @@
 
 use App\Livewire\CreateProduct;
 use App\Livewire\User\Analytics;
+use App\Livewire\User\HowToEarn;
 use App\Livewire\User\Partners;
 use App\Livewire\User\PostAnalytics;
 use App\Livewire\User\Posts;
@@ -96,6 +97,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('settings', Settings::class);
         Route::get('wallets', Wallets::class);
         Route::get('partner', Partners::class);
+        Route::get('how/to/earn', HowToEarn::class);
     });
 
     
