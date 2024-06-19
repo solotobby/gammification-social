@@ -54,8 +54,8 @@ Route::group(['namespace' => 'auth'], function () {
     // Route::get('partners/listed/lots', [\App\Http\Controllers\GeneralController::class, 'viewPartner']);
     // Route::get('activate/{id}', [\App\Http\Controllers\GeneralController::class, 'viewPartnerActivate']);
     
-    Route::get('view/agent/transaction', [\App\Http\Controllers\TransactionController::class, 'viewAgentTransaction']);
-    Route::get('agent/validate/activate/transaction/{id}', [\App\Http\Controllers\TransactionController::class, 'validateAgentTransaction']);
+    // Route::get('view/agent/transaction', [\App\Http\Controllers\TransactionController::class, 'viewAgentTransaction']);
+    // Route::get('agent/validate/activate/transaction/{id}', [\App\Http\Controllers\TransactionController::class, 'validateAgentTransaction']);
 
     Route::post('validate/slot', [\App\Http\Controllers\TransactionController::class, 'validateSlot'])->name('validate.slot');
 
@@ -112,7 +112,11 @@ Route::middleware(['auth'])->group(function () {
         Route::get('send/access/code', [\App\Http\Controllers\Admin\AccessCodeController::class, 'sendAccessCode'])->name('access.code.send');
         Route::post('send/access/code', [\App\Http\Controllers\Admin\AccessCodeController::class, 'processValidateCode'])->name('immaculate');
         Route::get('partner/list', [\App\Http\Controllers\Admin\PartnerController::class, 'list']);
+        Route::get('partner/payments', [\App\Http\Controllers\Admin\PartnerController::class, 'partnerPayments']);
         Route::get('partner/{id}/activate', [\App\Http\Controllers\Admin\PartnerController::class, 'viewPartnerActivate']);
         Route::get('partner/{id}', [\App\Http\Controllers\Admin\PartnerController::class, 'partnerInfo']);
+        Route::get('partner/validate/activate/transaction/{id}', [\App\Http\Controllers\Admin\PartnerController::class, 'validateAgentTransaction']);
+
+       
     });
 });

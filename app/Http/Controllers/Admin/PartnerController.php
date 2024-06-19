@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Partner;
 use App\Models\PartnerSlot;
+use App\Models\Transaction;
 use Illuminate\Http\Request;
 
 class PartnerController extends Controller
@@ -36,5 +37,26 @@ class PartnerController extends Controller
         if($res === 'OK'){ 
             return $id;
         }
+    }
+
+    public function partnerPayments(){
+        $res = securityVerification();
+        if($res === 'OK'){ 
+            $transactions = Transaction::where(['type' => 'slot_purchase', 'status' => 'successful'])->get();
+            return view('admin.partner.view_transaction', ['transactions' => $transactions]);
+           
+        }
+    }
+
+    public function validateAgentTransaction($id){
+        $res = securityVerification();
+        if($res === 'OK'){
+            return $transaction = Transaction::where('ref', $id)->first();
+            
+            @$partnerId = $transaction->user->partner->id;
+            @$slot = PartnerSlot::where('partner_id', $partnerId)->first();
+            return view('agent_info', ['transaction' => $transaction, 'slot' => $slot]);
+
+         }
     }
 }
