@@ -160,6 +160,9 @@
                         @endif
 
                         <div class="col-xl-6 order-xl-0">
+                          <div class="alert alert-info">
+                          As a Partner, you can buy Access codes (as slots) at discounted price (10% discount) and resell to your friends and followers. Select the number of slots and category below to continue. Once payment is successful, you'll be alloted the number of access codes (as slots). You can proceed to sell the codes.
+                          </div>
                             <form action="" method="POST" onsubmit="" wire:submit.prevent="purchaseSlot">
                               <div class="mb-4">
                                 <label class="form-label" for="dm-profile-edit-password">Package</label>
@@ -190,7 +193,7 @@
                                 <select wire:model="currency" class="form-control">
                                     <option value="">Select Currency</option>
                                     <option>USD</option>
-                                    <option>USDT</option>
+                                    {{-- <option>USDT</option> --}}
                                     <option>Naira</option>
                                 </select>
                                 <div style="color: brown">@error('currency') {{ $message }} @enderror</div>
@@ -219,6 +222,10 @@
 
 
                         <div class="col-xl-6 order-xl-0">
+                          <div class="alert alert-info">
+                            Selling access codes means sending access codes slot that you have pre-purchased to your customers email. Please provide correct email of the user, name and send. Thank you
+                          </div>
+
                           <form action="" method="POST" onsubmit="" wire:submit.prevent="sendSlot">
                             <div class="mb-4">
                               <label class="form-label" for="dm-profile-edit-password">Package</label>

@@ -51,11 +51,11 @@ class PartnerController extends Controller
     public function validateAgentTransaction($id){
         $res = securityVerification();
         if($res === 'OK'){
-            return $transaction = Transaction::where('ref', $id)->first();
+             $transaction = Transaction::where('ref', $id)->first();
             
             @$partnerId = $transaction->user->partner->id;
             @$slot = PartnerSlot::where('partner_id', $partnerId)->first();
-            return view('agent_info', ['transaction' => $transaction, 'slot' => $slot]);
+            return view('admin.partner.view_transaction_info', ['transaction' => $transaction, 'slot' => $slot]);
 
          }
     }

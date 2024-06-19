@@ -11,7 +11,7 @@ class WebhookController extends Controller
 
         $event = $request["event"];
 
-        Webhook::create(['name' => $event, 'content' => $request]);
+        Webhook::create(['event' => $event, 'content' => $request]);
 
 
     }
