@@ -14,7 +14,8 @@
     <link href="{{asset('asset/css/bootstrap.min.css')}}" rel="stylesheet" type="text/css" />
     <link href="{{asset('asset/css/materialdesignicons.min.css')}}" rel="stylesheet" type="text/css" />
     <link href="{{asset('asset/css/style.min.css')}}" rel="stylesheet" type="text/css" />
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/brands.min.css" integrity="sha512-DJLNx+VLY4aEiEQFjiawXaiceujj5GA7lIY8CHCIGQCBPfsEG0nGz1edb4Jvw1LR7q031zS5PpPqFuPA8ihlRA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script async src="https://www.googletagmanager.com/gtag/js?id=AW-10842521152"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -609,14 +610,22 @@
                             Payhankey allows you to make short posts, facts, quizzes and teasers. Earn signup bonus and referral bonuses when you refer your friends.
                         </p>
                         <ul class="list-inline footer-social-icon-content">
-                            <li class="list-inline-item me-4"><a href="#" class="footer-social-icon facebook"><i
-                                        class="" data-feather="facebook"></i></a></li>
-                            <li class="list-inline-item me-4"><a href="#" class="footer-social-icon"><i class=""
+                            <li class="list-inline-item me-4">
+                                <a href="https://www.tiktok.com/@payhankeyofficial?_t=8nKWNLIq65o&_r=1" class="footer-social-icon" target="_blank">
+                                    <i class="fab fa-tiktok"></i>
+                                </a>
+                            </li>
+                            <li class="list-inline-item me-4">
+                                <a href="https://www.instagram.com/payhankey_official?utm_source=qr&igsh=M3ZzdjN3MHUxOXZk" class="footer-social-icon" target="_blank">
+                                    <i class="fab fa-instagram"></i>
+                                </a>
+                            </li>
+                            {{-- <li class="list-inline-item me-4"><a href="#" class="footer-social-icon"><i class=""
                                         data-feather="twitter"></i></a></li>
-                            <li class="list-inline-item me-4"><a href="#" class="footer-social-icon"><i class=""
+                            <li class="list-inline-item me-4"><a href="https://www.instagram.com/payhankey_official?utm_source=qr&igsh=M3ZzdjN3MHUxOXZk" class="footer-social-icon" target="_blank"><i class=""
                                         data-feather="instagram"></i></a></li>
-                            <li class="list-inline-item "><a href="#" class="footer-social-icon"><i class=""
-                                        data-feather="linkedin"></i></a></li>
+                            <li class="list-inline-item"><a href="#" class="footer-social-icon"><i class=""
+                                        data-feather="linkedin"></i></a></li> --}}
                         </ul>
                     </div>
                 </div>
