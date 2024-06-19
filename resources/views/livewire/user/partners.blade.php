@@ -179,7 +179,7 @@
                                 <label class="form-label" for="dm-profile-edit-password">Number of Slot</label>
                                 <select wire:model="slot_number" class="form-control">
                                     <option value="">Select Number of Slot</option>
-                                    <option>1</option>
+                                    {{-- <option>1</option> --}}
                                     <option>10</option>
                                     <option>25</option>
                                     <option>50</option>
