@@ -29,7 +29,7 @@
             <div class="block-content block-content-full ratio ratio-16x9">
               <div class="d-flex justify-content-center align-items-center">
                 <div>
-                  <div class="fs-2 mb-1">15</div>
+                  <div class="fs-2 mb-1">{{ $userCount }}</div>
                   <div class="text-muted">Users</div>
                 </div>
               </div>
@@ -41,7 +41,7 @@
             <div class="block-content block-content-full ratio ratio-16x9">
               <div class="d-flex justify-content-center align-items-center">
                 <div>
-                  <div class="fs-2 mb-1">120</div>
+                  <div class="fs-2 mb-1">{{ $partnerCount }}</div>
                   <div class="text-muted">Partners</div>
                 </div>
               </div>
@@ -53,7 +53,7 @@
             <div class="block-content block-content-full ratio ratio-16x9">
               <div class="d-flex justify-content-center align-items-center">
                 <div>
-                  <div class="fs-2 mb-1">345</div>
+                  <div class="fs-2 mb-1">{{ $accesscodeCount }}</div>
                   <div class="text-muted">Access Codes</div>
                 </div>
               </div>
@@ -65,7 +65,7 @@
             <div class="block-content block-content-full ratio ratio-16x9">
               <div class="d-flex justify-content-center align-items-center">
                 <div>
-                  <div class="fs-2 mb-1">$29023</div>
+                  <div class="fs-2 mb-1">${{$rev}}</div>
                   <div class="text-muted">Balance</div>
                 </div>
               </div>
