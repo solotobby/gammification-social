@@ -30,17 +30,17 @@ class GeneralController extends Controller
             if($level == 'beginner'){
                 $amountDollar = '5';
                 $amountNaira = '7,500';
-                $nairaLink = 'https://flutterwave.com/pay/ohd7jfk6wgzq';
+                $nairaLink = 'https://paystack.com/pay/3kzeashpp7';//'https://flutterwave.com/pay/ohd7jfk6wgzq';
                 $dollarLink = 'https://buy.stripe.com/9AQ5la2KB7U80zCeUU';
             }elseif($level == 'creator'){
                 $amountDollar = '10';
                 $amountNaira = '15,000';
-                $nairaLink = 'https://flutterwave.com/pay/5lzof7tt5ykj';
+                $nairaLink = 'https://paystack.com/pay/ssl60zukg4';
                 $dollarLink = 'https://buy.stripe.com/4gwaFu3OF7U82HK8wx';
             }else{
                 $amountDollar = '20';
                 $amountNaira = '30,000';
-                $nairaLink = 'https://flutterwave.com/pay/kljctf1pziei';
+                $nairaLink = 'https://paystack.com/pay/h927ynoveq';
                 $dollarLink = 'https://buy.stripe.com/eVa9Bqfxn6Q48244gi';
             }
 
