@@ -617,7 +617,7 @@
         <!-- Sidebar Scrolling -->
         <div class="js-sidebar-scroll">
           <!-- Side Navigation -->
-          @include('layouts.sidebar')
+          @include('layouts.pub_sidebar')
           <!-- END Side Navigation -->
         </div>
         <!-- END Sidebar Scrolling -->
