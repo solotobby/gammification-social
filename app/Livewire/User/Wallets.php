@@ -166,10 +166,9 @@ class Wallets extends Component
             ['user_id'=> auth()->user()->id], 
             ['usdt_wallet_address' => $this->usdt_wallet_address]
         );
-
         session()->flash('success', 'Wallet Address Updated Successfully');
-
     }
+
     public function render()
     {
         return view('livewire.user.wallets');

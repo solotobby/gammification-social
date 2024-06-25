@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AccessCode;
+use App\Models\Level;
 use App\Models\LoginPoint;
 use App\Models\PartnerSlot;
 use App\Models\Transaction;
 use App\Models\User;
+use App\Models\UserLevel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
@@ -99,6 +102,67 @@ class HomeController extends Controller
         }
 
    }
+
+   public function upgradeApi(){
+
+        $url = request()->fullUrl();
+        $url_components = parse_url($url);
+        parse_str($url_components['query'], $params);
+        if($params['status'] == 'cancelled'){
+            return redirect('settings');
+        }
+
+        $ref = $params['transaction_id'];
+
+        $response = $this->verifyFlutterwavePayment($ref);
+
+        if($response['status'] == 'success'){
+           $amount = $response['data']['amount'];
+            $currency = $response['data']['currency'];
+            $string = json_encode($response['data']['meta']);
+            $data = json_decode($string, true);
+            $package = htmlspecialchars($data['package']);
+            // return ([$amount, $currency, $package]);
+
+            $ref = time();
+            $level = Level::where('name', $package)->first();
+            $code = generateCode(5);
+
+            AccessCode::create(['tx_id' => $ref, 'partner_id' => null, 'name' =>$level->name, 'email' => auth()->user()->email, 
+            'amount' => $level->amount, 'code' => $code, 'level_id' => $level->id,
+            'recepient_name' => auth()->user()->name, 'recepient_email' => auth()->user()->email, 'is_active' => false
+            ]);
+
+            $userInfo = User::where('id', auth()->user()->id)->first();
+            $userInfo->level_id = $level->id;
+            $userInfo->save();
+
+
+            // $accessCode = AccessCode::where('code', $code)->where('is_active', true)->first();
+            // $fetchUser = UserLevel::where('user_id', auth()->user()->id)->delete();
+            // UserLevel::create(['user_id' => auth()->user()->id, 'level_id' => $level->id]);
+
+         $transaction= Transaction::create([
+                'user_id' => auth()->user()->id,
+                'ref' => $response['data']['tx_ref'],
+                'amount' => $response['data']['amount'],
+                'currency' => $response['data']['currency'],
+                'status' =>  $response['data']['status'],
+                'type' => 'upgrade_purchase',
+                'action' => 'Credit',
+                'description' => auth()->user()->name.' upgraded to '.$level->name, 
+                'meta' => json_encode($response['data']['meta']),
+                'customer' => json_encode($response['data']['customer'])
+             ]);
+ 
+             return redirect('settings')->with('success', 'Upgrade Successful');
+ 
+         }
+ 
+
+   }
+
+ 
 
 
    public function verifyFlutterwavePayment($ref){

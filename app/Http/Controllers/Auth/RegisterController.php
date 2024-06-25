@@ -105,6 +105,8 @@ class RegisterController extends Controller
          ]);
        
          UserLevel::create(['user_id' => $user->id, 'level_id' => $accessCode->level_id]);
+         $user->level_id = $accessCode->level_id;
+         $user->save();
 
          $roleId = Role::where('name', 'user')->first()->id;
          $user->assignRole($roleId);
