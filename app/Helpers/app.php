@@ -23,6 +23,58 @@ if(!function_exists('engagement')){
         ->get();
     }
 }
+if(!function_exists('generateCode')){
+    function generateCode($number){
+        $alph = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+        $code='';
+        for($i=0;$i<$number;$i++){
+        $code .= $alph[rand(0, 35)];
+        }
+        return $code;
+    }
+}
+
+if(!function_exists('upgradePayment')){
+
+    function upgradePayment($amount, $currency, $package){
+
+        $payload = [
+            "tx_ref"=> Str::random(16),
+            "amount"=> $amount,
+            "currency"=> $currency,
+            "redirect_url"=> url('upgrade/api'),//"https://webhook.site/9d0b00ba-9a69-44fa-a43d-a82c33c36fdc",
+            "meta"=> [
+                "package" => $package
+                // "level_id" =>$level->id,
+                // "level_name" =>$package,
+                // "number_of_slot" =>$quantity,
+                // "unitprice" =>$level->amount,
+                // "amount_paid" =>$amount,
+            ],
+            "customer"=> [
+                "email"=> auth()->user()->email,
+                "name"=> auth()->user()->name
+            ],
+            "customizations"=> [
+                "title"=> "Upgrade payment to ".$package." package",
+                "logo"=> "https://payhankey.com/logo.png"
+               
+            ]
+        ];
+
+        $res = Http::withHeaders([
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer '.env('FL_SECRET_KEY')
+        ])->post('https://api.flutterwave.com/v3/payments', $payload)->throw();
+
+        return json_decode($res->getBody()->getContents(), true)['data']['link'];
+
+
+
+    }
+
+}
 
 if(!function_exists('processPayment')){
     function processPayment($amount, $currency, $package, $level, $quantity){

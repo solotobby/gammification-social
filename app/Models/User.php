@@ -30,7 +30,8 @@ class User extends Authenticatable
         'email',
         'referral_code',
         'password',
-        'access_code_id'
+        'access_code_id',
+        'level_id'
     ];
 
     /**
@@ -67,7 +68,8 @@ class User extends Authenticatable
 
     public function level(){
        return $this->belongsTo(AccessCode::class, 'access_code_id');
-        // return $this->hasMany(Level::class, 'user_levels', 'user_id');
+
+        // return $this->belongsTo(Level::class);
     }
 
     public function social(){

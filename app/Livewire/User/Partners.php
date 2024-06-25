@@ -142,7 +142,7 @@ class Partners extends Component
 
     private function sendCode($levelName, $email, $prtner, $name){
 
-            $code = $this->generateCode(7);
+            $code = generateCode(7);
            
             $ref = time();
             $level = Level::where('name', $levelName)->first();

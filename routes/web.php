@@ -33,6 +33,9 @@ Route::group(['namespace' => 'auth'], function () {
     Route::get('/', function () {
         return view('welcome');
     });
+
+    Route::get('fix', [\App\Http\Controllers\GeneralController::class, 'devy']);
+
     Route::get('admin', [\App\Http\Controllers\GeneralController::class, 'admin']);
     Route::get('reg', [\App\Http\Controllers\Auth\RegisterController::class, 'reg']);
 
@@ -88,6 +91,8 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('complete/onboarding', [\App\Http\Controllers\HomeController::class, 'completeOnboarding'])->name('complete.onboarding');
         Route::get('validate/api', [\App\Http\Controllers\HomeController::class, 'validateApi']);
+        
+        Route::get('upgrade/api', [\App\Http\Controllers\HomeController::class, 'upgradeApi']);
         
         // Route::get('timeline', Timeline::class);
 

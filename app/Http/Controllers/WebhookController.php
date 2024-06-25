@@ -16,6 +16,7 @@ class WebhookController extends Controller
         
 
         if($event == 'charge.completed'){
+            
             Webhook::create(['event' => $event, 'content' => $request]);
             $transactionRef = $request['data']['tx_ref']; //get tx ref from webhook
 

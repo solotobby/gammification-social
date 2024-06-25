@@ -64,7 +64,7 @@
             </p>
           </div>
           <div class="col-xl-6 order-xl-0">
-            <form action="be_pages_generic_profile_v2_edit.html" method="POST" enctype="multipart/form-data" onsubmit="return false;">
+            <form action="" method="POST" enctype="multipart/form-data" wire:submit.prevent="upgradeAccount">
               <div class="mb-4">
                 <label class="form-label" for="dm-profile-edit-username">Username</label>
                 <input type="text" class="form-control" id="dm-profile-edit-username" name="dm-profile-edit-username" placeholder="Enter your username.." value="{{ auth()->user()->username }}" readonly>
@@ -81,26 +81,56 @@
                 <label class="form-label" for="dm-profile-edit-job-title">Level</label>
                 <input type="text" class="form-control" id="dm-profile-edit-job-title" name="dm-profile-edit-job-title" placeholder="Add your job title.." value="{{ auth()->user()->level->name }}" readonly>
               </div>
-              <div class="mb-4">
+              {{-- <div class="mb-4">
                 <label class="form-label" for="dm-profile-edit-company">Activation Code</label>
                 <input type="text" class="form-control" id="dm-profile-edit-company" name="dm-profile-edit-company" value="{{ auth()->user()->level->code }}" readonly>
-              </div>
+              </div> --}}
               <div class="mb-4">
                 <label class="form-label" for="dm-profile-edit-company">Referral Code</label>
                 <input type="text" class="form-control" id="dm-profile-edit-company" name="dm-profile-edit-company" value="{{ auth()->user()->referral_code }}" readonly>
               </div>
+              <hr>
+              <div class="mb-4">
+                <label class="form-label">Upgrade your Account</label>
+                <select class="form-control" name="upgrade" wire:model="upgrade" required>
+                  <option value="">Select Upgrade Type</option>
 
-              {{-- <div class="mb-4">
-                <label class="form-label">Your Avatar</label>
-                <div class="push">
+                  @if(auth()->user()->level->name == 'Beginner')
+                      <option value="Creator">Creator</option>
+                      <option value="Influencer">Influencer</option>
+                  @elseif(auth()->user()->level->name == 'Creator')
+                      <option value="Influencer">Influencer</option>
+                  @else
+                    You do not need an upgrade of account
+                  @endif
+                </select>
+                {{-- <div class="push">
                   <img class="img-avatar" src="{{ asset('src/assets/media/avatars/avatar13.jpg')}}" alt="">
                 </div>
                 <label class="form-label" for="dm-profile-edit-avatar">Choose a new avatar</label>
-                <input class="form-control" type="file" id="dm-profile-edit-avatar">
-              </div> --}}
-              {{-- <button type="submit" class="btn btn-alt-primary">
-                <i class="fa fa-check-circle opacity-50 me-1"></i> Update Profile
-              </button> --}}
+                <input class="form-control" type="file" id="dm-profile-edit-avatar"> --}}
+              </div>
+
+              <div class="mb-4">
+                <label class="form-label">Currency</label>
+                <select class="form-control" name="currency" wire:model="currency" required>
+                  <option value="">Select Currency</option>
+                    <option value="USD">USD</option>
+                    <option value="Naira">Naira</option>
+                </select>
+              </div>
+
+              @if(auth()->user()->level->name == 'Influencer')
+              <button type="button" class="btn btn-alt-primary" disabled>
+                <i class="fa fa-check-circle opacity-50 me-1"></i> Upgrade Account
+              </button>
+              @else
+
+              <button type="submit" class="btn btn-alt-primary">
+                <i class="fa fa-check-circle opacity-50 me-1"></i> Upgrade Account
+              </button>
+
+              @endif
             </form>
           </div>
         </div>
