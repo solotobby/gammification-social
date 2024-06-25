@@ -620,6 +620,11 @@
                                     <i class="fab fa-instagram"></i>
                                 </a>
                             </li>
+                            <li class="list-inline-item me-4">
+                                <a href="https://www.facebook.com/profile.php?id=61561454191408&mibextid=ZbWKwL" class="footer-social-icon" target="_blank">
+                                    <i class="fab fa-facebook"></i>
+                                </a>
+                            </li>
                             {{-- <li class="list-inline-item me-4"><a href="#" class="footer-social-icon"><i class=""
                                         data-feather="twitter"></i></a></li>
                             <li class="list-inline-item me-4"><a href="https://www.instagram.com/payhankey_official?utm_source=qr&igsh=M3ZzdjN3MHUxOXZk" class="footer-social-icon" target="_blank"><i class=""
@@ -703,85 +708,7 @@
     </div> --}}
     <!-- login Modal End -->
 
-    <!-- Register Modal Start-->
-    <div class="modal fade" id="exampleModalCenter-1" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content login-page">
-                <div class="modal-body">
-                    <div class="text-center">
-                        <h3 class="title mb-4">Welcome To Payhankey</h3>
-                        <h4 class="text-uppercase text-primary"><b>Register as Partner</b></h4>
-                    </div>
-                    <div class="login-form mt-4">
-                        <form action="{{ route('partner') }}" method="POST">
-                            @csrf
-                            <div class="form-group">
-                                <label for="exampleInputUsername">Full Name</label>
-                                <input type="text" class="form-control" name="name" id="exampleInputUsername"
-                                    placeholder="Enter Name" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="exampleInputEmail2">Email</label>
-                                <input type="email" class="form-control" name="email" id="exampleInputEmail2"
-                                    placeholder="Youremail@gmail.com" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="exampleInputEmail2">Phone Number</label>
-                                <input type="text" class="form-control" name="phone" id="exampleInputEmail2"
-                                    placeholder="Youremail@gmail.com" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="exampleInputEmail2">Govt. issued Id. Card</label>
-                                    <select class="form-control" name="identification" required>
-                                        <option>National Identity Number (NIN)</option>
-                                        <option>Passport</option>
-                                    </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="exampleInputEmail2">Country</label>
-                                    <select class="form-control" name="country" required>
-                                        <option>Nigeria</option>
-                                        <option>Germany</option>
-                                    </select>
-                            </div>
-                            {{-- <div class="form-group">
-                                <label for="exampleInputPassword2">Password</label>
-                                <input type="password" class="form-control" id="exampleInputPassword2"
-                                    placeholder="Password">
-                            </div>
-                            <a href="#" class="float-end text-muted font-size-15">Forgot Password.?</a>
-                            <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" id="customCheck2">
-                                <label class="custom-control-label font-size-15" for="customCheck2">Remember Me</label>
-                            </div> --}}
-                            <div class="text-center mt-4">
-                                <button type="submit" class="btn btn-primary">Register <i class="icon-size-15 icon ms-1"
-                                        data-feather="arrow-right-circle"></i></button>
-                            </div>
-                        </form>
-                        {{-- <div class="position-relative text-center mt-4">
-                            <span class="login-border"></span>
-                            <p class="social-login text-muted font-size-17">Social Login</p>
-                        </div>
-                        <div class="text-center">
-                            <ul class="list-inline mt-2 mb-3">
-                                <li class="list-inline-item me-3"><a href="#" class="login-social-icon icon-primary"><i
-                                            class="icon-xs" data-feather="facebook"></i></a></li>
-                                <li class="list-inline-item me-3"><a href="#" class="login-social-icon icon-info"><i
-                                            class="icon-xs" data-feather="twitter"></i></a></li>
-                                <li class="list-inline-item me-3"><a href="#" class="login-social-icon icon-danger"><i
-                                            class="icon-xs" data-feather="instagram"></i></a></li>
-                                <li class="list-inline-item"><a href="#" class="login-social-icon icon-success"><i
-                                            class="icon-xs" data-feather="linkedin"></i></a></li>
-                            </ul>
-                        </div> --}}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Register Modal Start-->
-
+   
 
     <!-- javascript -->
     <script src="{{asset('asset/js/bootstrap.bundle.min.js')}}"></script>
