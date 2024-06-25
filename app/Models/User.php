@@ -67,9 +67,9 @@ class User extends Authenticatable
     }
 
     public function level(){
-       return $this->belongsTo(AccessCode::class, 'access_code_id');
+    //    return $this->belongsTo(AccessCode::class, 'access_code_id');
 
-        // return $this->belongsTo(Level::class);
+        return $this->belongsTo(Level::class);
     }
 
     public function social(){
