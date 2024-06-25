@@ -255,7 +255,12 @@
                       </div>
 
                       <div class="mb-4">
-                        <small><a href="{{ url('/#pricing') }}" target="_blank" alt="How to get Access code">Get Access Code</a></small><input type="text" class="form-control @error('access_code') is-invalid @enderror form-control-lg form-control-alt" id="access_code" name="access_code" placeholder="Access Code" required>
+                        <small><a href="{{ url('/#pricing') }}" target="_blank" alt="How to get Access code">Get Access Code</a></small>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <small><a href="{{ url('/howtoearn') }}" target="_blank" alt="How to get Access code"><span style="text-align: right">How to Earn</span></a></small>
+                        
+                        <input type="text" class="form-control @error('access_code') is-invalid @enderror form-control-lg form-control-alt" id="access_code" name="access_code" placeholder="Access Code" required>
                           @error('access_code')
                             <span class="invalid-feedback" role="alert">
                                 <strong>{{ $message }}</strong>

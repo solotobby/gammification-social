@@ -34,7 +34,7 @@
             <tr>
                 {{-- <td class="text-center">1</td> --}}
                 <td class="fw-semibold">
-                  <a href="#">{{ $user->name }}</a>
+                  <a href="{{ url('user/info/'.$user->id) }}">{{ $user->name }}</a>
                 </td>
                 <td class="d-none d-sm-table-cell">
                     {{ $user->email }}

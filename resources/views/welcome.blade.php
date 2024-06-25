@@ -68,6 +68,11 @@
                     {{-- <li class="nav-item">
                         <a data-scroll href="#pricing" class="nav-link">Access Code</a>
                     </li> --}}
+                    
+                    <li class="nav-item">
+                        <a data-scroll href="{{ url('howtoearn') }}" class="nav-link">How to Earn</a>
+                    </li>
+
                     <li class="nav-item">
                         <a data-scroll href="#faq" class="nav-link">FAQ</a>
                     </li>

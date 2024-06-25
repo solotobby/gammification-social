@@ -32,6 +32,11 @@ class GeneralController extends Controller
 
         return 'Okay good';
     }
+
+    public function howToEarn(){
+        return view('earn');
+    }
+
     public function admin(){
         return view('admin.home');
     }
