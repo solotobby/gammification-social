@@ -266,6 +266,11 @@
                                     <i class="fab fa-instagram"></i>
                                 </a>
                             </li>
+                            <li class="list-inline-item me-4">
+                                <a href="https://www.facebook.com/profile.php?id=61561454191408&mibextid=ZbWKwL" class="footer-social-icon" target="_blank">
+                                    <i class="fab fa-facebook"></i>
+                                </a>
+                            </li>
                         </ul>
                     </div>
                 </div>
