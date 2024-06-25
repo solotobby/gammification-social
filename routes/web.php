@@ -45,6 +45,8 @@ Route::group(['namespace' => 'auth'], function () {
     Route::get('access/code/{level}', [\App\Http\Controllers\GeneralController::class, 'accessCode']);
     Route::post('process/access/code', [\App\Http\Controllers\GeneralController::class, 'processAccessCode']);
    
+    Route::get('howtoearn', [\App\Http\Controllers\GeneralController::class, 'howToEarn']);
+
     Route::get('success', [\App\Http\Controllers\GeneralController::class, 'success']);
     Route::get('error', [\App\Http\Controllers\GeneralController::class, 'error']);
 
@@ -112,10 +114,14 @@ Route::middleware(['auth'])->group(function () {
     
     Route::group(['middleware'=>'auth','role:admin'],function() { 
         Route::get('admin/home', [\App\Http\Controllers\Admin\AdminController::class, 'home'])->name('admin.home');
-        Route::get('user/list', [\App\Http\Controllers\Admin\UserController::class, 'userList'])->name('user.list');
 
+        Route::get('user/list', [\App\Http\Controllers\Admin\UserController::class, 'userList'])->name('user.list');
+        Route::get('user/info/{id}', [\App\Http\Controllers\Admin\UserController::class, 'userInfo']);
+        Route::post('user/credit/wallet', [\App\Http\Controllers\Admin\UserController::class, 'processWalletCredit'])->name('credit.wallet');
+       
         Route::get('send/access/code', [\App\Http\Controllers\Admin\AccessCodeController::class, 'sendAccessCode'])->name('access.code.send');
         Route::post('send/access/code', [\App\Http\Controllers\Admin\AccessCodeController::class, 'processValidateCode'])->name('immaculate');
+        
         Route::get('partner/list', [\App\Http\Controllers\Admin\PartnerController::class, 'list']);
         Route::get('partner/payments', [\App\Http\Controllers\Admin\PartnerController::class, 'partnerPayments']);
         Route::get('partner/{id}/activate', [\App\Http\Controllers\Admin\PartnerController::class, 'viewPartnerActivate']);

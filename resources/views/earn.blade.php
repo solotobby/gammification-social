@@ -74,9 +74,6 @@
                     <li class="nav-item">
                         <a data-scroll href="{{ url('howtoearn') }}" class="nav-link">How to Earn</a>
                     </li>
-                    {{-- <li class="nav-item">
-                        <a data-scroll href="{{ url('#blog') }}" class="nav-link">Blog</a>
-                    </li> --}}
                     <li class="nav-item">
                         <a data-scroll href="{{ url('#contact') }}#contact" class="nav-link">Contact Us</a>
                     </li>
@@ -171,66 +168,40 @@
             <div class="row justify-content-center">
                 <div class="col-lg-5 align-self-center">
                     <p class="font-weight-medium text-uppercase mb-2"><i
-                            class="mdi mdi-chart-bubble h2 text-primary me-1 align-middle"></i> Early Bird Offer </p>
-                    {{-- <h3 class="font-weight-semibold line-height-1_4 mb-4">We do the work you <b>stay focused</b> on
-                        <b>your customers</b>.
-                    </h3> --}}
-                    <h3 class="title mb-3">Get Access Code for {{ ucfirst($level) }}</h3>
+                            class="mdi mdi-chart-bubble h2 text-primary me-1 align-middle"></i> Earning made Easy </p>
+                    <h3 class="font-weight-semibold line-height-1_4 mb-4">
+                        Earning is easy on Payhankey when you <b>post, comment, like and share </b> as many times as possible.
+                    </h3>
+                    <h3 class="title mb-3">You can earn from:</h3>
 
                     <p class="text-muted font-size-15 mb-4">
-                        An Access code is your unique passkey to 
-                        create an account on Payhankey. Once payment is successful and confirmed, 
-                        your access code will be sent to your registered email address.
+                        1. <b>Internal Content post and Engagements:</b> We pay you for every comment you make on Payhankey. Every like and comment your posts gets earns you money. This means we pay you for liking and comment on your posts
+                        <br>
+                        2. <b>Monetize your TikTok, Instagram, Facebook and other social media:</b> You earn $1 from every 1000 views on review videos you make about Payhankey on Instagram, Facebook or TikTok. Once the video (s) goes viral (20, 000 views and above), you earn $20.
+                        <br>
+                        3. <b>MonetIize Views on your TikTok, Instagram and Facebook:</b> Payhankey pays you when you share your posts from Payhankey to other social media to get views, likes and comment.
+                        <br>
+                        4. <b>Sign Up bonus:</b> For registering on Payhankey, you earn up to $3 sign up bonus
+                        <br>
+                        5. <b>Referal bonus:</b> We pay you up to $5 on each user you refer. Copy your referral link from your Profile, share with your friends, add to your social media bio for users to sign up using your referral link.
+
+                       
                     </p>
                     
                     <div class="mt-5">
-                        <a href="{{ $dollarlink }}" target="_blank" class="btn btn-primary me-2">Pay in Dollar - ${{ $amountDollar }}</a>
-                        <a href="{{ $nairalink }}" target="_blank" class="btn btn-soft-primary">Pay in Naira - &#8358;{{ $amountNaira }}</a>
+                        {{-- <a href="{{ $dollarlink }}" target="_blank" class="btn btn-primary me-2">Pay in Dollar - ${{ $amountDollar }}</a> --}}
+                        <a href="{{ url('register') }}" target="_blank" class="btn btn-soft-primary">Get Started</a>
                     </div>
-                    <hr>
-                    <div class="">
-                        {{-- <p class="text-muted font-size-15 mb-4">Pay  ${{ $amountDollar }} to the USDT wallet address below</p> --}}
-                        <a href="{{ $nairalink }}" target="_blank" class="btn btn-soft-primary" data-toggle="modal" data-target="#exampleModal">Pay with USDT - ${{ $amountDollar }}</a>
-                    </div>
+                   
+                    
                 </div>
                 <div class="col-lg-6 offset-lg-1 align-self-center">
                     <div class="mt-4 mt-lg-0">
-                        <img src="{{asset('asset/images/features-img-1.png')}}" alt="" class="img-fluid d-block mx-auto">
+                        <img src="{{asset('asset/images/money.png')}}" alt="" class="img-fluid d-block mx-auto">
                     </div>
                 </div>
 
-                    <!-- Button trigger modal -->
-
-  
-                <!-- Modal -->
-                <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                    <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Pay with USDT - ${{ $amountDollar }}</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                        </div>
-                        <div class="modal-body">
-                            Copy the wallet address below to make a payment of ${{ $amountDollar }}. <b>Only USDT (TRC20) is acceptable with the Address</b>
-                            <br>
-                            
-                            <b><i>TDq4Lg25Vbr9BxZpsWc1WcuW2UmuqnnSZZ</i></b>
-
-                            <button type="button" onclick="copyToClipboard('TDq4Lg25Vbr9BxZpsWc1WcuW2UmuqnnSZZ')" class="btn btn-xs btn-primary mt-3" data-bs-dismiss="modal">Copy USDT Address</button>
-                            <br><br>
-                            Send evidence of payment to support@payhankey.com immediately after payment.
-                        </div>
-                        <div class="modal-footer">
-                        {{-- <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button> --}}
-                        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
-                        </div>
-                    </div>
-                    </div>
-                </div>
-
-
+                  
 
             </div>
         </div>
