@@ -36,18 +36,26 @@
     <div class="row">
         <div class="col-md-8">
 
-            {{-- <div class="block block-bordered block-rounded">
+            <div class="block block-bordered block-rounded">
                 <div class="block-content block-content-full">
-                    <form wire:submit.prevent="post">
+                    <div class="alert alert-info">
+
+                        <b>You're missing something out</b><br>
+
+                        Sharing your post gives you a wider reach and makes you earn from your existing traffic on other social media. You can earn up to $100 on each post daily when you share to other social media. You can also earn $20 on each review video you make about Payhankey.
+                        <br>Simply make a 2-5mins video daily and tag us @payhankeyofficial on
+                        Instagram and TikTok.
+                    </div>
+                    {{-- <form wire:submit.prevent="post">
                         <div class="input-group mb-3">
                             <textarea wire:model="content" name="content" class="form-control form-control-alt @error('content') is-invalid @enderror" placeholder="Say something amazing" required></textarea>
                         </div>
                         <button type="submit" class="btn btn-primary btn-block">
                             <i class="fa fa-pencil-alt opacity-50 me-1"></i> Post
                         </button>
-                    </form>
-                </div>
-            </div> --}}
+                    </form>--}}
+                </div> 
+            </div>
 
             <div class="card mb-4">
                 <form wire:submit.prevent="post">
