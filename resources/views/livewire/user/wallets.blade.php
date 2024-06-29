@@ -9,6 +9,13 @@
       }
   </style>
 
+<style>
+  #form-container {
+      display: none;
+      margin-top: 20px;
+  }
+</style>
+
         <h2 class="content-heading">Wallets - {{ $wallets->level }}</h2>
         <div class="row">
           <div class="col-md-6 col-xl-6">
@@ -84,7 +91,7 @@
         <div class="row">
 
           <div class="col-md-12">
-            <form action="" method="POST" wire:submit.prevent="createWithdrawalMethod">
+          
               <div class="block block-rounded">
                 <div class="block-header block-header-default block-header">
                   <h3 class="block-title">Withdrawal Method</h3>
@@ -100,6 +107,7 @@
                     <div class="block-content">
                       <div class="row justify-content-center py-sm-3 py-md-5">
                         <div class="col-sm-10 col-md-6">
+                          <form action="" method="POST" wire:submit.prevent="createWithdrawalMethod">
                           
                           @if(session()->has('success'))
                             <div class="alert alert-success" role="alert">
@@ -173,13 +181,23 @@
                           </div>
                       </div>
 
+                      @if(!$withdrawals)
+                      <button type="submit" class="btn btn-sm btn-alt-primary mt-3">
+                        <i class="fa fa-check opacity-50 me-1"></i> Submit
+                      </button>
+                   
+                    @endif
+                  </form>
 
                         </div>
                       </div>
                     </div>
+            
+
+
                 @else
                   <div class="block-content">
-                    <div class="row justify-content-center py-sm-3 py-md-5">
+                    <div class="row justify-content-center py-sm-3 py-md-2">
                       @if($withdrawals->payment_method == 'usdt')
                         <center class="mb-3"> <strong>Your preferred Payment method</strong></center>
                         USDT Wallet Address: {{  maskCode($withdrawals->usdt_wallet) }}
@@ -192,25 +210,90 @@
                         Account Number: {{ $withdrawals->account_number }}
 
                         @endif
-
+                       
                     </div>
+                   
+                    <div class="row">
+                      <div class="col-md-3"></div>
+                        <div class="col-md-6">
+                          <hr>
+                          @if(session()->has('status'))
+                            <div class="alert alert-success" role="alert">
+                                  {{ session('status') }}
+                              </div>
+                          @endif
+                          @if(session()->has('status_error'))
+                            <div class="alert alert-danger" role="alert">
+                                  {{ session('status_error') }}
+                              </div>
+                          @endif
+                          <form wire:submit.prevent="submit">
+                            <div class="form-group mb-2">
+                            
+                              <select class="form-control" name="wallet_type" wire:model="wallet_type">
+                                  <option value="">Select Wallet </option>  
+                                  <option value="main">Main</option>
+                                  <option value="referral">Referral</option>
+                                  <option value="promotion">Promotion</option>
+                              </select>
+                              <div style="color: brown">@error('wallet_type') {{ $message }} @enderror</div>
+                            </div>
+
+                            <div class="form-group mb-2">
+                              <input type="text" class="form-control" min="10" wire:model="amount" placeholder="Enter Amount" required> 
+                            </div>
+
+                            <div style="color: brown">@error('amount') {{ $message }} @enderror</div> 
+
+                            <button type="submit" class="btn btn-sm btn-alt-primary mb-4">
+                              <i class="fa fa-check opacity-50 me-1"></i>Place Withdrawals
+                            </button>
+                            
+                          </form>
+                        </div>
+                      <div class="col-md-3"></div>
+                    </div>
+
+
                   </div>
+                  {{-- <center>
+                    <div class="col-md-6" id="form-container">
+                      <hr>
+                      <form action="" method="Post" wire:submit.prevent="withdrawal">
+                        <div class="form-group mb-2">
+                         
+                          <select class="form-control" name="wallet_type" wire:model="wallet_type">
+                              <option value="">Select Wallet </option>  
+                              <option value="main">Main</option>
+                              <option value="referral">Referral</option>
+                              <option value="promotion">Promotion</option>
+                          </select>
+                          <div style="color: brown">@error('wallet_type') {{ $message }} @enderror</div>
+                        </div>
+
+                        <div class="form-group mb-2">
+                         
+                          <input type="text" class="form-control" wire:model="amount" placeholder="Enter Amount">
+                        </div>
+                        <div style="color: brown">@error('amount') {{ $message }} @enderror</div>
+
+                        <button type="submit" class="btn btn-sm btn-alt-primary mb-4">
+                          <i class="fa fa-check opacity-50 me-1"></i>Place Withdrawals
+                        </button>
+                      </form>
+                    </div>
+                  </center> --}}
+                  
+
+
+
+
+                 
                 @endif 
 
-                <div class="block-content block-content-full block-content-sm bg-body-light text-end">
                
-                  @if(!$withdrawals)
-                    <button type="submit" class="btn btn-sm btn-alt-primary">
-                      <i class="fa fa-check opacity-50 me-1"></i> Submit
-                    </button>
-                  @else
-                  {{-- <button type="button" class="btn btn-sm btn-alt-primary">
-                    <i class="fa fa-check opacity-50 me-1" @disabled(true)></i> Submitted
-                  </button> --}}
-                  @endif
-                </div>
               </div>
-            </form>
+          
           </div>
 
 
@@ -300,6 +383,11 @@
                 // Attach onchange event listener to paymentMethod select
                 document.getElementById("paymentMethod").addEventListener("change", handlePaymentMethodChange);
             });
+
+
+            document.getElementById('show-form-button').addEventListener('click', function() {
+            document.getElementById('form-container').style.display = 'block';
+        });
 
          
       </script>

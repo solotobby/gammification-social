@@ -4,6 +4,7 @@ namespace App\Livewire\User;
 
 use App\Models\Wallet;
 use App\Models\WithdrawalMethod;
+use App\Models\Withdrawals;
 use Livewire\Component;
 use Livewire\Attributes\Validate;
 
@@ -22,6 +23,11 @@ class Wallets extends Component
     public $payment_method = '';
     public $paypal_email = '';
     public $usdt_wallet = '';
+
+
+    public $wallet_type = '';
+    // #[Validate('numeric')]
+    public $amount = '';
 
 
     public $paymentMethod;
@@ -43,6 +49,94 @@ class Wallets extends Component
         $this->withdrawals = WithdrawalMethod::where(['user_id'=> auth()->user()->id])->first(); //auth()->user()->usdt_wallet_address;
        
     }
+
+    public function submit(){
+        $validated = $this->validate([ 
+            'amount' => 'numeric|min:10',
+            'wallet_type' => 'required|string',
+        ]);
+               
+        $withdrwalaMethod = WithdrawalMethod::where('user_id', auth()->user()->id)->first();
+        if($withdrwalaMethod){
+           
+            if($validated['wallet_type'] == 'main'){
+            
+
+                $wallet = Wallet::where('user_id', auth()->user()->id)->first();
+                if( $wallet->balance  >= $validated['amount']){
+                    $wallet->balance -= $validated['amount'];
+                    $wallet->save();
+                    $naira = $validated['amount'] * 1500;
+    
+                    Withdrawals::create(['user_id' => auth()->user()->id, 'withdrawal_method_id'=>$withdrwalaMethod->id, 'amount' => $validated['amount'],
+                    'naira' => $naira, 'currency'=>'USD', 'wallet_type' => $validated['wallet_type'], 
+                    'method' => 'bank_transfer', 'status' => 'Queued'
+                    ]);
+                    $this->reset(['amount', 'wallet_type']);
+
+                    // $this->dispatch('refreshTimeline');
+                    session()->flash('status', 'Withdrawal Queued, it will be processed in 3 hours');
+                }else{
+                    session()->flash('status_error', 'Insurficient Balance');
+                }
+                
+
+               
+
+            }elseif($validated['wallet_type'] == 'referral'){
+                
+               
+
+                $wallet = Wallet::where('user_id', auth()->user()->id)->first();
+                if( $wallet->referral_balance  >= $validated['amount']){
+                    $wallet->referral_balance -= $validated['amount'];
+                    $wallet->save();
+                    $naira = $validated['amount'] * 1500;
+    
+                    Withdrawals::create(['user_id' => auth()->user()->id, 'withdrawal_method_id'=>$withdrwalaMethod->id, 'amount' => $validated['amount'],
+                    'naira' => $naira, 'currency'=>'USD', 'wallet_type' => $validated['wallet_type'], 
+                    'method' => 'bank_transfer', 'status' => 'Queued'
+                    ]);
+                    $this->reset(['amount', 'wallet_type']);
+
+                    // $this->dispatch('refreshTimeline');
+                    session()->flash('status', 'Withdrawal Queued, it will be processed in 3 hours');
+                }else{
+                    session()->flash('status_error', 'Insurficient Balance');
+                }
+                
+
+            }else{
+                
+
+                $wallet = Wallet::where('user_id', auth()->user()->id)->first();
+                if( $wallet->promoter_balance  >= $validated['amount']){
+                    $wallet->promoter_balance -= $validated['amount'];
+                    $wallet->save();
+                    $naira = $validated['amount'] * 1500;
+    
+                    Withdrawals::create(['user_id' => auth()->user()->id, 'withdrawal_method_id'=>$withdrwalaMethod->id, 'amount' => $validated['amount'],
+                    'naira' => $naira, 'currency'=>'USD', 'wallet_type' => $validated['wallet_type'], 
+                    'method' => 'bank_transfer', 'status' => 'Queued'
+                    ]);
+                    $this->reset(['amount', 'wallet_type']);
+
+                    // $this->dispatch('refreshTimeline');
+                    session()->flash('status', 'Withdrawal Queued, it will be processed in 3 hours');
+                }else{
+                    session()->flash('status_error', 'Insurficient Balance');
+                }
+                
+
+
+            }
+        }
+        
+    }
+
+   
+
+
 
     public function createWithdrawalMethod(){
 
@@ -169,6 +263,7 @@ class Wallets extends Component
         session()->flash('success', 'Wallet Address Updated Successfully');
     }
 
+    
     public function render()
     {
         return view('livewire.user.wallets');
