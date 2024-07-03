@@ -38,7 +38,7 @@
             <div class="block-content">
                 {{-- <a href="#" wire:click="show({{$timeline->id}})"> --}}
                     <p style="color: dimgrey">
-                        {{ $timeline->content }}
+                        {!! $timeline->content !!}
                     </p>
                 {{-- </a> --}}
             <hr>
