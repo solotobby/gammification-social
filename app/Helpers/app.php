@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\User\Posts;
+use App\Models\CommentExternal;
 use App\Models\Level;
 use App\Models\Post;
 use App\Models\UserComment;
@@ -70,8 +71,6 @@ if(!function_exists('upgradePayment')){
 
         return json_decode($res->getBody()->getContents(), true)['data']['link'];
 
-
-
     }
 
 }
@@ -137,7 +136,6 @@ if(!function_exists('viewsAmountCalculator')){
         $singleView = $earnings_per_1000_view / 1000;
         $singleViewExternal = 1 /5000;
 
-
         $paidExternalView = $unpaidExternalViews * $singleViewExternal;
         $paidInternalViews = $unpaidViews * $singleView;
 
@@ -173,6 +171,7 @@ if(!function_exists('commentsAmountCalculator')){
         
     }
 }
+
 
 
 if(!function_exists('sumCounter')){
@@ -245,16 +244,16 @@ if(!function_exists('securityVerification')){
 
 if(!function_exists('displayName')){
     function displayName($name) {
-
         $bk = explode(' ', $name);
         return $bk[0];
-
     }
 }
 
 if(!function_exists('refreshWallet')){
     function refreshWallet() {
         $user = Auth::user();
+
+       
         //get user Wallet
         $wallet = Wallet::where('user_id', $user->id)->first();
         //get all posts this guy has
@@ -263,7 +262,7 @@ if(!function_exists('refreshWallet')){
         
         //processviews  - internal
         $singleViewInternal =  $userLevel->earning_per_view / 1000; //amount per internal view
-        $singleViewExternal = 1 /5000; //amount per external view
+        $singleViewExternal = 1/5000; //amount per external view
         //fetch/update all unpaid views
         $internalViews=UserView::whereIn('post_id', $postIds)->where('is_paid', false)->get();
         //updatewallet 
@@ -306,13 +305,34 @@ if(!function_exists('refreshWallet')){
          //fetch/update all unpaid views
          $internalComments=UserComment::whereIn('post_id', $postIds)->where('is_paid', false)->get();
          //updatewallet 
-         $wallet->balance +=  $singleCommentInternal*$internalComments->count();
+         $wallet->balance += $singleCommentInternal*$internalComments->count();
          $wallet->save();
          //reset to paid
          foreach ($internalComments as $view) {
              $view->is_paid = true;
              $view->save();
          }
+
+         //external comment 
+         $externalComments = CommentExternal::whereIn('post_id', $postIds)->where('is_paid', false)->get();
+         $perCommentAmount = '';
+         if(auth()->user()->level->name == 'Influencer'){
+            $perCommentAmount = 0.40;
+         }elseif(auth()->user()->level->name == 'Creator'){
+            $perCommentAmount = 0.30;
+         }else{
+            $perCommentAmount = 0.25;
+         }
+
+         $counts = $externalComments->count() * 0.6;
+         
+         $wallet->balance += $perCommentAmount*$counts;
+         $wallet->save();
+         //reset to paid
+         foreach ($externalComments as $view){
+            $view->is_paid = true;
+            $view->save();
+        }
 
         return $wallet;
 

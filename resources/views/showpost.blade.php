@@ -53,7 +53,7 @@
                 </li>
                 <li class="nav-item me-1">
                     <a class="nav-link" href="{{url('register')}}">
-                        <i class="fa fa-comment-alt opacity-50 me-1"></i> {{$timeline->comments}}
+                        <i class="fa fa-comment-alt opacity-50 me-1"></i> {{$timeline->comment_external}}
                     </a>
                 </li>
                 <li class="nav-item">
@@ -71,9 +71,7 @@
             </div>
             <div class="block-content block-content-full bg-body-light">
                
-                <a class="fw-semibold" target="_blank" href="https://payhankey.com/#pricing">
-                    You can make money from your own comment, likes and views too on Payhankey    
-                </a>
+              
                 {{-- <p class="fs-sm">
                 <i class="fa fa-thumbs-up text-info"></i>
                 <i class="fa fa-heart text-danger"></i>
@@ -82,19 +80,25 @@
                 <a class="fw-semibold" href="javascript:void(0)">Lori Grant</a>,
                 <a class="fw-semibold" href="javascript:void(0)">and 150 others</a>
                 </p> --}}
-               {{-- <form method="POST" wire:submit.prevent="comment">
-                    <input type="text" wire:model="message" name="message"  :value="old('message')" class="form-control form-control-alt" placeholder="Write a comment.." required>
+               {{-- <form id="comment-form" onsubmit="submitCommentForm(event, {{ $timeline->id }})">
+                    <input type="text"  name="message"  :value="old('message')" class="form-control form-control-alt" placeholder="Write a comment.." required>
                 </form> --}}
+                <form id="comment-form" method="POST" action="{{ url('post/comment') }}">
+                    @csrf
+                    <input type="text" name="message" :value="old('message')" class="form-control form-control-alt" placeholder="Write a comment.." required>
+                    <input type="hidden" name="post_id" value="{{ $timeline->id }}">
+                </form>
+
                 <div class="pt-3 fs-sm">
 
-                    @foreach ($timeline->postComments as $comment)
+                    @foreach ($timeline->postCommentsExternal as $comment)
                         <div class="d-flex">
                             <a class="flex-shrink-0 img-link me-2" href="javascript:void(0)">
                             <img class="img-avatar img-avatar32 img-avatar-thumb" src="{{asset('src/assets/media/avatars/avatar3.jpg')}}" alt="">
                             </a>
                             <div class="flex-grow-1">
                                 <p class="mb-1">
-                                    <a class="fw-semibold" href="javascript:void(0)">{{ $comment->user->name }}</a>   <span class="fs-sm text-muted">{{$comment->created_at?->shortAbsoluteDiffForHumans()}} ago</span> <br>
+                                    <a class="fw-semibold" href="javascript:void(0)">Anonymous</a>   <span class="fs-sm text-muted">{{$comment->created_at?->shortAbsoluteDiffForHumans()}} ago</span> <br>
                                     {{ $comment->message }}
                                 </p>
                             </div>
@@ -215,16 +219,21 @@
 </div>
 
 @endsection
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+ <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    $(document).ready(function() {
-        $('#like').on('click', function() {
-            // alert('clicked');
-            // var postId=$(this).data('post');
-            // alert(postId);
+    
+    function submitCommentForm(event, postId) {
+        alert('Show up');
+    }
+    
+    // $(document).ready(function() {
+    //     $('#like').on('click', function() {
+    //         // alert('clicked');
+    //         // var postId=$(this).data('post');
+    //         // alert(postId);
 
             
-        });
+    //     });
 
         
         // $('#load-more-btn').on('click', function() {

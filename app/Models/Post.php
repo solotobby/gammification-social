@@ -56,6 +56,10 @@ class Post extends Model
         return $this->hasMany(Comment::class)->orderBy('created_at', 'desc');
     }
 
+    public function postCommentsExternal(){
+        return $this->hasMany(CommentExternalMessage::class)->orderBy('created_at', 'desc');
+    }
+
     public function comments(){
         
         return $this->hasMany(UserComment::class);
@@ -63,6 +67,14 @@ class Post extends Model
 
     public function unpaidComments(){
         return $this->comments()->where('is_paid', false)->count();
+    }
+
+    public function externalComments(){
+        return $this->hasMany(CommentExternal::class);
+    }
+
+    public function unpaidExternalComments(){
+        return $this->externalComments()->where('is_paid', false)->count();
     }
 
     public function externalViews(){

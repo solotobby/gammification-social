@@ -152,7 +152,7 @@
             </div>
             <div class="ms-3 text-end">
               <p class="text-white fs-3 fw-medium mb-0">
-                {{ $post->comments - $unpaidComments}}
+                {{ $unpaidExternalComments}}
               </p>
               <p class="text-white-75 mb-0">
                 Unmonetized Comment

@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Mail\AccessCodeMail;
 use App\Models\AccessCode;
 use App\Models\AdminLogin;
+use App\Models\Comment;
+use App\Models\CommentExternal;
+use App\Models\CommentExternalMessage;
 use App\Models\Level;
 use App\Models\Partner;
 use App\Models\PartnerSlot;
@@ -190,9 +193,15 @@ class GeneralController extends Controller
 
     public function showPost($id){
         
-        $timeline = Post::with(['postComments' => function($query) {
+        // $timeline = Post::with(['postComments' => function($query) {
+        //     $query->paginate(15); // Load initial 15 comments
+        // }])->where('id', $id)->firstOrFail();
+
+        $timeline = Post::with(['postCommentsExternal' => function($query) {
             $query->paginate(15); // Load initial 15 comments
         }])->where('id', $id)->firstOrFail();
+
+
 
         $timeline->views_external += 1;
         $timeline->save(); 
@@ -206,6 +215,34 @@ class GeneralController extends Controller
 
         
         return view('showpost', ['timeline' => $timeline] );
+    }
+
+    public function comment(Request $request){
+        
+          //unique view
+        $location = ipLocation();
+     
+       $timeline = Post::where('id', $request->post_id)->first();
+
+    //    $timeline = Post::with(['postCommentsExternal' => function($query) {
+    //     $query->paginate(15); // Load initial 15 comments
+    // }])->where('id', $request->post_id)->firstOrFail();
+
+
+       $timeline->comment_external += 1;
+       $timeline->save();
+
+       CommentExternalMessage::create(['post_id' => $request->post_id, 'message'=>$request->message]);
+       
+        $checkunique = CommentExternal::where(['post_id' => $request->post_id, 'ip' => $location['ip'], 'city' => $location['city']])->first();
+        if(!$checkunique){
+            CommentExternal::create(['post_id' => $request->post_id, 'message'=>$request->message, 'ip' => $location['ip'], 'city' => $location['city']]);
+
+            // CommentExternal::create(['post_id' => $request->post_id, 'ip' => $location['ip'], 'city' => $location['city']]);
+        }
+
+        return  back();
+
     }
 
     // public function partner(Request $request){
