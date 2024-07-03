@@ -78,6 +78,9 @@ Route::group(['namespace' => 'auth'], function () {
     Route::post('registration', [\App\Http\Controllers\AdminLoginController::class, 'proAdminLogin'])->name('dinky.reg');
 
 
+    Route::post('post/comment', [\App\Http\Controllers\GeneralController::class, 'comment']);
+
+
 });
 
 Auth::routes();

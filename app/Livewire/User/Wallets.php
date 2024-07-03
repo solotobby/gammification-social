@@ -44,10 +44,17 @@ class Wallets extends Component
 
 
     public function mount(){
-        refreshWallet();
-        $this->wallets = auth()->user()->wallet;
-        $this->withdrawals = WithdrawalMethod::where(['user_id'=> auth()->user()->id])->first(); //auth()->user()->usdt_wallet_address;
+         
+       $this->wallets = auth()->user()->wallet;
+       $this->withdrawals = WithdrawalMethod::where(['user_id'=> auth()->user()->id])->first(); //auth()->user()->usdt_wallet_address;
        
+    }
+
+    public function refresh(){
+        refreshWallet();
+        redirect('wallets');
+        //$this->withdrawals = WithdrawalMethod::where(['user_id'=> auth()->user()->id])->first();
+        session()->flash('status_refresh', 'Wallet Successfully refreshed');
     }
 
     public function submit(){
@@ -60,7 +67,6 @@ class Wallets extends Component
         if($withdrwalaMethod){
            
             if($validated['wallet_type'] == 'main'){
-            
 
                 $wallet = Wallet::where('user_id', auth()->user()->id)->first();
                 if( $wallet->balance  >= $validated['amount']){

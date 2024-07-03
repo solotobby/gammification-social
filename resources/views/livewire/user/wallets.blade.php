@@ -18,7 +18,14 @@
 
         <h2 class="content-heading">Wallets - {{ $wallets->level }}</h2>
         <div class="row">
+          @if(session()->has('status_refresh'))
+            <div class="alert alert-success" role="alert">
+                  {{ session('status_refresh') }}
+              </div>
+          @endif
+          
           <div class="col-md-6 col-xl-6">
+            
             <a class="block block-rounded block-link-pop" href="javascript:void(0)">
               <div class="block-content block-content-full d-flex align-items-center justify-content-between">
                 <div>
@@ -86,6 +93,12 @@
               </div>
             </a>
           </div>
+
+          <div class="col-12 mb-3">
+            <button class="btn btn-sm btn-info" wire:click="refresh">Refresh Wallet</button>
+          </div>
+
+
         </div>
 
         <div class="row">
