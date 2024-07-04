@@ -49,10 +49,16 @@ class Posts extends Component
 
     public function post(){
         $content = $this->convertUrlsToLinks($this->content);
-        // $content = $this->convertUrlsToLinks($this->content);
-        $timelines = Post::create(['user_id' => auth()->user()->id, 'content' => $content, 'unicode' => time()]);
-        $this->reset('content');
+        $getContent = Post::where(['user_id' => auth()->user()->id, 'content' => $content])->first();
+        if(!$getContent){
+            // $content = $this->convertUrlsToLinks($this->content);
+            $timelines = Post::create(['user_id' => auth()->user()->id, 'content' => $content, 'unicode' => time()]);
+            $this->reset('content');
 
+        }
+        $this->reset('content');
+        
+        
         // $this->dispatch('refreshTimeline');
 
         // session()->flash('success', 'Posted Created Successfully');
@@ -90,6 +96,7 @@ class Posts extends Component
     {
         
         $posts = Post::take($this->perpage)
+        ->where('status', 'LIVE')
         ->orderBy('created_at', 'desc')
         ->get();
         // Group posts by user_id
