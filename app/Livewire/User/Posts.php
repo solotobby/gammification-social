@@ -53,7 +53,7 @@ class Posts extends Component
 
         // dd($content);
         
-        if (isSimilar($content, $getContent, 5)) {
+        if (isSimilar($content, $getContent, 4)) {
             session()->flash('info', 'This content is too similar to existing content, therefore it not be posted.');
             $this->reset('content');
             // dd("This content is too similar to existing content and will not be posted.");
