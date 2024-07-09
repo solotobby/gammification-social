@@ -56,8 +56,14 @@
                     </form>--}}
                 </div> 
             </div>
+            @if(session()->has('info'))
+                <div class="alert alert-warning mb-2" role="alert">
+                    {{ session('info') }}
+                </div>
+            @endif
 
             <div class="card mb-4">
+
                 <form wire:submit.prevent="post">
                 <div class="card-body">
                     <textarea wire:model="content" name="content" class="form-control form-control-alt @error('content') is-invalid @enderror" placeholder="Say something amazing" required></textarea>

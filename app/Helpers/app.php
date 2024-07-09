@@ -339,4 +339,31 @@ if(!function_exists('refreshWallet')){
     }
 }
 
+if(!function_exists('normalizeText')){
+    function normalizeText($text) {
+        $text = preg_replace('/[^\w\s]/', '', $text);
+        $text = preg_replace('/\s+/', ' ', $text);
+        return strtolower(trim($text));
+     }
+}
+
+if(!function_exists('isSimilar')){
+    function isSimilar($newData, $existingData, $threshold = 5) { 
+        $normalizedNewData = normalizeText($newData);
+        
+        foreach ($existingData as $data) {
+            $normalizedData = normalizeText($data);
+            $levenshteinDistance = levenshtein($normalizedNewData, $normalizedData);
+            
+            if ($levenshteinDistance <= $threshold) {
+                return true;
+            }
+        }
+        
+        return false;
+
+    } 
+}
+
+
 

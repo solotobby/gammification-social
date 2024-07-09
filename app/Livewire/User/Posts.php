@@ -49,20 +49,47 @@ class Posts extends Component
 
     public function post(){
         $content = $this->convertUrlsToLinks($this->content);
-        $getContent = Post::where(['user_id' => auth()->user()->id, 'content' => $content])->first();
-        if(!$getContent){
-            // $content = $this->convertUrlsToLinks($this->content);
+        $getContent = Post::where(['user_id' => auth()->user()->id])->pluck('content')->toArray();
+
+        // dd($content);
+        
+        if (isSimilar($content, $getContent, 5)) {
+            session()->flash('info', 'This content is too similar to existing content, therefore it not be posted.');
+            $this->reset('content');
+            // dd("This content is too similar to existing content and will not be posted.");
+        } else {
             $timelines = Post::create(['user_id' => auth()->user()->id, 'content' => $content, 'unicode' => time()]);
             $this->reset('content');
-
         }
-        $this->reset('content');
+
+
+        // if(!$getContent){
+        //     // $content = $this->convertUrlsToLinks($this->content);
+        //     
+
+        // }
+        // $this->reset('content');
         
         
         // $this->dispatch('refreshTimeline');
 
         // session()->flash('success', 'Posted Created Successfully');
 
+    }
+
+    private function isSimilar($newData, $existingData, $threshold = 5) {
+        $normalizedNewData = normalizeText($newData);
+        
+        foreach ($existingData as $data) {
+            $normalizedData = normalizeText($data);
+            $levenshteinDistance = levenshtein($normalizedNewData, $normalizedData);
+            
+            if ($levenshteinDistance <= $threshold) {
+                return true;
+            }
+        }
+        
+        return false;
     }
 
     private function convertUrlsToLinks($text)
