@@ -348,7 +348,7 @@ if(!function_exists('normalizeText')){
 }
 
 if(!function_exists('isSimilar')){
-    function isSimilar($newData, $existingData, $threshold = 5) { 
+    function isSimilar($newData, $existingData, $threshold = 4) { 
         $normalizedNewData = normalizeText($newData);
         
         foreach ($existingData as $data) {
