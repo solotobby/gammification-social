@@ -19,9 +19,9 @@
           <span class="nav-main-link-name">Send Access Codes</span>
         </a>
 
-        <a class="nav-main-link" href="{{ url('validate/code') }}">
+        <a class="nav-main-link" href="{{ url('withdrawal/list') }}">
           <i class="nav-main-link-icon fa fa-list"></i>
-          <span class="nav-main-link-name">Validate Access Codes</span>
+          <span class="nav-main-link-name">Withdrawals</span>
         </a>
 
         <a class="nav-main-link" href="{{ url('partner/list') }}">

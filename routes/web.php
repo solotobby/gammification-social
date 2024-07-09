@@ -130,7 +130,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('partner/{id}/activate', [\App\Http\Controllers\Admin\PartnerController::class, 'viewPartnerActivate']);
         Route::get('partner/{id}', [\App\Http\Controllers\Admin\PartnerController::class, 'partnerInfo']);
         Route::get('partner/validate/activate/transaction/{id}', [\App\Http\Controllers\Admin\PartnerController::class, 'validateAgentTransaction']);
-
+        Route::get('withdrawal/list', [\App\Http\Controllers\Admin\WithdrawalController::class, 'withdrawalList']);
        
     });
 });
