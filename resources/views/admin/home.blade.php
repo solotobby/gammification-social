@@ -6,7 +6,6 @@
 
 
     <!-- Hero -->
-
     {{-- url('{{asset('src/assets/media/photos/photo10@2x.jpg')}});" --}}
     <div class="bg-image" style="background-image: url('{{asset('src/assets/media/photos/photo10@2x.jpg')}}');">
       <div class="bg-black-75">

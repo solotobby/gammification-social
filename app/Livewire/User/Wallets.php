@@ -127,7 +127,6 @@ class Wallets extends Component
                     ]);
                     $this->reset(['amount', 'wallet_type']);
 
-                    // $this->dispatch('refreshTimeline');
                     session()->flash('status', 'Withdrawal Queued, it will be processed in 3 hours');
                 }else{
                     session()->flash('status_error', 'Insurficient Balance');
