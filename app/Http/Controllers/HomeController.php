@@ -32,9 +32,10 @@ class HomeController extends Controller
     public function index()
     {
         $user = auth()->user();
+        
         if ($user->hasRole('admin')) {
             // return 'admin';
-            return redirect()->route('admin.home');
+            // return redirect()->route('logout');
         }else{
             $this->loginPoints(auth()->user());
             return redirect('timeline');
@@ -63,9 +64,11 @@ class HomeController extends Controller
         }
     }
 
-    public function completeOnboarding(){
+    public function completeOnboarding(Request $request){
+      
         $user = User::where(['id'=>auth()->user()->id])->first();
         $user->is_onboarded = true;
+        $user->heard = $request->heard;
         $user->save();
         return redirect('timeline');
     }

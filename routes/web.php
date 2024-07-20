@@ -94,7 +94,7 @@ Route::middleware(['auth'])->group(function () {
    
     Route::group(['middleware'=>'auth','role:user'],function() { 
 
-        Route::get('complete/onboarding', [\App\Http\Controllers\HomeController::class, 'completeOnboarding'])->name('complete.onboarding');
+        Route::post('complete/onboarding', [\App\Http\Controllers\HomeController::class, 'completeOnboarding'])->name('complete.onboarding');
         Route::get('validate/api', [\App\Http\Controllers\HomeController::class, 'validateApi']);
         
         Route::get('upgrade/api', [\App\Http\Controllers\HomeController::class, 'upgradeApi']);

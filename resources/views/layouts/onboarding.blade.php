@@ -58,11 +58,20 @@ data-bs-keyboard="false" aria-labelledby="modal-onboarding" aria-hidden="true">
                    <h3 class="fs-2 fw-light">More posts, more earnings</h3>
                    Start posting and sharing posts to get views and comments
                  
-                 <br>
-                 <a href="{{ route('complete.onboarding') }}" class="btn btn-primary mb-2 mt-4">
+                 <br> 
+                 <h5 class="mb-2 mt-3">Tell us, how did you hear about Us?</h5>
+
+                 <form action="{{ route('complete.onboarding') }}" method="POST" >
+                  @csrf
+                 <textarea class="form-control" name="heard" placeholder="Enter how you heard about us" rows="3" cols="3" required></textarea>                  
+                  <button type="submit" class="btn btn-primary mt-2">  Get Started <i class="fa fa-check opacity-50 ms-1"></i> </button>
+                 </form>
+                 {{-- <a href="{{ route('complete.onboarding') }}" class="btn btn-primary mb-2 mt-4">
                    Get Started <i class="fa fa-check opacity-50 ms-1"></i>
-                 </a>
+                 </a> --}}
                </div>
+               
+
              </div>
            </div>
          </div>
