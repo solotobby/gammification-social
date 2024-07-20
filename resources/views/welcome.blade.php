@@ -25,6 +25,25 @@
       gtag('config', 'AW-10842521152');
     </script>
 
+        <style>
+            .logos img {
+                max-width: 100%;
+                height: 100%;
+                display: block;
+                margin: 0 auto;
+            }
+            .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .logo-container .logos {
+            flex: 1 1 10%;
+            margin: 10px;
+        }
+        </style>
+
 
 </head>
 
@@ -374,6 +393,37 @@
         </div>
     </section>
     <!-- Pricing End -->
+    {{-- <section class="section bg-light" id="companies">
+
+        <div class="logo-container text-center my-4">
+            <div class="row">
+                <div class="col-md-2">
+                    <div class="logos"><img src="{{asset('stripe.png')}}" alt="Piggyvest"></div>
+                </div>
+                <div class="col-md-2">
+                    <div class="logos"><img src="{{asset('paystack.png')}}" alt="Paystack"></div>
+                </div>
+                <div class="col-md-2">
+                    <div class="logos"><img src="{{asset('flw.png')}}" alt="Filmhouse Cinemas"></div>
+                </div>
+                <div class="col-md-2">
+                    <div class="logos"><img src="{{asset('wellahealth-LOGO-.png')}}" alt="Ibom Air"></div>
+                </div>
+               
+                 <div class="col-md-2">
+                    <div class="logos"><img src="{{asset('amazon.png')}}" alt="Ibom Air"></div>
+                </div>
+               
+                {{--<div class="col-6 col-md-2 mb-4">
+                    <div class="logo"><img src="images/kuda.png" alt="Kuda"></div>
+                </div>
+                <div class="col-6 col-md-2 mb-4">
+                    <div class="logo"><img src="images/ariiya.png" alt="Ariiya"></div>
+                </div> -
+            </div>
+        </div>
+
+    </section> --}}
 
    
 

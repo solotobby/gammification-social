@@ -178,7 +178,15 @@
                         @csrf
                       <div class="py-3">
                         <div class="mb-4">
-                          <input type="text" class="form-control @error('email') is-invalid @enderror form-control-lg form-control-alt" id="login-username" name="email" placeholder="Email Address" required autocomplete="email" autofocus>
+                          {{-- <input type="text" class="form-control @error('email') is-invalid @enderror form-control-lg form-control-alt" id="login-username" name="email" placeholder="Email Address" required autocomplete="email" autofocus>
+                         --}}
+                         <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" placeholder="Enter Email Address" required autocomplete="email" autofocus>
+
+                            @error('email')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
                         </div>
                         
                       </div>
