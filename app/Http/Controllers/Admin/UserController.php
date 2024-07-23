@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\GeneralMail;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Models\Wallet;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class UserController extends Controller
 {
@@ -45,6 +47,13 @@ class UserController extends Controller
                 'meta' => null,
                 'customer' => null
              ]);
+
+             $user = User::where('id', $request->user_id)->first();
+             $subject = 'Promoter Wallet Credited';
+             $content = "Your promoter wallet has been credited with $".$request->amount;
+             
+             Mail::to($user->email)->send(new GeneralMail($user, $subject, $content));
+
 
              return back()->with('success', 'Wallet Credited');
         }
