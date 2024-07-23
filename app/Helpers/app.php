@@ -109,8 +109,6 @@ if(!function_exists('processPayment')){
         ])->post('https://api.flutterwave.com/v3/payments', $payload)->throw();
 
         return json_decode($res->getBody()->getContents(), true)['data']['link'];
-
-
     }
 }
 
@@ -224,7 +222,6 @@ if(!function_exists('securityVerification')){
         $myIp =  $myLocation['ip'];
         $myCountry =  $myLocation['country'];
 
-
        $ipIsContained = in_array($myIp, $ipList);
 
        $countryIsContained = in_array($myCountry, $countryList);
@@ -236,7 +233,6 @@ if(!function_exists('securityVerification')){
        }else{
             return 'not_okay';
        }
-
 
     }
 }

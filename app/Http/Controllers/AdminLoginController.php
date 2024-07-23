@@ -20,10 +20,7 @@ class AdminLoginController extends Controller
             if($res == 'OK'){
                 return view('auth.admin_login');
             }
-
-           
         }
-        
     }
 
     public function proAdminLogin(Request $request){

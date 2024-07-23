@@ -24,25 +24,27 @@
           <tr>
             {{-- <th class="text-center" style="width: 80px;">#</th> --}}
             <th>Name</th>
-            <th class="d-none d-sm-table-cell" style="width: 30%;">Email</th>
-            <th class="d-none d-sm-table-cell" style="width: 15%;">Level</th>
-            <th style="width: 15%;">Registered</th>
+            <th>Email</th>
+            <th>Level</th>
+            <th>Heard</th>
+            <th>Registered</th>
           </tr>
         </thead>
         <tbody>
             @foreach ($users as $user)
             <tr>
                 {{-- <td class="text-center">1</td> --}}
-                <td class="fw-semibold">
+                <td>
                   <a href="{{ url('user/info/'.$user->id) }}">{{ $user->name }}</a>
                 </td>
-                <td class="d-none d-sm-table-cell">
+                <td>
                     {{ $user->email }}
-                 
                 </td>
-                <td class="d-none d-sm-table-cell">
-
+                <td>
                   <span class="badge bg-info">{{ $user->level->name }}</span>
+                </td>
+                <td >
+                  {{ $user->heard }}
                 </td>
                 <td>
                   <em class="text-muted">{{$user->created_at?->shortAbsoluteDiffForHumans()}} ago</em>
