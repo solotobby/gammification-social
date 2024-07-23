@@ -5,7 +5,7 @@
     @if(auth()->user()->hasRole('admin'))
     <ul class="nav-main">
       <li class="nav-main-item">
-        <a class="nav-main-link" href="{{ url('home') }}">
+        <a class="nav-main-link" href="{{ url('admin/home') }}">
           <i class="nav-main-link-icon fa fa-home"></i>
           <span class="nav-main-link-name">Dashboard</span>
         </a>
