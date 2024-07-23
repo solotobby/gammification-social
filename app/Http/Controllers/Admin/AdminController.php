@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\AccessCode;
 use App\Models\Partner;
+use App\Models\Post;
 use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -26,11 +27,14 @@ class AdminController extends Controller
 
             $rev= $nairaInDollar+$usd;
 
+            $posts = Post::query()->get(['views', 'views_external', 'likes', 'likes_external', 'comments', 'comment_external']);
+            //return $post->sum('views');
             return view('admin.home', [
                 'userCount' => $userCount, 
                 'partnerCount' =>$partnerCount, 
                 'accesscodeCount' => $accesscodeCount,
-                'rev' => $rev
+                'rev' => $rev, 
+                'posts' => $posts
             ]);
         }
        

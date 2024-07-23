@@ -80,14 +80,14 @@
           <a class="block block-rounded block-link-pop bg-in" href="javascript:void(0)">
             <div class="block-content block-content-full d-flex justify-content-between">
               <div class="me-3">
-                <i class="fa fa-2x fa-money-bill-alt text-primary-lighter"></i>
+                <i class="fa fa-2x fa-briefcase text-primary-lighter"></i>
               </div>
               <div>
                 <p class="fs-3 fw-light mb-0">
-                  + 15%
+                  {{ number_format($posts->count()) }}
                 </p>
                 <p class="text-muted mb-0">
-                  Earnings
+                  Total Posts
                 </p>
               </div>
             </div>
@@ -112,14 +112,14 @@
             <div class="block-content block-content-full d-flex justify-content-between">
               <div class="me-3">
                 <p class="fs-3 fw-light mb-0">
-                  + 55%
+                  {{ number_format($posts->sum('views')) }}
                 </p>
                 <p class="text-muted mb-0">
-                  Sales
+                  Views
                 </p>
               </div>
               <div>
-                <i class="fa fa-2x fa-boxes text-primary-lighter"></i>
+                <i class="fa fa-2x fa-eye text-primary-lighter"></i>
               </div>
             </div>
             <div class="block-content block-content-full overflow-hidden">
@@ -143,14 +143,14 @@
           <a class="block block-rounded block-link-pop" href="javascript:void(0)">
             <div class="block-content block-content-full d-flex justify-content-between">
               <div class="me-3">
-                <i class="fa fa-2x fa-users text-primary-lighter"></i>
+                <i class="fa fa-2x fa-thumbs-up text-primary-lighter"></i>
               </div>
               <div>
                 <p class="fs-3 fw-light mb-0">
-                  3.590
+                  {{ number_format($posts->sum('likes')) }}
                 </p>
                 <p class="text-muted mb-0">
-                  Accounts
+                  Likes
                 </p>
               </div>
             </div>
@@ -176,14 +176,14 @@
             <div class="block-content block-content-full d-flex justify-content-between">
               <div class="me-3">
                 <p class="fs-3 fw-light mb-0">
-                  80
+                  {{ number_format($posts->sum('comments')) }}
                 </p>
                 <p class="text-muted mb-0">
-                  Tickets
+                  Comments
                 </p>
               </div>
               <div>
-                <i class="fa fa-2x fa-ticket-alt text-primary-lighter"></i>
+                <i class="fa fa-2x fa-comments text-primary-lighter"></i>
               </div>
             </div>
             <div class="block-content block-content-full overflow-hidden">
@@ -206,33 +206,33 @@
         <!-- END Charts -->
 
         <!-- More Stats -->
-        <div class="col-md-6">
+        <div class="col-md-12">
           <a class="block block-rounded block-link-pop" href="javascript:void(0)">
             <div class="block-content block-content-full">
               <div class="row text-center">
                 <div class="col-4">
                   <div class="py-3 border-end">
                     <div class="item item-circle bg-body-light mx-auto">
-                      <i class="fa fa-user-circle text-primary"></i>
+                      <i class="fa fa-thumbs-up text-primary"></i>
                     </div>
                     <p class="fs-3 fw-light mt-3 mb-0">
-                      9
+                      {{ number_format($posts->sum('likes_external')) }}
                     </p>
                     <p class="text-muted mb-0">
-                      Clients
+                      Ex. Likes
                     </p>
                   </div>
                 </div>
                 <div class="col-4">
                   <div class="py-3 border-end">
                     <div class="item item-circle bg-body-light mx-auto">
-                      <i class="fa fa-chart-line text-primary"></i>
+                      <i class="fa fa-eye text-primary"></i>
                     </div>
                     <p class="fs-3 fw-light mt-3 mb-0">
-                      3
+                      {{ number_format($posts->sum('views_external')) }}
                     </p>
                     <p class="text-muted mb-0">
-                      Invoices
+                      Ex. Views
                     </p>
                   </div>
                 </div>
@@ -242,10 +242,10 @@
                       <i class="fa fa-comments text-primary"></i>
                     </div>
                     <p class="fs-3 fw-light mt-3 mb-0">
-                      2
+                      {{ number_format($posts->sum('comment_external')) }}
                     </p>
                     <p class="text-muted mb-0">
-                      Chats
+                      Ex. Comments
                     </p>
                   </div>
                 </div>
@@ -253,7 +253,7 @@
             </div>
           </a>
         </div>
-        <div class="col-md-6">
+        {{-- <div class="col-md-6">
           <a class="block block-rounded block-link-pop" href="javascript:void(0)">
             <div class="block-content block-content-full">
               <div class="row text-center">
@@ -299,7 +299,7 @@
               </div>
             </div>
           </a>
-        </div>
+        </div> --}}
         <!-- END More Stats -->
       </div>
     </div>
