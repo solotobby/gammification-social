@@ -23,9 +23,11 @@ class UserController extends Controller
     public function userInfo($id){
         $res = securityVerification();
         if($res == 'OK'){
+
             $user = User::find($id);
-            return $withrawals = Transaction::where('type', 'withdrawals')->where('user_id', auth()->user()->id)->sum('amount');
+            $withrawals = Transaction::where('type', 'withdrawals')->where('user_id', $user->id)->sum('amount');
             return view('admin.user.user_info', ['user' => $user, 'withdrawals' => $withrawals]);
+            
         }
     }
 
