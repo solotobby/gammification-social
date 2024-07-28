@@ -31,6 +31,7 @@ class UserController extends Controller
     public function processWalletCredit(Request $request){
         $res = securityVerification();
         if($res == 'OK'){
+
             $wallet= Wallet::where('user_id', $request->user_id)->first();
             $wallet->promoter_balance += $request->amount;
             $wallet->save();
@@ -46,7 +47,7 @@ class UserController extends Controller
                 'description' => 'Promoter Wallet Credited', 
                 'meta' => null,
                 'customer' => null
-             ]);
+            ]);
 
              $user = User::where('id', $request->user_id)->first();
              $subject = 'Promoter Wallet Credited';

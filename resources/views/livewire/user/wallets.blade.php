@@ -84,7 +84,7 @@
                 </div>
                 <div class="ms-3 text-end">
                   <p class="fs-3 fw-medium mb-0">
-                   $0
+                   ${{ $paidWithdrawals }}
                   </p>
                   <p class="text-muted mb-0">
                     Total Withdrawal <span><small>(Earnings withdrawn from your wallet)</small></span>
@@ -206,23 +206,26 @@
                       </div>
                     </div>
             
-
-
                 @else
                   <div class="block-content">
                     <div class="row justify-content-center py-sm-3 py-md-2">
                       @if($withdrawals->payment_method == 'usdt')
+
                         <center class="mb-3"> <strong>Your preferred Payment method</strong></center>
                         USDT Wallet Address: {{  maskCode($withdrawals->usdt_wallet) }}
+                      
                       @elseif($withdrawals->payment_method == 'paypal')
-                      <center class="mb-3"> <strong>Your preferred Payment method</strong></center>
+                      
+                        <center class="mb-3"> <strong>Your preferred Payment method</strong></center>
                         PayPal Email: {{  maskCode($withdrawals->paypal_email) }}
-                        @else
+                      
+                      @else
+
                         <center class="mb-3"> <strong>Your preferred Payment method</strong></center>
                         Bank Name: {{  $withdrawals->bank_name }}<br>
                         Account Number: {{ $withdrawals->account_number }}
 
-                        @endif
+                      @endif
                        
                     </div>
                    
