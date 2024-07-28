@@ -66,7 +66,7 @@
             </div>
             <div class="ms-3 text-end">
               <p class="fs-3 fw-medium mb-0">
-               $0
+               ${{ $withdrawals }}
               </p>
               <p class="text-muted mb-0">
                 Total Withdrawal <span><small>(Earnings withdrawn from your wallet)</small></span>
