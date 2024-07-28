@@ -18,6 +18,12 @@
       </h3>
     </div>
     <div class="block-content block-content-full">
+      @if (session('success'))
+          <div class="alert alert-success" role="alert">
+              {{ session('success') }}
+          </div>
+      @endif
+
       <!-- DataTables init on table by adding .js-dataTable-buttons class, functionality is initialized in js/pages/be_tables_datatables.min.js which was auto compiled from _js/pages/be_tables_datatables.js -->
       <table class="table table-bordered table-striped table-vcenter js-dataTable-buttons">
         <thead>
@@ -96,6 +102,7 @@
                     </div>
                     
                     <div class="modal-footer">
+                      <a href="{{ url('withdrawal/list/'.$list->id) }}" class="btn btn-sm btn-primary">Update Payment</a>
                     <button type="button" class="btn btn-sm btn-alt-secondary" data-bs-dismiss="modal">Close</button>
                     {{-- @if($with->status != '1')
                         

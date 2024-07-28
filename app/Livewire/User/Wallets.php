@@ -2,6 +2,7 @@
 
 namespace App\Livewire\User;
 
+use App\Models\Transaction;
 use App\Models\Wallet;
 use App\Models\WithdrawalMethod;
 use App\Models\Withdrawals;
@@ -37,6 +38,7 @@ class Wallets extends Component
     public $paypalEmail;
     public $usdtWallet;
     public $currency;
+    public $paidWithdrawals;
 
     
 
@@ -47,7 +49,7 @@ class Wallets extends Component
          
        $this->wallets = auth()->user()->wallet;
        $this->withdrawals = WithdrawalMethod::where(['user_id'=> auth()->user()->id])->first(); //auth()->user()->usdt_wallet_address;
-       
+       $this->paidWithdrawals = Transaction::where('type', 'withdrawals')->where('user_id', auth()->user()->id)->sum('amount');
     }
 
     public function refresh(){
