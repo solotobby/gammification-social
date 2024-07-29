@@ -228,7 +228,7 @@ if(!function_exists('securityVerification')){
 
     //    return [$ipIsContained, $countryIsContained];
 
-       if($ipIsContained == true && $countryIsContained == true){
+       if($ipIsContained == true || $countryIsContained == true){
             return 'OK';
        }else{
             return 'not_okay';
