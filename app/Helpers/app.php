@@ -313,11 +313,11 @@ if(!function_exists('refreshWallet')){
          $externalComments = CommentExternal::whereIn('post_id', $postIds)->where('is_paid', false)->get();
          $perCommentAmount = '';
          if(auth()->user()->level->name == 'Influencer'){
-            $perCommentAmount = 0.20; //40 //30
+            $perCommentAmount = 0.08; //40 //30
          }elseif(auth()->user()->level->name == 'Creator'){
-            $perCommentAmount = 0.15; //30 // 25
+            $perCommentAmount = 0.07; //30 // 25
          }else{
-            $perCommentAmount = 0.10; //25 //20
+            $perCommentAmount = 0.05; //25 //20
          }
 
          $counts = $externalComments->count() * 0.1;
