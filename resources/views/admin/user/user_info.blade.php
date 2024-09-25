@@ -148,6 +148,56 @@
       </div>
     </div>
     <!-- END Groups -->
+
+    <div class="block block-rounded">
+      <div class="block-header block-header-default">
+        <h3 class="block-title">List of Posts</h3>
+      </div>
+      <div class="block-content">
+        <table class="table table-bordered table-striped table-vcenter js-dataTable-buttons">
+          <thead>
+            <tr>
+              {{-- <th class="text-center" style="width: 80px;">#</th> --}}
+              <th>Content</th>
+              <th>View-Ext_View-paid-Amt</th>
+              <th>Likes-Ext_Likes-paid-Amt</th>
+              <th>Comm-Ext_Comm-paid-Amt</th>
+             
+              <th>When Posted</th>
+            </tr>
+          </thead>
+          <tbody>
+              @foreach ($posts as $post)
+              <tr>
+                  {{-- <td class="text-center">1</td> --}}
+                  <td>
+                    {{\Illuminate\Support\Str::limit($post->content, 50,) }}
+                    {{-- {{ $post->content }} --}}
+                    {{-- <a href="{{ url('user/info/'.$post->id) }}">{{ $post->user->name }}</a> --}}
+                  </td>
+                  <td>
+                    {{ $post->views }}-{{ $post->views_external }}-{{ $post->paidExternalViews() }}|<span class="badge bg-info">${{ $post->paidExternalViews()*$singleViewExternal }}</span>
+                  </td>
+                  <td>
+                    {{ $post->likes }}/{{ $post->likes_external }}
+                    {{-- <span class="badge bg-info">{{ $post->views }}</span> --}}
+                  </td>
+                  <td>
+                    {{ $post->comments }}-{{ $post->comment_external == null ? '0' : $post->comment_external }}-{{$post->paidExternalComments()}}| <span class="badge bg-info">${{$post->paidExternalComments()*$perCommentAmount }}</span>                  
+                  </td>
+                  <td>
+                    <em class="text-muted">{{$post->created_at?->shortAbsoluteDiffForHumans()}} ago</em>
+                  </td>
+                </tr>
+              @endforeach
+           
+           
+           
+          </tbody>
+        </table>
+
+      </div>
+    </div>
   </div>
   <!-- END Page Content -->
 
