@@ -320,7 +320,7 @@ if(!function_exists('refreshWallet')){
             $perCommentAmount = 0.10; //25 //20
          }
 
-         $counts = $externalComments->count() * 0.2;
+         $counts = $externalComments->count() * 0.1;
          
          $wallet->balance += $perCommentAmount*$counts;
          $wallet->save();
