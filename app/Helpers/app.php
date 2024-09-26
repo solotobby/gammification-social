@@ -452,6 +452,7 @@ if(!function_exists('generateVirtualAccount')){
                     $updateVA_info->currency = 'NGN';
                     $updateVA_info->save();
 
+                    $data['status'] = true;
                     $data['customers'] = $customer;
                     $data['virtual_account'] = $va; 
                     $data['partner'] = $partner;
