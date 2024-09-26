@@ -110,8 +110,9 @@
             </div>
           </a>
         </div>
-
-        <a href="{{ url('generate/virtual/account/'.$partners->id) }}" class="btn btn-primary">Generate Virtual Account</a>
+            @if($partners->account_number == null)
+                <a href="{{ url('generate/virtual/account/'.$partners->id) }}" class="btn btn-primary">Generate Virtual Account</a>
+            @endif
     @endif
 
 </div>
