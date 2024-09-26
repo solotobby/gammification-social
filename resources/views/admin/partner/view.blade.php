@@ -4,7 +4,7 @@
 
 
 <div class="content">
-    <h2 class="content-heading">Partner -  {{ $partners->user->name }} </h2>
+    <h2 class="content-heading">Partner -  {{ @$partners->user->name }} </h2>
 <div class="row">
 
     <div class="col-md-6 col-xl-4">
@@ -110,8 +110,9 @@
             </div>
           </a>
         </div>
-
-        <a href="{{ url('generate/virtual/account/'.$partners->id) }}" class="btn btn-primary">Generate Virtual Account</a>
+            @if($partners->account_number == null)
+                <a href="{{ url('generate/virtual/account/'.$partners->id) }}" class="btn btn-primary">Generate Virtual Account</a>
+            @endif
     @endif
 
 </div>
