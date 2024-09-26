@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ApiResponse;
 use App\Models\Partner;
 use App\Models\PartnerSlot;
 use App\Models\Transaction;
@@ -14,6 +15,8 @@ class WebhookController extends Controller
 
         $event = $request['event'];
 
+        ApiResponse::create(['response' => $event]);
+
         if($event == 'charge.success'){
             $amount = $request['data']['amount']/100;
             $status = $request['data']['status'];
@@ -25,20 +28,20 @@ class WebhookController extends Controller
 
             $dollarEqv = $amount/1500; //conver to dollar using base rate of 1500
             //fetch partner information
-            // $partner = Partner::where('customer_code', $customer_code)->first();
-            // $partner->balance_dollar += number_format($dollarEqv,1);
-            // $partner->balance_naira += $amount;
-            // $partner->save();
-
+            $partner = Partner::where('customer_code', $customer_code)->first();
+            $partner->balance_dollar += number_format($dollarEqv,1);
+            $partner->balance_naira += $amount;
+            $partner->save();
+// '25f5b37e-aff2-44df-9c21-3ad565df09db',
             Transaction::create([
-                'user_id' => '25f5b37e-aff2-44df-9c21-3ad565df09db', //$partner->user_id,
+                'user_id' => $partner->user_id,
                 'ref' => $reference,
                 'amount' =>$amount,
                 'currency' => $currency,
                 'status' =>  $status,
                 'type' => 'partner_wallet_topup',
                 'action' => 'Credit',
-                'description' => 'Top up', //$partner->user->name .' topped up partner wallet', 
+                'description' => $partner->user->name .' topped up partner wallet', 
                 'meta' =>$event,
                 'customer' => null
              ]);
