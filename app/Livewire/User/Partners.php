@@ -67,9 +67,10 @@ class Partners extends Component
             $payment =  processPayment($finalAmount, 'USD', $validated['package'], $level, $quantity);
             return redirect($payment);
         }else{
-
-            $payment =  processPayment($finalAmount*1500,  'NGN', $validated['package'], $level, $quantity);
-            return redirect($payment);
+            $amtFinal = $finalAmount*1500;
+            session()->flash('status', "Kindly send NGN" .$amtFinal. " to the account details on your partner dashbboard");
+            // $payment =  processPayment($finalAmount*1500,  'NGN', $validated['package'], $level, $quantity);
+            // return redirect($payment);
         }
 
     }

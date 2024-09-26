@@ -87,9 +87,9 @@
       <!-- END Page Content -->
 
       @else
-                <h2 class="content-heading">You're a Partner!</h2>
+                <h2 class="content-heading">Partner Dashboard!</h2>
                 @if($partners->status == false)
-                    <div class="alert alert-info">You have successfully applied to become a partner. We have sent a link to your email for a 15min introductory call with our team. </div>
+                    <div class="alert alert-info">You have successfully applied to become a partner, your request will be reviewed in the next 48hours. </div>
                 @else
                     
 
@@ -150,9 +150,50 @@
                           </a>
                         </div>
 
+                        @if($partners->country == 'Nigeria')
+                            <div class="col-md-6">
+                              <a class="block block-rounded block-link-pop" href="javascript:void(0)">
+                                <div class="block-content block-content-full d-flex align-items-center justify-content-between">
+                                  <div>
+                                    <i class="fa fa-2x fa-file text-primary"></i>
+                                  </div>
+                                  <div class="ms-3 text-end">
+                                    <p class="fs-3 fw-medium mb-0">
+                                        {{ @$partners->account_number }}
+                                    </p>
+                                    <p class="text-muted mb-0">
+                                      {{ @$partners->bank_name }}
+                                    </p>
+                                    <p class="text-muted mb-0">
+                                      {{ @$partners->account_name }}
+                                    </p>
+                                  </div>
+                                </div>
+                              </a>
+                            </div>
 
+                            <div class="col-md-6">
+                              <a class="block block-rounded block-link-pop" href="javascript:void(0)">
+                                <div class="block-content block-content-full d-flex align-items-center justify-content-between">
+                                  <div>
+                                    <i class="fa fa-2x fa-dollar text-primary"></i>
+                                  </div>
+                                  <div class="ms-3 text-end">
+                                    <p class="fs-3 fw-medium mb-0">
+                                        ${{ @$partners->balance_dollar }}
+                                    </p>
+                                    <small>&#8358 {{ @$partners->balance_dollar }}</small>
+                                    <p class="text-muted mb-0">
+                                      Wallet Balance
+                                    </p>
+                                  </div>
+                                </div>
+                              </a>
+                            </div>
+                        @endif
 
                         <div class="col-lg-12">
+                          
                           @if (session('success'))
                           <div class="alert alert-success" role="alert">
                               {{ session('success') }}
