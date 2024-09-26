@@ -430,7 +430,7 @@ if(!function_exists('generateVirtualAccount')){
                 "last_name"=> 'Payhankey',
                 "phone"=> $phone
             ];
-            return $payload;
+           
             $customer = createCustomer($payload);
 
             if($customer['status'] == true){
@@ -442,7 +442,7 @@ if(!function_exists('generateVirtualAccount')){
                         
                  $va = virtualAccount($data);
 
-                 return [$customer, $va];
+                
 
                 if($va['status'] == true){
 
@@ -460,7 +460,7 @@ if(!function_exists('generateVirtualAccount')){
                     $data['virtual_account'] = $va; 
                     $data['partner'] = $partner;
 
-                    return $data;
+                    
 
                 }else{
                     return response()->json('Could not create virtual acsount', 403);
