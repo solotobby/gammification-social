@@ -423,13 +423,14 @@ if(!function_exists('generateVirtualAccount')){
 
         // }else{
 
-            $phone = '+234' . substr($partner->phone, 1);
+            $phone = '+234'.substr($partner->phone, 1);
             $payload = [
                 "email"=> $partner->email,
                 "first_name"=> $partner->name,
                 "last_name"=> 'Payhankey',
                 "phone"=> $phone
             ];
+            return $payload;
             $customer = createCustomer($payload);
 
             if($customer['status'] == true){
