@@ -439,7 +439,9 @@ if(!function_exists('generateVirtualAccount')){
                     "preferred_bank"=> env('PAYSTACK_BANK') //"wema-bank"
                 ];
                         
-                return $va = virtualAccount($data);
+                 $va = virtualAccount($data);
+
+                 return [$customer, $va];
 
                 if($va['status'] == true){
 
