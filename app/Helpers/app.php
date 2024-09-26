@@ -426,8 +426,8 @@ if(!function_exists('generateVirtualAccount')){
             $phone = '+234'.substr($partner->phone, 1);
             $payload = [
                 "email"=> $partner->email,
-                "first_name"=> $partner->name,
-                "last_name"=> 'Payhankey',
+                "first_name"=> 'Payhankey',
+                "last_name"=> $partner->name,
                 "phone"=> $phone
             ];
            
@@ -441,8 +441,6 @@ if(!function_exists('generateVirtualAccount')){
                 ];
                         
                  $va = virtualAccount($data);
-
-                
 
                 if($va['status'] == true){
 
@@ -460,10 +458,8 @@ if(!function_exists('generateVirtualAccount')){
                     $data['virtual_account'] = $va; 
                     $data['partner'] = $partner;
 
-                    
-
                 }else{
-                    return response()->json('Could not create virtual acsount', 403);
+                    return response()->json(['status' => false, 'data' => $data], 403);
                 }
 
                
