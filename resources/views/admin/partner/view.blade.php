@@ -4,7 +4,7 @@
 
 
 <div class="content">
-    <h2 class="content-heading">Partner -  {{ $partners->user->name }} </h2>
+    <h2 class="content-heading">Partner -  {{ @$partners->user->name }} </h2>
 <div class="row">
 
     <div class="col-md-6 col-xl-4">
