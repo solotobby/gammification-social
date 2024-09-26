@@ -458,7 +458,7 @@ if(!function_exists('generateVirtualAccount')){
                     $data['virtual_account'] = $va; 
                     $data['partner'] = $partner;
 
-                    return $data;
+                   
 
                 }else{
                     return response()->json(['status' => false, 'data' => $data], 403);
