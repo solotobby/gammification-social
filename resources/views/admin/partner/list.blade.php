@@ -31,6 +31,7 @@
                <th >Email</th>
                <th >Country</th>
                <th>Phone</th>
+               <th>VA</th>
                <th >Status</th>
                {{-- <th >Created</th> --}}
              </tr>
@@ -42,6 +43,7 @@
                    <td>{{ $partner->email }}</td>
                    <td>{{ $partner->country}}</td>
                    <td>{{ $partner->phone}}</td>
+                   <td>{{ $partner->account_number == null ? 'NILL' : 'CREATED'}}</td>
                    <td>
                     @if($partner->status == true)
                         <a href=" {{  url('partner/'.$partner->id)}}" target="_blank" class="btn btn-sm btn-alt-primary">View Account</a>
