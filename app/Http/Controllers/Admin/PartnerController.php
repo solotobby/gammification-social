@@ -25,6 +25,11 @@ class PartnerController extends Controller
         $res = securityVerification();
         if($res === 'OK'){
             $part = Partner::find($id);
+
+            if($part->country == 'Nigeria'){
+                //generate Virtual Account
+                generateVirtualAccount($part);
+            }
             $part->status = true;
             $part->save();
             PartnerSlot::create(['partner_id' => $part->id, 'beginner' => 0, 'creator' => 0, 'influencer' => 0]);

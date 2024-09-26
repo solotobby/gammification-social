@@ -3,6 +3,7 @@
 use App\Livewire\User\Posts;
 use App\Models\CommentExternal;
 use App\Models\Level;
+use App\Models\Partner;
 use App\Models\Post;
 use App\Models\UserComment;
 use App\Models\UserLike;
@@ -361,5 +362,201 @@ if(!function_exists('isSimilar')){
     } 
 }
 
+if(!function_exists('generateVirtualAccount')){
+    function generateVirtualAccount($partner){  
 
+          //check if user exist, if yes, update informatioon
+          //$fetchCustomer = fetchCustomer($partner->email);
+
+        // if($fetchCustomer['status'] == true){
+           
+        //     //update customer
+        //     $customerPayload = [
+        //         "first_name"=> $partner->name,//auth()->user()->name,
+        //         "last_name"=> 'Payhankey',
+        //         "phone"=> "+".$phone_number
+        //     ];
+
+        //     $updateCustomer = updateCustomer($user->email, $customerPayload);
+
+        //     if($updateCustomer['status'] == true){
+
+        //         $data = [
+        //             "customer"=> $updateCustomer['data']['customer_code'], 
+        //             "preferred_bank"=>env('PAYSTACK_BANK')
+        //         ];
+                        
+        //         $response = virtualAccount($data);
+
+        //         $VirtualAccount = VirtualAccount::where('user_id', $user->id)->first();
+        //         if($VirtualAccount){
+
+        //             $VirtualAccount->bank_name = $response['data']['bank']['name'];
+        //             $VirtualAccount->account_name = $response['data']['account_name'];
+        //             $VirtualAccount->account_number = $response['data']['account_number'];
+        //             $VirtualAccount->account_name = $response['data']['account_name'];
+        //             $VirtualAccount->currency = 'NGN';
+        //             $VirtualAccount->save();
+
+        //         }else{
+
+                    
+        //             $VirtualAccount = VirtualAccount::create([
+        //                 'user_id' => $user->id, 
+        //                 'channel' => 'paystack', 
+        //                 'customer_id'=>$updateCustomer['data']['customer_code'], 
+        //                 'customer_intgration'=> $updateCustomer['data']['integration'],
+        //                 'bank_name' => $response['data']['bank']['name'],
+        //                 'account_name' => $response['data']['account_name'],
+        //                 'account_number' => $response['data']['account_number'],
+        //                 'account_name' => $response['data']['account_name'],
+        //                 'currency' => 'NGN'
+        //             ]);
+
+        //         }
+
+        //         $data['res']=$response;
+        //         $data['va']=$VirtualAccount; //back()->with('success', 'Account Created Succesfully');
+        //         return $data;
+        //     }
+
+
+        // }else{
+
+            $phone = '+234' . substr($partner->phone, 1);
+            $payload = [
+                "email"=> $partner->email,
+                "first_name"=> $partner->name,
+                "last_name"=> 'Payhankey',
+                "phone"=> $phone
+            ];
+            $customer = createCustomer($payload);
+
+            if($customer['status'] == true){
+            
+                $data = [
+                    "customer"=> $customer['data']['customer_code'], 
+                    "preferred_bank"=> env('PAYSTACK_BANK') //"wema-bank"
+                ];
+                        
+                $va = virtualAccount($data);
+
+                if($va['status'] == true){
+
+                    $updateVA_info = Partner::where('user_id', $partner->user_id)->first(); 
+
+                    $updateVA_info->customer_code = $va['data']['customer']['customer_code'];
+                    $updateVA_info->bank_name = $va['data']['bank']['name'];
+                    $updateVA_info->account_number = $va['data']['account_number'];
+                    $updateVA_info->account_name = $va['data']['account_name'];
+                    $updateVA_info->currency = 'NGN';
+                    $updateVA_info->save();
+
+                    $data['customers'] = $customer;
+                    $data['virtual_account'] = $va; 
+                    $data['partner'] = $partner;
+
+                    return $data;
+
+                }else{
+                    return response()->json('Could not create virtual acsount', 403);
+                }
+
+               
+                
+
+                // $data['res']=$customer;
+                // $data['va']=$va; 
+                // return $data;
+    
+                // if($VirtualAccount){
+                    
+                //     // $VirtualAccount->bank_name = $response['data']['bank']['name'];
+                //     // $VirtualAccount->account_name = $response['data']['account_name'];
+                //     // $VirtualAccount->account_number = $response['data']['account_number'];
+                //     // $VirtualAccount->account_name = $response['data']['account_name'];
+                //     // $VirtualAccount->currency = 'NGN';
+                //     // $VirtualAccount->save();
+
+                // }else{
+
+                //     // $VirtualAccount = VirtualAccount::create([
+                //     //     'user_id' => $user->id, 
+                //     //     'channel' => 'paystack', 
+                //     //     'customer_id'=>$res['data']['customer_code'], 
+                //     //     'customer_intgration'=> $res['data']['integration'],
+                //     //     'bank_name' => $response['data']['bank']['name'],
+                //     //     'account_name' => $response['data']['account_name'],
+                //     //     'account_number' => $response['data']['account_number'],
+                //     //     'account_name' => $response['data']['account_name'],
+                //     //     'currency' => 'NGN'
+                //     // ]);
+                
+                // }
+                
+               
+            }else{
+                return response()->json('Could not create customer account', 403);
+            }
+        
+
+    }
+}
+
+if(!function_exists('fetchCustomer')){
+    function  fetchCustomer($email){
+
+        $res = Http::withHeaders([
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer '.env('PAYSTACK_SECRET_KEY')
+        ])->get('https://api.paystack.co/customer/'.$email);
+    
+        return json_decode($res->getBody()->getContents(), true);
+
+    }
+}
+
+if(!function_exists('updateCustomer')){
+    function  updateCustomer($email, $payload){
+
+        $res = Http::withHeaders([
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer '.env('PAYSTACK_SECRET_KEY')
+        ])->put('https://api.paystack.co/customer/'.$email, $payload);
+    
+        return json_decode($res->getBody()->getContents(), true);
+
+    }
+}
+
+if(!function_exists('virtualAccount')){
+    function  virtualAccount($data){
+        $res = Http::withHeaders([
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer '.env('PAYSTACK_SECRET_KEY')
+        ])->post('https://api.paystack.co/dedicated_account', $data);
+    
+        return json_decode($res->getBody()->getContents(), true);
+
+    }
+}
+
+
+
+if(!function_exists('createCustomer')){
+    function  createCustomer($data){
+
+        $res = Http::withHeaders([
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer '.env('PAYSTACK_SECRET_KEY')
+        ])->post('https://api.paystack.co/customer', $data);
+    
+        return json_decode($res->getBody()->getContents(), true);
+
+    }
+}
 

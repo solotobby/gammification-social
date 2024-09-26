@@ -162,7 +162,6 @@
               <th>View-Ext_View-paid-Amt</th>
               <th>Likes-Ext_Likes-paid-Amt</th>
               <th>Comm-Ext_Comm-paid-Amt</th>
-             
               <th>When Posted</th>
             </tr>
           </thead>
@@ -171,7 +170,7 @@
               <tr>
                   {{-- <td class="text-center">1</td> --}}
                   <td>
-                    {{\Illuminate\Support\Str::limit($post->content, 50,) }}
+                    {{\Illuminate\Support\Str::words($post->content, 3, '...') }}
                     {{-- {{ $post->content }} --}}
                     {{-- <a href="{{ url('user/info/'.$post->id) }}">{{ $post->user->name }}</a> --}}
                   </td>
@@ -190,9 +189,6 @@
                   </td>
                 </tr>
               @endforeach
-           
-           
-           
           </tbody>
         </table>
 
