@@ -16,4 +16,8 @@ class Partner extends Model
     public function partnerSlot(){
         return $this->hasOne(PartnerSlot::class);
     }
+
+    public function user(){
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }

@@ -125,6 +125,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('send/access/code', [\App\Http\Controllers\Admin\AccessCodeController::class, 'sendAccessCode'])->name('access.code.send');
         Route::post('send/access/code', [\App\Http\Controllers\Admin\AccessCodeController::class, 'processValidateCode'])->name('immaculate');
         
+        Route::get('generate/virtual/account/{partner_id}', [\App\Http\Controllers\Admin\PartnerController::class, 'generateVirtualAccount']);
         Route::get('partner/list', [\App\Http\Controllers\Admin\PartnerController::class, 'list']);
         Route::get('partner/payments', [\App\Http\Controllers\Admin\PartnerController::class, 'partnerPayments']);
         Route::get('partner/{id}/activate', [\App\Http\Controllers\Admin\PartnerController::class, 'viewPartnerActivate']);
