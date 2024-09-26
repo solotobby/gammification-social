@@ -50,7 +50,7 @@ class PartnerController extends Controller
         $res = securityVerification();
         if($res === 'OK'){ 
                 $partners = Partner::find($id);
-                generateVirtualAccount($partners);
+                return $va = generateVirtualAccount($partners);
                 return back()->with('success', 'Virtual Account Generated successully');
         }
     }

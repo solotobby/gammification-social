@@ -82,10 +82,10 @@
                     {{ @$partners->account_number }}
                 </p>
                 <p class="text-muted mb-0">
-                  {{ @$partners->bank_name }}
+                    {{ @$partners->bank_name }}
                 </p>
                 <p class="text-muted mb-0">
-                  {{ @$partners->account_name }}
+                    {{ @$partners->account_name }}
                 </p>
               </div>
             </div>
