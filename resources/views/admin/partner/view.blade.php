@@ -102,7 +102,7 @@
                 <p class="fs-3 fw-medium mb-0">
                     ${{ @$partners->balance_dollar }}
                 </p>
-                <small>&#8358 {{ @$partners->balance_dollar }}</small>
+                <small>&#8358 {{ @$partners->balance_naira }}</small>
                 <p class="text-muted mb-0">
                   Wallet Balance
                 </p>
