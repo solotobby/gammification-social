@@ -44,7 +44,7 @@
                    <td>{{ $partner->phone}}</td>
                    <td>
                     @if($partner->status == true)
-                        <a href=" {{  url('partner/'.$partner->id)}}" class="btn btn-sm btn-alt-primary">View Account</a>
+                        <a href=" {{  url('partner/'.$partner->id)}}" target="_blank" class="btn btn-sm btn-alt-primary">View Account</a>
                     @else
                     <a href="{{ url('partner/'.$partner->id.'/activate') }}" class="btn btn-sm btn-alt-warning"> {{ $partner->status == true ? 'Active' : 'Not Active' }}</a>
                     @endif
