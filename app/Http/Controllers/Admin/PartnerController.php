@@ -40,7 +40,18 @@ class PartnerController extends Controller
     public function partnerInfo($id){
         $res = securityVerification();
         if($res === 'OK'){ 
-            return $id;
+            $partners = Partner::find($id);
+            $slot = PartnerSlot::where('partner_id', $id)->first();
+            return view('admin.partner.view', ['partners' => $partners, 'slot' => $slot]);
+        }
+    }
+
+    public function generateVirtualAccount($id){
+        $res = securityVerification();
+        if($res === 'OK'){ 
+                $partners = Partner::find($id);
+                generateVirtualAccount($partners);
+                return back()->with('success', 'Virtual Account Generated successully');
         }
     }
 
