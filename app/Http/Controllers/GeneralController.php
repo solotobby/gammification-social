@@ -36,6 +36,10 @@ class GeneralController extends Controller
         return 'Okay good';
     }
 
+    public function privacyPolicy(){
+        return view('privacy');
+    }
+
     public function howToEarn(){
         return view('earn');
     }

@@ -35,6 +35,7 @@ Route::group(['namespace' => 'auth'], function () {
     });
 
     Route::get('fix', [\App\Http\Controllers\GeneralController::class, 'devy']);
+    Route::get('privacy/policy', [\App\Http\Controllers\GeneralController::class, 'privacyPolicy']);
 
     Route::get('admin', [\App\Http\Controllers\GeneralController::class, 'admin']);
     Route::get('reg', [\App\Http\Controllers\Auth\RegisterController::class, 'reg']);
