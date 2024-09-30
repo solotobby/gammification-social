@@ -46,7 +46,8 @@
 
       gtag('config', 'G-E30RCECSBG');
     </script> --}}
-
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7484162262282358"
+    crossorigin="anonymous"></script>
 
     <script async src="https://www.googletagmanager.com/gtag/js?id=AW-10842521152"></script>
     <script>
