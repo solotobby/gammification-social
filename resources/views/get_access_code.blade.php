@@ -10,7 +10,7 @@
     <meta content="Themesbrand" name="author" />
     <!-- favicon -->
     <link rel="shortcut icon" href="{{asset('favicon.png')}}">
-    
+
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7484162262282358"
      crossorigin="anonymous"></script>
 
@@ -77,6 +77,9 @@
                     </li>
                     <li class="nav-item">
                         <a data-scroll href="{{ url('howtoearn') }}" class="nav-link">How to Earn</a>
+                    </li>
+                    <li class="nav-item">
+                        <a data-scroll href="{{ url('privacy/policy') }}" class="nav-link">Privacy Policy</a>
                     </li>
                     {{-- <li class="nav-item">
                         <a data-scroll href="{{ url('#blog') }}" class="nav-link">Blog</a>

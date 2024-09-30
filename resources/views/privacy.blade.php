@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8" />
-    <title>Payhankey | Monetize your posts, comments and views to earn daily</title>
+    <title>Payhankey | Privacy Policy</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Payhankey | Monetize your posts, comments and views to earn daily" />
     <meta name="keywords" content="money, facebook. twitter, instagram premium, marketing, multipurpose" />
@@ -98,113 +98,78 @@
 
    
 
-    <!-- Blog start -->
-    {{-- <section class="section blog" id="blog">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-6">
-                    <div class="text-center mb-5">
-                        <h3 class="title mb-3">Latest News</h3>
-                        <p class="text-muted font-size-15">Et harum quidem rerum facilis est et expedita distinctio nam
-                            libero tempore cum soluta nobis eligendi cumque.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-lg-4">
-                    <div class="blog-box mb-4 mb-lg-0">
-                        <img src="images/blog/img-1.jpg" alt="" class="img-fluid d-block mx-auto rounded">
-                        <ul class="list-inline text-muted text-uppercase font-size-15 font-weight-medium mt-3 mb-2">
-                            <li class="list-inline-item me-3"><i class="icon-size-15 icon me-1"
-                                    data-feather="calendar"></i> April 10 2020</li>
-                            <li class="list-inline-item"><i class="icon-size-15 icon me-1" data-feather="user"></i>
-                                Admin</li>
-                        </ul>
-                        <a href="#" class="fw-bold h5">Best Traveling Place</a>
-                        <p class="text-muted font-size-15">Integer ante arcu accumsan a consectetuer eget posuere mauris
-                            praesent adipiscing phasellus ullamcorper ipsum rutrum punc.</p>
-                        <a href="#" class="text-primary  font-weight-semibold">Learn More <span
-                                class="ms-2 right-icon">&#8594;</span></a>
-                    </div>
-                </div>
-                <div class="col-lg-4">
-                    <div class="blog-box blog-box mb-4 mb-lg-0">
-                        <img src="images/blog/img-2.jpg" alt="" class="img-fluid d-block mx-auto rounded">
-                        <ul class="list-inline text-muted text-uppercase font-size-15 font-weight-medium mt-3 mb-2">
-                            <li class="list-inline-item me-3"><i class="icon-size-15 icon me-1"
-                                    data-feather="calendar"></i> April 11 2020</li>
-                            <li class="list-inline-item"><i class="icon-size-15 icon me-1" data-feather="user"></i>
-                                Admin</li>
-                        </ul>
-                        <a href="#" class="fw-bold h5">Private Meeting Room</a>
-                        <p class="text-muted font-size-15">Integer ante arcu accumsan a consectetuer eget posuere mauris
-                            praesent adipiscing phasellus ullamcorper ipsum rutrum punc.</p>
-                        <a href="#" class="text-primary   font-weight-semibold">Learn More <span
-                                class="ms-2 right-icon">&#8594;</span></a>
-                    </div>
-                </div>
-                <div class="col-lg-4">
-                    <div class="blog-box blog-box mb-4 mb-lg-0">
-                        <img src="images/blog/img-3.jpg" alt="" class="img-fluid d-block mx-auto rounded">
-                        <ul class="list-inline text-muted text-uppercase font-size-15 font-weight-medium mt-3 mb-2">
-                            <li class="list-inline-item me-3"><i class="icon-size-15 icon me-1"
-                                    data-feather="calendar"></i> April 12 2020</li>
-                            <li class="list-inline-item"><i class="icon-size-15 icon me-1" data-feather="user"></i>
-                                Admin</li>
-                        </ul>
-                        <a href="#" class="fw-bold h5">The Best Business Ideas</a>
-                        <p class="text-muted font-size-15">Integer ante arcu accumsan a consectetuer eget posuere mauris
-                            praesent adipiscing phasellus ullamcorper ipsum rutrum punc.</p>
-                        <a href="#" class="text-primary  font-weight-semibold">Learn More <span
-                                class="ms-2 right-icon">&#8594;</span></a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section> --}}
-    <!-- Blog End -->
-
-    <!-- Contact Us Start -->
+    
   
 
     <section class="section feather-bg-img" style="background-image: url(asset/images/features-bg-img-1.png)">
         <div class="container">
             <div class="row justify-content-center">
-                <div class="col-lg-5 align-self-center">
+                <div class="col-lg-12 align-self-center">
                     <p class="font-weight-medium text-uppercase mb-2"><i
-                            class="mdi mdi-chart-bubble h2 text-primary me-1 align-middle"></i> Earning made Easy </p>
-                    <h3 class="font-weight-semibold line-height-1_4 mb-4">
-                        Earning is easy on Payhankey when you <b>post, comment, like and share </b> as many times as possible.
-                    </h3>
-                    <h3 class="title mb-3">You can earn from:</h3>
+                            class="mdi mdi-chart-bubble h2 text-primary me-1 align-middle"></i> Privacy Policy </p>
+                    {{-- <h3 class="font-weight-semibold line-height-1_4 mb-4">
+                        Privacy Policy
+                    </h3> --}}
 
-                    <p class="text-muted font-size-15 mb-4">
-                        1. <b>Internal Content post and Engagements:</b> We pay you for every comment you make on Payhankey. Every like and comment your posts gets earns you money. This means we pay you for liking and comment on your posts
-                        <br>
-                        2. <b>Monetize your TikTok, Instagram, Facebook and other social media:</b> You earn $1 from every 1000 views on review videos you make about Payhankey on Instagram, Facebook or TikTok. Once the video (s) goes viral (20, 000 views and above), you earn $20.
-                        <br>
-                        3. <b>MonetIize Views on your TikTok, Instagram and Facebook:</b> Payhankey pays you when you share your posts from Payhankey to other social media to get views, likes and comment.
-                        <br>
-                        4. <b>Sign Up bonus:</b> For registering on Payhankey, you earn up to $3 sign up bonus
-                        <br>
-                        5. <b>Referal bonus:</b> We pay you up to $5 on each user you refer. Copy your referral link from your Profile, share with your friends, add to your social media bio for users to sign up using your referral link.
+                        <p class="text-muted font-size-15 mb-4">
+                            
+                            
+                            At Payhankey, accessible from https://Payhankey.com/, one of our main priorities is the privacy of our visitors. This Privacy Policy document contains types of information that is collected 
+                            and recorded by Payhankey and how we use it. If you have additional questions or require more information about our Privacy Policy, do not hesitate to contact us. This Privacy Policy applies 
+                            only to our online activities and is valid for visitors to our website with regards to the information that they shared and/or collect in Payhankey for the purpose of posting and monetizing contents. 
+                            This policy is not applicable to any information collected offline or via channels other than this website.
+                            <br>
+                            <b>Consent</b><br>
+                            By using our website, you hereby consent to our Privacy Policy and agree to its terms.
+                            <b>Information we collect</b><br>
+                            The personal information that you are asked to provide, and the reasons why you are asked to provide it, will be made clear to you at the point we ask you 
+                            to provide your personal information. If you contact us directly, we may receive additional information about you such as your name, email address, phone number, 
+                            the contents of the message and/or attachments you may send us, and any other information you may choose to provide. When you register for an Account, we may ask 
+                            for your contact information, including items such as name, company name, address, email address, and telephone number.
 
-                       
-                    </p>
-                    
-                    <div class="mt-5">
-                        {{-- <a href="{{ $dollarlink }}" target="_blank" class="btn btn-primary me-2">Pay in Dollar - ${{ $amountDollar }}</a> --}}
-                        <a href="{{ url('register') }}" target="_blank" class="btn btn-soft-primary">Get Started</a>
-                    </div>
-                   
-                    
+                            <br>
+
+                            <b>How we use your information</b><br>
+                                We use the information we collect in various ways, including to: Provide, operate, and maintain our website<br>
+                                Improve, personalize, and expand our website<br>
+                                Understand and analyze how you use our website<br>
+                                Develop new products, services, features, and functionality<br>
+                                Communicate with you, either directly or through one of our partners, including for customer service, to provide you with updates and other information relating to the website, and for marketing and promotional purposes <br>
+                                Send you emails <br>
+                                Find and prevent fraud<br>
+                                Log Files<br>
+                                Payhankey follows a standard procedure of using log files. These files log visitors when they visit websites. All hosting companies do this and a part of hosting services' analytics. The information collected by log files include internet protocol (IP) addresses, browser type, Internet Service Provider (ISP), date and time stamp, referring/exit pages, and possibly the number of clicks. These are not linked to any information that is personally identifiable. The purpose of the information is for analyzing trends, administering the site, tracking users' movement on the website, and gathering demographic information. Cookies and Web Beacons
+                                Like any other website, Payhankey uses 'cookies'. These cookies are used to store information including visitors' preferences, and the pages on the website that the visitor accessed or visited. The information is used to optimize the users' experience by customizing our web page content based on visitors' browser type and/or other information. Advertising Partners Privacy Policies
+                                <br>
+                                You may consult this list to find the Privacy Policy for each of the advertising partners of Payhankey. Third-party ad servers or ad networks uses technologies like cookies, JavaScript, or Web Beacons that are used in their respective advertisements and links that appear on Payhankey, which are sent directly to users' browser. They automatically receive your IP address when this occurs. These technologies are used to measure the effectiveness of their advertising campaigns and/or to personalize the advertising content that you see on websites that you visit. Note that Payhankey has no access to or control over these cookies that are used by third-party advertisers.
+
+                                <br>
+                                <b>Third Party Privacy Policies</b><br>
+                                Payhankey's Privacy Policy does not apply to other advertisers or websites. Thus, we are advising you to consult the respective Privacy Policies of these third-party ad servers for more detailed information. It may include their practices and instructions about how to opt-out of certain options. You can choose to disable cookies through your individual browser options. To know more detailed information about cookie management with specific web browsers, it can be found at the browsers' respective websites. CCPA Privacy Rights (Do Not Sell My Personal Information)
+
+                                <br>Under the CCPA, among other rights, California consumers have the right to:<br>
+                                Request that a business that collects a consumer's personal data disclose the categories and specific pieces of personal data that a business has collected about consumers. <br>
+                                Request that a business delete any personal data about the consumer that a business has collected. <br>
+                                Request that a business that sells a consumer's personal data, not sell the consumer's personal data. <br>
+                                If you make a request, we have one month to respond to you. If you would like to exercise any of these rights, please contact us. <br>
+
+                                <br>
+                                <b>GDPR Data Protection Rights</b>
+                                We would like to make sure you are fully aware of all of your data protection rights. Every user is entitled to the following: The right to access – You have the right to request copies of your personal data. We may charge you a small fee for this service. The right to rectification – You have the right to request that we correct any information you believe is inaccurate. You also have the right to request that we complete the information you believe is incomplete. The right to erasure – You have the right to request that we erase your personal data, under certain conditions. The right to restrict processing – You have the right to request that we restrict the processing of your personal data, under certain conditions. The right to object to processing – You have the right to object to our processing of your personal data, under certain conditions. The right to data portability – You have the right to request that we transfer the data that we have collected to another organization, or directly to you, under certain conditions. If you make a request, we have one month to respond to you. If you would like to exercise any of these rights, please contact us.
+
+                                <br>
+                                <b>Children's Information</b><br>
+                                Another part of our priority is adding protection for children while using the internet. We encourage parents and guardians to observe, participate in, and/or monitor and guide their online activity.
+                                Payhankey does not knowingly collect any Personal Identifiable Information from children under the age of 13. If you think that your child provided this kind of information on our website, we strongly encourage you to contact us immediately and we will do our best efforts to promptly remove such information from our records.
+
+                        </p> 
+
                 </div>
-                <div class="col-lg-6 offset-lg-1 align-self-center">
+                {{-- <div class="col-lg-6 offset-lg-1 align-self-center">
                     <div class="mt-4 mt-lg-0">
                         <img src="{{asset('asset/images/money.png')}}" alt="" class="img-fluid d-block mx-auto">
                     </div>
-                </div>
+                </div> --}}
 
                   
 
