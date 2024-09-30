@@ -10,6 +10,10 @@
     <meta content="Themesbrand" name="author" />
     <!-- favicon -->
     <link rel="shortcut icon" href="{{asset('favicon.png')}}">
+    
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7484162262282358"
+     crossorigin="anonymous"></script>
+
     <!-- css -->
     <link href="{{asset('asset/css/bootstrap.min.css')}}" rel="stylesheet" type="text/css" />
     <link href="{{asset('asset/css/materialdesignicons.min.css')}}" rel="stylesheet" type="text/css" />

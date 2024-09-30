@@ -25,6 +25,9 @@
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('src/assets/media/favicons/apple-touch-icon-180x180.png') }}">
     <!-- END Icons -->
 
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7484162262282358"
+     crossorigin="anonymous"></script>
+
     <!-- Stylesheets -->
     <!-- Page JS Plugins CSS -->
     <link rel="stylesheet" href="{{ asset('src/assets/js/plugins/highlightjs/styles/atom-one-dark.css') }}">

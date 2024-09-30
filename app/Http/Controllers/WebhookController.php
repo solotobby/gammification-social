@@ -15,7 +15,7 @@ class WebhookController extends Controller
 
         $event = $request['event'];
 
-        ApiResponse::create(['response' => $event]);
+        ApiResponse::create(['response' => $request]);
 
         if($event == 'charge.success'){
             $amount = $request['data']['amount']/100;
