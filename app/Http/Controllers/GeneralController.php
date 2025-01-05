@@ -55,17 +55,17 @@ class GeneralController extends Controller
                 $amountDollar = '5';
                 $amountNaira = '7,500';
                 $nairaLink = 'https://paystack.com/pay/r950fs5tu8';//'https://flutterwave.com/pay/ohd7jfk6wgzq';
-                $dollarLink = 'https://buy.stripe.com/9AQ5la2KB7U80zCeUU';
+                $dollarLink = 'https://flutterwave.com/pay/ab97dpgweldm';
             }elseif($level == 'creator'){
                 $amountDollar = '10';
                 $amountNaira = '15,000';
                 $nairaLink = 'https://paystack.com/pay/pzdavnj0r2';
-                $dollarLink = 'https://buy.stripe.com/4gwaFu3OF7U82HK8wx';
+                $dollarLink = 'https://flutterwave.com/pay/elba42t3nw7m';
             }else{
                 $amountDollar = '20';
                 $amountNaira = '30,000';
                 $nairaLink = 'https://paystack.com/pay/xfsjg9c51c';
-                $dollarLink = 'https://buy.stripe.com/eVa9Bqfxn6Q48244gi';
+                $dollarLink = 'https://flutterwave.com/pay/4dhkdzur56fz';
             }
 
 
