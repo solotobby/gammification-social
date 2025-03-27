@@ -38,7 +38,7 @@ class AccessCodeController extends Controller
                 }
 
                 AccessCode::create(['tx_id' => $ref,'name' =>$level->name, 'email' => $request->email, 'amount' => $level->amount, 'code' => $code, 'level_id' => $level->id]);
-                Mail::to($request->email)->send(new AccessCodeMail($code));
+                // Mail::to($request->email)->send(new AccessCodeMail($code));
 
                 return back()->with('success', 'Access Code Sent');
 
