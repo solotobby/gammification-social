@@ -64,4 +64,11 @@ class AccessCodeController extends Controller
     }
 
 
+    public function listAccessCode(){
+        $list = AccessCode::orderBy('created_at', 'DESC')->get();
+
+        return view('admin.accesscode.list', ['lists' => $list]);
+    }
+
+
 }
