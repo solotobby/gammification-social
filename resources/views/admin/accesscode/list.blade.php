@@ -35,10 +35,10 @@
                 <tr>
                     {{-- <td class="text-center">1</td> --}}
                     <td>
-                     {{ $user->recipient_name }}
+                     {{ $user->recepient_name }}
                     </td>
                     <td>
-                        {{ $user->recipient_email }}
+                        {{ $user->recepient_email }}
                     </td>
                     <td>
                         {{ $user->name }}
