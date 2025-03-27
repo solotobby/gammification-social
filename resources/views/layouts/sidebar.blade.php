@@ -13,11 +13,20 @@
           <i class="nav-main-link-icon fa fa-list"></i>
           <span class="nav-main-link-name">User List</span>
         </a>
+        
+        <a class="nav-main-link" href="{{ route('list.accesscode') }}">
+          <i class="nav-main-link-icon fa fa-list"></i>
+          <span class="nav-main-link-name">List Access Codes</span>
+        </a>
 
         <a class="nav-main-link" href="{{ url('send/access/code') }}">
           <i class="nav-main-link-icon fa fa-list"></i>
           <span class="nav-main-link-name">Send Access Codes</span>
         </a>
+
+        
+
+        
 
         <a class="nav-main-link" href="{{ url('withdrawal/list') }}">
           <i class="nav-main-link-icon fa fa-list"></i>
