@@ -23,10 +23,11 @@
             <thead>
               <tr>
                 {{-- <th class="text-center" style="width: 80px;">#</th> --}}
-                <th>Name</th>
+                <th>Amount</th>
                 <th>Email</th>
                 <th>Level</th>
                 <th>Code</th>
+                <th>Status</th>
                 <th>Created</th>
               </tr>
             </thead>
@@ -35,10 +36,10 @@
                 <tr>
                     {{-- <td class="text-center">1</td> --}}
                     <td>
-                     {{ $user->recepient_name }}
+                     {{ $user->amount }}
                     </td>
                     <td>
-                        {{ $user->recepient_email }}
+                        {{ $user->email }}
                     </td>
                     <td>
                         {{ $user->name }}
@@ -46,6 +47,9 @@
                     <td >
                       {{ $user->code }}
                     </td>
+                    <td >
+                        {{ $user->is_active == true ? 'Not Redeemed' : 'Reddemed' }}
+                      </td>
                     <td>
                       <em class="text-muted">{{$user->created_at}}</em>
                     </td>
