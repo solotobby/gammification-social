@@ -133,18 +133,11 @@ class RegisterController extends Controller
             // Authentication passed...
               session()->regenerate();
 
-            //   return [
-            //         'session_id' => session()->getId(),
-            //         'cookie_session_id' => request()->cookie('laravel_session'),
-            //         'auth' => Auth::check(),
-            //         'user' => Auth::user(),
-            //     ];
-
-              return redirect('timeline');
+            //   return redirect('timeline');
 
               //dd(auth()->user()); //->update(['last_login_at' => now()]);
 
-            // return redirect()->intended('home');
+            return redirect()->intended('home');
         } else {
             return back()->with('error', 'Invalid Login Credentials');
         }

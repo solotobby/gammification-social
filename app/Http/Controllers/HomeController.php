@@ -33,16 +33,8 @@ class HomeController extends Controller
     public function index()
     {
 
-    
-        return [
-            'auth' => Auth::check(),
-            'user' => Auth::user(),
-            'session_id' => session()->getId(),
-        ];
-
-
         $user = auth()->user();
-        dd($user);
+      
 
         if ($user->hasRole('admin')) {
             // return 'admin';
