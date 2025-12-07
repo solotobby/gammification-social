@@ -114,8 +114,6 @@ class RegisterController extends Controller
             //Auth::guard('web')->login($user);
 
             Auth::login($user);
-            dd(Auth::check());
-            //Auth::login($user);
             return redirect('home');
 
 
@@ -133,8 +131,13 @@ class RegisterController extends Controller
 
         // return $validated;
 
+
+            // Auth::login($user);
+            // dd(Auth::check());
+
         if (Auth::attempt(['email' => $validated['email'], 'password' => $validated['password']])) {
             // Authentication passed...
+              session()->regenerate();
             return redirect()->intended('home');
         } else {
             return back()->with('error', 'Invalid Login Credentials');
