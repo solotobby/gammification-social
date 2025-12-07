@@ -133,6 +133,13 @@ class RegisterController extends Controller
             // Authentication passed...
               session()->regenerate();
 
+              return [
+                    'session_id' => session()->getId(),
+                    'cookie_session_id' => request()->cookie('laravel_session'),
+                    'auth' => Auth::check(),
+                    'user' => Auth::user(),
+                ];
+
               return redirect('home');
 
               //dd(auth()->user()); //->update(['last_login_at' => now()]);
