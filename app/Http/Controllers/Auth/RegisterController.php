@@ -111,8 +111,10 @@ class RegisterController extends Controller
 
             Wallet::create(['user_id' => $user->id, 'balance' => $level->reg_bonus, 'promoter_balance' => '0.00', 'referral_balance' => '0.00', 'currency' => 'USD', 'level' => $level->name]);
 
-            Auth::guard('web')->login($user);
-
+            //Auth::guard('web')->login($user);
+            
+            Auth::login($user);
+            dd(Auth::check());
             //Auth::login($user);
             return redirect('home');
 
