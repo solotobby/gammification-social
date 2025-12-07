@@ -32,7 +32,8 @@ class HomeController extends Controller
     public function index()
     {
         $user = auth()->user();
-        
+        dd($user);
+
         if ($user->hasRole('admin')) {
             // return 'admin';
             // return redirect()->route('logout');
@@ -46,6 +47,8 @@ class HomeController extends Controller
         // return redirect('timeline');
         // return view('home');
     }
+
+    
 
     public function userHome(){
         $this->loginPoints(auth()->user());
