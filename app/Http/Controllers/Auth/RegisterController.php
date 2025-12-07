@@ -92,7 +92,7 @@ class RegisterController extends Controller
         $user = User::create([
             'name' => $validated['name'],
             'username' => 'user' . rand(1000, 10000000), //$validated['username'],
-            'phone' => $data['phone'],
+            'phone' => $validated['phone'],
             'referral_code' => Str::random(7),
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
