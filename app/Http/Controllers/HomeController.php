@@ -10,6 +10,7 @@ use App\Models\Transaction;
 use App\Models\User;
 use App\Models\UserLevel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 
 class HomeController extends Controller
@@ -31,6 +32,15 @@ class HomeController extends Controller
      */
     public function index()
     {
+
+    
+        return [
+            'auth' => Auth::check(),
+            'user' => Auth::user(),
+            'session_id' => session()->getId(),
+        ];
+
+
         $user = auth()->user();
         dd($user);
 
@@ -48,7 +58,7 @@ class HomeController extends Controller
         // return view('home');
     }
 
-    
+
 
     public function userHome(){
         $this->loginPoints(auth()->user());

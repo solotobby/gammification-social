@@ -135,7 +135,7 @@ class RegisterController extends Controller
 
               //dd(auth()->user()); //->update(['last_login_at' => now()]);
 
-            return redirect()->intended('timeline');
+            return redirect()->intended('home');
         } else {
             return back()->with('error', 'Invalid Login Credentials');
         }
