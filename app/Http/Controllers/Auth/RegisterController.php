@@ -138,6 +138,9 @@ class RegisterController extends Controller
         if (Auth::attempt(['email' => $validated['email'], 'password' => $validated['password']])) {
             // Authentication passed...
               session()->regenerate();
+
+              dd(auth()->user()); //->update(['last_login_at' => now()]);
+              
             return redirect()->intended('home');
         } else {
             return back()->with('error', 'Invalid Login Credentials');
