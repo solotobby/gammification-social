@@ -58,7 +58,7 @@
         <!-- Main Container -->
         <main id="main-container">
             <!-- Page Content -->
-            
+
             <div class="bg-image" style="background-image: url('{{ asset('src/media/photos/photo14@2x.jpg') }}');">
                 <div class="row g-0 justify-content-center bg-black-75">
                     <div class="hero-static col-sm-8 col-md-6 col-xl-4 d-flex align-items-center p-2 px-sm-0">
@@ -75,6 +75,16 @@
                                     </a>
                                     <p class="text-uppercase fw-bold fs-sm text-muted mt-2">Create New Account</p>
                                 </div>
+
+                                @if ($errors->any())
+                                    <div class="alert alert-danger">
+                                        <ul>
+                                            @foreach ($errors->all() as $error)
+                                                <li>{{ $error }}</li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                @endif
                                 <!-- END Header -->
 
                                 <!-- Sign Up Form -->
@@ -173,7 +183,7 @@
                     <!-- END Sign Up Block -->
                 </div>
 
-                
+
             </div>
             <!-- END Page Content -->
         </main>

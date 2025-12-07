@@ -76,6 +76,17 @@
                                     </a>
                                     <p class="text-uppercase fw-bold fs-sm text-muted mt-2">Sign In</p>
                                 </div>
+
+                                @if ($errors->any())
+                                    <div class="alert alert-danger">
+                                        <ul>
+                                            @foreach ($errors->all() as $error)
+                                                <li>{{ $error }}</li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                @endif
+
                                 <!-- END Header -->
 
                                 <!-- Sign In Form -->
@@ -87,7 +98,8 @@
                                         <div class="mb-4">
                                             <input type="text"
                                                 class="form-control @error('email') is-invalid @enderror form-control-lg form-control-alt"
-                                                id="login-username" name="email" placeholder="Email Address" autofocus>
+                                                id="login-username" name="email" placeholder="Email Address"
+                                                autofocus>
                                         </div>
                                         <div class="mb-4">
                                             <input type="password"

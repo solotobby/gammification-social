@@ -69,7 +69,7 @@ class RegisterController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'min:3'],
             //  'username' => ['required', 'string', 'min:5', 'max:255', 'unique:users'],
-            // 'phone' => ['numeric', 'max:255', 'unique:users'],
+            'phone' => ['numeric', 'max:255', 'unique:users'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             // 'password' => ['required', 'string', 'min:8', 'confirmed'],
             'password' => ['required', 'string', 'min:8'],
@@ -92,7 +92,7 @@ class RegisterController extends Controller
         $user = User::create([
             'name' => $validated['name'],
             'username' => 'user' . rand(1000, 10000000), //$validated['username'],
-            // 'phone' => $data['phone'],
+            'phone' => $data['phone'],
             'referral_code' => Str::random(7),
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
