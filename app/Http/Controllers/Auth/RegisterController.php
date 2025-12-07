@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\AccessCode;
+use App\Models\Level;
 use App\Models\LoginPoint;
 use App\Models\Referral;
 use App\Models\Transaction;
@@ -50,109 +51,74 @@ class RegisterController extends Controller
         $this->middleware('guest');
     }
 
-    public function reg(Request $request){
+    public function reg(Request $request)
+    {
         $validated = $request->validate([
-             'referral_code' => ['sometimes', 'string', 'max:255']
-         ]); 
+            'referral_code' => ['sometimes', 'string', 'max:255']
+        ]);
 
         //  return $validated;
         return view('auth.register', ['ref' => $validated['referral_code']]);
     }
 
-    public function regUser(Request $request){
-        // return $request;
+    
+
+    public function regUser(Request $request)
+    {
+    
         $validated = $request->validate([
             'name' => ['required', 'string', 'min:3'],
             //  'username' => ['required', 'string', 'min:5', 'max:255', 'unique:users'],
-             // 'phone' => ['numeric', 'max:255', 'unique:users'],
-             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-             // 'password' => ['required', 'string', 'min:8', 'confirmed'],
-             'password' => ['required', 'string', 'min:8'],
-             'access_code' => ['required', 'string'],
-             'referral_code' => ['sometimes']
-         ]);
- 
-         // return $validated;
+            // 'phone' => ['numeric', 'max:255', 'unique:users'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            // 'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'password' => ['required', 'string', 'min:8'],
+            // 'access_code' => ['required', 'string'],
+            'referral_code' => ['sometimes']
+        ]);
 
-         if(!empty($validated['referral_code'])){
-             //validate referral code
+        // return $validated;
+
+        if (!empty($validated['referral_code'])) {
+            //validate referral code
             $refffff = User::where(['referral_code' => $validated['referral_code']])->first();
 
-            if(!$refffff){
+            if (!$refffff) {
                 return back()->with('error', 'Invalid Referral Code');
             }
+        }
 
-         }
 
-       
-          $accessCode = AccessCode::where('code', $validated['access_code'])->where('is_active', true)->first();
-            if($accessCode){
-                $accessCode->is_active = false;
-                $accessCode->save();
-            }else{
-                return back()->with('error', 'Invalid Access Code');
-            }
- 
- 
-         $user = User::create([
-             'name' => $validated['name'],
-             'username' => 'user'.rand(1000, 10000000), //$validated['username'],
-             // 'phone' => $data['phone'],
-             'referral_code' => Str::random(7),
-             'email' => $validated['email'],
-             'password' => Hash::make($validated['password']),
-             'access_code_id' => $accessCode->id
-         ]);
-       
-         UserLevel::create(['user_id' => $user->id, 'level_id' => $accessCode->level_id]);
-         $user->level_id = $accessCode->level_id;
-         $user->save();
+        $user = User::create([
+            'name' => $validated['name'],
+            'username' => 'user' . rand(1000, 10000000), //$validated['username'],
+            // 'phone' => $data['phone'],
+            'referral_code' => Str::random(7),
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            // 'access_code_id' => $accessCode->id
+        ]);
 
-         $roleId = Role::where('name', 'user')->first()->id;
-         $user->assignRole($roleId);
+        if($user){
+            
+            $level = Level::where('name', 'Basic')->first();
+            UserLevel::create(['user_id' => $user->id, 'level_id' => $level->id]);
+            $user->level_id = $level->id;
+            $user->save();  
 
-         Wallet::create(['user_id' => $user->id, 'balance' => $accessCode->level->reg_bonus, 'promoter_balance' => '0.00', 'referral_balance' => '0.00', 'currency' => 'USD', 'level' => $accessCode->level->name]);
-        
-         Transaction::create([
-            'user_id' => $user->id,
-            'ref' => time(),
-            'amount' => $accessCode->level->reg_bonus,
-            'currency' => 'USD',
-            'status' => 'successful',
-            'type' => 'registration_bonus',
-            'action' => 'Credit',
-            'description' => 'Reg Bonus for '.$user->name
-         ]);
+            $roleId = Role::where('name', 'user')->first()->id;
+            $user->assignRole($roleId);
 
-         if(!empty($validated['referral_code'])){
-            $validateReferralCode = User::where('referral_code', $validated['referral_code'])->first();
-            if($validateReferralCode){
-                Referral::create(['user_id' => $user->id, 'referral_id' => $validateReferralCode->id]);
-            }
+            Wallet::create(['user_id' => $user->id, 'balance' => $level->reg_bonus, 'promoter_balance' => '0.00', 'referral_balance' => '0.00', 'currency' => 'USD', 'level' => $level->name]);
 
-            $refWallet = Wallet::where('user_id', $validateReferralCode->id)->first();
-            $refWallet->referral_balance += $accessCode->level->ref_bonus;
-            $refWallet->save();
+            Auth::login($user);
+            return redirect('home');
 
-            Transaction::create([
-                'user_id' => $validateReferralCode->id,
-                'ref' => time(),
-                'amount' => $accessCode->level->ref_bonus,
-                'currency' => 'USD',
-                'status' => 'successful',
-                'type' => 'referral_bonus',
-                'action' => 'Credit',
-                'description' => 'Referral Bonus from '.$user->name
-             ]);
 
-         }
+        }
 
-         if ($user) {
-             Auth::login($user);
-             return redirect('home');
-         }
- 
-     }
+
+    }
 
     /**
      * Get a validator for an incoming registration request.
@@ -179,7 +145,7 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
-       
+
         // return User::create([
         //     'name' => $data['name'],
         //     'email' => $data['email'],
