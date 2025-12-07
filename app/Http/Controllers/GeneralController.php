@@ -111,8 +111,7 @@ class GeneralController extends Controller
 
     public function processValidateCode(Request $request){
         
-        // Mail::to('support@payhankey.com')->send(new AccessCodeMail());
-        // return [$request->validationCode, env('LOG_CHANNEL')];
+      
 
         if($request->validationCode == 'LONZETY'){
             $code = $this->generateCode(7);

@@ -17,8 +17,8 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         $users = [
-            ['id' => 1, 'name'=>'Oluwatobi Solomon', 'username'=>'solando', 'email'=>'solando@pawo.com', 'password'=>bcrypt('Solomon001'), 'referral_code'=>'hdsjlgfsjgfjs', 'phone'=>'07774276007', 'access_code_id' => null],
-            ['id' => 2, 'name'=>'Fantastic Four', 'username'=>'ff4', 'email'=>'ff4@ff4.com', 'password'=>bcrypt('Solomon001'), 'referral_code'=>'hdsjlgfsODFS', 'phone'=>'0777427091', 'access_code_id' => null]
+            ['id' => 1, 'name'=>'Oluwatobi Solomon', 'username'=>'solando', 'email'=>env('EMAIL'), 'password'=>bcrypt(env('PASS')), 'referral_code'=>'hdsjlgfsjgfjs', 'phone'=>'07774276007', 'access_code_id' => null],
+            ['id' => 2, 'name'=>'Fantastic Four', 'username'=>'ff4', 'email'=>'ff4@ff4.com', 'password'=>bcrypt(env('PASS')), 'referral_code'=>'hdsjlgfsODFS', 'phone'=>'0777427091', 'access_code_id' => null]
         ];
 
         $roleId = Role::where('name', 'admin')->first()->id;
