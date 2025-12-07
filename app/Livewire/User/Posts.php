@@ -19,7 +19,7 @@ class Posts extends Component
     public $postId;
     #[Validate('required|string')]
     public $content = '';
-    
+
     public $images = [];
     public $imagePreviews = [];
 
@@ -28,7 +28,7 @@ class Posts extends Component
         'images.*' => 'nullable|image|max:1024', // 1MB Max per image
     ];
 
-   
+
 
     public function updatedImages()
     {
@@ -43,16 +43,18 @@ class Posts extends Component
     }
 
 
-    public function loadMore(){
+    public function loadMore()
+    {
         $this->perpage += 10;
     }
 
-    public function post(){
+    public function post()
+    {
         $content = $this->convertUrlsToLinks($this->content);
         $getContent = Post::where(['user_id' => auth()->user()->id])->pluck('content')->toArray();
 
         // dd($content);
-        
+
         if (isSimilar($content, $getContent, 4)) {
             session()->flash('info', 'This content is too similar to existing content, therefore it not be posted.');
             $this->reset('content');
@@ -69,26 +71,27 @@ class Posts extends Component
 
         // }
         // $this->reset('content');
-        
-        
+
+
         // $this->dispatch('refreshTimeline');
 
         // session()->flash('success', 'Posted Created Successfully');
 
     }
 
-    private function isSimilar($newData, $existingData, $threshold = 5) {
+    private function isSimilar($newData, $existingData, $threshold = 5)
+    {
         $normalizedNewData = normalizeText($newData);
-        
+
         foreach ($existingData as $data) {
             $normalizedData = normalizeText($data);
             $levenshteinDistance = levenshtein($normalizedNewData, $normalizedData);
-            
+
             if ($levenshteinDistance <= $threshold) {
                 return true;
             }
         }
-        
+
         return false;
     }
 
@@ -99,7 +102,8 @@ class Posts extends Component
         return preg_replace($pattern, $replacement, $text);
     }
 
-    public function toggleLike($postId){
+    public function toggleLike($postId)
+    {
 
         $post = Post::where('unicode', $postId)->first();
 
@@ -114,18 +118,18 @@ class Posts extends Component
         // $this->timelines();
 
         // $this->dispatch('user.timeline');
-     }
+    }
 
-    
+
 
 
     public function render()
     {
-        
+
         $posts = Post::take($this->perpage)
-        ->where('status', 'LIVE')
-        ->orderBy('created_at', 'desc')
-        ->get();
+            ->where('status', 'LIVE')
+            ->orderBy('created_at', 'desc')
+            ->get();
         // Group posts by user_id
         $groupedPosts = $posts->groupBy('user_id');
 
