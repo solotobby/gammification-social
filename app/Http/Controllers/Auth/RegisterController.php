@@ -112,7 +112,7 @@ class RegisterController extends Controller
             Wallet::create(['user_id' => $user->id, 'balance' => $level->reg_bonus, 'promoter_balance' => '0.00', 'referral_balance' => '0.00', 'currency' => 'USD', 'level' => $level->name]);
 
             //Auth::guard('web')->login($user);
-            
+
             Auth::login($user);
             dd(Auth::check());
             //Auth::login($user);
@@ -123,6 +123,26 @@ class RegisterController extends Controller
 
 
     }
+
+    public function loginUser(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => ['required', 'string', 'email'],
+            'password' => ['required', 'string'],
+        ]);
+
+        // return $validated;
+
+        if (Auth::attempt(['email' => $validated['email'], 'password' => $validated['password']])) {
+            // Authentication passed...
+            return redirect()->intended('home');
+        } else {
+            return back()->with('error', 'Invalid Login Credentials');
+        }
+
+    }
+
+
 
     /**
      * Get a validator for an incoming registration request.
