@@ -30,6 +30,7 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::group(['namespace' => 'auth'], function () {
+
     Route::get('/', function () {
         return view('welcome');
     });
@@ -52,25 +53,25 @@ Route::group(['namespace' => 'auth'], function () {
     Route::get('success', [\App\Http\Controllers\GeneralController::class, 'success']);
     Route::get('error', [\App\Http\Controllers\GeneralController::class, 'error']);
 
-    Route::get('post/{id}', [\App\Http\Controllers\GeneralController::class, 'showPost']);
-    Route::get('/post/{id}/comments', [\App\Http\Controllers\GeneralController::class, 'loadMoreComments'])->name('post.comments.load_more');
+    // Route::get('post/{id}', [\App\Http\Controllers\GeneralController::class, 'showPost']);
+    // Route::get('/post/{id}/comments', [\App\Http\Controllers\GeneralController::class, 'loadMoreComments'])->name('post.comments.load_more');
 
-    Route::get('validate/makintosh', [\App\Http\Controllers\GeneralController::class, 'validateCode']);
+    // Route::get('validate/makintosh', [\App\Http\Controllers\GeneralController::class, 'validateCode']);
 
-    Route::post('partner', [\App\Http\Controllers\GeneralController::class, 'partner'])->name('partner');
+    // Route::post('partner', [\App\Http\Controllers\GeneralController::class, 'partner'])->name('partner');
     // Route::get('partners/listed/lots', [\App\Http\Controllers\GeneralController::class, 'viewPartner']);
     // Route::get('activate/{id}', [\App\Http\Controllers\GeneralController::class, 'viewPartnerActivate']);
     
     // Route::get('view/agent/transaction', [\App\Http\Controllers\TransactionController::class, 'viewAgentTransaction']);
     // Route::get('agent/validate/activate/transaction/{id}', [\App\Http\Controllers\TransactionController::class, 'validateAgentTransaction']);
 
-    Route::post('validate/slot', [\App\Http\Controllers\TransactionController::class, 'validateSlot'])->name('validate.slot');
+    // Route::post('validate/slot', [\App\Http\Controllers\TransactionController::class, 'validateSlot'])->name('validate.slot');
 
     Route::post('wallet/topup', [\App\Http\Controllers\WebhookController::class, 'handle']);
 
-    Route::get('user/list', [\App\Http\Controllers\GeneralController::class, 'userList']);
+    // Route::get('user/list', [\App\Http\Controllers\GeneralController::class, 'userList']);
 
-    Route::get('ac/cd', [\App\Http\Controllers\GeneralController::class, 'access']);
+    // Route::get('ac/cd', [\App\Http\Controllers\GeneralController::class, 'access']);
 
     Route::get('get/ip', [\App\Http\Controllers\GeneralController::class, 'ipConfig']);
 
@@ -80,7 +81,7 @@ Route::group(['namespace' => 'auth'], function () {
     Route::post('registration', [\App\Http\Controllers\AdminLoginController::class, 'proAdminLogin'])->name('dinky.reg');
 
 
-    Route::post('post/comment', [\App\Http\Controllers\GeneralController::class, 'comment']);
+    // Route::post('post/comment', [\App\Http\Controllers\GeneralController::class, 'comment']);
 
 
 });
@@ -97,6 +98,7 @@ Route::middleware(['auth'])->group(function () {
     Route::group(['middleware'=>'auth','role:user'],function() { 
 
         Route::post('complete/onboarding', [\App\Http\Controllers\HomeController::class, 'completeOnboarding'])->name('complete.onboarding');
+         Route::post('access/code/verification', [\App\Http\Controllers\HomeController::class, 'accessCodeVerification'])->name('access.code.verification');
         Route::get('validate/api', [\App\Http\Controllers\HomeController::class, 'validateApi']);
         
         Route::get('upgrade/api', [\App\Http\Controllers\HomeController::class, 'upgradeApi']);
@@ -105,7 +107,7 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('timeline', Posts::class);
     
-        Route::get('profile/{id}', ViewProfile::class);
+        Route::get('profile/{username}', ViewProfile::class);
         // Route::get('show/{query}', ShowPost::class)->name('show');
         Route::get('show/{query}', ShowNewPosts::class);
         Route::get('post/timeline/{id}/analytics', PostAnalytics::class);

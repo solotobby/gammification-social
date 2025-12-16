@@ -76,8 +76,9 @@ class Timeline extends Component
 
         $content = $this->convertUrlsToLinks($this->content);
         // $content = nl2br(e($content));
+        $uniqueCode = rand(1000,9999).time();
 
-        $timelines = Post::create(['user_id' => auth()->user()->id, 'content' => $content, 'unicode' => time()]);
+        $timelines = Post::create(['user_id' => auth()->user()->id, 'content' => $content, 'unicode' => $uniqueCode, 'status' => 'LIVE']);
         $this->reset('content');
 
         $this->timelines->push($timelines);

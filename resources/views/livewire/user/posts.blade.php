@@ -4,9 +4,10 @@
     <style>
         .form-control {
             resize: none;
-            height: 100px; /* Adjust the height as needed */
+            height: 100px;
+            /* Adjust the height as needed */
         }
-    
+
         .stylish-button {
             display: block;
             width: 100%;
@@ -15,18 +16,19 @@
             padding: 10px 20px;
             font-size: 16px;
             transition: background-color 0.3s ease;
-            margin-top: 10px; /* Space between textarea and button */
+            margin-top: 10px;
+            /* Space between textarea and button */
             text-align: center;
         }
-    
+
         .stylish-button:hover {
             background-color: #0056b3;
         }
-    
+
         .stylish-button i {
             margin-right: 5px;
         }
-    
+
         .btn-block {
             display: block;
             width: 100%;
@@ -46,6 +48,7 @@
                         <br>Simply make a 2-5mins video daily and tag us @payhankeyofficial on
                         Instagram and TikTok.
                     </div>
+
                     {{-- <form wire:submit.prevent="post">
                         <div class="input-group mb-3">
                             <textarea wire:model="content" name="content" class="form-control form-control-alt @error('content') is-invalid @enderror" placeholder="Say something amazing" required></textarea>
@@ -53,10 +56,10 @@
                         <button type="submit" class="btn btn-primary btn-block">
                             <i class="fa fa-pencil-alt opacity-50 me-1"></i> Post
                         </button>
-                    </form>--}}
-                </div> 
+                    </form> --}}
+                </div>
             </div>
-            @if(session()->has('info'))
+            @if (session()->has('info'))
                 <div class="alert alert-warning mb-2" role="alert">
                     {{ session('info') }}
                 </div>
@@ -65,39 +68,40 @@
             <div class="card mb-4">
 
                 <form wire:submit.prevent="post">
-                <div class="card-body">
-                    <textarea wire:model="content" name="content" class="form-control form-control-alt @error('content') is-invalid @enderror" placeholder="Say something amazing" required></textarea>
-                   @if(auth()->user()->level->name == 'Influencer')
-                    <div class="d-flex align-items-center justify-content-between mt-3">
-                       
+                    <div class="card-body">
+                        <textarea wire:model="content" name="content"
+                            class="form-control form-control-alt @error('content') is-invalid @enderror" placeholder="Say something amazing"
+                            required></textarea>
+                            {{-- An influencer qill be able to post image --}}
+                        {{-- @if (auth()->user()->level->name == 'Influencer')
+                            <div class="d-flex align-items-center justify-content-between mt-3">
 
-                        {{-- <button class="btn btn-light"><i class="fas fa-font"></i></button>
-                        <button class="btn btn-light"><i class="fas fa-image"></i></button> --}}
-                        <!-- Image upload button -->
+                                <label for="image-upload" class="btn btn-light m-0">
+                                    <i class="fas fa-image"></i>
+                                </label>
+                                <input type="file" id="image-upload" wire:model="images" multiple accept="image/*"
+                                    style="display: none;">
 
-                        <label for="image-upload" class="btn btn-light m-0">
-                            <i class="fas fa-image"></i>
-                        </label>
-                        <input type="file" id="image-upload" wire:model="images" multiple accept="image/*" style="display: none;">
-
-                        @if ($imagePreviews)
-                            <div class="form-group">
-                                <div class="row py-4">
-                                    @foreach ($imagePreviews as $preview)
-                                        <div class="col-md-3">
-                                            <img src="{{ $preview }}" class="img-fluid" alt="Preview Image">
+                                @if ($imagePreviews)
+                                    <div class="form-group">
+                                        <div class="row py-4">
+                                            @foreach ($imagePreviews as $preview)
+                                                <div class="col-md-3">
+                                                    <img src="{{ $preview }}" class="img-fluid"
+                                                        alt="Preview Image">
+                                                </div>
+                                            @endforeach
                                         </div>
-                                    @endforeach
-                                </div>
-                            </div>
-                        @endif
+                                    </div>
+                                @endif
 
-                        </div>
-                    @endif
-                </div>
-                <div class="card-footer">
-                    <button class="btn btn-primary btn-block"> <i class="fa fa-pencil-alt opacity-50 me-1"></i> Post</button>
-                </div>
+                            </div>
+                        @endif --}}
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-primary btn-block"> <i class="fa fa-pencil-alt opacity-50 me-1"></i>
+                            Post</button>
+                    </div>
                 </form>
             </div>
 
@@ -108,13 +112,19 @@
 
             @include('layouts.posts', $posts)
 
-            
+
         </div>
         @include('layouts.engagement')
     </div>
 
 
 
-    @include('layouts.onboarding')
+    @if(auth()->user()->email_verified_at == null)
+        @include('layouts.accesscode_verification')
+    @else
+
+        @include('layouts.onboarding')
+
+    @endif
 
 </div>

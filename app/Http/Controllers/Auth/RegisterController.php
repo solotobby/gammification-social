@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Mail\AccessCodeMail;
 use App\Models\AccessCode;
 use App\Models\Level;
 use App\Models\LoginPoint;
@@ -16,6 +17,7 @@ use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Spatie\Permission\Models\Role;
 
@@ -61,15 +63,15 @@ class RegisterController extends Controller
         return view('auth.register', ['ref' => $validated['referral_code']]);
     }
 
-    
+
 
     public function regUser(Request $request)
     {
-    
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'min:3'],
-            //  'username' => ['required', 'string', 'min:5', 'max:255', 'unique:users'],
-            'phone' => ['numeric', 'unique:users'],
+            'username' => ['required', 'string', 'min:3', 'max:255', 'unique:users'],
+            // 'phone' => ['numeric', 'unique:users'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             // 'password' => ['required', 'string', 'min:8', 'confirmed'],
             'password' => ['required', 'string', 'min:8'],
@@ -92,34 +94,43 @@ class RegisterController extends Controller
         $user = User::create([
             'name' => $validated['name'],
             'username' => 'user' . rand(1000, 10000000), //$validated['username'],
-            'phone' => $validated['phone'],
+            // 'phone' => $validated['phone'],
             'referral_code' => Str::random(7),
             'email' => $validated['email'],
+            'username' => $validated['username'],
             'password' => Hash::make($validated['password']),
             // 'access_code_id' => $accessCode->id
         ]);
 
-        if($user){
-            
+        if ($user) {
+
             $level = Level::where('name', 'Basic')->first();
             UserLevel::create(['user_id' => $user->id, 'level_id' => $level->id]);
             $user->level_id = $level->id;
-            $user->save();  
+            $user->save();
 
             $roleId = Role::where('name', 'user')->first()->id;
             $user->assignRole($roleId);
 
             Wallet::create(['user_id' => $user->id, 'balance' => $level->reg_bonus, 'promoter_balance' => '0.00', 'referral_balance' => '0.00', 'currency' => 'USD', 'level' => $level->name]);
 
-            //Auth::guard('web')->login($user);
+            $code = generateCode(7);
+            $ref = time().rand(1000, 9000);
+            $accessCode = AccessCode::create(['tx_id' => $ref,'name' =>$level->name, 'email' => $request->email, 'amount' => $level->amount, 'code' => $code, 'level_id' => $level->id, 'is_active' => false]);
 
-            Auth::login($user);
-            return redirect('home');
+            $user->access_code_id = $accessCode->id;
+            $user->save();
 
+            if($accessCode){
+                
+                Mail::to($request->email)->send(new AccessCodeMail($code)); //send access code mail
+
+                Auth::login($user);
+                return redirect('home');
+
+            }
 
         }
-
-
     }
 
     public function loginUser(Request $request)
@@ -131,17 +142,16 @@ class RegisterController extends Controller
 
         if (Auth::attempt(['email' => $validated['email'], 'password' => $validated['password']])) {
             // Authentication passed...
-              session()->regenerate();
+            session()->regenerate();
 
             //   return redirect('timeline');
 
-              //dd(auth()->user()); //->update(['last_login_at' => now()]);
+            //dd(auth()->user()); //->update(['last_login_at' => now()]);
 
             return redirect()->intended('home');
         } else {
             return back()->with('error', 'Invalid Login Credentials');
         }
-
     }
 
 

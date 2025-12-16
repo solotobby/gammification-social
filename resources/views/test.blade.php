@@ -59,7 +59,7 @@
         </div>
         <div class="content">
             <h1>Payment Successful</h1>
-            <p>Dear, </p>
+            <p>Dear {{$user->name}}, </p>
             <p>We are pleased to inform you that your Access code for  Payhankey Registration is: <strong>{{ $code }}</strong></p>
            
             <p>If you have any questions or need further assistance, please do not hesitate to contact us.</p>

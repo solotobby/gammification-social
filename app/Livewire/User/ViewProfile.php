@@ -12,7 +12,7 @@ use Livewire\Attributes\On;
 class ViewProfile extends Component
 {
 
-    public $id, $timelines, $highestEngagement;
+    public $username, $timelines, $highestEngagement;
 
     public User $user;
 
@@ -20,16 +20,16 @@ class ViewProfile extends Component
 
     #[On('view-profile.{user.id}')] 
 
-    public function mount($id){
+    public function mount($username){
        
-        $this->timeline($id);
+        $this->timeline($username);
     }
 
-    public function timeline($id){
-        $this->id = $id;
-        // dd($this->id);
-        $this->user = User::withPostStats($this->id)->first();
-        $this->timelines = $this->user->posts()->where(['status'=>'LIVE', 'user_id' =>  $this->id])->orderBy('created_at', 'desc')->take($this->perpage)->get();//$this->timelines();
+    public function timeline($username){
+        $this->username = $username;
+        // dd($this->username);
+        $this->user = User::withPostStatsByUsername($this->username)->firstOrFail();
+        $this->timelines = $this->user->posts()->where(['status'=>'LIVE', 'user_id' =>  $this->user->id])->orderBy('created_at', 'desc')->take($this->perpage)->get();//$this->timelines();
        
     }
 
@@ -84,7 +84,7 @@ class ViewProfile extends Component
     {
         // $timelines = $this->timeline($this->id);
 
-        $timelines = $this->user->posts()->where(['status'=>'LIVE', 'user_id' =>  $this->id])->orderBy('created_at', 'desc')->take($this->perpage)->get();//$this->timelines();
+        $timelines = $this->user->posts()->where(['status'=>'LIVE', 'user_id' =>  $this->user->id])->orderBy('created_at', 'desc')->take($this->perpage)->get();//$this->timelines();
 
         return view('livewire.user.view-profile', ['posts' => $timelines]);
     }

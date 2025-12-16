@@ -9,20 +9,16 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class AccessCodeMail extends Mailable
+class WelcomeMail extends Mailable
 {
     use Queueable, SerializesModels;
 
     /**
      * Create a new message instance.
      */
-
-     public $code;
-     public $user;
-    public function __construct($code, $user)
+    public function __construct()
     {
-        $this->code = $code;
-        $this->user = $user;
+        //
     }
 
     /**
@@ -31,7 +27,7 @@ class AccessCodeMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Access Code Mail',
+            subject: 'Welcome Mail',
         );
     }
 
@@ -41,7 +37,7 @@ class AccessCodeMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'test',
+            view: 'view.name',
         );
     }
 

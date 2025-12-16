@@ -95,7 +95,7 @@
                 <select class="form-control" name="upgrade" wire:model="upgrade" required>
                   <option value="">Select Upgrade Type</option>
 
-                  @if(auth()->user()->level->name == 'Beginner')
+                  @if(auth()->user()->level->name == 'Basic')
                       <option value="Creator">Creator</option>
                       <option value="Influencer">Influencer</option>
                   @elseif(auth()->user()->level->name == 'Creator')

@@ -15,11 +15,11 @@ class Wallets extends Component
     public $wallets, $withdrawals;
     #[Validate('string')]
     public $usdt_wallet_address = '';
-    
-    
+
+
     public $bank_name = '';
     public $country = '';
-   
+
     public $account_number = '';
     public $payment_method = '';
     public $paypal_email = '';
@@ -40,114 +40,126 @@ class Wallets extends Component
     public $currency;
     public $paidWithdrawals;
 
-    
+
 
     protected $listeners = ['paymentMethodChanged' => 'resetSubPaymentMethod'];
 
 
-    public function mount(){
-         
-       $this->wallets = auth()->user()->wallet;
-       $this->withdrawals = WithdrawalMethod::where(['user_id'=> auth()->user()->id])->first(); //auth()->user()->usdt_wallet_address;
-       $this->paidWithdrawals = Transaction::where('type', 'withdrawals')->where('user_id', auth()->user()->id)->sum('amount');
+    public function mount()
+    {
+
+        $this->wallets = auth()->user()->wallet;
+        $this->withdrawals = WithdrawalMethod::where(['user_id' => auth()->user()->id])->first(); //auth()->user()->usdt_wallet_address;
+        $this->paidWithdrawals = Transaction::where('type', 'withdrawals')->where('user_id', auth()->user()->id)->sum('amount');
     }
 
-    public function refresh(){
+    public function refresh()
+    {
         refreshWallet();
         redirect('wallets');
         //$this->withdrawals = WithdrawalMethod::where(['user_id'=> auth()->user()->id])->first();
         session()->flash('status_refresh', 'Wallet Successfully refreshed');
     }
 
-    public function submit(){
-        $validated = $this->validate([ 
+    public function submit()
+    {
+        $validated = $this->validate([
             'amount' => 'numeric|min:10',
             'wallet_type' => 'required|string',
         ]);
-               
+
         $withdrwalaMethod = WithdrawalMethod::where('user_id', auth()->user()->id)->first();
-        if($withdrwalaMethod){
-           
-            if($validated['wallet_type'] == 'main'){
+        if ($withdrwalaMethod) {
+
+            if ($validated['wallet_type'] == 'main') {
 
                 $wallet = Wallet::where('user_id', auth()->user()->id)->first();
-                if( $wallet->balance  >= $validated['amount']){
+                if ($wallet->balance  >= $validated['amount']) {
                     $wallet->balance -= $validated['amount'];
                     $wallet->save();
                     $naira = $validated['amount'] * 1500;
-    
-                    Withdrawals::create(['user_id' => auth()->user()->id, 'withdrawal_method_id'=>$withdrwalaMethod->id, 'amount' => $validated['amount'],
-                    'naira' => $naira, 'currency'=>'USD', 'wallet_type' => $validated['wallet_type'], 
-                    'method' => 'bank_transfer', 'status' => 'Queued'
+
+                    Withdrawals::create([
+                        'user_id' => auth()->user()->id,
+                        'withdrawal_method_id' => $withdrwalaMethod->id,
+                        'amount' => $validated['amount'],
+                        'naira' => $naira,
+                        'currency' => 'USD',
+                        'wallet_type' => $validated['wallet_type'],
+                        'method' => 'bank_transfer',
+                        'status' => 'Queued'
                     ]);
                     $this->reset(['amount', 'wallet_type']);
 
                     // $this->dispatch('refreshTimeline');
                     session()->flash('status', 'Withdrawal Queued, it will be processed in 3 hours');
-                }else{
+                } else {
                     session()->flash('status_error', 'Insurficient Balance');
                 }
-                
+            } elseif ($validated['wallet_type'] == 'referral') {
 
-               
 
-            }elseif($validated['wallet_type'] == 'referral'){
-                
-               
 
                 $wallet = Wallet::where('user_id', auth()->user()->id)->first();
-                if( $wallet->referral_balance  >= $validated['amount']){
+                if ($wallet->referral_balance  >= $validated['amount']) {
                     $wallet->referral_balance -= $validated['amount'];
                     $wallet->save();
                     $naira = $validated['amount'] * 1500;
-    
-                    Withdrawals::create(['user_id' => auth()->user()->id, 'withdrawal_method_id'=>$withdrwalaMethod->id, 'amount' => $validated['amount'],
-                    'naira' => $naira, 'currency'=>'USD', 'wallet_type' => $validated['wallet_type'], 
-                    'method' => 'bank_transfer', 'status' => 'Queued'
+
+                    Withdrawals::create([
+                        'user_id' => auth()->user()->id,
+                        'withdrawal_method_id' => $withdrwalaMethod->id,
+                        'amount' => $validated['amount'],
+                        'naira' => $naira,
+                        'currency' => 'USD',
+                        'wallet_type' => $validated['wallet_type'],
+                        'method' => 'bank_transfer',
+                        'status' => 'Queued'
                     ]);
                     $this->reset(['amount', 'wallet_type']);
 
                     // $this->dispatch('refreshTimeline');
                     session()->flash('status', 'Withdrawal Queued, it will be processed in 3 hours');
-                }else{
+                } else {
                     session()->flash('status_error', 'Insurficient Balance');
                 }
-                
+            } else {
 
-            }else{
-                
 
                 $wallet = Wallet::where('user_id', auth()->user()->id)->first();
-                if( $wallet->promoter_balance  >= $validated['amount']){
+                if ($wallet->promoter_balance  >= $validated['amount']) {
                     $wallet->promoter_balance -= $validated['amount'];
                     $wallet->save();
                     $naira = $validated['amount'] * 1500;
-    
-                    Withdrawals::create(['user_id' => auth()->user()->id, 'withdrawal_method_id'=>$withdrwalaMethod->id, 'amount' => $validated['amount'],
-                    'naira' => $naira, 'currency'=>'USD', 'wallet_type' => $validated['wallet_type'], 
-                    'method' => 'bank_transfer', 'status' => 'Queued'
+
+                    Withdrawals::create([
+                        'user_id' => auth()->user()->id,
+                        'withdrawal_method_id' => $withdrwalaMethod->id,
+                        'amount' => $validated['amount'],
+                        'naira' => $naira,
+                        'currency' => 'USD',
+                        'wallet_type' => $validated['wallet_type'],
+                        'method' => 'bank_transfer',
+                        'status' => 'Queued'
                     ]);
                     $this->reset(['amount', 'wallet_type']);
 
                     session()->flash('status', 'Withdrawal Queued, it will be processed in 3 hours');
-                }else{
+                } else {
                     session()->flash('status_error', 'Insurficient Balance');
                 }
-                
-
-
             }
         }
-        
     }
 
-   
 
 
 
-    public function createWithdrawalMethod(){
 
-        $validated = $this->validate([ 
+    public function createWithdrawalMethod()
+    {
+
+        $validated = $this->validate([
             'account_number' => 'numeric|unique:withdrawal_methods',
             'country' => 'required|string',
             'bank_name' => 'string|sometimes',
@@ -156,61 +168,59 @@ class Wallets extends Component
             'usdt_wallet' => 'string|unique:withdrawal_methods',
         ]);
 
-         if($validated['country'] == 'Nigeria'){
-                $paymentMethod = 'bank_transfer';
-                // $currency = 'NGN';
-        }else{
-                $paymentMethod = $this->payment_method;
-                // $currency = 'USD';
+        if ($validated['country'] == 'Nigeria') {
+            $paymentMethod = 'bank_transfer';
+            // $currency = 'NGN';
+        } else {
+            $paymentMethod = $this->payment_method;
+            // $currency = 'USD';
         }
 
         // dd($currency);
 
-            //validation
-            if($paymentMethod == 'bank_transfer'){
+        //validation
+        if ($paymentMethod == 'bank_transfer') {
 
-                if($validated['bank_name'] == ''){
-                    session()->flash('fail', 'Bank Name is required');
-                    // Redirect back to the form
-                    return redirect()->back();
-                }
-
-                if($validated['account_number'] == ''){
-                    session()->flash('fail', 'Account Number is required');
-                    // Redirect back to the form
-                    return redirect()->back();
-                }
-
+            if ($validated['bank_name'] == '') {
+                session()->flash('fail', 'Bank Name is required');
+                // Redirect back to the form
+                return redirect()->back();
             }
 
-            if($paymentMethod == 'paypal'){
-
-               
-                if($validated['paypal_email'] == ''){
-                    session()->flash('fail', 'Paypal email is required');
-                    // Redirect back to the form
-                    return redirect()->back();
-                }
-
+            if ($validated['account_number'] == '') {
+                session()->flash('fail', 'Account Number is required');
+                // Redirect back to the form
+                return redirect()->back();
             }
+        }
 
-            if($paymentMethod == 'usdt'){
-                if($validated['usdt_wallet'] == ''){
-                    session()->flash('fail', 'USDT Wallet address is required');
-                    // Redirect back to the form
-                    return redirect()->back();
-                }
+        if ($paymentMethod == 'paypal') {
+
+
+            if ($validated['paypal_email'] == '') {
+                session()->flash('fail', 'Paypal email is required');
+                // Redirect back to the form
+                return redirect()->back();
             }
+        }
 
-     
+        if ($paymentMethod == 'usdt') {
+            if ($validated['usdt_wallet'] == '') {
+                session()->flash('fail', 'USDT Wallet address is required');
+                // Redirect back to the form
+                return redirect()->back();
+            }
+        }
+
+
 
         // dd($validated['payment_method']);
 
         WithdrawalMethod::create([
-            'user_id' => auth()->user()->id, 
-            'account_number' => $validated['account_number'], 
-            'currency' => 'USD', 
-            'bank_name' => $validated['bank_name'], 
+            'user_id' => auth()->user()->id,
+            'account_number' => $validated['account_number'],
+            'currency' => 'USD',
+            'bank_name' => $validated['bank_name'],
             'payment_method' => $paymentMethod, //$validated['payment_method'], 
             'paypal_email' => $validated['paypal_email'],
             'usdt_wallet' => $validated['usdt_wallet'],
@@ -219,7 +229,7 @@ class Wallets extends Component
         $this->reset('country');
         return redirect()->to('/wallets');
 
-            // dd($this->account_bank);
+        // dd($this->account_bank);
 
         // if($this->bank_name == ''){ //if the persoon is not in Nigeria, no need paypal and usdt
         //     $paymentMethod = $this->payment_method;
@@ -239,10 +249,10 @@ class Wallets extends Component
         // }else{
         //     $paymentMethod = $this->payment_method;
 
-            
+
         // }
 
-        
+
 
 
         // WithdrawalMethod::create([
@@ -260,17 +270,18 @@ class Wallets extends Component
 
     }
 
-    
-    public function updateUSDTWallet(){
-       
+
+    public function updateUSDTWallet()
+    {
+
         Wallet::updateOrCreate(
-            ['user_id'=> auth()->user()->id], 
+            ['user_id' => auth()->user()->id],
             ['usdt_wallet_address' => $this->usdt_wallet_address]
         );
         session()->flash('success', 'Wallet Address Updated Successfully');
     }
 
-    
+
     public function render()
     {
         return view('livewire.user.wallets');

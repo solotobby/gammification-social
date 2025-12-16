@@ -69,6 +69,10 @@ class HomeController extends Controller
         }
     }
 
+    // public function accessCodeVerification(Request $request){
+    //     access_code
+    // }
+
     public function completeOnboarding(Request $request){
       
         $user = User::where(['id'=>auth()->user()->id])->first();

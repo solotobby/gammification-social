@@ -103,7 +103,18 @@
                                         <div class="mb-4">
                                             <input type="text"
                                                 class="form-control @error('name') is-invalid @enderror form-control-lg form-control-alt"
-                                                id="login-username" name="name" placeholder="Enter Name" required
+                                                id="login-username" name="name" placeholder="Enter Full Name" required
+                                                autocomplete="name" autofocus>
+                                            @error('name')
+                                                <span class="invalid-feedback" role="alert">
+                                                    <strong>{{ $message }}</strong>
+                                                </span>
+                                            @enderror
+                                        </div>
+                                         <div class="mb-4">
+                                            <input type="text"
+                                                class="form-control @error('username') is-invalid @enderror form-control-lg form-control-alt"
+                                                id="login-username" name="username" placeholder="Enter your preferred username" required
                                                 autocomplete="name" autofocus>
                                             @error('name')
                                                 <span class="invalid-feedback" role="alert">
@@ -121,7 +132,7 @@
                                                 </span>
                                             @enderror
                                         </div>
-                                        <div class="mb-4">
+                                        {{-- <div class="mb-4">
                                             <input type="text"
                                                 class="form-control @error('phone') is-invalid @enderror form-control-lg form-control-alt"
                                                 id="login-username" name="phone" placeholder="Phone number" required>
@@ -130,7 +141,7 @@
                                                     <strong>{{ $message }}</strong>
                                                 </span>
                                             @enderror
-                                        </div>
+                                        </div> --}}
                                         <div class="mb-0">
                                             <input type="password"
                                                 class="form-control @error('password') is-invalid @enderror form-control-lg form-control-alt"
@@ -146,7 +157,6 @@
 
 
                                     <div class="mb-4">
-
                                         <input type="text"
                                             class="form-control @error('referral_code') is-invalid @enderror form-control-lg form-control-alt"
                                             id="referral_code" name="referral_code" value="{{ @$ref }}"

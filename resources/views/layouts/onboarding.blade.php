@@ -15,14 +15,32 @@ data-bs-keyboard="false" aria-labelledby="modal-onboarding" aria-hidden="true">
          </div> --}}
          <div class="col-md-12">
            <div class="bg-body-extra-light shadow-lg">
+            
+
              <div class="js-slider slick-dotted-inner" data-dots="true" data-arrows="false" data-infinite="false">
                <div class="p-5">
                  {{-- <i class="far fa-face-smile fa-3x text-muted my-4"></i> --}}
                  <img src="{{asset('logo.png')}}" alt="" class="logo-light mb-3" height="54" />
                  <h3 class="fs-2 fw-light mb-2">Welcome to Payhankey!</h3>
+
+                 @if (session()->has('success'))
+                    <div class="alert alert-success mb-2" role="alert">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
+                @if (session()->has('error'))
+                    <div class="alert alert-danger mb-2" role="alert">
+                        {{ session('error') }}
+                    </div>
+                @endif
+
+
                  <p class="text-muted">
                   Start your monetization journey now! First, claim your signup bonus
                   </p>
+                  
+                  
                  <button type="button" class="btn btn-primary mb-2" onclick="jQuery('.js-slider').slick('slickGoTo', 1);">
                    Claim <i class="fa fa-arrow-right ms-1"></i>
                  </button>

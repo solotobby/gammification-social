@@ -54,50 +54,77 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-    public function wallet(){
+    public function wallet()
+    {
         return $this->hasOne(Wallet::class, 'user_id');
     }
 
-    public function partner(){
+    public function partner()
+    {
         return $this->hasOne(Partner::class, 'user_id');
     }
 
-    public function posts(){
+    public function posts()
+    {
         return $this->hasMany(Post::class);
     }
 
-    public function level(){
-    //    return $this->belongsTo(AccessCode::class, 'access_code_id');
+    public function level()
+    {
+        //    return $this->belongsTo(AccessCode::class, 'access_code_id');
 
         return $this->belongsTo(Level::class);
     }
 
-    public function social(){
+    public function social()
+    {
         return $this->hasOne(Social::class, 'user_id');
     }
+
+    public function scopeWithPostStatsByUsername(Builder $query, string $username)
+    {
+        return $query->where('username', $username)
+            ->withCount([
+                'posts as total_likes' => function ($query) {
+                    $query->select(DB::raw('COALESCE(SUM(likes),0)'));
+                },
+                'posts as total_likes_external' => function ($query) {
+                    $query->select(DB::raw('COALESCE(SUM(likes_external),0)'));
+                },
+                'posts as total_views_external' => function ($query) {
+                    $query->select(DB::raw('COALESCE(SUM(views_external),0)'));
+                },
+                'posts as total_views' => function ($query) {
+                    $query->select(DB::raw('COALESCE(SUM(views),0)'));
+                },
+                'posts as total_comments' => function ($query) {
+                    $query->select(DB::raw('COUNT(comments)'));
+                },
+            ]);
+    }
+
 
     public function scopeWithPostStats(Builder $query, $userId)
     {
         return $query->where('id', $userId)
-                     ->withCount(['posts as total_likes' => function ($query) {
-                         $query->select(DB::raw('sum(likes)'));
-                        
-                     }])
-                     ->withCount(['posts as total_likes_external' => function ($query) {
-                        
-                         $query->select(DB::raw('sum(likes_external)'));
-                     }])
-                     ->withCount(['posts as total_views_external' => function ($query) {
-                        
-                         $query->select(DB::raw('sum(views_external)'));
-                     }])
-                     ->withCount(['posts as total_views' => function ($query) {
-                       
-                         $query->select(DB::raw('sum(views)'));
-                     }])
-                     ->withCount(['posts as total_comments' => function ($query) {
-                         $query->select(DB::raw('count(comments)'));
-                     }]);
+            ->withCount(['posts as total_likes' => function ($query) {
+                $query->select(DB::raw('sum(likes)'));
+            }])
+            ->withCount(['posts as total_likes_external' => function ($query) {
+
+                $query->select(DB::raw('sum(likes_external)'));
+            }])
+            ->withCount(['posts as total_views_external' => function ($query) {
+
+                $query->select(DB::raw('sum(views_external)'));
+            }])
+            ->withCount(['posts as total_views' => function ($query) {
+
+                $query->select(DB::raw('sum(views)'));
+            }])
+            ->withCount(['posts as total_comments' => function ($query) {
+                $query->select(DB::raw('count(comments)'));
+            }]);
     }
 
 
@@ -132,7 +159,4 @@ class User extends Authenticatable
     {
         return $this->likes()->where('post_id', $post->id)->delete();
     }
-
-
-    
 }

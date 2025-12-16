@@ -2,7 +2,12 @@
 
 namespace App\Livewire\User;
 
+use App\Models\AccessCode;
 use App\Models\Post;
+use App\Models\Transaction;
+use App\Models\User;
+use App\Models\UserLevel;
+use App\Models\Wallet;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Validate;
@@ -28,6 +33,18 @@ class Posts extends Component
         'images.*' => 'nullable|image|max:1024', // 1MB Max per image
     ];
 
+    public $access_code = '';
+    public $currency = '';
+
+    protected $rates = [
+        'USD' => 1,
+        'NGN' => 1500,
+        'EUR' => 0.92,
+        'GBP' => 0.79,
+    ];
+
+    public $convertedAmount;
+
 
 
     public function updatedImages()
@@ -50,33 +67,21 @@ class Posts extends Component
 
     public function post()
     {
+
         $content = $this->convertUrlsToLinks($this->content);
         $getContent = Post::where(['user_id' => auth()->user()->id])->pluck('content')->toArray();
 
         // dd($content);
 
         if (isSimilar($content, $getContent, 4)) {
-            session()->flash('info', 'This content is too similar to existing content, therefore it not be posted.');
+            session()->flash('info', 'This content is too similar to existing content, therefore it will not be posted.');
             $this->reset('content');
             // dd("This content is too similar to existing content and will not be posted.");
         } else {
-            $timelines = Post::create(['user_id' => auth()->user()->id, 'content' => $content, 'unicode' => time()]);
+            $uniqueCode = rand(1000, 9999) . time();
+            $timelines = Post::create(['user_id' => auth()->user()->id, 'content' => $content, 'unicode' => $uniqueCode, 'status' => 'LIVE']);
             $this->reset('content');
         }
-
-
-        // if(!$getContent){
-        //     // $content = $this->convertUrlsToLinks($this->content);
-        //     
-
-        // }
-        // $this->reset('content');
-
-
-        // $this->dispatch('refreshTimeline');
-
-        // session()->flash('success', 'Posted Created Successfully');
-
     }
 
     private function isSimilar($newData, $existingData, $threshold = 5)
@@ -120,8 +125,54 @@ class Posts extends Component
         // $this->dispatch('user.timeline');
     }
 
+    public function verifyAccessCode()
+    {
+       
+        $accessCode = AccessCode::where('code', $this->access_code)->where('is_active', false)->first();
+
+        if ($accessCode) {
+
+            $accessCode->is_active = true;
+            $accessCode->save();
+
+            $user = User::where('id', auth()->user()->id)->first();
+            $user->level_id = $accessCode->level_id;
+            $user->email_verified_at = now();
+            $user->save();
+
+          
+            $rate = $this->rates[$this->currency] ?? 1;
+            $this->convertedAmount = $accessCode->amount * $rate;
 
 
+            $wallet = Wallet::where('user_id', auth()->user()->id)->first();
+            $wallet->balance = $this->convertedAmount; //$accessCode->amount;
+            $wallet->currency = $this->currency;
+            $wallet->save();
+
+             Transaction::create([
+                'user_id' => auth()->user()->id,
+                'ref' => time().rand(999, 99999),
+                'amount' => $this->convertedAmount,
+                'currency' => $this->currency,
+                'status' =>  'successful',
+                'type' => 'reg_bonus',
+                'action' => 'Credit',
+                'description' => 'Payhankey Sign-up Bonus', //ucfirst($update->wallet_type).' withdrawal via '.ucwords($method), 
+                'meta' => null,
+                'customer' => null
+            ]);
+
+
+            session()->flash('success', 'Access Code Redeemed Successfully');
+
+            return redirect('timeline');
+
+        } else {
+            session()->flash('error', 'Invalid Access Code');
+            return redirect('timeline');
+        }
+    }
 
     public function render()
     {

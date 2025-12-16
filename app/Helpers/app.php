@@ -5,6 +5,7 @@ use App\Models\CommentExternal;
 use App\Models\Level;
 use App\Models\Partner;
 use App\Models\Post;
+use App\Models\User;
 use App\Models\UserComment;
 use App\Models\UserLike;
 use App\Models\UserView;
@@ -18,7 +19,7 @@ use Stevebauman\Location\Facades\Location;
 if(!function_exists('engagement')){
     function engagement(){
         
-        return Post::with(['user:id,name'])->select('user_id', \DB::raw('SUM(views + views_external + likes + likes_external + comments) as total'))
+        return Post::with(['user:id,name,username'])->select('user_id', \DB::raw('SUM(views + views_external + likes + likes_external + comments) as total'))
         ->groupBy('user_id')
         ->orderByDesc('total')
         ->limit(5)
@@ -35,6 +36,37 @@ if(!function_exists('generateCode')){
         return $code;
     }
 }
+
+if(!function_exists('getCurrencyCode')){
+    function getCurrencyCode($currency=null){
+        $codes = [
+            'USD' => '$',
+            'NGN' => '₦',
+            'EUR' => '€',
+            'GBP' => '£',
+        ];
+
+        if($currency == null){
+            $userCurrency = Wallet::where('user_id', auth()->user()->id)->first();
+            return $codes[$userCurrency->currency] ?? null;
+        }else{
+            return $codes[$currency] ?? null;
+        }
+        
+    }
+}
+
+
+if(!function_exists('userLevel')){
+    function userLevel($userId=null) {
+
+        
+        return $userId ? User::find($userId)->level->name : auth()->user()->level->name;
+
+    }
+}
+
+   
 
 if(!function_exists('upgradePayment')){
 
