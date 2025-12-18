@@ -20,17 +20,19 @@ class ShowNewPosts extends Component
     #[Validate('required|string')]
     public $message = '';
 
-    public function mount($query){
+    public function mount($query)
+    {
         $this->postQuery = $query;
     }
 
-    
 
-      public function toggleLike($postId){
 
-        
+    public function toggleLike($postId)
+    {
+
+
         $post = Post::where('unicode', $postId)->first();
-        
+
         if ($post->isLikedBy(Auth::user())) {
             $post->likes()->where('user_id', Auth::id())->delete();
             $post->decrement('likes');
@@ -42,31 +44,33 @@ class ShowNewPosts extends Component
         // $this->timeline($post->id);
 
         // $this->dispatch('user.timeline');
-     }
+    }
 
-    public function loadMoreComments(){
+    public function loadMoreComments()
+    {
         $this->perpage += 10;
     }
 
-    public function comment(){
-            Comment::create(['user_id' => auth()->user()->id, 'post_id' =>$this->postQuery, 'message' =>  $this->message]);
-            $pst = Post::with(['postComments'])->where(['id' => $this->postQuery])->first();
-            $pst->comments += 1;
-            $pst->save();
-    
-            $checkUniqueComment = UserComment::where(['user_id' => auth()->user()->id, 'post_id' => $this->postQuery])->first();
-            
-            if(!$checkUniqueComment){
-                if(auth()->user()->id != $pst->user_id){
-                    UserComment::create(['user_id' => auth()->user()->id, 'post_id' => $this->postQuery]);
-                }
+    public function comment()
+    {
+        Comment::create(['user_id' => auth()->user()->id, 'post_id' => $this->postQuery, 'message' =>  $this->message]);
+        $pst = Post::with(['postComments'])->where(['id' => $this->postQuery])->first();
+        $pst->comments += 1;
+        $pst->save();
+
+        $checkUniqueComment = UserComment::where(['user_id' => auth()->user()->id, 'post_id' => $this->postQuery])->first();
+
+        if (!$checkUniqueComment) {
+            if (auth()->user()->id != $pst->user_id) {
+                UserComment::create(['user_id' => auth()->user()->id, 'post_id' => $this->postQuery]);
             }
-    
-            $this->reset('message');
-            // $this->timeline->push($pst);
-            // $this->dispatch('refreshComments');
-    
         }
+
+        $this->reset('message');
+        // $this->timeline->push($pst);
+        // $this->dispatch('refreshComments');
+
+    }
 
 
 
@@ -76,11 +80,16 @@ class ShowNewPosts extends Component
         $post = Post::with(['postComments'])->where('id', $this->postQuery)->first();
 
         $regView = UserView::where(['user_id' => auth()->user()->id, 'post_id' => $this->postQuery])->first();
-        if(!$regView){
-            UserView::create(['user_id' => auth()->user()->id, 'post_id' => $this->postQuery]);
-            $post->views += 1;
-            $post->save(); 
-        }
+        if (!$regView) {
+            UserView::create(['user_id' => auth()->user()->id, 'post_id' => $this->postQuery, 'is_paid' => true]);
+            $post->views += 1; //UNIQUE VIEW COUNT
+            $post->save();
+            
+        }else{
+            $post->views_external += 1; //unmonetized view count
+            $post->save();
+        }   
+        
 
         $comments = Comment::where(['post_id' => $this->postQuery])->take($this->perpage)->orderBy('created_at', 'desc')->get();
 

@@ -104,7 +104,7 @@
                                             <input type="text"
                                                 class="form-control @error('name') is-invalid @enderror form-control-lg form-control-alt"
                                                 id="login-username" name="name" placeholder="Enter Full Name" required
-                                                autocomplete="name" autofocus>
+                                                autocomplete="name" value="{{ old('name') }}" autofocus>
                                             @error('name')
                                                 <span class="invalid-feedback" role="alert">
                                                     <strong>{{ $message }}</strong>
@@ -115,7 +115,7 @@
                                             <input type="text"
                                                 class="form-control @error('username') is-invalid @enderror form-control-lg form-control-alt"
                                                 id="login-username" name="username" placeholder="Enter your preferred username" required
-                                                autocomplete="name" autofocus>
+                                                autocomplete="username" value="{{ old('username') }}">
                                             @error('name')
                                                 <span class="invalid-feedback" role="alert">
                                                     <strong>{{ $message }}</strong>
@@ -125,7 +125,7 @@
                                         <div class="mb-4">
                                             <input type="email"
                                                 class="form-control @error('email') is-invalid @enderror form-control-lg form-control-alt"
-                                                id="login-username" name="email" placeholder="Email address" required>
+                                                id="login-username" name="email" placeholder="Email address" value="{{ old('email') }}" required>
                                             @error('email')
                                                 <span class="invalid-feedback" role="alert">
                                                     <strong>{{ $message }}</strong>

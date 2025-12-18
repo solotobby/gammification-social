@@ -115,23 +115,23 @@ class RegisterController extends Controller
             Wallet::create(['user_id' => $user->id, 'balance' => $level->reg_bonus, 'promoter_balance' => '0.00', 'referral_balance' => '0.00', 'currency' => 'USD', 'level' => $level->name]);
 
             $code = generateCode(7);
-            $ref = time().rand(1000, 9000);
-            $accessCode = AccessCode::create(['tx_id' => $ref,'name' =>$level->name, 'email' => $request->email, 'amount' => $level->amount, 'code' => $code, 'level_id' => $level->id, 'is_active' => false]);
+            $ref = time() . rand(1000, 9000);
+            $accessCode = AccessCode::create(['tx_id' => $ref, 'name' => $level->name, 'email' => $request->email, 'amount' => $level->amount, 'code' => $code, 'level_id' => $level->id, 'is_active' => false]);
 
             $user->access_code_id = $accessCode->id;
             $user->save();
 
-            if($accessCode){
-                
-                Mail::to($request->email)->send(new AccessCodeMail($code)); //send access code mail
+            if ($accessCode) {
+
+                Mail::to($request->email)->send(new AccessCodeMail($code, $user)); //send access code mail
 
                 Auth::login($user);
                 return redirect('home');
-
             }
-
         }
     }
+
+
 
     public function loginUser(Request $request)
     {
@@ -143,15 +143,33 @@ class RegisterController extends Controller
         if (Auth::attempt(['email' => $validated['email'], 'password' => $validated['password']])) {
             // Authentication passed...
             session()->regenerate();
-
-            //   return redirect('timeline');
-
-            //dd(auth()->user()); //->update(['last_login_at' => now()]);
+            if (auth()->user()->email_verified_at == null) {
+                $this->verifyExistingUserEmail(auth()->user());
+                return redirect()->intended('home')->with('info', 'Please verify your email. An access code has been sent to your email');
+            }
 
             return redirect()->intended('home');
         } else {
             return back()->with('error', 'Invalid Login Credentials');
         }
+    }
+
+    private function verifyExistingUserEmail($user)
+    {
+        $code = generateCode(7);
+        $updatedCode = AccessCode::where('email', $user->email)->first();
+        if ($updatedCode) {
+            $updatedCode->code = $code;
+            $updatedCode->is_active = false;
+            $updatedCode->save();
+        } else {
+            $level = Level::where('id', $user->level_id)->first();
+            $ref = time() . rand(1000, 9000);
+            $updatedCode = AccessCode::create(['tx_id' => $ref, 'name' => $level->name, 'email' => $user->email, 'amount' => $level->reg_bonus, 'code' => $code, 'level_id' => $level->id, 'is_active' => false]);
+        }
+
+        Mail::to($user->email)->send(new AccessCodeMail($code, $user));
+        return $code;
     }
 
 

@@ -54,7 +54,7 @@
          
           </a>
           @if(Auth::user())
-          <a class="nav-main-link" href="{{ url('profile/'.auth()->user()->id) }}">
+          <a class="nav-main-link" href="{{ url('profile/'.auth()->user()->username) }}">
               <i class="nav-main-link-icon fa fa-user"></i>
               <span class="nav-main-link-name">Profile</span>
           </a>
@@ -77,10 +77,10 @@
             <i class="nav-main-link-icon fa fa-wallet"></i>
             <span class="nav-main-link-name">Wallets</span>
           </a>
-          <a class="nav-main-link" href="{{ url('partner') }}">
+          {{-- <a class="nav-main-link" href="{{ url('partner') }}">
             <i class="nav-main-link-icon fa fa-briefcase"></i>
             <span class="nav-main-link-name">Become a Partner</span>
-          </a>
+          </a> --}}
   
           <a class="nav-main-link" href="{{ url('how/to/earn') }}">
             <i class="nav-main-link-icon fa fa-usd"></i>

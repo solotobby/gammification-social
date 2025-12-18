@@ -55,7 +55,9 @@ class Wallets extends Component
 
     public function refresh()
     {
-        refreshWallet();
+        dd(updateWalletEarnings());
+
+        //refreshWallet();
         redirect('wallets');
         //$this->withdrawals = WithdrawalMethod::where(['user_id'=> auth()->user()->id])->first();
         session()->flash('status_refresh', 'Wallet Successfully refreshed');

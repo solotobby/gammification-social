@@ -59,15 +59,16 @@ if(!function_exists('getCurrencyCode')){
 
 if(!function_exists('userLevel')){
     function userLevel($userId=null) {
-
         
         return $userId ? User::find($userId)->level->name : auth()->user()->level->name;
 
     }
 }
 
-   
 
+
+   
+////PAYMENT HELPERS//// ---- DEPRECIATED ---
 if(!function_exists('upgradePayment')){
 
     function upgradePayment($amount, $currency, $package){
@@ -145,19 +146,58 @@ if(!function_exists('processPayment')){
     }
 }
 
+//calculate earnings from views
+if(!function_exists('calculateUniqueViewEarnings')){
+    function calculateUniqueViewEarnings() {
+        $user = Auth::user();
+        $earningPer1000Views = 1/1000; //we set $1 per 1000 views
+        $unpaidViews =  UserView::whereHas('post', function($query) use ($user) {
+            $query->where('user_id', $user->id);
+        })->where('is_paid', false); //get all unpaid views for this user's posts
 
-if(!function_exists('maskCode')){
-    function maskCode($code) {
-        $length = strlen($code);
-        if ($length <= 8) {
-            return $code; // If the code is 8 characters or less, don't mask it
-        }
-        $firstFour = substr($code, 0, 4);
-        $lastFour = substr($code, -4);
-        $masked = str_repeat('*', $length - 8);
-        return $firstFour . $masked . $lastFour;
+        // Count unpaid views
+        $unpaidViewsCount = $unpaidViews->count();
+
+        // Calculate payment
+        $payment = $unpaidViewsCount * $earningPer1000Views;
+
+        $unpaidViews->update(['is_paid' => true]); //mark all as paid
+        return $payment; //return payment amount
     }
 }
+
+if(!function_exists('updateWalletEarnings')){
+    function updateWalletEarnings() {
+        $uniquePaidErnings = calculateUniqueViewEarnings();
+
+        $wallet = Wallet::where('user_id', auth()->user()->id)->first(); 
+        //get user base currency
+        $baseCurrency = $wallet->currency;
+        $convertedAmount = convertToBaseCurrency($uniquePaidErnings, $baseCurrency);
+        $wallet->balance += $convertedAmount;
+        $wallet->save();
+
+        return [$wallet, $convertedAmount, $uniquePaidErnings, $baseCurrency];
+    }
+}
+
+if(!function_exists('convertToBaseCurrency')){
+    function convertToBaseCurrency($amount, $currency) {
+        
+        $rates = [
+            'USD' => 1,
+            'NGN' => 460,
+            'EUR' => 0.91,
+            'GBP' => 0.81,
+        ];
+
+        $rate = $rates[$currency] ?? 1;
+        $convertedAmount = $amount * $rate;
+
+        return $convertedAmount;
+
+}}
+
 
 if(!function_exists('viewsAmountCalculator')){
     function viewsAmountCalculator($unpaidViews,$unpaidExternalViews) {
@@ -214,19 +254,8 @@ if(!function_exists('sumCounter')){
     }
 }
 
-if(!function_exists('bankList')){
-    function bankList() {
-        $url = 'https://api.paystack.co/bank?country=nigeria';
-        $res = Http::withHeaders([
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-            'Authorization' => 'Bearer '.env('PAYSTACK_SECRET_KEY')
-        ])->get($url)->throw();
 
-        return json_decode($res->getBody()->getContents(), true)['data'];
-    }
-}
-
+///IP LOCATION HELPERS////
 if(!function_exists('ipLocation')){
     function ipLocation() {
         if(env('APP_DEBUG') == true){
@@ -241,8 +270,7 @@ if(!function_exists('ipLocation')){
 
     }
 }
-
-
+////SECURITY VERIFICATION HELPERS////
 if(!function_exists('securityVerification')){
     function securityVerification() {
 
@@ -270,14 +298,7 @@ if(!function_exists('securityVerification')){
     }
 }
 
-
-if(!function_exists('displayName')){
-    function displayName($name) {
-        $bk = explode(' ', $name);
-        return $bk[0];
-    }
-}
-
+/////WALLET HELPERS////
 if(!function_exists('refreshWallet')){
     function refreshWallet() {
         $user = Auth::user();
@@ -368,6 +389,15 @@ if(!function_exists('refreshWallet')){
     }
 }
 
+
+////TEXT HELPERS////
+if(!function_exists('displayName')){
+    function displayName($name) {
+        $bk = explode(' ', $name);
+        return $bk[0];
+    }
+}
+
 if(!function_exists('normalizeText')){
     function normalizeText($text) {
         $text = preg_replace('/[^\w\s]/', '', $text);
@@ -394,6 +424,37 @@ if(!function_exists('isSimilar')){
     } 
 }
 
+if(!function_exists('maskCode')){
+    function maskCode($code) {
+        $length = strlen($code);
+        if ($length <= 8) {
+            return $code; // If the code is 8 characters or less, don't mask it
+        }
+        $firstFour = substr($code, 0, 4);
+        $lastFour = substr($code, -4);
+        $masked = str_repeat('*', $length - 8);
+        return $firstFour . $masked . $lastFour;
+    }
+}
+
+
+
+
+
+/////PAYSTACK INTEGRATION////
+
+if(!function_exists('bankList')){
+    function bankList() {
+        $url = 'https://api.paystack.co/bank?country=nigeria';
+        $res = Http::withHeaders([
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer '.env('PAYSTACK_SECRET_KEY')
+        ])->get($url)->throw();
+
+        return json_decode($res->getBody()->getContents(), true)['data'];
+    }
+}
 if(!function_exists('generateVirtualAccount')){
     function generateVirtualAccount($partner){  
 
@@ -577,8 +638,6 @@ if(!function_exists('virtualAccount')){
 
     }
 }
-
-
 
 if(!function_exists('createCustomer')){
     function  createCustomer($data){

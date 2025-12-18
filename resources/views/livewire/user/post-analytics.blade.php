@@ -30,7 +30,7 @@
                     </div>
                     <div class="ms-3 text-end">
                         <p class="fs-3 fw-medium mb-0">
-                            {{ $unpaidViews }}
+                            {{ $post->views }}
                         </p>
                         <p class="text-muted mb-0">
                             Monetized Views
@@ -65,10 +65,10 @@
                     <div class="me-3 text-end">
                         <p class="fs-3 fw-medium mb-0">
 
-                            {{ $unpaidExternalViews }}
+                            {{ $post->views + $post->views_external }}
                         </p>
                         <p class="text-muted mb-0">
-                            Unique External views
+                            Total views
                         </p>
                     </div>
 
@@ -87,7 +87,7 @@
                             {{ getCurrencyCode() }}{{ viewsAmountCalculator($unpaidViews, $unpaidExternalViews) }}
                         </p>
                         <p class="text-muted mb-0">
-                            All Views Revenue
+                            Views Revenue
                         </p>
                     </div>
 

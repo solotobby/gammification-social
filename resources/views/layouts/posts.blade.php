@@ -31,7 +31,7 @@
                 <a class="fw-semibold" href="{{ url('profile/' . $timeline->user->username) }}"
                     style="color: #5A4FDC">{{ displayName($timeline->user->name) }}</a>
 
-
+                    
                 <span class="fs-sm text-muted ms-2">{{ $timeline->created_at?->shortAbsoluteDiffForHumans() }} ago</span>
 
 
