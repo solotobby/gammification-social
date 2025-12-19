@@ -55,15 +55,20 @@ class ShowNewPosts extends Component
     {
         Comment::create(['user_id' => auth()->user()->id, 'post_id' => $this->postQuery, 'message' =>  $this->message]);
         $pst = Post::with(['postComments'])->where(['id' => $this->postQuery])->first();
-        $pst->comments += 1;
-        $pst->save();
+        
 
         $checkUniqueComment = UserComment::where(['user_id' => auth()->user()->id, 'post_id' => $this->postQuery])->first();
 
         if (!$checkUniqueComment) {
-            if (auth()->user()->id != $pst->user_id) {
-                UserComment::create(['user_id' => auth()->user()->id, 'post_id' => $this->postQuery]);
-            }
+            // if (auth()->user()->id != $pst->user_id) {
+                UserComment::create(['user_id' => auth()->user()->id, 'post_id' => $this->postQuery, 'is_paid' => false, 'amount' => calculateUniqueEarningPerComment(), 'poster_user_id' => $pst->user_id]);
+                $pst->comments += 1;
+                $pst->save();
+            // }
+        }else{
+            //non-unique comment
+            $pst->comment_external +=1;
+            $pst->save();
         }
 
         $this->reset('message');
@@ -80,9 +85,11 @@ class ShowNewPosts extends Component
 
         $regView = UserView::where(['user_id' => auth()->user()->id, 'post_id' => $this->postQuery])->first();
         if (!$regView) {
-            UserView::create(['user_id' => auth()->user()->id, 'post_id' => $this->postQuery, 'is_paid' => false, 'amount' => calculateUniqueEarningPerView(), 'poster_user_id' => $post->user_id]);
-            $post->views += 1;  //UNIQUE VIEW COUNT
-            $post->save();
+            // if (auth()->user()->id != $post->user_id) {
+                UserView::create(['user_id' => auth()->user()->id, 'post_id' => $this->postQuery, 'is_paid' => false, 'amount' => calculateUniqueEarningPerView(), 'poster_user_id' => $post->user_id]);
+                $post->views += 1;  //UNIQUE VIEW COUNT
+                $post->save();
+            // }
 
         }else{
             $post->views_external += 1; //unmonetized view count

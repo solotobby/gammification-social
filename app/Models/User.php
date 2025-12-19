@@ -104,28 +104,28 @@ class User extends Authenticatable
     }
 
 
-    public function scopeWithPostStats(Builder $query, $userId)
-    {
-        return $query->where('id', $userId)
-            ->withCount(['posts as total_likes' => function ($query) {
-                $query->select(DB::raw('sum(likes)'));
-            }])
-            ->withCount(['posts as total_likes_external' => function ($query) {
+    // public function scopeWithPostStats(Builder $query, $userId)
+    // {
+    //     return $query->where('id', $userId)
+    //         ->withCount(['posts as total_likes' => function ($query) {
+    //             $query->select(DB::raw('sum(likes)'));
+    //         }])
+    //         ->withCount(['posts as total_likes_external' => function ($query) {
 
-                $query->select(DB::raw('sum(likes_external)'));
-            }])
-            ->withCount(['posts as total_views_external' => function ($query) {
+    //             $query->select(DB::raw('sum(likes_external)'));
+    //         }])
+    //         ->withCount(['posts as total_views_external' => function ($query) {
 
-                $query->select(DB::raw('sum(views_external)'));
-            }])
-            ->withCount(['posts as total_views' => function ($query) {
+    //             $query->select(DB::raw('sum(views_external)'));
+    //         }])
+    //         ->withCount(['posts as total_views' => function ($query) {
 
-                $query->select(DB::raw('sum(views)'));
-            }])
-            ->withCount(['posts as total_comments' => function ($query) {
-                $query->select(DB::raw('count(comments)'));
-            }]);
-    }
+    //             $query->select(DB::raw('sum(views)'));
+    //         }])
+    //         ->withCount(['posts as total_comments' => function ($query) {
+    //             $query->select(DB::raw('count(comments)'));
+    //         }]);
+    // }
 
 
 
@@ -159,4 +159,33 @@ class User extends Authenticatable
     {
         return $this->likes()->where('post_id', $post->id)->delete();
     }
+
+    public function following()
+    {
+        return $this->belongsToMany(
+            User::class,
+            'follows',
+            'follower_id',
+            'following_id',
+            'id'
+        )->withTimestamps();
+    }
+
+    // Users that follow me
+    public function followers()
+    {
+        return $this->belongsToMany(
+            User::class,
+            'follows',
+            'following_id',
+            'follower_id',
+            'id'
+        )->withTimestamps();
+    }
+
+    public function isFollowing(User $user): bool
+    {
+        return $this->following()->where('following_id', $user->id)->exists();
+    }
+
 }

@@ -116,8 +116,10 @@ class Posts extends Component
             $post->likes()->where('user_id', Auth::id())->delete();
             $post->decrement('likes');
         } else {
-            $post->likes()->create(['user_id' => Auth::id()]);
-            $post->increment('likes');
+            // if (auth()->user()->id != $post->user_id) {
+                $post->likes()->create(['user_id' => Auth::id(), 'is_paid' => false, 'amount' => calculateUniqueEarningPerLike(), 'poster_user_id' => $post->user_id]);
+                $post->increment('likes');
+            // }
         }
 
         // $this->timelines();
@@ -127,7 +129,7 @@ class Posts extends Component
 
     public function verifyAccessCode()
     {
-       
+
         $accessCode = AccessCode::where('code', $this->access_code)->where('is_active', false)->first();
 
         if ($accessCode) {
@@ -142,7 +144,7 @@ class Posts extends Component
 
             $amount = $accessCode->level->reg_bonus;
 
-          
+
             $rate = $this->rates[$this->currency] ?? 1;
             $this->convertedAmount = $amount * $rate;
 
@@ -152,9 +154,9 @@ class Posts extends Component
             $wallet->currency = $this->currency;
             $wallet->save();
 
-             Transaction::create([
+            Transaction::create([
                 'user_id' => auth()->user()->id,
-                'ref' => time().rand(999, 99999),
+                'ref' => time() . rand(999, 99999),
                 'amount' => $this->convertedAmount,
                 'currency' => $this->currency,
                 'status' =>  'successful',
@@ -169,7 +171,6 @@ class Posts extends Component
             session()->flash('success', 'Access Code Redeemed Successfully');
 
             return redirect('timeline');
-
         } else {
             session()->flash('error', 'Invalid Access Code');
             return redirect('timeline');

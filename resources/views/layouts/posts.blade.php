@@ -107,7 +107,7 @@
 
                         <button type="button" class="btn-block-option dropdown-toggle text-muted fs-sm"
                             data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Est. Earning
-                            5k</button>
+                           {{ getCurrencyCode() }}{{ estimatedEarnings($timeline->id) }}</button>
 
                         <div class="dropdown-menu dropdown-menu-end">
 
@@ -238,14 +238,11 @@
                             post
                         </p>
                         <p>
-                            {{ url('post/' . $timeline->id) }}
-
-
+                            {{ url('show/' . $timeline->id) }}
                         </p>
 
                         <?php
-                        
-                        $url = url('post/' . $timeline->id);
+                            $url = url('show/' . $timeline->id);
                         ?>
 
 

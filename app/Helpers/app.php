@@ -164,6 +164,86 @@ if (!function_exists('calculateUniqueEarningPerView')) {
     }
 }
 
+if (!function_exists('calculateUniqueEarningPerLike')) {
+    function calculateUniqueEarningPerLike()
+    {
+        $user = Auth::user();
+        $level = Level::where('name', $user->level->name)->first();
+
+        $earningPer1000Likes = $level->earning_per_like;
+        $earningPerLike = $earningPer1000Likes / 1000;
+        return $earningPerLike;
+    }
+}
+
+if (!function_exists('calculateUniqueEarningPerComment')) {
+    function calculateUniqueEarningPerComment()
+    {
+        $user = Auth::user();
+        $level = Level::where('name', $user->level->name)->first();
+
+        $earningPer1000Comments = $level->earning_per_comment;
+        $earningPerComment = $earningPer1000Comments / 1000;
+        return $earningPerComment;
+    }
+}
+
+if (!function_exists('updatesLikeEarnings')) {
+    function updatesLikeEarnings(): float
+    {
+
+        $user = Auth::user();
+
+        if (!$user) {
+            return 0.00;
+        }
+
+        return DB::transaction(function () use ($user) {
+
+            $baseQuery = UserLike::whereHas('post', function ($query) use ($user) {
+                $query->where('poster_user_id', $user->id);
+            })->where('is_paid', false);
+
+            // Aggregate before update
+            $result = (clone $baseQuery)
+                ->selectRaw('COUNT(*) as total_likes, COALESCE(SUM(amount), 0) as total_amount')
+                ->first();
+
+            // Mark as paid
+            $baseQuery->update(['is_paid' => true]);
+
+            return (float) $result->total_amount;
+        });
+    }
+}
+
+if (!function_exists('updatesCommentEarnings')) {
+    function updatesCommentEarnings(): float
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return 0.00;
+        }
+
+        return DB::transaction(function () use ($user) {
+
+            $baseQuery = UserComment::whereHas('post', function ($query) use ($user) {
+                $query->where('poster_user_id', $user->id);
+            })->where('is_paid', false);
+
+            // Aggregate before update
+            $result = (clone $baseQuery)
+                ->selectRaw('COUNT(*) as total_comments, COALESCE(SUM(amount), 0) as total_amount')
+                ->first();
+
+            // Mark as paid
+            $baseQuery->update(['is_paid' => true]);
+
+            return (float) $result->total_amount;
+        });
+    }
+}
 
 if (!function_exists('updatesViewEarnings')) {
     function updatesViewEarnings(): float
@@ -195,22 +275,32 @@ if (!function_exists('updatesViewEarnings')) {
 
 //master function to update wallet earnings
 if (!function_exists('updateWalletEarnings')) {
-    function updateWalletEarnings(): ?Wallet
+    function updateWalletEarnings():  ?Wallet
     {
         $user = Auth::user();
-        if (! $user) {
+        if (!$user) {
             return null;
         }
 
-        $uniquePaidEarnings = updatesViewEarnings(); //coming in dollars - VIEW EARNINGS
-        return DB::transaction(function () use ($user, $uniquePaidEarnings) {
+         $totalEarnings = updatesViewEarnings() + updatesCommentEarnings() + updatesLikeEarnings();
+
+    //    return [
+    //         'views'    => updatesViewEarnings(),
+    //         'comments' => updatesCommentEarnings(),
+    //         'likes'    => updatesLikeEarnings(),
+    //         'total'    => $totalEarnings,
+    //     ];
+
+       
+
+        if ($totalEarnings <= 0) {
+            return Wallet::where('user_id', $user->id)->first();
+        }
+
+        return DB::transaction(function () use ($user, $totalEarnings) {
 
             // Earnings in USD (or system currency)
-            $viewEarnings = $uniquePaidEarnings;
-
-            if ($viewEarnings <= 0) {
-                return Wallet::where('user_id', $user->id)->first();
-            }
+            $viewEarnings = $totalEarnings;
 
             $wallet = Wallet::where('user_id', $user->id)->lockForUpdate()->first();
 
@@ -218,18 +308,44 @@ if (!function_exists('updateWalletEarnings')) {
                 return null;
             }
 
-             $convertedAmount = convertToBaseCurrency(
+            $convertedAmount = convertToBaseCurrency(
                 $viewEarnings,
                 $wallet->currency
             );
-            $wallet->balance += $convertedAmount;
+            $wallet->balance += round($convertedAmount, 2);
             $wallet->save();
             return $wallet;
-
-            
         });
+
+
     }
 }
+
+if (!function_exists('estimatedEarnings')) {
+    function estimatedEarnings($postId): float
+    {
+        $post = Post::find($postId);
+
+        if (!$post) {
+            return 0.00;
+        }
+
+        return DB::transaction(function () use ($post) {
+
+            $allearnings = UserView::where('post_id', $post->id)->where('user_id', auth()->user()->id)->where('created_at', '>=', now()->subDays(30))->sum('amount') +
+                         UserLike::where('post_id', $post->id)->where('user_id', auth()->user()->id)->where('created_at', '>=', now()->subDays(30))->sum('amount') +
+                         UserComment::where('post_id', $post->id)->where('user_id', auth()->user()->id)->where('created_at', '>=', now()->subDays(30))->sum('amount');
+            $convertedAmount = convertToBaseCurrency(
+                $allearnings,
+                auth()->user()->wallet->currency
+            );
+
+            return (float) round($convertedAmount, 5);
+        });
+
+    }
+}
+
 
 if (!function_exists('convertToBaseCurrency')) {
     function convertToBaseCurrency($amount, $currency)
@@ -251,47 +367,71 @@ if (!function_exists('convertToBaseCurrency')) {
 
 
 if (!function_exists('viewsAmountCalculator')) {
-    function viewsAmountCalculator($unpaidViews, $unpaidExternalViews)
+    function viewsAmountCalculator($postId): float
     {
 
-        $earnings_per_1000_view = Level::where('name', auth()->user()->level->name)->first()->earning_per_view;
+        // $post = Post::find($postId);
 
-        $singleView = $earnings_per_1000_view / 1000;
-        $singleViewExternal = 1 / 5000;
+        if (!$postId) {
+            return 0.0;
+        }
 
-        $paidExternalView = $unpaidExternalViews * $singleViewExternal;
-        $paidInternalViews = $unpaidViews * $singleView;
+        return DB::transaction(function () use ($postId) {
+             $viewsEarnings = UserView::where('post_id', $postId)->where('user_id', auth()->user()->id)->sum('amount');
 
-        return $paidExternalView + $paidInternalViews;
+             $convertedAmount = convertToBaseCurrency(
+                $viewsEarnings,
+                auth()->user()->wallet->currency
+            );
+
+            return (float) round($convertedAmount, 5);
+        });
+
     }
 }
 
 
 if (!function_exists('likesAmountCalculator')) {
-    function likesAmountCalculator($count)
+    function likesAmountCalculator($postId): float
     {
 
-        $earnings_per_1000_like = Level::where('name', auth()->user()->level->name)->first()->earning_per_like;
+        // $post = Post::find($postId);
+        if (!$postId) {
+            return 0.0;
+        }
+        return DB::transaction(function () use ($postId) {
+             $likesEarnings = UserLike::where('post_id', $postId)->where('user_id', auth()->user()->id)->sum('amount');
 
-        $singleView = $earnings_per_1000_like / 1000; //0.0009; //dollar
+             $convertedAmount = convertToBaseCurrency(
+                $likesEarnings,
+                auth()->user()->wallet->currency
+            );
 
-        return $count * $singleView;
-        // return floor($count/1000) * 0.9;
+            return (float) round($convertedAmount, 5);
+        });
 
     }
 }
 
 
 if (!function_exists('commentsAmountCalculator')) {
-    function commentsAmountCalculator($count)
+    function commentsAmountCalculator($postId): float
     {
 
-        $earnings_per_1000_comment = Level::where('name', auth()->user()->level->name)->first()->earning_per_comment;
+        // $post = Post::find($postId);
+        if (!$postId) {
+            return 0.0;
+        }
+        return DB::transaction(function () use ($postId) {
+             $commentsEarnings = UserComment::where('post_id', $postId)->where('user_id', auth()->user()->id)->sum('amount');
 
-        $singleView = $earnings_per_1000_comment / 1000;
+             $convertedAmount = convertToBaseCurrency(
+                $commentsEarnings,
+                auth()->user()->wallet->currency
+            );
 
-        return $count * $singleView;
-        // return floor($count/1000) * 0.9;
+            return (float) round($convertedAmount, 5);
+        });
 
     }
 }

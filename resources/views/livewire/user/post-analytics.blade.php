@@ -65,7 +65,7 @@
                     <div class="me-3 text-end">
                         <p class="fs-3 fw-medium mb-0">
 
-                            {{ $post->views + $post->views_external }}
+                            {{ sumCounter($post->views, $post->views_external) }}
                         </p>
                         <p class="text-muted mb-0">
                             Total views
@@ -84,7 +84,7 @@
                     <div class="me-3 text-end">
                         <p class="fs-3 fw-medium mb-0">
 
-                            {{ getCurrencyCode() }}{{ viewsAmountCalculator($unpaidViews, $unpaidExternalViews) }}
+                            {{ getCurrencyCode() }}{{ viewsAmountCalculator($post->id) }}
                         </p>
                         <p class="text-muted mb-0">
                             Views Revenue
@@ -103,7 +103,7 @@
                     </div>
                     <div class="ms-3 text-end">
                         <p class="text-white fs-3 fw-medium mb-0">
-                            {{ $unpaidLikes }}
+                            {{ $post->likes == null ? 0 : $post->likes }}
                         </p>
                         <p class="text-white-75 mb-0">
                             Monetized Likes
@@ -137,7 +137,7 @@
                     </div>
                     <div class="ms-3 text-end">
                         <p class="text-white fs-3 fw-medium mb-0">
-                            {{ getCurrencyCode() }}{{ likesAmountCalculator($unpaidLikes) }}
+                            {{ getCurrencyCode() }}{{ likesAmountCalculator($post->id) }}
                         </p>
                         <p class="text-white-75 mb-0">
                             Amount
@@ -147,7 +147,7 @@
             </a>
         </div>
 
-        <div class="col-md-6 col-xl-4">
+        <div class="col-md-6 col-xl-3">
             <a class="block block-rounded block-link-shadow bg-success" href="javascript:void(0)">
                 <div class="block-content block-content-full d-flex align-items-center justify-content-between">
                     <div>
@@ -155,7 +155,7 @@
                     </div>
                     <div class="ms-3 text-end">
                         <p class="text-white fs-3 fw-medium mb-0">
-                            {{ $unpaidComments }}
+                            {{ $post->comments  == null ? 0 : $post->comments }}
                         </p>
                         <p class="text-white-75 mb-0">
                             Monetized Comments
@@ -164,7 +164,7 @@
                 </div>
             </a>
         </div>
-        <div class="col-md-6 col-xl-4">
+        <div class="col-md-6 col-xl-3">
             <a class="block block-rounded block-link-shadow bg-success" href="javascript:void(0)">
                 <div class="block-content block-content-full d-flex align-items-center justify-content-between">
                     <div>
@@ -172,16 +172,33 @@
                     </div>
                     <div class="ms-3 text-end">
                         <p class="text-white fs-3 fw-medium mb-0">
-                            {{ $unpaidExternalComments }}
+                            {{ $post->comment_external == null ? 0 : $post->comment_external }}
                         </p>
                         <p class="text-white-75 mb-0">
-                            Unmonetized Comment
+                            Unmonetized 
                         </p>
                     </div>
                 </div>
             </a>
         </div>
-        <div class="col-md-6 col-xl-4">
+        <div class="col-md-6 col-xl-3">
+            <a class="block block-rounded block-link-shadow bg-success" href="javascript:void(0)">
+                <div class="block-content block-content-full d-flex align-items-center justify-content-between">
+                    <div>
+                        <i class="far fa-2x fa-comments text-success-light"></i>
+                    </div>
+                    <div class="ms-3 text-end">
+                        <p class="text-white fs-3 fw-medium mb-0">
+                            {{ sumCounter($post->comment_external == null ? 0 : $post->comment_external, $post->comments == null ? 0 : $post->comments) }}
+                        </p>
+                        <p class="text-white-75 mb-0">
+                            Total Comment
+                        </p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-xl-3">
             <a class="block block-rounded block-link-shadow bg-success" href="javascript:void(0)">
                 <div class="block-content block-content-full d-flex align-items-center justify-content-between">
                     <div>
@@ -189,10 +206,10 @@
                     </div>
                     <div class="ms-3 text-end">
                         <p class="text-white fs-3 fw-medium mb-0">
-                            {{ getCurrencyCode() }}{{ commentsAmountCalculator($unpaidComments) }}
+                            {{ getCurrencyCode() }}{{ commentsAmountCalculator($post->id) }}
                         </p>
                         <p class="text-white-75 mb-0">
-                            Amount
+                            Comments Revenue
                         </p>
                     </div>
                 </div>
@@ -210,7 +227,7 @@
                                     <i class="fa fa-briefcase text-white"></i>
                                 </div>
                                 <p class="text-white fs-3 fw-medium mt-3 mb-0">
-                                    {{ $unpaidViews }}
+                                    {{ $post->views == null ? 0 : $post->views }}
                                 </p>
                                 <p class="text-white-75 mb-0">
                                     Total Monetized Views
@@ -223,7 +240,7 @@
                                     <i class="fa fa-chart-line text-white"></i>
                                 </div>
                                 <p class="text-white fs-3 fw-medium mt-3 mb-0">
-                                    {{ $unpaidLikes }}
+                                    {{ $post->likes == null ? 0 : $post->likes }}
                                 </p>
                                 <p class="text-white-75 mb-0">
                                     Total Monetized Likes
@@ -236,7 +253,7 @@
                                     <i class="fa fa-users text-white"></i>
                                 </div>
                                 <p class="text-white fs-3 fw-medium mt-3 mb-0">
-                                    {{ $unpaidComments }}
+                                    {{ $post->comments == null ? 0 : $post->comments }}
                                 </p>
                                 <p class="text-white-75 mb-0">
                                     Total Monetized Comments
@@ -250,7 +267,7 @@
                                 </div>
                                 <p class="text-white fs-3 fw-medium mt-3 mb-0">
                                     <?php
-                                    $all = commentsAmountCalculator($unpaidComments) + likesAmountCalculator($unpaidLikes) + viewsAmountCalculator($unpaidViews, $unpaidExternalViews);
+                                    $all = commentsAmountCalculator($post->id) + likesAmountCalculator($post->id) + viewsAmountCalculator($post->id);
                                     ?>
                                     {{ getCurrencyCode() }}{{ $all }}
                                 </p>

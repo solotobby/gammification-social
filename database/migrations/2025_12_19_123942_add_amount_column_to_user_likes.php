@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('user_views', function (Blueprint $table) {
+        Schema::table('user_likes', function (Blueprint $table) {
             $table->decimal('amount', 10, 5)->default(0)->after('is_paid');
             $table->uuid('poster_user_id')->nullable()->after('post_id');
             $table->index('poster_user_id');
@@ -23,9 +23,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('user_views', function (Blueprint $table) {
+        Schema::table('user_likes', function (Blueprint $table) {
             $table->dropIndex(['poster_user_id']);
-            $table->dropColumn(['amount', 'poster_user_id']);
+            $table->dropColumn('amount');
+            $table->dropColumn('poster_user_id');
         });
     }
 };

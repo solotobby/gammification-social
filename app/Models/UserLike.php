@@ -10,7 +10,7 @@ class UserLike extends Model
 {
     use HasFactory, UuidTrait;
 
-    protected $fillable = ['user_id', 'post_id', 'is_paid', 'amount'];
+    protected $fillable = ['user_id', 'post_id', 'poster_user_id', 'is_paid', 'amount'];
 
 
     public function user()

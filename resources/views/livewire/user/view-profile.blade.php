@@ -42,16 +42,15 @@
                             </h1>
             @endif
 
-
-
             <h2 class="fs-sm fw-medium text-muted mb-0">
-                <a href="javascript:void(0)" class="text-muted">4,5k Followers</a> &bull;
-                <a href="javascript:void(0)" class="text-muted">100 Following</a> &bull;
-                <a href="javascript:void(0)" class="text-muted">{{ $user->total_views + $user->total_views_external }}
-                    Views</a> &bull;
+                <a href="javascript:void(0)" class="text-muted">{{ $user->followers()->count() }} Followers</a> &bull;
+                <a href="javascript:void(0)" class="text-muted">{{ $user->following()->count() }} Following</a> &bull;
+                {{-- <a href="javascript:void(0)" class="text-muted">{{ $user->total_views + $user->total_views_external }}
+                    Views</a>  --}}
+                   
                 <a href="javascript:void(0)" class="text-muted">{{ $user->total_likes + $user->total_likes_external }}
-                    Likes</a> &bull;
-                <a href="javascript:void(0)" class="text-muted">{{ $user->total_comments }} Comments</a>
+                    Likes</a> 
+                {{-- &bull; <a href="javascript:void(0)" class="text-muted">{{ $user->total_comments }} Comments</a> --}}
             </h2>
             <h2 class="fs-sm fw-medium text-muted mt-2">
                 Referral Link: {{ url('/reg?referral_code=' . auth()->user()->referral_code) }}
@@ -66,10 +65,22 @@
                     <span>Edit Profile</span>
                 </a>
             @else
-                <a href="" class="btn btn-sm btn-alt-secondary space-x-1">
+            <a
+    wire:click="toggleFollow()"
+    href="javascript:void(0)"
+    class="btn btn-sm space-x-1
+        {{ $isFollowing ? 'btn-alt-secondary' : 'btn-primary' }}"
+>
+    <i class="fa {{ $isFollowing ? 'fa-user-minus' : 'fa-user-plus' }} opacity-50"></i>
+    <span>
+        {{ $isFollowing ? 'Following' : 'Follow' }}
+    </span>
+</a>
+
+                {{-- <a wire:click="toggleFollow()" href="javascript:void(0)" class="btn btn-sm btn-alt-secondary space-x-1">
                     <i class="fa fa-pencil-alt opacity-50"></i>
                     <span>Follow</span>
-                </a>
+                </a> --}}
             @endif
         </div>
     </div>

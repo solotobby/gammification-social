@@ -30,10 +30,12 @@
                 @if(auth()->user()->id == $timeline->user_id)
                     <div class="block-options">
                         <div class="dropdown">
+                            Est. Earning {{ getCurrencyCode() }}{{ estimatedEarnings($timeline->id) }}
                             <button type="button" class="btn-block-option dropdown-toggle text-muted" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
                                 <div class="dropdown-menu dropdown-menu-end">
                                 
                                     <a class="dropdown-item" href="{{ url('post/timeline/'.$timeline->id.'/analytics') }}">
+                                        
                                         <i class="far fa-fw fa-eye text-success me-1"></i> View Posts Earnings
                                     </a>
                                 
@@ -168,14 +170,12 @@
                 Share this Post on all social media and make money when people view, like or comment on the post
                 </p>
                 <p>
-                    {{ url('post/'.$timeline->id) }}
-
-                
+                    {{ url('show/'.$timeline->id) }}
                 </p>
 
                 <?php 
                 
-                $url = url('post/'.$timeline->id);
+                $url = url('show/'.$timeline->id);
                 ?>
 
                 
