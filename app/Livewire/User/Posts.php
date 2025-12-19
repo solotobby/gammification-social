@@ -140,9 +140,11 @@ class Posts extends Component
             $user->email_verified_at = now();
             $user->save();
 
+            $amount = $accessCode->level->reg_bonus;
+
           
             $rate = $this->rates[$this->currency] ?? 1;
-            $this->convertedAmount = $accessCode->amount * $rate;
+            $this->convertedAmount = $amount * $rate;
 
 
             $wallet = Wallet::where('user_id', auth()->user()->id)->first();

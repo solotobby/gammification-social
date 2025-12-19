@@ -64,11 +64,11 @@
                     <li class="nav-item me-1">
                         @if($timeline->isLikedBy(auth()->user()))
                             <a class="nav-link"  wire:click="toggleLike({{$timeline->unicode}})" href="javascript:void(0)">
-                                <i class="fa fa-thumbs-down opacity-50 me-1"></i> {{ $timeline->likes }}
+                                <i class="fa fa-thumbs-down opacity-50 me-1"></i> {{ sumCounter($timeline->likes, $timeline->likes_external) }}
                             </a>
                         @else
                             <a class="nav-link"  wire:click="toggleLike({{$timeline->unicode}})" href="javascript:void(0)">
-                                <i class="fa fa-thumbs-up opacity-50 me-1"></i> {{ $timeline->likes }}
+                                <i class="fa fa-thumbs-up opacity-50 me-1"></i> {{ sumCounter($timeline->likes, $timeline->likes_external) }}
                             </a>
                         @endif
                                 
@@ -84,12 +84,12 @@
                     </li>
                     <li class="nav-item me-1">
                     <a class="nav-link" href="javascript:void(0)">
-                        <i class="fa fa-comment-alt opacity-50 me-1"></i> {{$timeline->comments}}
+                        <i class="fa fa-comment-alt opacity-50 me-1"></i> {{ sumCounter($timeline->comments, $timeline->comments_external) }}
                     </a>
                     </li>
                     <li class="nav-item">
                     <a class="nav-link" href="javascript:void(0)">
-                        <i class="fa fa-eye opacity-50 me-1"></i> {{ $timeline->views  }}
+                        <i class="fa fa-eye opacity-50 me-1"></i> {{ sumCounter($timeline->views, $timeline->views_external) }}
                     </a>
                     </li>
                     <li class="nav-item">

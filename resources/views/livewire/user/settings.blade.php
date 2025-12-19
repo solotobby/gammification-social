@@ -16,7 +16,7 @@
         </div>
         <div class="space-x-1">
         
-            <a href="{{ url('profile/'.auth()->user()->id) }}" class="btn btn-sm btn-alt-secondary space-x-1">
+            <a href="{{ url('profile/'.auth()->user()->username) }}" class="btn btn-sm btn-alt-secondary space-x-1">
             <i class="fa fa-arrow-left opacity-50"></i>
             <span>Back to Profile</span>
             </a>
@@ -92,7 +92,7 @@
               <hr>
               <div class="mb-4">
                 <label class="form-label">Upgrade your Account</label>
-                <select class="form-control" name="upgrade" wire:model="upgrade" required>
+                {{-- <select class="form-control" name="upgrade" wire:model="upgrade" required>
                   <option value="">Select Upgrade Type</option>
 
                   @if(auth()->user()->level->name == 'Basic')
@@ -103,34 +103,21 @@
                   @else
                     You do not need an upgrade of account
                   @endif
-                </select>
-                {{-- <div class="push">
+                </select> --}}
+                <div class="push">
                   <img class="img-avatar" src="{{ asset('src/assets/media/avatars/avatar13.jpg')}}" alt="">
                 </div>
                 <label class="form-label" for="dm-profile-edit-avatar">Choose a new avatar</label>
-                <input class="form-control" type="file" id="dm-profile-edit-avatar"> --}}
+                <input class="form-control" type="file" id="dm-profile-edit-avatar">
               </div>
 
-              <div class="mb-4">
-                <label class="form-label">Currency</label>
-                <select class="form-control" name="currency" wire:model="currency" required>
-                  <option value="">Select Currency</option>
-                    <option value="USD">USD</option>
-                    <option value="Naira">Naira</option>
-                </select>
-              </div>
 
-              @if(auth()->user()->level->name == 'Influencer')
-              <button type="button" class="btn btn-alt-primary" disabled>
-                <i class="fa fa-check-circle opacity-50 me-1"></i> Upgrade Account
+              <button type="button" class="btn btn-alt-primary">
+                <i class="fa fa-check-circle opacity-50 me-1"></i> Update Account
               </button>
-              @else
+              
 
-              <button type="submit" class="btn btn-alt-primary">
-                <i class="fa fa-check-circle opacity-50 me-1"></i> Upgrade Account
-              </button>
-
-              @endif
+              
             </form>
           </div>
         </div>

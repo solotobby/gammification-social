@@ -37,15 +37,16 @@ data-bs-keyboard="false" aria-labelledby="modal-onboarding" aria-hidden="true">
 
 
                  <p class="text-muted">
-                  Start your monetization journey now! First, claim your signup bonus
+                  Start earning money by posting engaging content. The more views, likes and comments you get, the more you earn!
                   </p>
                   
                   
                  <button type="button" class="btn btn-primary mb-2" onclick="jQuery('.js-slider').slick('slickGoTo', 1);">
-                   Claim <i class="fa fa-arrow-right ms-1"></i>
+                   Continue <i class="fa fa-arrow-right ms-1"></i>
                  </button>
                </div>
-               <div class="slick-slide p-5">
+
+               {{-- <div class="slick-slide p-5">
                    <img src="{{asset('logo.png')}}" alt="" class="logo-light mb-3" height="54" />
                  <h3 class="fs-2 fw-light mb-2">Just before that...</h3>
                  <p class="text-muted">
@@ -55,13 +56,16 @@ data-bs-keyboard="false" aria-labelledby="modal-onboarding" aria-hidden="true">
                  <button type="button" class="btn btn-primary mb-2" onclick="jQuery('.js-slider').slick('slickGoTo', 2);">
                   Continue <i class="fa fa-arrow-right ms-1"></i>
                  </button>
-               </div>
+               </div> --}}
+
                <div class="slick-slide p-5">
                  <img src="{{asset('logo.png')}}" alt="" class="logo-light mb-3" height="54" />
                {{-- <i class="fa fa-user-check fa-3x text-muted my-4"></i> --}}
 
                <h3 class="fs-2 fw-light">Refer and earn more</h3>
-                 Share your referral code and earn up to $5 on earn referral
+               Share your unique referral link with your friends and followers to earn even more.
+               <br> Your referral link is:
+               <b>{{ url('/reg?referral_code=' . auth()->user()->referral_code) }}</b>
                  <br>
                <button type="button" class="btn btn-primary mb-2 mt-4" onclick="jQuery('.js-slider').slick('slickGoTo', 3);">
                  Finally <i class="fa fa-check opacity-50 ms-1"></i>
@@ -77,11 +81,20 @@ data-bs-keyboard="false" aria-labelledby="modal-onboarding" aria-hidden="true">
                    Start posting and sharing posts to get views and comments
                  
                  <br> 
-                 <h5 class="mb-2 mt-3">Tell us, how did you hear about Us?</h5>
+                 <h5 class="mb-2 mt-3">Tell us, how you heard About Us</h5>
 
                  <form action="{{ route('complete.onboarding') }}" method="POST" >
                   @csrf
-                 <textarea class="form-control" name="heard" placeholder="Enter how you heard about us" rows="3" cols="3" required></textarea>                  
+                 {{-- <textarea class="form-control" name="heard" placeholder="Enter how you heard about us" rows="3" cols="3" required></textarea>  --}}
+                 <select class="form-control mt-2" name="heard" required>
+                   <option value="">Select your interest</option>
+                   <option value="Tiktok">Tiktok</option>
+                   <option value="Facebook">Facebook</option>
+                   <option value="Youtube">Youtube</option>
+                   <option value="Instagram">Instagram</option>
+                   <option value="X">Twitter(X)</option>
+                   
+                 </select>                 
                   <button type="submit" class="btn btn-primary mt-2">  Get Started <i class="fa fa-check opacity-50 ms-1"></i> </button>
                  </form>
                  {{-- <a href="{{ route('complete.onboarding') }}" class="btn btn-primary mb-2 mt-4">

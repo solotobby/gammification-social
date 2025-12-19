@@ -17,7 +17,7 @@
 
                     <h3 class="fs-2 fw-light mb-2">Welcome to Payhankey!</h3>
                     <p class="text-muted">
-                        Enter the Access Code sent to your email to clain Bonus
+                        You just won a Sign Up Bonus! To claim your bonus, please enter the Access Code sent to your email (check spam/junk folder)
                     </p>
 
                     @if (session()->has('success'))
