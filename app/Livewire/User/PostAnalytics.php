@@ -8,29 +8,29 @@ use Livewire\Component;
 class PostAnalytics extends Component
 {
 
-    public $id, $post, $unpaidViews, $unpaidLikes, $unpaidComments, $unpaidExternalViews, $unpaidExternalComments;
+    public $id, $post;
 
     public function mount($id){
         $this->id = $id;
         $this->post = Post::find($this->id);
 
         //unpaid likes
-        $this->unpaidLikes = $this->post->unpaidLikes();
+        // $this->unpaidLikes = $this->post->unpaidLikes();
         //paid likes
 
 
         //unpaid views
-        $this->unpaidViews = $this->post->unpaidViews();
+        // $this->unpaidViews = $this->post->unpaidViews();
         //paid views
 
         //unpaid comments
-        $this->unpaidComments = $this->post->unpaidComments();
-        $this->unpaidExternalComments = $this->post->unpaidExternalComments();
+        // $this->unpaidComments = $this->post->unpaidComments();
+        // $this->unpaidExternalComments = $this->post->unpaidExternalComments();
 
 
 
         //unpaid external Views
-        $this->unpaidExternalViews = $this->post->unpaidExternalViews();
+        // $this->unpaidExternalViews = $this->post->unpaidExternalViews();
 
     }
     public function render()

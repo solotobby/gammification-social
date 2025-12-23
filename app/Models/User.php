@@ -76,6 +76,12 @@ class User extends Authenticatable
         return $this->belongsTo(Level::class);
     }
 
+    public function activeLevel()
+    {
+        $currentDate = now();
+        return $this->hasOne(UserLevel::class, 'user_id', 'id')->where('status', 'active')->where('end_date', '>', $currentDate);
+    }
+
     public function social()
     {
         return $this->hasOne(Social::class, 'user_id');

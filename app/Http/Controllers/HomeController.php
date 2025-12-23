@@ -120,56 +120,79 @@ class HomeController extends Controller
         $url = request()->fullUrl();
         $url_components = parse_url($url);
         parse_str($url_components['query'], $params);
-        if($params['status'] == 'cancelled'){
-            return redirect('settings');
-        }
 
-        $ref = $params['transaction_id'];
+        // if($params['status'] == 'cancelled'){
+        //     return redirect('settings');
+        // }
+        $reference = $params['reference'];
 
-        $response = $this->verifyFlutterwavePayment($ref);
+        $url = 'https://api.paystack.co/transaction/verify/'.$reference;
+        $res = Http::withHeaders([
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer ' . env('PAYSTACK_SECRET_KEY')
+        ])->get($url)->throw();
 
-        if($response['status'] == 'success'){
-           $amount = $response['data']['amount'];
-            $currency = $response['data']['currency'];
-            $string = json_encode($response['data']['meta']);
-            $data = json_decode($string, true);
-            $package = htmlspecialchars($data['package']);
-            // return ([$amount, $currency, $package]);
+        return json_decode($res->getBody()->getContents(), true);
 
-            $ref = time();
-            $level = Level::where('name', $package)->first();
-            $code = generateCode(5);
-
-            AccessCode::create(['tx_id' => $ref, 'partner_id' => null, 'name' =>$level->name, 'email' => auth()->user()->email, 
-            'amount' => $level->amount, 'code' => $code, 'level_id' => $level->id,
-            'recepient_name' => auth()->user()->name, 'recepient_email' => auth()->user()->email, 'is_active' => false
-            ]);
-
-            $userInfo = User::where('id', auth()->user()->id)->first();
-            $userInfo->level_id = $level->id;
-            $userInfo->save();
+        // Subscription::create([
+        // 'user_id' => $data['metadata']['user_id'],
+        // 'subscription_code' => $data['subscription']['subscription_code'],
+        // 'email_token' => $data['subscription']['email_token'],
+        // 'plan_code' => $data['plan']['plan_code'],
+        // 'status' => 'active',
+        // 'next_payment_date' => $data['subscription']['next_payment_date'],
+        // ]);
 
 
-            // $accessCode = AccessCode::where('code', $code)->where('is_active', true)->first();
-            // $fetchUser = UserLevel::where('user_id', auth()->user()->id)->delete();
-            // UserLevel::create(['user_id' => auth()->user()->id, 'level_id' => $level->id]);
 
-         $transaction= Transaction::create([
-                'user_id' => auth()->user()->id,
-                'ref' => $response['data']['tx_ref'],
-                'amount' => $response['data']['amount'],
-                'currency' => $response['data']['currency'],
-                'status' =>  $response['data']['status'],
-                'type' => 'upgrade_purchase',
-                'action' => 'Credit',
-                'description' => auth()->user()->name.' upgraded to '.$level->name, 
-                'meta' => json_encode($response['data']['meta']),
-                'customer' => json_encode($response['data']['customer'])
-             ]);
+
+       
+
+        // $response = $this->verifyFlutterwavePayment($ref);
+
+        // if($response['status'] == 'success'){
+        //    $amount = $response['data']['amount'];
+        //     $currency = $response['data']['currency'];
+        //     $string = json_encode($response['data']['meta']);
+        //     $data = json_decode($string, true);
+        //     $package = htmlspecialchars($data['package']);
+        //     // return ([$amount, $currency, $package]);
+
+        //     $ref = time();
+        //     $level = Level::where('name', $package)->first();
+        //     $code = generateCode(5);
+
+        //     AccessCode::create(['tx_id' => $ref, 'partner_id' => null, 'name' =>$level->name, 'email' => auth()->user()->email, 
+        //     'amount' => $level->amount, 'code' => $code, 'level_id' => $level->id,
+        //     'recepient_name' => auth()->user()->name, 'recepient_email' => auth()->user()->email, 'is_active' => false
+        //     ]);
+
+        //     $userInfo = User::where('id', auth()->user()->id)->first();
+        //     $userInfo->level_id = $level->id;
+        //     $userInfo->save();
+
+
+        //     // $accessCode = AccessCode::where('code', $code)->where('is_active', true)->first();
+        //     // $fetchUser = UserLevel::where('user_id', auth()->user()->id)->delete();
+        //     // UserLevel::create(['user_id' => auth()->user()->id, 'level_id' => $level->id]);
+
+        //  $transaction= Transaction::create([
+        //         'user_id' => auth()->user()->id,
+        //         'ref' => $response['data']['tx_ref'],
+        //         'amount' => $response['data']['amount'],
+        //         'currency' => $response['data']['currency'],
+        //         'status' =>  $response['data']['status'],
+        //         'type' => 'upgrade_purchase',
+        //         'action' => 'Credit',
+        //         'description' => auth()->user()->name.' upgraded to '.$level->name, 
+        //         'meta' => json_encode($response['data']['meta']),
+        //         'customer' => json_encode($response['data']['customer'])
+        //      ]);
  
-             return redirect('settings')->with('success', 'Upgrade Successful');
+        //      return redirect('settings')->with('success', 'Upgrade Successful');
  
-         }
+        //  }
  
 
    }

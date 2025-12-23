@@ -154,6 +154,7 @@ class RegisterController extends Controller
         }
     }
 
+
     private function verifyExistingUserEmail($user)
     {
         $code = generateCode(7);

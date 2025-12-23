@@ -16,6 +16,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
 use Stevebauman\Location\Facades\Location;
 use Illuminate\Support\Facades\DB;
+use Symfony\Polyfill\Uuid\Uuid;
 
 if (!function_exists('engagement')) {
     function engagement()
@@ -59,14 +60,25 @@ if (!function_exists('getCurrencyCode')) {
     }
 }
 
+if(!function_exists('userBaseCurrency')){
+    function userBaseCurrency($userId = null): ?string
+    {
+        $userId ??= auth()->id();
+
+        return Wallet::where('user_id', $userId)->value('currency');
+    }
+}
+
 
 if (!function_exists('userLevel')) {
     function userLevel($userId = null)
     {
-
         return $userId ? User::find($userId)->level->name : auth()->user()->level->name;
     }
 }
+
+
+
 
 
 
@@ -77,37 +89,39 @@ if (!function_exists('upgradePayment')) {
     function upgradePayment($amount, $currency, $package)
     {
 
-        $payload = [
-            "tx_ref" => Str::random(16),
-            "amount" => $amount,
-            "currency" => $currency,
-            "redirect_url" => url('upgrade/api'), //"https://webhook.site/9d0b00ba-9a69-44fa-a43d-a82c33c36fdc",
-            "meta" => [
-                "package" => $package
-                // "level_id" =>$level->id,
-                // "level_name" =>$package,
-                // "number_of_slot" =>$quantity,
-                // "unitprice" =>$level->amount,
-                // "amount_paid" =>$amount,
-            ],
-            "customer" => [
-                "email" => auth()->user()->email,
-                "name" => auth()->user()->name
-            ],
-            "customizations" => [
-                "title" => "Upgrade payment to " . $package . " package",
-                "logo" => "https://payhankey.com/logo.png"
 
-            ]
-        ];
 
-        $res = Http::withHeaders([
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-            'Authorization' => 'Bearer ' . env('FL_SECRET_KEY')
-        ])->post('https://api.flutterwave.com/v3/payments', $payload)->throw();
+        // $payload = [
+        //     "tx_ref" => Str::random(16),
+        //     "amount" => $amount,
+        //     "currency" => $currency,
+        //     "redirect_url" => url('upgrade/api'), //"https://webhook.site/9d0b00ba-9a69-44fa-a43d-a82c33c36fdc",
+        //     "meta" => [
+        //         "package" => $package
+        //         // "level_id" =>$level->id,
+        //         // "level_name" =>$package,
+        //         // "number_of_slot" =>$quantity,
+        //         // "unitprice" =>$level->amount,
+        //         // "amount_paid" =>$amount,
+        //     ],
+        //     "customer" => [
+        //         "email" => auth()->user()->email,
+        //         "name" => auth()->user()->name
+        //     ],
+        //     "customizations" => [
+        //         "title" => "Upgrade payment to " . $package . " package",
+        //         "logo" => "https://payhankey.com/logo.png"
 
-        return json_decode($res->getBody()->getContents(), true)['data']['link'];
+        //     ]
+        // ];
+
+        // $res = Http::withHeaders([
+        //     'Accept' => 'application/json',
+        //     'Content-Type' => 'application/json',
+        //     'Authorization' => 'Bearer ' . env('FL_SECRET_KEY')
+        // ])->post('https://api.flutterwave.com/v3/payments', $payload)->throw();
+
+        // return json_decode($res->getBody()->getContents(), true)['data']['link'];
     }
 }
 
@@ -324,17 +338,17 @@ if (!function_exists('updateWalletEarnings')) {
 if (!function_exists('estimatedEarnings')) {
     function estimatedEarnings($postId): float
     {
-        $post = Post::find($postId);
+        // $post = Post::find($postId);
 
-        if (!$post) {
+        if (!$postId) {
             return 0.00;
         }
 
-        return DB::transaction(function () use ($post) {
+        return DB::transaction(function () use ($postId) {
 
-            $allearnings = UserView::where('post_id', $post->id)->where('user_id', auth()->user()->id)->where('created_at', '>=', now()->subDays(30))->sum('amount') +
-                         UserLike::where('post_id', $post->id)->where('user_id', auth()->user()->id)->where('created_at', '>=', now()->subDays(30))->sum('amount') +
-                         UserComment::where('post_id', $post->id)->where('user_id', auth()->user()->id)->where('created_at', '>=', now()->subDays(30))->sum('amount');
+            $allearnings = UserView::where('post_id', $postId)->where('user_id', auth()->user()->id)->where('created_at', '>=', now()->subDays(30))->sum('amount') +
+                         UserLike::where('post_id', $postId)->where('user_id', auth()->user()->id)->where('created_at', '>=', now()->subDays(30))->sum('amount') +
+                         UserComment::where('post_id', $postId)->where('user_id', auth()->user()->id)->where('created_at', '>=', now()->subDays(30))->sum('amount');
             $convertedAmount = convertToBaseCurrency(
                 $allearnings,
                 auth()->user()->wallet->currency
@@ -353,7 +367,7 @@ if (!function_exists('convertToBaseCurrency')) {
 
         $rates = [
             'USD' => 1,
-            'NGN' => 460,
+            'NGN' => 1500,
             'EUR' => 0.91,
             'GBP' => 0.81,
         ];
@@ -369,8 +383,6 @@ if (!function_exists('convertToBaseCurrency')) {
 if (!function_exists('viewsAmountCalculator')) {
     function viewsAmountCalculator($postId): float
     {
-
-        // $post = Post::find($postId);
 
         if (!$postId) {
             return 0.0;
@@ -395,7 +407,7 @@ if (!function_exists('likesAmountCalculator')) {
     function likesAmountCalculator($postId): float
     {
 
-        // $post = Post::find($postId);
+      
         if (!$postId) {
             return 0.0;
         }
@@ -418,7 +430,7 @@ if (!function_exists('commentsAmountCalculator')) {
     function commentsAmountCalculator($postId): float
     {
 
-        // $post = Post::find($postId);
+       
         if (!$postId) {
             return 0.0;
         }
@@ -488,97 +500,6 @@ if (!function_exists('securityVerification')) {
         } else {
             return 'not_okay';
         }
-    }
-}
-
-/////WALLET HELPERS////
-if (!function_exists('refreshWallet')) {
-    function refreshWallet()
-    {
-        $user = Auth::user();
-
-
-        //get user Wallet
-        $wallet = Wallet::where('user_id', $user->id)->first();
-        //get all posts this guy has
-        $postIds = Post::where('user_id', $user->id)->get(['id']);
-        $userLevel = Level::where('name', auth()->user()->level->name)->first(['name', 'earning_per_comment', 'earning_per_view', 'earning_per_like']);
-
-        //processviews  - internal
-        $singleViewInternal =  $userLevel->earning_per_view / 1000; //amount per internal view
-        $singleViewExternal = 1 / 5000; //amount per external view
-        //fetch/update all unpaid views
-        $internalViews = UserView::whereIn('post_id', $postIds)->where('is_paid', false)->get();
-        //updatewallet 
-        $wallet->balance +=  $singleViewInternal * $internalViews->count();
-        $wallet->save();
-        //reset to paid
-        foreach ($internalViews as $view) {
-            $view->is_paid = true;
-            $view->save();
-        }
-
-        //external
-        $externalViews = ViewsExternal::whereIn('post_id', $postIds)->where('is_paid', false)->get();
-        //updatewallet 
-        $wallet->balance +=  $singleViewExternal * $externalViews->count();
-        $wallet->save();
-        //reset to paid
-        foreach ($externalViews as $view) {
-            $view->is_paid = true;
-            $view->save();
-        }
-
-
-        //process Likes
-        $singleLikeInternal = $userLevel->earning_per_like / 1000;
-
-        //fetch/update all unpaid views
-        $internalLikes = UserLike::whereIn('post_id', $postIds)->where('is_paid', false)->get();
-        //updatewallet 
-        $wallet->balance +=  $singleLikeInternal * $internalLikes->count();
-        $wallet->save();
-        //reset to paid
-        foreach ($internalLikes as $view) {
-            $view->is_paid = true;
-            $view->save();
-        }
-
-        //process comments
-        $singleCommentInternal = $userLevel->earning_per_comment / 1000;
-        //fetch/update all unpaid views
-        $internalComments = UserComment::whereIn('post_id', $postIds)->where('is_paid', false)->get();
-        //updatewallet 
-        $wallet->balance += $singleCommentInternal * $internalComments->count();
-        $wallet->save();
-        //reset to paid
-        foreach ($internalComments as $view) {
-            $view->is_paid = true;
-            $view->save();
-        }
-
-        //external comment 
-        $externalComments = CommentExternal::whereIn('post_id', $postIds)->where('is_paid', false)->get();
-        $perCommentAmount = '';
-        if (auth()->user()->level->name == 'Influencer') {
-            $perCommentAmount = 0.08; //40 //30
-        } elseif (auth()->user()->level->name == 'Creator') {
-            $perCommentAmount = 0.07; //30 // 25
-        } else {
-            $perCommentAmount = 0.05; //25 //20
-        }
-
-        $counts = $externalComments->count() * 0.1;
-
-        $wallet->balance += $perCommentAmount * $counts;
-        $wallet->save();
-        //reset to paid
-        foreach ($externalComments as $view) {
-            $view->is_paid = true;
-            $view->save();
-        }
-
-        return $wallet;
     }
 }
 
@@ -841,6 +762,79 @@ if (!function_exists('createCustomer')) {
             'Content-Type' => 'application/json',
             'Authorization' => 'Bearer ' . env('PAYSTACK_SECRET_KEY')
         ])->post('https://api.paystack.co/customer', $data);
+
+        return json_decode($res->getBody()->getContents(), true);
+    }
+}
+
+
+if (!function_exists('createPlan')) {
+
+    function createPlan($name, $amount)
+    {
+        $url = 'https://api.paystack.co/plan';
+        $res = Http::withHeaders([
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer ' . env('PAYSTACK_SECRET_KEY')
+        ])->post($url, [
+            "name" => $name,
+            "amount" => $amount*100,
+            "interval" => "monthly"
+        ])->throw();
+
+        return json_decode($res->getBody()->getContents(), true);
+    }
+}
+
+// if (!function_exists('initializeCustomerAuthorization')) {
+
+//     function initializeCustomerAuthorization()
+//     {
+//         $url = 'https://api.paystack.co/customer/authorization/initialize';
+//         $res = Http::withHeaders([
+//             'Accept' => 'application/json',
+//             'Content-Type' => 'application/json',
+//             'Authorization' => 'Bearer ' . env('PAYSTACK_SECRET_KEY')
+//         ])->post($url, [
+//             "email"=> auth()->user()->email,
+//             "channel"=> "direct_debit",
+//             "callback_url"=> "http://test.url.com"
+//         ])->throw();
+
+//         return json_decode($res->getBody()->getContents(), true);
+//     }
+// }
+
+           
+
+// PLN_jpan26fg9bz60p7
+//create subscription
+if (!function_exists('createSubscription')) {
+
+    function createSubscription($planId=null, $customerEmail=null)
+    {
+    //     $user = Auth::user();
+    //     $phone = '+234' . substr($user->phone, 1);
+    //     $payload = [
+    //         "email" => $user->email,
+    //         "first_name" => 'Payhankey',
+    //         "last_name" => $user->name,
+    //         "phone" => $phone
+    //     ];
+
+    //    return  $customerCode = createCustomer($payload)['data']['customer_code'];
+
+
+        $url = 'https://api.paystack.co/subscription';
+        $res = Http::withHeaders([
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer ' . env('PAYSTACK_SECRET_KEY')
+        ])->post($url, [
+            "plan" => 'PLN_jpan26fg9bz60p7',
+            "customer" => 'CUS_fjk7b9wnxwid0t8' //$customerCode
+        ])->throw();
 
         return json_decode($res->getBody()->getContents(), true);
     }

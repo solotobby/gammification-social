@@ -9,46 +9,55 @@
     <meta name="keywords" content="money, facebook. twitter, instagram premium, marketing, multipurpose" />
     <meta content="Themesbrand" name="author" />
     <!-- favicon -->
-    <link rel="shortcut icon" href="{{asset('favicon.png')}}">
+    <link rel="shortcut icon" href="{{ asset('favicon.png') }}">
     <!-- css -->
 
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7484162262282358"
-     crossorigin="anonymous"></script>
+        crossorigin="anonymous"></script>
 
-    <link href="{{asset('asset/css/bootstrap.min.css')}}" rel="stylesheet" type="text/css" />
-    <link href="{{asset('asset/css/materialdesignicons.min.css')}}" rel="stylesheet" type="text/css" />
-    <link href="{{asset('asset/css/style.min.css')}}" rel="stylesheet" type="text/css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/brands.min.css" integrity="sha512-DJLNx+VLY4aEiEQFjiawXaiceujj5GA7lIY8CHCIGQCBPfsEG0nGz1edb4Jvw1LR7q031zS5PpPqFuPA8ihlRA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    
+    <link href="{{ asset('asset/css/bootstrap.min.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ asset('asset/css/materialdesignicons.min.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ asset('asset/css/style.min.css') }}" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/brands.min.css"
+        integrity="sha512-DJLNx+VLY4aEiEQFjiawXaiceujj5GA7lIY8CHCIGQCBPfsEG0nGz1edb4Jvw1LR7q031zS5PpPqFuPA8ihlRA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
     <script async src="https://www.googletagmanager.com/gtag/js?id=AW-10842521152"></script>
-    
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
 
-      gtag('config', 'AW-10842521152');
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+        gtag('js', new Date());
+
+        gtag('config', 'AW-10842521152');
     </script>
 
-        <style>
-            .logos img {
-                max-width: 100%;
-                height: 100%;
-                display: block;
-                margin: 0 auto;
-            }
-            .logo-container {
+    <style>
+        .logos img {
+            max-width: 100%;
+            height: 100%;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .logo-container {
             display: flex;
             justify-content: center;
             align-items: center;
             flex-wrap: wrap;
         }
+
         .logo-container .logos {
             flex: 1 1 10%;
             margin: 10px;
         }
-        </style>
+    </style>
 
 
 </head>
@@ -75,52 +84,18 @@
         <div class="container">
             <!-- LOGO -->
             <a class="navbar-brand logo" href="{{ url('/') }}">
-                <img src="{{asset('logo.png')}}" alt="" class="logo-dark" height="34" />
-                <img src="{{asset('logo.png')}}" alt="" class="logo-light" height="34" />
+                <img src="{{ asset('logo.png') }}" alt="" class="logo-dark" height="34" />
+                <img src="{{ asset('logo.png') }}" alt="" class="logo-light" height="34" />
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
                 aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
                 <i class="mdi mdi-menu"></i>
             </button>
-            <div class="collapse navbar-collapse" id="navbarCollapse">
-                <ul class="navbar-nav mx-auto navbar-center" id="navbar-navlist">
-                    <li class="nav-item">
-                        <a data-scroll href="{{ url('/') }}" class="nav-link">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a data-scroll href="#features" class="nav-link">Features</a>
-                    </li>
-                    {{-- <li class="nav-item">
-                        <a data-scroll href="#pricing" class="nav-link">Access Code</a>
-                    </li> --}}
-                    
-                    <li class="nav-item">
-                        <a data-scroll href="{{ url('howtoearn') }}" class="nav-link">How to Earn</a>
-                    </li>
-                    
-                    <li class="nav-item">
-                        <a data-scroll href="{{ url('privacy/policy') }}" class="nav-link">Privacy Policy</a>
-                    </li>
 
-                    <li class="nav-item">
-                        <a data-scroll href="#faq" class="nav-link">FAQ</a>
-                    </li>
-                    <li class="nav-item">
-                        <a data-scroll href="#partner" class="nav-link">Become a Partner</a>
-                    </li>
-                    <li class="nav-item">
-                        <a data-scroll href="#contact" class="nav-link">Contact Us</a>
-                    </li>
-                </ul>
-                <ul class="navbar-nav navbar-center">
-                    <li class="nav-item">
-                        <a href="{{ url('login') }}" class="nav-link">Login</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ url('register') }}" class="nav-link">Register</a>
-                    </li>
-                </ul>
-            </div>
+            @include('layouts.rsc.header')
+
+
+
         </div>
     </nav>
     <!-- Navbar End -->
@@ -132,8 +107,9 @@
                 <div class="col-lg-6">
                     <h1 class="hero-1-title fw-bold text-shadow mb-4">Monetize your Posts</h1>
                     <div class="w-75 mb-5 mb-lg-0">
-                        <p class="text-muted mb-5 pb-5 font-size-17">The social media that pays you for every posts, views, comments and likes. Withdraw your earnings anytime. Minimum withdrawal is $20.
-                            <br>Withdraw your earnings via Paypal, USDT or your Local Bank.
+                        <p class="text-muted mb-5 pb-5 font-size-17">The social media that pays you for every posts,
+                            views, comments and likes. Withdraw your earnings anytime. Minimum withdrawal is $20 or its equivalent in your local currency.
+                            <br>Withdrawals are processed via Paypal, USDT or your Local Bank. Signup is <b>100%</b> free.
                         </p>
                         {{-- <p><span class="font-size-20 me-2">🥳️</span>Join our mailing list to receive updates before creating an account.</p>
                         <div class="subscribe-form">
@@ -146,7 +122,8 @@
                 </div>
                 <div class="col-lg-6 col-md-10">
                     <div class=" mt-5 mt-lg-0">
-                        <img src="{{asset('asset/images/hero-1-img.png')}}" alt="" class="img-fluid d-block mx-auto">
+                        <img src="{{ asset('asset/images/hero-1-img.png') }}" alt=""
+                            class="img-fluid d-block mx-auto">
                     </div>
                 </div>
             </div>
@@ -164,8 +141,9 @@
                             <div class="icon-xxl uim-icon-primary"><i class="uim uim-cube"></i></div>
                         </div>
                         <h3 class="">Why Choose Us ?</h3>
-                        <p class="text-muted mb-4">Payhankey pays you for every engagement you get on short posts, facts, quizzes and teasers. You earn from your FIRST post.</p>
-                        <a href="{{ url('/#pricing') }}" class="btn btn-outline-primary">Get Started</a>
+                        <p class="text-muted mb-4">Payhankey pays you for every engagement you get on posts,
+                            facts, quizzes, teasers and videos. You can earn from your FIRST post.</p>
+                        <a href="{{ url('register') }}" class="btn btn-outline-primary">Get Started for Free</a>
                     </div>
                 </div>
                 <div class="col-lg-8 align-self-center">
@@ -176,14 +154,16 @@
                                     <i class="mdi mdi-cash"></i>
                                 </div>
                                 <h5 class="fw-bold mb-2 wc-title mt-4">Earn on the Go</h5>
-                                <p class="text-muted mb-0 font-size-15 wc-subtitle">Earn up to $5 signup bonus. Make money from every post.</p>
+                                <p class="text-muted mb-0 font-size-15 wc-subtitle">Earn up to $2 signup bonus. Make
+                                    money from every post.</p>
                             </div>
                             <div class="wc-box rounded text-center wc-box-primary p-4">
                                 <div class="wc-box-icon">
-                                    <i class="mdi mdi-trending-up"></i>
+                                    <i class="mdi mdi-account-multiple"></i>
                                 </div>
-                                <h5 class="fw-bold mb-2 wc-title mt-4">Grow Your Revenue</h5>
-                                <p class="text-muted mb-0 font-size-15 wc-subtitle">Earn up to $3 on every friend you refer to Payhankey.</p>
+                                <h5 class="fw-bold mb-2 wc-title mt-4">Grow With Friends</h5>
+                                <p class="text-muted mb-0 font-size-15 wc-subtitle">Earn more when friends engage your
+                                    posts.</p>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -192,14 +172,15 @@
                                     <i class="mdi mdi-chart-line"></i>
                                 </div>
                                 <h5 class="fw-bold mb-2 wc-title mt-4">Analytics</h5>
-                                <p class="text-muted mb-0 font-size-15 wc-subtitle">Monitor your growth and Revenue on the go</p>
+                                <p class="text-muted mb-0 font-size-15 wc-subtitle">Monitor your earnings on the go</p>
                             </div>
                             <div class="wc-box rounded text-center wc-box-primary p-4">
                                 <div class="wc-box-icon">
                                     <i class="mdi mdi-account-cash"></i>
                                 </div>
                                 <h5 class="fw-bold mb-2 wc-title mt-4">Withdraw Anytime</h5>
-                                <p class="text-muted mb-0 font-size-15 wc-subtitle">Withdraw your earnings via Paypal, USDT or to your Local Bank</p>
+                                <p class="text-muted mb-0 font-size-15 wc-subtitle">Withdraw your earnings via Paypal,
+                                    USDT or to your Local Bank</p>
                             </div>
                         </div>
                     </div>
@@ -214,10 +195,10 @@
         id="features">
         <div class="container">
             <div class="row justify-content-center">
-                <div class="col-lg-6">
+                <div class="col-lg-8">
                     <div class="text-center mb-5">
                         <h3 class="title mb-3">Awesome Features</h3>
-                        <p class="text-muted font-size-15">
+                        <p class="text-muted font-size-17">
                             We are removing every monetization barrier for all creators globally.
                         </p>
                     </div>
@@ -227,7 +208,8 @@
             <div class="row justify-content-center">
                 <div class="col-lg-6 align-self-center">
                     <div class="mb-4 mb-lg-0">
-                        <img src="{{asset('asset/images/features-img.png')}}" alt="" class="img-fluid d-block mx-auto">
+                        <img src="{{ asset('asset/images/features-img.png') }}" alt=""
+                            class="img-fluid d-block mx-auto">
                     </div>
                 </div>
 
@@ -235,23 +217,25 @@
                     <p class="font-weight-medium text-uppercase mb-2"><i
                             class="mdi mdi-chart-bubble h2 text-primary me-1 align-middle"></i> Earning Made Easy</p>
                     <h3 class="font-weight-semibold line-height-1_4 mb-4">
-                       
+
                         We pay you for your <b>Likes</b>, <b>Comments</b>
-                       and <b>Views</b></h3>
-                    <p class="text-muted font-size-15 mb-4">Payhankey allows you to make short posts, facts, quizzes and teasers. Earn signup bonus and referral bonuses when you refer your friends.</p>
+                        and <b>Views</b></h3>
+                    <p class="text-muted font-size-15 mb-4">Payhankey allows you to make posts, facts, quizzes, teasers
+                        and videos. Earn signup bonus and referral bonuses when you refer your friends.</p>
                     {{-- <p class="text-muted mb-2"><i class="icon-xs me-1" data-feather="layout"></i> Donec pede justo
                         fringilla vel nec.</p>
                     <p class="text-muted"><i class="icon-xs me-1" data-feather="life-buoy"></i> Cras ultricies mi eu
                         turpis hendrerit fringilla.</p> --}}
                     <div class="mt-5">
-                        <a href="{{ url('/#pricing')}}" class="btn btn-primary me-2">Learn More</a>
-                        <a href="{{ url('register') }}" class="btn btn-soft-primary">Get Started</a>
+                        {{-- <a href="{{ url('/#pricing')}}" class="btn btn-primary me-2">Learn More</a> --}}
+                        <a href="{{ url('register') }}" class="btn btn-soft-primary">Get Started for Free</a>
                     </div>
                 </div>
             </div>
         </div>
     </section>
-    <section class="section feather-bg-img" style="background-image: url(asset/images/features-bg-img-1.png)" id="partner">
+
+    {{-- <section class="section feather-bg-img" style="background-image: url(asset/images/features-bg-img-1.png)" id="partner">
         <div class="container">
             
             @if ($errors->any())
@@ -277,7 +261,7 @@
                             class="mdi mdi-chart-bubble h2 text-primary me-1 align-middle"></i> Become our Partner </p>
                     {{-- <h3 class="font-weight-semibold line-height-1_4 mb-4">We do the work you <b>stay focused</b> on
                         <b>your customers</b>.
-                    </h3> --}}
+                    </h3> --
                     <h3 class="title mb-3">Earn more as a Partner</h3>
 
                     <p class="text-muted font-size-15 mb-4">
@@ -289,7 +273,7 @@
                     <div class="mt-5">
                         <a href="{{ url('login') }}" target="_blank"  class="btn btn-primary me-2">Sell Access Code</a>
                         {{-- <a href="" target="_blank" class="btn btn-soft-primary">Pay in Naira  </a> --}}
-                        {{-- data-bs-toggle="modal" data-bs-target="#exampleModalCenter-1" --}}
+    {{-- data-bs-toggle="modal" data-bs-target="#exampleModalCenter-1" --
                     </div>
                     
                 </div>
@@ -301,7 +285,8 @@
                     <!-- Button trigger modal -->
             </div>
         </div>
-    </section>
+    </section> --}}
+
 
     <!-- Features End -->
 
@@ -311,17 +296,18 @@
             <div class="row justify-content-center">
                 <div class="col-lg-8">
                     <div class="text-center mb-5">
-                        <h3 class="title mb-3">How do you want to start?</h3>
-                        <p class="text-muted font-size-15"> Start earning daily on Payhankey 
-                            instead of waiting for many subscribers, followers or unending watch hours requirement 
-                            for monetization somewhere else.</p>
-                            <p>
-                                <strong>Get an Access Code to Get Started</strong>
-                            </p>
+                        <h3 class="title mb-3">Earn the Way You Want!</h3>
+                        <p class="text-muted font-size-15"> Start earning daily on Payhankey as an influencer, creator
+                            or basic user. Influencers and creators earn more from their posts.
+                        </p>
+                        <p>
+                            <strong>Sign Up is 100% Free</strong>
+                        </p>
+                        <a href="{{ url('register') }}" class="btn btn-primary me-2">Get Started Now</a>
                     </div>
                 </div>
             </div>
-            <div class="row">
+            {{-- <div class="row">
                 <div class="col-lg-4">
                     <div class="pricing-box rounded text-center p-4">
                         <div class="pricing-icon-bg my-4">
@@ -362,7 +348,7 @@
                             <li class="text-muted">every 1,000 likes: $0.6</li>
                             <li class="text-muted">every 1,000 comments: $0.7</li>
                             <li class="text-muted">Can Post Text, Links and Images</li>
-                            {{-- <li class="text-muted">Can Post Images</li> --}}
+                            {{-- <li class="text-muted">Can Post Images</li> --
                             
                         </ul>
                         <a href="{{ url('access/code/creator') }}" class="btn btn-primary pr-btn">Get Access Code</a>
@@ -399,7 +385,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> --}}
         </div>
     </section>
     <!-- Pricing End -->
@@ -424,7 +410,7 @@
                     <div class="logos"><img src="{{asset('amazon.png')}}" alt="Ibom Air"></div>
                 </div>
                
-                {{--<div class="col-6 col-md-2 mb-4">
+                {{-- <div class="col-6 col-md-2 mb-4">
                     <div class="logo"><img src="images/kuda.png" alt="Kuda"></div>
                 </div>
                 <div class="col-6 col-md-2 mb-4">
@@ -435,7 +421,7 @@
 
     </section> --}}
 
-   
+
 
     <!-- Blog start -->
     {{-- <section class="section blog" id="blog">
@@ -504,64 +490,147 @@
     </section> --}}
     <!-- Blog End -->
 
-   
- <!-- Contact Us Start -->
- <section class="section" id="faq">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-10">
-                <div class="text-center mb-4">
-                    <h3 class="title mb-1">Frequently Asked Questions</h3>
-                    {{-- <p class="text-muted font-size-15">
+     <!-- About Us Start -->
+    <section class="section bg-light" id="about">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="text-center mb-1">
+                        <h3 class="title mb-3">About Us</h3>
+                        <p class="text-muted font-size-15">
+                            Payhankey is the social media monetization app for African creators and influencers. We are
+                            on a mission to remove every monetization barrier for all creators globally.
+                            Our goal is to support over 30 million creators and influencers in Africa monetize their
+                            content by 2030. Payhankey is a product of Freebyz Technologies Ltd.
+                            Freebyz Technologies Ltd is a software company that develops tech and AI powered solutions
+                            in Fintech, Edutech and Adtech ecosystems.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </section>
+
+
+    <!-- Contact Us Start -->
+    <section class="section" id="faq">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="text-center mb-4">
+                        <h3 class="title mb-1">Frequently Asked Questions</h3>
+                        {{-- <p class="text-muted font-size-15">
                         We'll love to hear from you and learn how best to assist you monetize your posts and content. Kindly send us a mail and we will be glad to help.
                     </p> --}}
-                </div>
-
-                <div class="accordion" id="accordionExample">
-                    <div class="accordion-item">
-                      <h2 class="accordion-header" id="headingOne">
-                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                            How do I earn on Payhankey?
-                        </button>
-                      </h2>
-                      <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
-                        <div class="accordion-body">
-                            <strong>Payhankey</strong> is the social media that helps you monetize your content without followers,
-                            subscribers or watch hours.On Payhankey, you can monetize your post, teasers and quizzes. You can earn up to $200 daily on views.
-                            Payhankey is amazing, you earn up to $5 for signing up alone apart from earnings for every comments, likes and views.
-                            You can also earn affiliate commissions when you refer your friends to sign up with your referral code. 
-                            <br>
-                            <strong>Payhankey</strong> also pays creators from viral videos made about Payhankey on other social media (TikTok, Instagram, YouTube, Facebook etc)
-                        </div>
-                      </div>
-                    </div>
-                    <div class="accordion-item">
-                      <h2 class="accordion-header" id="headingTwo">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                            Why do I need an access code?
-                        </button>
-                      </h2>
-                      <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
-                        <div class="accordion-body">
-                            An access code is needed to complete registration on Payhankey. This gives you ACCESS to monetize your comments, posts, and views. You will be able to access your referral code to earn affiliate commissions and promotions commissions.
-                        </div>
-                      </div>
-                    </div>
-                    <div class="accordion-item">
-                      <h2 class="accordion-header" id="headingThree">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                            How do I earn promotion commissions 
-                        </button>
-                      </h2>
-                      <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
-                        <div class="accordion-body">
-                            To earn promotion commissions, make viral videos about Payhankey and tag us @payhankey
-                            You can earn up to $10 per 1000 views on each viral video daily.
-                        </div>
-                      </div>
                     </div>
 
-                    <div class="accordion-item">
+                    <div class="accordion" id="accordionExample">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingOne">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                    How do I earn on Payhankey?
+                                </button>
+                            </h2>
+                            <div id="collapseOne" class="accordion-collapse collapse show"
+                                aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                                <div class="accordion-body">
+                                    <strong>Payhankey</strong> is the social media that helps you monetize your content
+                                    without followers,
+                                    subscribers or watch hours.On Payhankey, you can monetize your post, teasers,
+                                    quizzes, and videos. You can earn up to $200 daily on views.
+                                    Payhankey is amazing, you earn up to $2 for signing up alone apart from earnings for
+                                    every comments, likes and views.
+                                    You can also earn affiliate commissions when you refer your friends to sign up with
+                                    your referral code.
+                                    <br>
+                                    <strong>Payhankey</strong> also pays creators from viral videos made about Payhankey
+                                    on other social media (TikTok, Instagram, YouTube, Facebook etc)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingTwo">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                    How much do I pay to sign up?
+                                </button>
+                            </h2>
+                            <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
+                                data-bs-parent="#accordionExample">
+                                <div class="accordion-body">
+                                    No payment is required to sign up on Payhankey. Signing up is 100% free. Once you
+                                    sign up, you have a basic account with a free sign up bonus. Basic accounts can make
+                                    unlimited post but cannot monetize posts.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingThree-4">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#collapseThree-4" aria-expanded="false"
+                                    aria-controls="collapseThree-4">
+                                    How much can I earn on Payhankey?
+                                </button>
+                            </h2>
+                            <div id="collapseThree-4" class="accordion-collapse collapse"
+                                aria-labelledby="headingThree-4" data-bs-parent="#accordionExample">
+                                <div class="accordion-body">
+                                    Payhankey pays for posts made by creators and influencers. Creators can earn up to
+                                    $2 per post while influencers can earn up to $5 per post alone. Post with more
+                                    engagement earns more. A creator has a Blue tick badge while an Influencer has a
+                                    blue tick and a blue ring around the profile picture. You can earn in your local
+                                    currency.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingThree-5">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#collapseThree-5" aria-expanded="false"
+                                    aria-controls="collapseThree-5">
+                                    How do I become a Creator or Influencer?
+                                </button>
+                            </h2>
+                            <div id="collapseThree-5" class="accordion-collapse collapse"
+                                aria-labelledby="headingThree-5" data-bs-parent="#accordionExample">
+                                <div class="accordion-body">
+                                    To become a Creator or Influencer on Payhankey, you need to upgrade your account
+                                    from basic to creator or influencer status. To maintain your status, you need to
+                                    have an active monetization status (Creator or Influencer). A creator needs $1 (for
+                                    blue tick status) while an Influencer needs $5 (for blue tick and ring status).
+                                    These can be paid in your local currency.
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingThree">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#collapseThree" aria-expanded="false"
+                                    aria-controls="collapseThree">
+                                    How do I earn promotional commissions?
+                                </button>
+                            </h2>
+                            <div id="collapseThree" class="accordion-collapse collapse"
+                                aria-labelledby="headingThree" data-bs-parent="#accordionExample">
+                                <div class="accordion-body">
+                                    To earn promotional commissions, make viral videos about Payhankey and tag us
+                                    @payhankeyoffical on Instagram, TikTok, Facebook or Twitter.
+                                    Ensure your video is public and has a good number of views. Once your video goes
+                                    viral, you can submit your video link via Promotional Content button on the sidebar
+                                    of your dashboard.
+                                    You can earn up to $10 per 1000 views on each viral video daily.
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- <div class="accordion-item">
                         <h2 class="accordion-header" id="headingThree-1">
                           <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree-1" aria-expanded="false" aria-controls="collapseThree-1">
                             How can I be a verified partner 
@@ -575,9 +644,9 @@
                             All verified partners will be listed
                           </div>
                         </div>
-                    </div>
+                    </div> --}}
 
-                    <div class="accordion-item">
+                        {{-- <div class="accordion-item">
                         <h2 class="accordion-header" id="headingThree-2">
                           <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree-2" aria-expanded="false" aria-controls="collapseThree-2">
                             How many times can I use an access code on Payhankey?
@@ -590,47 +659,42 @@
                             To see earnings, simply login to your dashboard and click on Analytics to see your earnings and analytics.
                           </div>
                         </div>
-                    </div>
+                    </div> --}}
 
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="headingThree-3">
-                          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree-3" aria-expanded="false" aria-controls="collapseThree-3">
-                            How do I withdrawal my earnings?
-                          </button>
-                        </h2>
-                        <div id="collapseThree-3" class="accordion-collapse collapse" aria-labelledby="headingThree-3" data-bs-parent="#accordionExample">
-                          <div class="accordion-body">
-                            Payhankey allows all users to withdraw anytime once they have a minimum of $20. 
-                            To withdraw, Login to your dashboard to provide your withdrawal information.
-                          </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingThree-3">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#collapseThree-3" aria-expanded="false"
+                                    aria-controls="collapseThree-3">
+                                    How do I withdraw my earnings?
+                                </button>
+                            </h2>
+                            <div id="collapseThree-3" class="accordion-collapse collapse"
+                                aria-labelledby="headingThree-3" data-bs-parent="#accordionExample">
+                                <div class="accordion-body">
+                                    Payhankey allows all users to withdraw anytime once they have a minimum of $20 (or
+                                    its equivalent in your local currency).
+                                    To withdraw, Login to your dashboard to provide your withdrawal information.You can
+                                    withdraw via Paypal, USDT or to your Local Bank.
+                                    Withdrawals are processed within 24 hours to 48 hours depending on your withdrawal
+                                    method.
+                                </div>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="headingThree-4">
-                          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree-4" aria-expanded="false" aria-controls="collapseThree-4">
-                            How much can I earn per view on Payhankey? 
-                          </button>
-                        </h2>
-                        <div id="collapseThree-4" class="accordion-collapse collapse" aria-labelledby="headingThree-4" data-bs-parent="#accordionExample">
-                          <div class="accordion-body">
-                            Payhankey pays for every  like, comment. Click <a href="{{ url('register') }}"> here</a> to see earnings
-                          </div>
-                        </div>
-                    </div>
 
+
+
+
+                    </div>
 
 
                 </div>
-
-
             </div>
-        </div>
-      
-    </div>
-</section>
-<!-- Contact Us End -->
 
+        </div>
+    </section>
+    
     <!-- Contact Us Start -->
     <section class="section bg-light" id="contact">
         <div class="container">
@@ -639,23 +703,24 @@
                     <div class="text-center mb-5">
                         <h3 class="title mb-3">Contact Us</h3>
                         <p class="text-muted font-size-15">
-                            We'll love to hear from you and learn how best to assist you monetize your posts and content. Kindly send us a mail and we will be glad to help.
+                            We'll love to hear from you and learn how best to assist you monetize your posts and
+                            content. Kindly send us a mail and we will be glad to help.
                         </p>
                     </div>
                 </div>
             </div>
             <div class="row justify-content-center">
-                
+
                 <div class="col-lg-6 align-self-center">
                     <div class="contact-detail text-muted ms-lg-5">
 
                         <p class=""><i class="icon-xs icon me-1" data-feather="mail"></i> :
                             <span>support@payhankey.com</span>
                         </p>
-                       
-                        <p class=""><i class="icon-xs icon me-1" data-feather="map-pin"></i> : <span>
-                            1309 Coffeen Avenue, 1200 Sheridan Wyoming, 82801</span>
-                        </p>
+
+                        {{-- <p class=""><i class="icon-xs icon me-1" data-feather="map-pin"></i> : <span>
+                                1309 Coffeen Avenue, 1200 Sheridan Wyoming, 82801</span>
+                        </p> --}}
 
                     </div>
                 </div>
@@ -672,21 +737,25 @@
                     <div class="mb-5">
                         <img src="images/logo-light.png" alt="" class="" height="24">
                         <p class="text-white-50 my-4 font-size-15">
-                            Payhankey allows you to make short posts, facts, quizzes and teasers. Earn signup bonus and referral bonuses when you refer your friends.
+                            Payhankey allows you to make short posts, facts, quizzes and teasers. Earn signup bonus and
+                            referral bonuses when you refer your friends.
                         </p>
                         <ul class="list-inline footer-social-icon-content">
                             <li class="list-inline-item me-4">
-                                <a href="https://www.tiktok.com/@payhankeyofficial?_t=8nKWNLIq65o&_r=1" class="footer-social-icon" target="_blank">
+                                <a href="https://www.tiktok.com/@payhankeyofficial?_t=8nKWNLIq65o&_r=1"
+                                    class="footer-social-icon" target="_blank">
                                     <i class="fab fa-tiktok"></i>
                                 </a>
                             </li>
                             <li class="list-inline-item me-4">
-                                <a href="https://www.instagram.com/payhankey_official?utm_source=qr&igsh=M3ZzdjN3MHUxOXZk" class="footer-social-icon" target="_blank">
+                                <a href="https://www.instagram.com/payhankey_official?utm_source=qr&igsh=M3ZzdjN3MHUxOXZk"
+                                    class="footer-social-icon" target="_blank">
                                     <i class="fab fa-instagram"></i>
                                 </a>
                             </li>
                             <li class="list-inline-item me-4">
-                                <a href="https://www.facebook.com/profile.php?id=61561454191408&mibextid=ZbWKwL" class="footer-social-icon" target="_blank">
+                                <a href="https://www.facebook.com/profile.php?id=61561454191408&mibextid=ZbWKwL"
+                                    class="footer-social-icon" target="_blank">
                                     <i class="fab fa-facebook"></i>
                                 </a>
                             </li>
@@ -699,7 +768,7 @@
                         </ul>
                     </div>
                 </div>
-                
+
             </div>
         </div>
     </section>
@@ -709,7 +778,9 @@
                 <div class="col-lg-12">
                     <div class="text-center">
                         <p class="text-white-50 font-size-15 mb-0">
-                            <script>document.write(new Date().getFullYear())</script> © Payhankey.com
+                            <script>
+                                document.write(new Date().getFullYear())
+                            </script> © Payhankey.com
                         </p>
                     </div>
                 </div>
@@ -773,18 +844,18 @@
     </div> --}}
     <!-- login Modal End -->
 
-   
+
 
     <!-- javascript -->
-    <script src="{{asset('asset/js/bootstrap.bundle.min.js')}}"></script>
-    <script src="{{asset('asset/js/smooth-scroll.polyfills.min.js')}}"></script>
-    <script src="{{asset('asset/js/gumshoe.polyfills.min.js')}}"></script>
+    <script src="{{ asset('asset/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ asset('asset/js/smooth-scroll.polyfills.min.js') }}"></script>
+    <script src="{{ asset('asset/js/gumshoe.polyfills.min.js') }}"></script>
     <!-- feather icon -->
-    <script src="{{asset('asset/js/feather.js')}}"></script>
+    <script src="{{ asset('asset/js/feather.js') }}"></script>
     <!-- unicons icon -->
-    <script src="{{asset('asset/js/unicons.js')}}"></script>
+    <script src="{{ asset('asset/js/unicons.js') }}"></script>
     <!-- Main Js -->
-    <script src="{{asset('asset/js/app.js')}}"></script>
+    <script src="{{ asset('asset/js/app.js') }}"></script>
 
 </body>
 
