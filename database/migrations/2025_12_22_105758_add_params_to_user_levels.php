@@ -12,10 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('user_levels', function (Blueprint $table) {
+            $table->string('email_token')->nullable()->after('level_id');
             $table->string('plan_name')->nullable()->after('level_id');
-            $table->string('start_date')->nullable()->after('plan_name');
-            $table->dateTime('end_date')->nullable()->after('start_date');
-            $table->enum('status', ['active', 'inactive'])->default('active')->after('end_date');
+            $table->string('plan_code')->nullable()->after('plan_name');
+            $table->string('subscription_code')->nullable()->after('plan_code');
+            $table->timestamp('start_date')->nullable()->after('plan_name');
+            $table->timestamp('next_payment_date')->nullable()->after('start_date');
+            $table->enum('status', ['active', 'inactive'])->default('active')->after('next_payment_date');
         });
     }
 
@@ -25,7 +28,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('user_levels', function (Blueprint $table) {
-            $table->dropColumn(['plan_name', 'start_date', 'end_date', 'status']);
+            $table->dropColumn(['email_token', 'plan_name', 'plan_code', 'start_date', 'subscription_code', 'next_payment_date', 'status']);
         });
     }
 };

@@ -9,6 +9,7 @@ use App\Models\PartnerSlot;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Models\UserLevel;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -82,38 +83,38 @@ class HomeController extends Controller
         return redirect('timeline');
     }
 
-    public function validateApi(){
-         $url = request()->fullUrl();
-       $url_components = parse_url($url);
-       parse_str($url_components['query'], $params);
-       if($params['status'] == 'cancelled'){
-           return redirect('partner');
-       }
-       $ref = $params['transaction_id']; 
+//     public function validateApi(){
+//          $url = request()->fullUrl();
+//        $url_components = parse_url($url);
+//        parse_str($url_components['query'], $params);
+//        if($params['status'] == 'cancelled'){
+//            return redirect('partner');
+//        }
+//        $ref = $params['transaction_id']; 
 
-       $response = $this->verifyFlutterwavePayment($ref);
+//        $response = $this->verifyFlutterwavePayment($ref);
 
-       if($response['status'] == 'success'){
+//        if($response['status'] == 'success'){
           
             
-        $transaction= Transaction::create([
-               'user_id' => auth()->user()->id,
-               'ref' => $response['data']['tx_ref'],
-               'amount' => $response['data']['amount'],
-               'currency' => $response['data']['currency'],
-               'status' =>  $response['data']['status'],
-               'type' => 'slot_purchase',
-               'action' => 'Credit',
-               'description' => 'Agent payment by '.auth()->user()->name, 
-               'meta' => json_encode($response['data']['meta']),
-               'customer' => json_encode($response['data']['customer'])
-            ]);
+//         $transaction= Transaction::create([
+//                'user_id' => auth()->user()->id,
+//                'ref' => $response['data']['tx_ref'],
+//                'amount' => $response['data']['amount'],
+//                'currency' => $response['data']['currency'],
+//                'status' =>  $response['data']['status'],
+//                'type' => 'slot_purchase',
+//                'action' => 'Credit',
+//                'description' => 'Agent payment by '.auth()->user()->name, 
+//                'meta' => json_encode($response['data']['meta']),
+//                'customer' => json_encode($response['data']['customer'])
+//             ]);
 
-            return redirect('partner')->with('success', 'Payment received. Your slot will be allocated in less than 3 hours');
+//             return redirect('partner')->with('success', 'Payment received. Your slot will be allocated in less than 3 hours');
 
-        }
+//         }
 
-   }
+//    }
 
    public function upgradeApi(){
 
@@ -121,78 +122,58 @@ class HomeController extends Controller
         $url_components = parse_url($url);
         parse_str($url_components['query'], $params);
 
-        // if($params['status'] == 'cancelled'){
-        //     return redirect('settings');
-        // }
+
         $reference = $params['reference'];
 
-        $url = 'https://api.paystack.co/transaction/verify/'.$reference;
-        $res = Http::withHeaders([
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-            'Authorization' => 'Bearer ' . env('PAYSTACK_SECRET_KEY')
-        ])->get($url)->throw();
+        //verify Payment
 
-        return json_decode($res->getBody()->getContents(), true);
-
-        // Subscription::create([
-        // 'user_id' => $data['metadata']['user_id'],
-        // 'subscription_code' => $data['subscription']['subscription_code'],
-        // 'email_token' => $data['subscription']['email_token'],
-        // 'plan_code' => $data['plan']['plan_code'],
-        // 'status' => 'active',
-        // 'next_payment_date' => $data['subscription']['next_payment_date'],
-        // ]);
-
-
-
-
+        $res = verifyPaystackPayment($reference); 
+        $cusEmail = $res['customer']['email'];
        
 
-        // $response = $this->verifyFlutterwavePayment($ref);
+        
+        //fetch Subscription
+        $subData = fetchSubscription($cusEmail);
 
-        // if($response['status'] == 'success'){
-        //    $amount = $response['data']['amount'];
-        //     $currency = $response['data']['currency'];
-        //     $string = json_encode($response['data']['meta']);
-        //     $data = json_decode($string, true);
-        //     $package = htmlspecialchars($data['package']);
-        //     // return ([$amount, $currency, $package]);
+        
+       $nextPaymentDate = Carbon::parse($subData['next_payment_date'])
+        ->timezone(config('app.timezone')); // optional
+       
 
-        //     $ref = time();
-        //     $level = Level::where('name', $package)->first();
-        //     $code = generateCode(5);
+       $level =  Level::where('name', $subData['plan']['name'])->first();
 
-        //     AccessCode::create(['tx_id' => $ref, 'partner_id' => null, 'name' =>$level->name, 'email' => auth()->user()->email, 
-        //     'amount' => $level->amount, 'code' => $code, 'level_id' => $level->id,
-        //     'recepient_name' => auth()->user()->name, 'recepient_email' => auth()->user()->email, 'is_active' => false
-        //     ]);
+        $updatedSub = UserLevel::updateOrCreate(
+            [
+                'user_id' => auth()->id(),
+                
+            ],
+            [
+                'level_id' => $level->id,
+                'plan_name' => $subData['plan']['name'],
+                'plan_code' => $subData['plan']['plan_code'],
+                'subscription_code' => $subData['subscription_code'],
+                'email_token' => $subData['email_token'],
+                'start_date' => now(),
+                'status' => $subData['status'],
+                'next_payment_date' => $nextPaymentDate,
+            ]
+        );
 
-        //     $userInfo = User::where('id', auth()->user()->id)->first();
-        //     $userInfo->level_id = $level->id;
-        //     $userInfo->save();
-
-
-        //     // $accessCode = AccessCode::where('code', $code)->where('is_active', true)->first();
-        //     // $fetchUser = UserLevel::where('user_id', auth()->user()->id)->delete();
-        //     // UserLevel::create(['user_id' => auth()->user()->id, 'level_id' => $level->id]);
-
-        //  $transaction= Transaction::create([
-        //         'user_id' => auth()->user()->id,
-        //         'ref' => $response['data']['tx_ref'],
-        //         'amount' => $response['data']['amount'],
-        //         'currency' => $response['data']['currency'],
-        //         'status' =>  $response['data']['status'],
-        //         'type' => 'upgrade_purchase',
-        //         'action' => 'Credit',
-        //         'description' => auth()->user()->name.' upgraded to '.$level->name, 
-        //         'meta' => json_encode($response['data']['meta']),
-        //         'customer' => json_encode($response['data']['customer'])
-        //      ]);
+        $transaction= Transaction::create([
+                'user_id' => auth()->user()->id,
+                'ref' => $reference,
+                'amount' => $subData['amount']/100,
+                'currency' => $subData['plan']['currency'],
+                'status' =>  'successful',
+                'type' => 'upgrade_purchase',
+                'action' => 'Credit',
+                'description' => auth()->user()->name.' upgraded to '.$subData['plan']['name'], 
+                'meta' => null,
+                'customer' => null
+             ]);
  
-        //      return redirect('settings')->with('success', 'Upgrade Successful');
+             return redirect('upgrade')->with('success', 'You Successfully upgraded to '.$subData['plan']['name']. ' your next payment is '. $nextPaymentDate);
  
-        //  }
  
 
    }

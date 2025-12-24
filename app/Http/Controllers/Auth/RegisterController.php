@@ -12,6 +12,7 @@ use App\Models\Transaction;
 use App\Models\User;
 use App\Models\UserLevel;
 use App\Models\Wallet;
+use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
@@ -76,7 +77,7 @@ class RegisterController extends Controller
             // 'password' => ['required', 'string', 'min:8', 'confirmed'],
             'password' => ['required', 'string', 'min:8'],
             // 'access_code' => ['required', 'string'],
-            'referral_code' => ['sometimes']
+            'referral_code' => ['sometimes', 'string']
         ]);
 
         // return $validated;
@@ -107,6 +108,8 @@ class RegisterController extends Controller
             $level = Level::where('name', 'Basic')->first();
             UserLevel::create(['user_id' => $user->id, 'level_id' => $level->id]);
             $user->level_id = $level->id;
+            $user->plan_name = $level->name;
+            $user->next_payment_date = Carbon::now()->addDays(365);
             $user->save();
 
             $roleId = Role::where('name', 'user')->first()->id;
@@ -145,6 +148,7 @@ class RegisterController extends Controller
             session()->regenerate();
             if (auth()->user()->email_verified_at == null) {
                 $this->verifyExistingUserEmail(auth()->user());
+
                 return redirect()->intended('home')->with('info', 'Please verify your email. An access code has been sent to your email');
             }
 
@@ -163,11 +167,37 @@ class RegisterController extends Controller
             $updatedCode->code = $code;
             $updatedCode->is_active = false;
             $updatedCode->save();
+
         } else {
             $level = Level::where('id', $user->level_id)->first();
             $ref = time() . rand(1000, 9000);
             $updatedCode = AccessCode::create(['tx_id' => $ref, 'name' => $level->name, 'email' => $user->email, 'amount' => $level->reg_bonus, 'code' => $code, 'level_id' => $level->id, 'is_active' => false]);
         }
+
+        $level = Level::where('id', $user->level_id)->first();
+       $nextPaymentDate = null;
+        if($level->name == 'Creator' || $level->name == 'Influencer'){
+            $nextPaymentDate = Carbon::now()->addDays(30);//->format('Y-m-d H:i:s');
+        }else{
+            $nextPaymentDate = Carbon::now()->addDays(365);
+        }
+
+        UserLevel::updateOrCreate(
+            [
+                'user_id' => auth()->id(),
+                
+            ],
+            [
+                'level_id' => $level->id,
+                'plan_name' => $level->name,
+                'plan_code' => null,
+                'subscription_code' => null,
+                'email_token' => null,
+                'start_date' => now(),
+                'status' => 'active',
+                'next_payment_date' => $nextPaymentDate
+            ]
+        );
 
         Mail::to($user->email)->send(new AccessCodeMail($code, $user));
         return $code;

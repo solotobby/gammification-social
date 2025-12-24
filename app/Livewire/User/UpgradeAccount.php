@@ -42,16 +42,18 @@ class UpgradeAccount extends Component
             return;
         }
 
-        $userCurrency = userBaseCurrency($user->id);
-        $convertedAmount = convertToBaseCurrency($level->amount, $userCurrency);
+       $userCurrency = userBaseCurrency($user->id);
 
         //get plan code based on currency and plan
         $levelPlan = LevelPlanId::where('level_name', $level->name)->where('currency', $userCurrency)->first();
 
+        
+        $convertedAmount = convertToBaseCurrency($levelPlan->amount, $userCurrency);
+
         if($levelPlan){
-            
+
             if($userCurrency == 'NGN'){
-                $this->createSubscriptionNGN($levelPlan->plan_id, $convertedAmount, $level->name);
+                $this->createSubscriptionNGN($levelPlan->plan_id, $levelPlan->amount, $level->name);
             }
             
         }
@@ -72,6 +74,7 @@ class UpgradeAccount extends Component
             'email' => $user->email,
             'amount' => $amount*100, // first charge
             'callback_url' => route('upgrade.api'),
+            'channel' => ["card", "bank", "apple_pay", "ussd", "qr", "mobile_money", "bank_transfer", "payattitude"],
             'metadata' => [
                 'user_id' => $user->id,
                 'level' => $level,

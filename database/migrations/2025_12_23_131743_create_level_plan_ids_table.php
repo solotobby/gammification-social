@@ -16,7 +16,7 @@ return new class extends Migration
             $table->uuid('level_id')->index();
             $table->string('level_name');
             $table->string('provider');
-            $table->string('plan_id');
+            $table->string('plan_code');
             $table->decimal('amount', 10, 2)->default(0.00);
             $table->string('currency');
             $table->enum('status', ['active', 'inactive'])->default('active');

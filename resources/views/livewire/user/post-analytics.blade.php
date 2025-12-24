@@ -1,6 +1,6 @@
 <div>
     <!-- Simple -->
-    <h2 class="content-heading">Post Analytics - <i>{{ auth()->user()->level->name }}</i></h2>
+    <h2 class="content-heading">Post Analytics - <i>{{ userLevel() }}</i></h2>
 
 
     <blockquote class="blockquote bg-light p-3 rounded border-start border-4 border-primary">

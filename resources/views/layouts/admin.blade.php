@@ -683,7 +683,7 @@
                   @if(auth()->user()->hasRole('admin'))
                       Admin Account
                     @else
-                      {{ auth()->user()->level->name }}
+                      {{ userLevel()}}
                     @endif
                 </div>
                 <div class="p-2">

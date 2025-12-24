@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
 use App\Traits\UuidTrait;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -69,17 +70,27 @@ class User extends Authenticatable
         return $this->hasMany(Post::class);
     }
 
-    public function level()
-    {
-        //    return $this->belongsTo(AccessCode::class, 'access_code_id');
+    // public function level()
+    // {
+    //     //    return $this->belongsTo(AccessCode::class, 'access_code_id');
 
-        return $this->belongsTo(Level::class);
-    }
+    //     //return $this->belongsTo(Level::class);
+
+    //     return activeLevel()->plan_name;
+    // }
+
+    // public function activeLevel()
+    // {
+    //     $currentDate = now();
+    //     return $this->hasOne(UserLevel::class, 'user_id')->where('status', 'active')->where('next_payment_date', '>', $currentDate);
+    // }
 
     public function activeLevel()
     {
-        $currentDate = now();
-        return $this->hasOne(UserLevel::class, 'user_id', 'id')->where('status', 'active')->where('end_date', '>', $currentDate);
+        
+       return $this->hasOne(UserLevel::class, 'user_id')
+                ->where('status', 'active')
+                ->where('next_payment_date', '>', Carbon::now());
     }
 
     public function social()

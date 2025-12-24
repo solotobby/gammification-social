@@ -17,7 +17,7 @@
         }
     </style>
 
-    <h2 class="content-heading">Wallets - {{ $wallets->level }}</h2>
+    <h2 class="content-heading">Wallets - {{ userLevel() }}</h2>
     <div class="row">
         @if (session()->has('status_refresh'))
             <div class="alert alert-success" role="alert">
@@ -96,7 +96,7 @@
             </a>
         </div>
 
-        @if (auth()->user()->level->name == 'Influencer' || auth()->user()->level->name == 'Creator' || auth()->user()->level->name == 'Beginner')
+        @if (userLevel() == 'Influencer' || userLevel() == 'Creator' || userLevel() == 'Basic')
             <div class="col-12 mb-3">
                 <button class="btn btn-sm btn-info" wire:click="refresh">Refresh Wallet</button>
             </div>

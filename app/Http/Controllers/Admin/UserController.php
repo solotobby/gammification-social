@@ -50,13 +50,7 @@ class UserController extends Controller
                 $perCommentAmount = 0.10; //25 //20
              }
 
-            // if(auth()->user()->level->name == 'Influencer'){
-            //     $perCommentAmount = 0.08; //40 //30
-            //  }elseif(auth()->user()->level->name == 'Creator'){
-            //     $perCommentAmount = 0.07; //30 // 25
-            //  }else{
-            //     $perCommentAmount = 0.05; //25 //20
-            //  }
+            
 
              $singleViewExternal = 1/5000;
 

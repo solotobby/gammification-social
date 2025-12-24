@@ -79,7 +79,7 @@
               </div>
               <div class="mb-4">
                 <label class="form-label" for="dm-profile-edit-job-title">Level</label>
-                <input type="text" class="form-control" id="dm-profile-edit-job-title" name="dm-profile-edit-job-title" placeholder="Add your job title.." value="{{ auth()->user()->level->name }}" readonly>
+                <input type="text" class="form-control" id="dm-profile-edit-job-title" name="dm-profile-edit-job-title" placeholder="Add your job title.." value="{{ userLevel() }}" readonly>
               </div>
               {{-- <div class="mb-4">
                 <label class="form-label" for="dm-profile-edit-company">Activation Code</label>
@@ -92,18 +92,7 @@
               <hr>
               <div class="mb-4">
                 <label class="form-label">Upgrade your Account</label>
-                {{-- <select class="form-control" name="upgrade" wire:model="upgrade" required>
-                  <option value="">Select Upgrade Type</option>
-
-                  @if(auth()->user()->level->name == 'Basic')
-                      <option value="Creator">Creator</option>
-                      <option value="Influencer">Influencer</option>
-                  @elseif(auth()->user()->level->name == 'Creator')
-                      <option value="Influencer">Influencer</option>
-                  @else
-                    You do not need an upgrade of account
-                  @endif
-                </select> --}}
+                
                 <div class="push">
                   <img class="img-avatar" src="{{ asset('src/assets/media/avatars/avatar13.jpg')}}" alt="">
                 </div>

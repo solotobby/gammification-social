@@ -10,5 +10,5 @@ class LevelPlanId extends Model
 {
     use HasFactory, UuidTrait;
 
-    protected $fillable = ['level_id', 'level_name', 'provider', 'plan_id', 'amount', 'currency', 'status'];
+    protected $fillable = ['level_id', 'level_name', 'provider', 'plan_code', 'amount', 'currency', 'status'];
 }

@@ -73,7 +73,11 @@ if(!function_exists('userBaseCurrency')){
 if (!function_exists('userLevel')) {
     function userLevel($userId = null)
     {
-        return $userId ? User::find($userId)->level->name : auth()->user()->level->name;
+        $user = $userId ? User::find($userId) : auth()->user();
+
+        return $user?->activeLevel?->plan_name ?? 'Basic';
+
+        // return $userId ? User::find($userId)->activeLevel->plan_name : auth()->user()->activeLevel->plan_name;
     }
 }
 
@@ -787,55 +791,41 @@ if (!function_exists('createPlan')) {
     }
 }
 
-// if (!function_exists('initializeCustomerAuthorization')) {
+if (!function_exists('verifyPaystackPayment')) {
 
-//     function initializeCustomerAuthorization()
-//     {
-//         $url = 'https://api.paystack.co/customer/authorization/initialize';
-//         $res = Http::withHeaders([
-//             'Accept' => 'application/json',
-//             'Content-Type' => 'application/json',
-//             'Authorization' => 'Bearer ' . env('PAYSTACK_SECRET_KEY')
-//         ])->post($url, [
-//             "email"=> auth()->user()->email,
-//             "channel"=> "direct_debit",
-//             "callback_url"=> "http://test.url.com"
-//         ])->throw();
+    function verifyPaystackPayment($reference)
+    {
+        $url = 'https://api.paystack.co/transaction/verify/'.$reference;
+        $res = Http::withHeaders([
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer ' . env('PAYSTACK_SECRET_KEY')
+        ])->get($url)->throw();
 
-//         return json_decode($res->getBody()->getContents(), true);
-//     }
-// }
+         return json_decode($res->getBody()->getContents(), true)['data'];
+    }
+}
 
            
 
 // PLN_jpan26fg9bz60p7
 //create subscription
-if (!function_exists('createSubscription')) {
+if (!function_exists('fetchSubscription')) {
 
-    function createSubscription($planId=null, $customerEmail=null)
+    function fetchSubscription($customerEmail)
     {
-    //     $user = Auth::user();
-    //     $phone = '+234' . substr($user->phone, 1);
-    //     $payload = [
-    //         "email" => $user->email,
-    //         "first_name" => 'Payhankey',
-    //         "last_name" => $user->name,
-    //         "phone" => $phone
-    //     ];
-
-    //    return  $customerCode = createCustomer($payload)['data']['customer_code'];
-
-
         $url = 'https://api.paystack.co/subscription';
-        $res = Http::withHeaders([
+        $subData = Http::withHeaders([
             'Accept' => 'application/json',
             'Content-Type' => 'application/json',
             'Authorization' => 'Bearer ' . env('PAYSTACK_SECRET_KEY')
-        ])->post($url, [
-            "plan" => 'PLN_jpan26fg9bz60p7',
-            "customer" => 'CUS_fjk7b9wnxwid0t8' //$customerCode
+        ])->get($url, [
+            // "plan" => $cusPlan,
+            // "customer" => $cusCode,
+            "email" => $customerEmail,
+            // 'authorization' => $authCode, //$customerCode
         ])->throw();
 
-        return json_decode($res->getBody()->getContents(), true);
+        return json_decode($subData->getBody()->getContents(), true)['data'][0];
     }
 }

@@ -46,6 +46,11 @@ class Posts extends Component
     public $convertedAmount;
 
 
+    // public function mount(){
+    //     $user = UserLevel::where('user_id', auth()->user()->id)->first();
+
+    //     dd($user);
+    // }
 
     public function updatedImages()
     {

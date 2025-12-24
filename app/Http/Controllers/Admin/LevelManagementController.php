@@ -33,12 +33,11 @@ class LevelManagementController extends Controller
 
             $creatPlan = createPlan($level->name, $convertedAmount);
 
-
             LevelPlanId::create([
                 'level_id' => $level->id,
                 'level_name' => $level->name,
                 'provider' => 'Paystack',
-                'plan_id' => $creatPlan['data']['plan_code'],
+                'plan_code' => $creatPlan['data']['plan_code'],
                 'amount' => $convertedAmount,
                 'currency' => 'NGN',
                 'status' => 'active'

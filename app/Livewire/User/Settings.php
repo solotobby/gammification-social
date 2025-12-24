@@ -22,7 +22,7 @@ class Settings extends Component
     public $currency = '';
 
     public function mount(){
-        // dd(auth()->user()->level->name);
+        
         $this->facebook = @auth()->user()->social->facebook;
         $this->twitter = @auth()->user()->social->twitter;
         $this->instagram = @auth()->user()->social->instagram;
@@ -46,7 +46,7 @@ class Settings extends Component
     public function upgradeAccount(){
         $upgrade = $this->upgrade;
         $currency = $this->currency;
-        $currentLevel = auth()->user()->level->name;
+        $currentLevel = auth()->user()->activeLevel->plan_name;
 
         $price = $this->pricingList($currentLevel, $upgrade);
 
