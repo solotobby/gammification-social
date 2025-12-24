@@ -66,16 +66,16 @@
                 </a>
             @else
             <a
-    wire:click="toggleFollow()"
-    href="javascript:void(0)"
-    class="btn btn-sm space-x-1
-        {{ $isFollowing ? 'btn-alt-secondary' : 'btn-primary' }}"
->
-    <i class="fa {{ $isFollowing ? 'fa-user-minus' : 'fa-user-plus' }} opacity-50"></i>
-    <span>
-        {{ $isFollowing ? 'Following' : 'Follow' }}
-    </span>
-</a>
+                wire:click="toggleFollow()"
+                href="javascript:void(0)"
+                class="btn btn-sm space-x-1
+                    {{ $isFollowing ? 'btn-alt-secondary' : 'btn-primary' }}"
+            >
+                <i class="fa {{ $isFollowing ? 'fa-user-minus' : 'fa-user-plus' }} opacity-50"></i>
+                <span>
+                    {{ $isFollowing ? 'Following' : 'Follow' }}
+                </span>
+            </a>
 
                 {{-- <a wire:click="toggleFollow()" href="javascript:void(0)" class="btn btn-sm btn-alt-secondary space-x-1">
                     <i class="fa fa-pencil-alt opacity-50"></i>

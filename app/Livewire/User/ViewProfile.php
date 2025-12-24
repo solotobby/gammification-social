@@ -21,7 +21,7 @@ class ViewProfile extends Component
 
     public bool $isFollowing = false;
 
-    #[On('view-profile.{user.id}')]
+    #[On('view-profile.{user.username}')]
 
     public function mount($username, )
     {
@@ -49,11 +49,13 @@ class ViewProfile extends Component
             $post->likes()->where('user_id', Auth::id())->delete();
             $post->decrement('likes');
         } else {
-            $post->likes()->create(['user_id' => Auth::id()]);
-            $post->increment('likes');
+            // if (auth()->user()->id != $post->user_id) {
+                $post->likes()->create(['user_id' => Auth::id(), 'is_paid' => false, 'amount' => calculateUniqueEarningPerLike(), 'poster_user_id' => $post->user_id]);
+                $post->increment('likes');
+            // }
         }
 
-        $this->timeline($post->user_id);
+        $this->timeline($this->username);
 
         // $this->dispatch('user.timeline');
     }
