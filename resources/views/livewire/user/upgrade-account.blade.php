@@ -3,14 +3,14 @@
     <main id="main-container">
 
         <!-- Hero -->
-        <div class="bg-image" style="background-image: url('assets/media/photos/photo11@2x.jpg');">
+        <div class="bg-image" style="background-image: url({{ asset('src/assets/media/photos/photo11@2x.jpg') }} );">
             <div class="bg-black-75">
                 <div class="content content-boxed text-center">
                     <div class="py-5">
                         <h1 class="fs-2 fw-normal text-white mb-2">
                             <i class="fa fa-arrow-up me-1"></i> Upgrade Account
                         </h1>
-                        <h2 class="fs-4 fw-normal text-white-75">Go to Cretor or Influencer to monentize your account!
+                        <h2 class="fs-4 fw-normal text-white-75">To Cretor or Influencer to monentize your account!
                         </h2>
                     </div>
                 </div>
@@ -31,7 +31,7 @@
 
                 @foreach ($levels as $level)
                     <div class="col-md-6 col-xl-4">
-                        @if ($activeLevel && $activeLevel->level_id == $level->id)
+                        @if (userLevel() && userLevel() == $level->name)
                             <!-- Freelancer Plan -->
                             <div class="block block-rounded block-themed text-center">
                                 <div class="block-header bg-muted">
@@ -46,20 +46,23 @@
                                 <div class="block-content">
                                     <div class="py-2">
                                         <p>
-                                            <strong>3</strong> Projects
+                                            <strong>{{ getCurrencyCode() }}{{ convertToBaseCurrency($level->reg_bonus, auth()->user()->wallet->currency) }} </strong> Upgrade Bonus
                                         </p>
                                         <p>
-                                            <strong>1GB</strong> Storage
+                                            <strong>{{ getCurrencyCode() }}{{ convertToBaseCurrency($level->ref_bonus, auth()->user()->wallet->currency) }} </strong> Referral Bonus
                                         </p>
+                                        
+                                        @if($level->name != 'Basic')
+                                         <p>
+                                            <strong>Account</strong> Monetization
+                                        </p>
+                                        @endif
+                                        
+                                        
                                         <p>
-                                            <strong>1</strong> Monthly Backup
+                                            <strong> Email</strong> Support
                                         </p>
-                                        <p>
-                                            <strong>10</strong> Clients
-                                        </p>
-                                        <p>
-                                            <strong>Email</strong> Support
-                                        </p>
+                                        
                                     </div>
                                 </div>
                                 <div class="block-content block-content-full bg-body-light">
@@ -88,21 +91,23 @@
                                 </div>
                                 <div class="block-content">
                                     <div class="py-2">
-                                        <p>
-                                            <strong>10</strong> Projects
+                                         <p>
+                                            <strong>{{ getCurrencyCode() }}{{ convertToBaseCurrency($level->reg_bonus, auth()->user()->wallet->currency) }} </strong> Upgrade Bonus
                                         </p>
                                         <p>
-                                            <strong>30GB</strong> Storage
+                                            <strong>{{ getCurrencyCode() }}{{ convertToBaseCurrency($level->ref_bonus, auth()->user()->wallet->currency) }} </strong> Referral Bonus
                                         </p>
+                                        
+                                        @if($level->name != 'Basic')
+                                         <p>
+                                            <strong>Account</strong> Monetization
+                                        </p>
+                                        @endif
+
                                         <p>
-                                            <strong>30</strong> Monthly Backups
+                                            <strong>Email</strong> Support
                                         </p>
-                                        <p>
-                                            <strong>500</strong> Clients
-                                        </p>
-                                        <p>
-                                            <strong>FULL</strong> Support
-                                        </p>
+                                        
                                     </div>
                                 </div>
                                 <div class="block-content block-content-full bg-body-light">
