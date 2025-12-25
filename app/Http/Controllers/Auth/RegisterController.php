@@ -106,11 +106,11 @@ class RegisterController extends Controller
         if ($user) {
 
             $level = Level::where('name', 'Basic')->first();
-            UserLevel::create(['user_id' => $user->id, 'level_id' => $level->id]);
-            $user->level_id = $level->id;
-            $user->plan_name = $level->name;
-            $user->next_payment_date = Carbon::now()->addDays(365);
-            $user->save();
+            $userLevel = UserLevel::create(['user_id' => $user->id, 'level_id' => $level->id]);
+            $userLevel->level_id = $level->id;
+            $userLevel->plan_name = $level->name;
+            $userLevel->next_payment_date = Carbon::now()->addDays(365);
+            $userLevel->save();
 
             $roleId = Role::where('name', 'user')->first()->id;
             $user->assignRole($roleId);
