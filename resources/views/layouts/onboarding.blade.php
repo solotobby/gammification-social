@@ -62,12 +62,42 @@ data-bs-keyboard="false" aria-labelledby="modal-onboarding" aria-hidden="true">
                  <img src="{{asset('logo.png')}}" alt="" class="logo-light mb-3" height="54" />
                {{-- <i class="fa fa-user-check fa-3x text-muted my-4"></i> --}}
 
-               <h3 class="fs-2 fw-light">Refer and earn more</h3>
-               Share your unique referral link with your friends and followers to earn even more.
-               <br> Your referral link is:
-               <b>{{ url('/reg?referral_code=' . auth()->user()->referral_code) }}</b>
-                 <br>
-               <button type="button" class="btn btn-primary mb-2 mt-4" onclick="jQuery('.js-slider').slick('slickGoTo', 3);">
+               {{-- <h3 class="fs-2 fw-light">Refer and earn more</h3>
+               Share your unique referral link with your friends and followers to earn even more. --}}
+
+               <h3 class="fs-2 fw-light mb-0">Refer & Earn More</h3>
+                <p class="text-muted">
+                  Share your unique referral link with friends and followers to earn even more.
+                </p>
+
+
+                <div class="card shadow-sm border-0 p-2 mb-0" style="max-width: 100%;">
+                <label class="form-label fw-semibold mb-1">Your referral link</label>
+
+                <div class="input-group">
+                  <input
+                    type="text"
+                    id="referralLink"
+                    class="form-control"
+                    value="{{ url('/reg?referral_code=' . auth()->user()->referral_code) }}"
+                    readonly
+                  />
+                  <button
+                    class="btn btn-outline-primary"
+                    type="button"
+                    onclick="copyReferralLink()"
+                    title="Copy to clipboard"
+                  >
+                    <i class="fa fa-copy"></i>
+                  </button>
+                </div>
+
+                <small id="copyFeedback" class="text-success mt-2 d-none">
+                  <i class="fa fa-check-circle me-1"></i> Link copied to clipboard
+                </small>
+              </div>
+
+               <button type="button" class="btn btn-primary mb-2 " onclick="jQuery('.js-slider').slick('slickGoTo', 3);">
                  Finally <i class="fa fa-check opacity-50 ms-1"></i>
                </button>
               
@@ -88,6 +118,8 @@ data-bs-keyboard="false" aria-labelledby="modal-onboarding" aria-hidden="true">
                  {{-- <textarea class="form-control" name="heard" placeholder="Enter how you heard about us" rows="3" cols="3" required></textarea>  --}}
                  <select class="form-control mt-2" name="heard" required>
                    <option value="">Select your interest</option>
+                   <option value="Freebyz">Freebyz</option>
+                   <option value="WhatsApp">WhatsApp</option>
                    <option value="Tiktok">Tiktok</option>
                    <option value="Facebook">Facebook</option>
                    <option value="Youtube">Youtube</option>
@@ -111,4 +143,23 @@ data-bs-keyboard="false" aria-labelledby="modal-onboarding" aria-hidden="true">
    </div>
  </div>
  <!-- END Onboarding Modal -->
+
+
+ <script>
+  function copyReferralLink() {
+    const input = document.getElementById('referralLink');
+    input.select();
+    input.setSelectionRange(0, 99999); // for mobile
+
+    navigator.clipboard.writeText(input.value).then(() => {
+      const feedback = document.getElementById('copyFeedback');
+      feedback.classList.remove('d-none');
+
+      setTimeout(() => {
+        feedback.classList.add('d-none');
+      }, 2000);
+    });
+  }
+</script>
+
  @endif

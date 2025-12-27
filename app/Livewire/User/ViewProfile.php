@@ -102,27 +102,27 @@ class ViewProfile extends Component
 
 
 
-    public function like($id)
-    {
-        // dd(auth()->user()->WithTotalLikes($id));
+    // public function like($id)
+    // {
+    //     // dd(auth()->user()->WithTotalLikes($id));
 
-        $post =  Post::where('unicode', $id)->first();
-        $post->likes += 1;
-        $post->save();
+    //     $post =  Post::where('unicode', $id)->first();
+    //     $post->likes += 1;
+    //     $post->save();
 
-        UserLike::create(['user_id' => auth()->user()->id, 'post_id' => $post->id]);
-        $this->dispatch('user.view-profile', id: $post->id);
-    }
+    //     UserLike::create(['user_id' => auth()->user()->id, 'post_id' => $post->id]);
+    //     $this->dispatch('user.view-profile', id: $post->id);
+    // }
 
-    public function dislike($id)
-    {
+    // public function dislike($id)
+    // {
 
-        $post =  Post::where('unicode', $id)->first();
-        $post->likes -= 1;
-        $post->save();
-        UserLike::where(['user_id' => auth()->user()->id, 'post_id' => $post->id])->delete();
-        $this->dispatch('user.view-profile', id: $post->id);
-    }
+    //     $post =  Post::where('unicode', $id)->first();
+    //     $post->likes -= 1;
+    //     $post->save();
+    //     UserLike::where(['user_id' => auth()->user()->id, 'post_id' => $post->id])->delete();
+    //     $this->dispatch('user.view-profile', id: $post->id);
+    // }
 
     public function loadMore()
     {
