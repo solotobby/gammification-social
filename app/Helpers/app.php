@@ -813,7 +813,7 @@ if (!function_exists('upgradeLevel')) {
     function upgradeLevel($levelId)
     {
         $user = Auth::user();
-        $level = Level::find($levelId);
+       $level = Level::find($levelId);
 
 
         if (!$level) {
@@ -825,7 +825,7 @@ if (!function_exists('upgradeLevel')) {
         $userCurrency = userBaseCurrency($user->id);
 
         //get plan code based on currency and plan
-        $levelPlan = LevelPlanId::where('level_name', $level->name)->where('currency', $userCurrency)->first();
+       $levelPlan = LevelPlanId::where('level_name', $level->name)->where('currency', $userCurrency)->first();
 
 
         $convertedAmount = convertToBaseCurrency($levelPlan->amount, $userCurrency);
@@ -833,7 +833,7 @@ if (!function_exists('upgradeLevel')) {
         if ($levelPlan) {
 
             if ($userCurrency == 'NGN') {
-                return createSubscriptionNGN($levelPlan->plan_id, $levelPlan->amount, $level->name);
+                return createSubscriptionNGN($levelPlan->plan_code, $levelPlan->amount, $level);
             }
         }
     }
@@ -843,7 +843,6 @@ if (!function_exists('createSubscriptionNGN')) {
 
     function createSubscriptionNGN($planCode, $amount, $level)
     {
-
         $user = Auth::user();
 
 
@@ -860,7 +859,8 @@ if (!function_exists('createSubscriptionNGN')) {
             'channel' => ["card", "bank", "apple_pay", "ussd", "qr", "mobile_money", "bank_transfer", "payattitude"],
             'metadata' => [
                 'user_id' => $user->id,
-                'level' => $level,
+                'level' => $level->name,
+                'level_id' => $level->id,
                 'name' => $user->name
             ],
         ])->throw();

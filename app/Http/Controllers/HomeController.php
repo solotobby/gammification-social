@@ -84,39 +84,6 @@ class HomeController extends Controller
         return redirect('timeline');
     }
 
-//     public function validateApi(){
-//          $url = request()->fullUrl();
-//        $url_components = parse_url($url);
-//        parse_str($url_components['query'], $params);
-//        if($params['status'] == 'cancelled'){
-//            return redirect('partner');
-//        }
-//        $ref = $params['transaction_id']; 
-
-//        $response = $this->verifyFlutterwavePayment($ref);
-
-//        if($response['status'] == 'success'){
-          
-            
-//         $transaction= Transaction::create([
-//                'user_id' => auth()->user()->id,
-//                'ref' => $response['data']['tx_ref'],
-//                'amount' => $response['data']['amount'],
-//                'currency' => $response['data']['currency'],
-//                'status' =>  $response['data']['status'],
-//                'type' => 'slot_purchase',
-//                'action' => 'Credit',
-//                'description' => 'Agent payment by '.auth()->user()->name, 
-//                'meta' => json_encode($response['data']['meta']),
-//                'customer' => json_encode($response['data']['customer'])
-//             ]);
-
-//             return redirect('partner')->with('success', 'Payment received. Your slot will be allocated in less than 3 hours');
-
-//         }
-
-//    }
-
    public function upgradeApi(){
 
         $url = request()->fullUrl();
@@ -128,13 +95,11 @@ class HomeController extends Controller
 
         //verify Payment
 
-        $res = verifyPaystackPayment($reference); 
+       $res = verifyPaystackPayment($reference); 
         $cusEmail = $res['customer']['email'];
        
-
-        
         //fetch Subscription
-        $subData = fetchSubscription($cusEmail);
+       $subData = fetchSubscription($cusEmail);
 
         
        $nextPaymentDate = Carbon::parse($subData['next_payment_date'])

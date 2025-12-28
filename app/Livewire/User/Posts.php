@@ -4,6 +4,7 @@ namespace App\Livewire\User;
 
 use App\Models\AccessCode;
 use App\Models\Post;
+use App\Models\PostImages;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Models\UserLevel;
@@ -72,6 +73,45 @@ class Posts extends Component
 
     public function post()
     {
+        $level = userLevel();
+
+
+        // Determine max length
+        $maxLength = in_array($level, ['Creator', 'Influencer']) ? null : 160;
+
+        // Check content length for regular users
+        if ($maxLength && strlen($this->content) > $maxLength) {
+            session()->flash('error', "You cannot post more than $maxLength characters.");
+            return;
+        }
+
+
+        $maxImages = match ($level) {
+            'Creator' => 1,
+            'Influencer' => 4,
+            default => 0,
+        };
+
+        // Block image upload for normal users
+        if ($maxImages === 0 && count($this->images) > 0) {
+            session()->flash('error', 'You are not allowed to upload images.');
+            return;
+        }
+
+        // Enforce image count
+        if (count($this->images) > $maxImages) {
+            session()->flash('error', "You can upload a maximum of {$maxImages} image(s).");
+            return;
+        }
+
+        // Validate images
+        if ($maxImages > 0) {
+            $this->validate([
+                'images.*' => 'image|max:2048', // 2MB per image
+            ]);
+        }
+
+
 
         $content = $this->convertUrlsToLinks($this->content);
         $getContent = Post::where(['user_id' => auth()->user()->id])->pluck('content')->toArray();
@@ -81,11 +121,21 @@ class Posts extends Component
         if (isSimilar($content, $getContent, 4)) {
             session()->flash('info', 'This content is too similar to existing content, therefore it will not be posted.');
             $this->reset('content');
-            // dd("This content is too similar to existing content and will not be posted.");
         } else {
             $uniqueCode = rand(1000, 9999) . time();
             $timelines = Post::create(['user_id' => auth()->user()->id, 'content' => $content, 'unicode' => $uniqueCode, 'status' => 'LIVE']);
-            $this->reset('content');
+
+            foreach ($this->images as $image) {
+                $path = $image->store('post_images', 'public');
+
+                PostImages::create(['user_id' => Auth::id(), 'post_id' => $timelines->id, 'path' => $path]);
+
+                // $post->images()->create([
+                //     'path' => $path,
+                // ]);
+            }
+
+            $this->reset('content', 'images');
         }
     }
 
@@ -112,6 +162,18 @@ class Posts extends Component
         return preg_replace($pattern, $replacement, $text);
     }
 
+    public function removeImage($index)
+    {
+        if (isset($this->images[$index])) {
+            unset($this->images[$index]);
+
+            // Reindex array so Livewire stays in sync
+            $this->images = array_values($this->images);
+        }
+    }
+
+
+
     public function toggleLike($postId)
     {
 
@@ -122,8 +184,8 @@ class Posts extends Component
             $post->decrement('likes');
         } else {
             // if (auth()->user()->id != $post->user_id) {
-                $post->likes()->create(['user_id' => Auth::id(), 'is_paid' => false, 'amount' => calculateUniqueEarningPerLike(), 'poster_user_id' => $post->user_id]);
-                $post->increment('likes');
+            $post->likes()->create(['user_id' => Auth::id(), 'is_paid' => false, 'amount' => calculateUniqueEarningPerLike(), 'poster_user_id' => $post->user_id]);
+            $post->increment('likes');
             // }
         }
 

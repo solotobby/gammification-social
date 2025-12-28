@@ -44,7 +44,9 @@
 
                         <b>You're missing something out</b><br>
 
-                        Sharing your post gives you a wider reach and makes you earn from your existing traffic on other social media. You can earn up to $100 on each post daily when you share to other social media. You can also earn $20 on each review video you make about Payhankey.
+                        Sharing your post gives you a wider reach and makes you earn from your existing traffic on other
+                        social media. You can earn up to $100 on each post daily when you share to other social media.
+                        You can also earn $20 on each review video you make about Payhankey.
                         <br>Simply make a 2-5mins video daily and tag us @payhankeyofficial on
                         Instagram and TikTok.
                     </div>
@@ -64,39 +66,58 @@
                     {{ session('info') }}
                 </div>
             @endif
+            @if (session()->has('error'))
+                <div class="alert alert-danger mb-2" role="alert">
+                    {{ session('error') }}
+                </div>
+            @endif
+
 
             <div class="card mb-4">
 
                 <form wire:submit.prevent="post">
                     <div class="card-body">
-                        <textarea wire:model="content" name="content"
-                            class="form-control form-control-alt @error('content') is-invalid @enderror" placeholder="Say something amazing"
-                            required></textarea>
-                            {{-- An influencer qill be able to post image --}}
-                        {{-- @if (auth()->user()->level->name == 'Influencer')
-                            <div class="d-flex align-items-center justify-content-between mt-3">
+                        <div x-data="{ content: @entangle('content') }">
+                            <textarea x-model="content" class="form-control" placeholder="Say something amazing"
+                                @if (!in_array(userLevel(), ['Creator', 'Influencer'])) maxlength="160" @endif required></textarea>
+                            @if (!in_array(userLevel(), ['Creator', 'Influencer']))
+                                <small class="text-muted" x-text="content.length + '/160 characters'"></small>
+                            @endif
+                        </div>
 
-                                <label for="image-upload" class="btn btn-light m-0">
+                        @if (in_array(UserLevel(), ['Creator', 'Influencer']))
+                            <div class="mt-3" x-data="{ images: @entangle('images') }">
+
+                                <label class="btn btn-light">
                                     <i class="fas fa-image"></i>
+                                    <input type="file" wire:model="images" multiple accept="image/*" hidden
+                                        @if (UserLevel() === 'Creator') x-bind:disabled="images.length >= 1" @endif
+                                        @if (UserLevel() === 'Influencer') x-bind:disabled="images.length >= 4" @endif>
+                                        
                                 </label>
-                                <input type="file" id="image-upload" wire:model="images" multiple accept="image/*"
-                                    style="display: none;">
 
-                                @if ($imagePreviews)
-                                    <div class="form-group">
-                                        <div class="row py-4">
-                                            @foreach ($imagePreviews as $preview)
-                                                <div class="col-md-3">
-                                                    <img src="{{ $preview }}" class="img-fluid"
-                                                        alt="Preview Image">
-                                                </div>
-                                            @endforeach
+                                <small class="text-muted d-block mt-1">
+                                    {{ UserLevel() === 'Creator' ? 'Max 1 image' : 'Max 4 images' }}
+                                </small>
+
+                                {{-- Preview + Remove --}}
+                                <div class="row mt-3">
+                                    @foreach ($images as $index => $image)
+                                        <div class="col-3 position-relative mb-2">
+
+                                            <img src="{{ $image->temporaryUrl() }}" class="img-fluid rounded">
+
+                                            <button type="button" wire:click="removeImage({{ $index }})"
+                                                class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1">
+                                                &times;
+                                            </button>
+
                                         </div>
-                                    </div>
-                                @endif
-
+                                    @endforeach
+                                </div>
                             </div>
-                        @endif --}}
+                        @endif
+
                     </div>
                     <div class="card-footer">
                         <button class="btn btn-primary btn-block"> <i class="fa fa-pencil-alt opacity-50 me-1"></i>
@@ -105,10 +126,6 @@
                 </form>
             </div>
 
-
-            {{-- @foreach ($posts as $post)
-                {{ $post->content }} : {{$post->created_at}} <br>
-            @endforeach --}}
 
             @include('layouts.posts', $posts)
 
@@ -119,12 +136,10 @@
 
 
 
-    @if(auth()->user()->email_verified_at == null)
+    @if (auth()->user()->email_verified_at == null)
         @include('layouts.accesscode_verification')
     @else
-
         @include('layouts.onboarding')
-
     @endif
 
 </div>

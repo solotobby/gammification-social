@@ -21,82 +21,74 @@
 
             <div class="d-flex align-items-center">
 
-              @if(userLevel($timeline->user->id) == 'Basic')
-
-              <a class="img-link me-1" href="{{ url('profile/' . $timeline->user->username) }}">
-                    <img class="img-avatar img-avatar32 img-avatar-thumb"
-                        src="{{ asset('src/assets/media/avatars/avatar11.jpg') }}" alt="Avatar">
-                </a>
-
-                <a class="fw-semibold" href="{{ url('profile/' . $timeline->user->username) }}"
-                    style="color: #5A4FDC">{{ displayName($timeline->user->name) }}</a>
-
-                    
-                <span class="fs-sm text-muted ms-2">{{ $timeline->created_at?->shortAbsoluteDiffForHumans() }} ago</span>
-
-
-              @elseif (userLevel($timeline->user->id) == 'Creator')
-
-              <a class="img-link me-1" href="{{ url('profile/' . $timeline->user->username) }}">
-                    <img class="img-avatar img-avatar32 img-avatar-thumb"
-                        src="{{ asset('src/assets/media/avatars/avatar11.jpg') }}" alt="Avatar">
-                </a>
-                {{-- Username + Verified Tick --}}
-                <div class="d-flex align-items-center">
-                    <a class="fw-semibold me-1" href="{{ url('profile/' . $timeline->user->username) }}"
-                        style="color: #5A4FDC">
-                        {{ displayName($timeline->user->name) }}
+                @if (userLevel($timeline->user->id) == 'Basic')
+                    <a class="img-link me-1" href="{{ url('profile/' . $timeline->user->username) }}">
+                        <img class="img-avatar img-avatar32 img-avatar-thumb"
+                            src="{{ asset('src/assets/media/avatars/avatar11.jpg') }}" alt="Avatar">
                     </a>
 
-                    {{-- @if ($timeline->user->is_verified) --}}
-                    <!-- Twitter-style blue tick SVG -->
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                        fill="#1DA1F2" class="ms-1">
-                        <path d="M22.5 5.5l-12 12-5.5-5.5 1.5-1.5 4 4 10.5-10.5z" />
-                    </svg>
-                    {{-- @endif --}}
-                </div>
-
-                {{-- Timestamp --}}
-                <span class="fs-sm text-muted ms-2">
-                    {{ $timeline->created_at?->shortAbsoluteDiffForHumans() }} ago
-                </span>
+                    <a class="fw-semibold" href="{{ url('profile/' . $timeline->user->username) }}"
+                        style="color: #5A4FDC">{{ displayName($timeline->user->name) }}</a>
 
 
-              @else
+                    <span class="fs-sm text-muted ms-2">{{ $timeline->created_at?->shortAbsoluteDiffForHumans() }}
+                        ago</span>
+                @elseif (userLevel($timeline->user->id) == 'Creator')
+                    <a class="img-link me-1" href="{{ url('profile/' . $timeline->user->username) }}">
+                        <img class="img-avatar img-avatar32 img-avatar-thumb"
+                            src="{{ asset('src/assets/media/avatars/avatar11.jpg') }}" alt="Avatar">
+                    </a>
+                    {{-- Username + Verified Tick --}}
+                    <div class="d-flex align-items-center">
+                        <a class="fw-semibold me-1" href="{{ url('profile/' . $timeline->user->username) }}"
+                            style="color: #5A4FDC">
+                            {{ displayName($timeline->user->name) }}
+                        </a>
 
-              {{-- Avatar --}}
-                <a class="img-link me-2" href="{{ url('profile/' . $timeline->user->username) }}">
-                    <img class="img-avatar img-avatar32 img-avatar-thumb rounded-circle border border-primary border-2"
-                        src="{{ asset('src/assets/media/avatars/avatar11.jpg') }}" alt="Avatar">
-                </a>
+                        {{-- @if ($timeline->user->is_verified) --}}
+                        <!-- Twitter-style blue tick SVG -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                            fill="#1DA1F2" class="ms-1">
+                            <path d="M22.5 5.5l-12 12-5.5-5.5 1.5-1.5 4 4 10.5-10.5z" />
+                        </svg>
+                        {{-- @endif --}}
+                    </div>
 
-                 {{-- Username + Verified Tick --}}
-                <div class="d-flex align-items-center">
-                    <a class="fw-semibold me-1" href="{{ url('profile/' . $timeline->user->username) }}"
-                        style="color: #5A4FDC">
-                        {{ displayName($timeline->user->name) }}
+                    {{-- Timestamp --}}
+                    <span class="fs-sm text-muted ms-2">
+                        {{ $timeline->created_at?->shortAbsoluteDiffForHumans() }} ago
+                    </span>
+                @else
+                    {{-- Avatar --}}
+                    <a class="img-link me-2" href="{{ url('profile/' . $timeline->user->username) }}">
+                        <img class="img-avatar img-avatar32 img-avatar-thumb rounded-circle border border-primary border-2"
+                            src="{{ asset('src/assets/media/avatars/avatar11.jpg') }}" alt="Avatar">
                     </a>
 
-                    {{-- @if ($timeline->user->is_verified) --}}
-                    <!-- Twitter-style blue tick SVG -->
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                        fill="#1DA1F2" class="ms-1">
-                        <path d="M22.5 5.5l-12 12-5.5-5.5 1.5-1.5 4 4 10.5-10.5z" />
-                    </svg>
-                    {{-- @endif --}}
-                </div>
+                    {{-- Username + Verified Tick --}}
+                    <div class="d-flex align-items-center">
+                        <a class="fw-semibold me-1" href="{{ url('profile/' . $timeline->user->username) }}"
+                            style="color: #5A4FDC">
+                            {{ displayName($timeline->user->name) }}
+                        </a>
 
-                {{-- Timestamp --}}
-                <span class="fs-sm text-muted ms-2">
-                    {{ $timeline->created_at?->shortAbsoluteDiffForHumans() }} ago
-                </span>
+                        {{-- @if ($timeline->user->is_verified) --}}
+                        <!-- Twitter-style blue tick SVG -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                            fill="#1DA1F2" class="ms-1">
+                            <path d="M22.5 5.5l-12 12-5.5-5.5 1.5-1.5 4 4 10.5-10.5z" />
+                        </svg>
+                        {{-- @endif --}}
+                    </div>
+
+                    {{-- Timestamp --}}
+                    <span class="fs-sm text-muted ms-2">
+                        {{ $timeline->created_at?->shortAbsoluteDiffForHumans() }} ago
+                    </span>
+                @endif
 
 
-              @endif
-                
 
-                
             </div>
 
 
@@ -107,7 +99,7 @@
 
                         <button type="button" class="btn-block-option dropdown-toggle text-muted fs-sm"
                             data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Est. Earning
-                           {{ getCurrencyCode() }}{{ estimatedEarnings($timeline->id) }}</button>
+                            {{ getCurrencyCode() }}{{ estimatedEarnings($timeline->id) }}</button>
 
                         <div class="dropdown-menu dropdown-menu-end">
 
@@ -139,19 +131,77 @@
 
                 </p>
             </a>
+
+            @php
+                $count = $timeline->images->count();
+            @endphp
+
+            @if ($count)
+                <div class="row g-sm js-gallery img-fluid-100">
+
+                    @php
+
+                        $col = match ($count) {
+                            1 => 'col-12',
+                            2 => 'col-6',
+                            3 => 'col-4',
+                            4 => 'col-3'
+                        };
+                    @endphp
+
+
+                    @foreach ($timeline->images as $image)
+                        <div class="{{ $col }} mb-2">
+                            <a class="img-link img-link-simple img-link-zoom-in img-lightbox"
+                                href="{{ asset('storage/' . $image->path) }}">
+                                <img class="img-fluid rounded" loading="lazy" src="{{ asset('storage/' . $image->path) }}"
+                                    alt="Post image">
+                            </a>
+                        </div>
+                    @endforeach
+
+                </div>
+            @endif
+
+
+
+            {{-- <div class="row g-sm js-gallery img-fluid-100">
+                    <!-- Magnific Popup (.js-gallery class is initialized in Helpers.jqMagnific()) -->
+                    <!-- For more info and examples you can check out http://dimsemenov.com/plugins/magnific-popup/ -->
+                    <div class="col-4">
+                      <a class="img-link img-link-simple img-link-zoom-in img-lightbox" href="assets/media/photos/photo11@2x.jpg">
+                        <img class="img-fluid" src="assets/media/photos/photo11.jpg" alt="">
+                      </a>
+                    </div>
+                    <div class="col-4">
+                      <a class="img-link img-link-simple img-link-zoom-in img-lightbox" href="assets/media/photos/photo12@2x.jpg">
+                        <img class="img-fluid" src="assets/media/photos/photo12.jpg" alt="">
+                      </a>
+                    </div>
+                    <div class="col-4">
+                      <a class="img-link img-link-simple img-link-zoom-in img-lightbox" href="assets/media/photos/photo13@2x.jpg">
+                        <img class="img-fluid" src="assets/media/photos/photo13.jpg" alt="">
+                      </a>
+                    </div>
+            </div> --}}
+
+
             <hr>
             <ul class="nav nav-pills fs-sm push " style="color: #5A4FDC">
                 <li class="nav-item me-1">
 
 
                     @if ($timeline->isLikedBy(auth()->user()))
-                        <a class="nav-link" wire:click="toggleLike({{ $timeline->unicode }})" href="javascript:void(0)">
+                        <a class="nav-link" wire:click="toggleLike({{ $timeline->unicode }})"
+                            href="javascript:void(0)">
                             <i class="fa fa-thumbs-down opacity-50 me-1"></i>
                             {{ sumCounter($timeline->likes, $timeline->likes_external) }}
                         </a>
                     @else
-                        <a class="nav-link" wire:click="toggleLike({{ $timeline->unicode }})" href="javascript:void(0)">
-                            <i class="fa fa-thumbs-up opacity-50 me-1"></i> {{ sumCounter($timeline->likes, $timeline->likes_external) }}
+                        <a class="nav-link" wire:click="toggleLike({{ $timeline->unicode }})"
+                            href="javascript:void(0)">
+                            <i class="fa fa-thumbs-up opacity-50 me-1"></i>
+                            {{ sumCounter($timeline->likes, $timeline->likes_external) }}
                         </a>
                     @endif
 
@@ -159,12 +209,14 @@
                 </li>
                 <li class="nav-item me-1">
                     <a class="nav-link" href="{{ url('show/' . $timeline->id) }}">
-                        <i class="fa fa-comment-alt opacity-50 me-1"></i> {{ sumCounter($timeline->comments, $timeline->comments_external) }}
+                        <i class="fa fa-comment-alt opacity-50 me-1"></i>
+                        {{ sumCounter($timeline->comments, $timeline->comments_external) }}
                     </a>
                 </li>
                 <li class="nav-item me-1">
                     <a class="nav-link" href="javascript:void(0)">
-                        <i class="fa fa-eye opacity-50 me-1"></i> {{ sumCounter($timeline->views, $timeline->views_external) }}
+                        <i class="fa fa-eye opacity-50 me-1"></i>
+                        {{ sumCounter($timeline->views, $timeline->views_external) }}
                     </a>
                 </li>
                 <li class="nav-item">
@@ -227,7 +279,8 @@
                     <div class="block-header bg-primary-dark">
                         <h3 class="block-title">Share Post</h3>
                         <div class="block-options">
-                            <button type="button" class="btn-block-option" data-bs-dismiss="modal" aria-label="Close">
+                            <button type="button" class="btn-block-option" data-bs-dismiss="modal"
+                                aria-label="Close">
                                 <i class="fa fa-fw fa-times"></i>
                             </button>
                         </div>
@@ -242,7 +295,7 @@
                         </p>
 
                         <?php
-                            $url = url('show/' . $timeline->id);
+                        $url = url('show/' . $timeline->id);
                         ?>
 
 
