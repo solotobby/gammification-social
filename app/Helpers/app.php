@@ -3,6 +3,7 @@
 use App\Livewire\User\Posts;
 use App\Models\CommentExternal;
 use App\Models\Level;
+use App\Models\LevelPlanId;
 use App\Models\Partner;
 use App\Models\Post;
 use App\Models\User;
@@ -60,7 +61,7 @@ if (!function_exists('getCurrencyCode')) {
     }
 }
 
-if(!function_exists('userBaseCurrency')){
+if (!function_exists('userBaseCurrency')) {
     function userBaseCurrency($userId = null): ?string
     {
         $userId ??= auth()->id();
@@ -205,6 +206,13 @@ if (!function_exists('calculateUniqueEarningPerComment')) {
         return $earningPerComment;
     }
 }
+if (!function_exists('getLevels')) {
+    function getLevels()
+    {
+        return Level::orderBy('name', 'asc')->get();
+    }
+}
+
 
 if (!function_exists('updatesLikeEarnings')) {
     function updatesLikeEarnings(): float
@@ -293,23 +301,23 @@ if (!function_exists('updatesViewEarnings')) {
 
 //master function to update wallet earnings
 if (!function_exists('updateWalletEarnings')) {
-    function updateWalletEarnings():  ?Wallet
+    function updateWalletEarnings(): ?Wallet
     {
         $user = Auth::user();
         if (!$user) {
             return null;
         }
 
-         $totalEarnings = updatesViewEarnings() + updatesCommentEarnings() + updatesLikeEarnings();
+        $totalEarnings = updatesViewEarnings() + updatesCommentEarnings() + updatesLikeEarnings();
 
-    //    return [
-    //         'views'    => updatesViewEarnings(),
-    //         'comments' => updatesCommentEarnings(),
-    //         'likes'    => updatesLikeEarnings(),
-    //         'total'    => $totalEarnings,
-    //     ];
+        //    return [
+        //         'views'    => updatesViewEarnings(),
+        //         'comments' => updatesCommentEarnings(),
+        //         'likes'    => updatesLikeEarnings(),
+        //         'total'    => $totalEarnings,
+        //     ];
 
-       
+
 
         if ($totalEarnings <= 0) {
             return Wallet::where('user_id', $user->id)->first();
@@ -334,8 +342,6 @@ if (!function_exists('updateWalletEarnings')) {
             $wallet->save();
             return $wallet;
         });
-
-
     }
 }
 
@@ -351,8 +357,8 @@ if (!function_exists('estimatedEarnings')) {
         return DB::transaction(function () use ($postId) {
 
             $allearnings = UserView::where('post_id', $postId)->where('user_id', auth()->user()->id)->where('created_at', '>=', now()->subDays(30))->sum('amount') +
-                         UserLike::where('post_id', $postId)->where('user_id', auth()->user()->id)->where('created_at', '>=', now()->subDays(30))->sum('amount') +
-                         UserComment::where('post_id', $postId)->where('user_id', auth()->user()->id)->where('created_at', '>=', now()->subDays(30))->sum('amount');
+                UserLike::where('post_id', $postId)->where('user_id', auth()->user()->id)->where('created_at', '>=', now()->subDays(30))->sum('amount') +
+                UserComment::where('post_id', $postId)->where('user_id', auth()->user()->id)->where('created_at', '>=', now()->subDays(30))->sum('amount');
             $convertedAmount = convertToBaseCurrency(
                 $allearnings,
                 auth()->user()->wallet->currency
@@ -360,7 +366,6 @@ if (!function_exists('estimatedEarnings')) {
 
             return (float) round($convertedAmount, 5);
         });
-
     }
 }
 
@@ -393,16 +398,15 @@ if (!function_exists('viewsAmountCalculator')) {
         }
 
         return DB::transaction(function () use ($postId) {
-             $viewsEarnings = UserView::where('post_id', $postId)->where('user_id', auth()->user()->id)->sum('amount');
+            $viewsEarnings = UserView::where('post_id', $postId)->where('user_id', auth()->user()->id)->sum('amount');
 
-             $convertedAmount = convertToBaseCurrency(
+            $convertedAmount = convertToBaseCurrency(
                 $viewsEarnings,
                 auth()->user()->wallet->currency
             );
 
             return (float) round($convertedAmount, 5);
         });
-
     }
 }
 
@@ -411,21 +415,20 @@ if (!function_exists('likesAmountCalculator')) {
     function likesAmountCalculator($postId): float
     {
 
-      
+
         if (!$postId) {
             return 0.0;
         }
         return DB::transaction(function () use ($postId) {
-             $likesEarnings = UserLike::where('post_id', $postId)->where('user_id', auth()->user()->id)->sum('amount');
+            $likesEarnings = UserLike::where('post_id', $postId)->where('user_id', auth()->user()->id)->sum('amount');
 
-             $convertedAmount = convertToBaseCurrency(
+            $convertedAmount = convertToBaseCurrency(
                 $likesEarnings,
                 auth()->user()->wallet->currency
             );
 
             return (float) round($convertedAmount, 5);
         });
-
     }
 }
 
@@ -434,21 +437,20 @@ if (!function_exists('commentsAmountCalculator')) {
     function commentsAmountCalculator($postId): float
     {
 
-       
+
         if (!$postId) {
             return 0.0;
         }
         return DB::transaction(function () use ($postId) {
-             $commentsEarnings = UserComment::where('post_id', $postId)->where('user_id', auth()->user()->id)->sum('amount');
+            $commentsEarnings = UserComment::where('post_id', $postId)->where('user_id', auth()->user()->id)->sum('amount');
 
-             $convertedAmount = convertToBaseCurrency(
+            $convertedAmount = convertToBaseCurrency(
                 $commentsEarnings,
                 auth()->user()->wallet->currency
             );
 
             return (float) round($convertedAmount, 5);
         });
-
     }
 }
 
@@ -783,7 +785,7 @@ if (!function_exists('createPlan')) {
             'Authorization' => 'Bearer ' . env('PAYSTACK_SECRET_KEY')
         ])->post($url, [
             "name" => $name,
-            "amount" => $amount*100,
+            "amount" => $amount * 100,
             "interval" => "monthly"
         ])->throw();
 
@@ -795,18 +797,85 @@ if (!function_exists('verifyPaystackPayment')) {
 
     function verifyPaystackPayment($reference)
     {
-        $url = 'https://api.paystack.co/transaction/verify/'.$reference;
+        $url = 'https://api.paystack.co/transaction/verify/' . $reference;
         $res = Http::withHeaders([
             'Accept' => 'application/json',
             'Content-Type' => 'application/json',
             'Authorization' => 'Bearer ' . env('PAYSTACK_SECRET_KEY')
         ])->get($url)->throw();
 
-         return json_decode($res->getBody()->getContents(), true)['data'];
+        return json_decode($res->getBody()->getContents(), true)['data'];
     }
 }
 
-           
+if (!function_exists('upgradeLevel')) {
+
+    function upgradeLevel($levelId)
+    {
+        $user = Auth::user();
+        $level = Level::find($levelId);
+
+
+        if (!$level) {
+            session()->flash('error', 'Invalid Level Selected');
+            return;
+        }
+
+
+        $userCurrency = userBaseCurrency($user->id);
+
+        //get plan code based on currency and plan
+        $levelPlan = LevelPlanId::where('level_name', $level->name)->where('currency', $userCurrency)->first();
+
+
+        $convertedAmount = convertToBaseCurrency($levelPlan->amount, $userCurrency);
+
+        if ($levelPlan) {
+
+            if ($userCurrency == 'NGN') {
+                return createSubscriptionNGN($levelPlan->plan_id, $levelPlan->amount, $level->name);
+            }
+        }
+    }
+}
+
+if (!function_exists('createSubscriptionNGN')) {
+
+    function createSubscriptionNGN($planCode, $amount, $level)
+    {
+
+        $user = Auth::user();
+
+
+        $url = 'https://api.paystack.co/transaction/initialize';
+        $res = Http::withHeaders([
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer ' . env('PAYSTACK_SECRET_KEY')
+        ])->post($url, [
+            "plan" => $planCode,
+            'email' => $user->email,
+            'amount' => $amount * 100, // first charge
+            'callback_url' => route('upgrade.api'),
+            'channel' => ["card", "bank", "apple_pay", "ussd", "qr", "mobile_money", "bank_transfer", "payattitude"],
+            'metadata' => [
+                'user_id' => $user->id,
+                'level' => $level,
+                'name' => $user->name
+            ],
+        ])->throw();
+
+        if (!$res->successful()) {
+            session()->flash('error', 'Unable to initialize payment.');
+            return;
+        }
+
+        return redirect($res['data']['authorization_url']);
+    }
+}
+
+
+
 
 // PLN_jpan26fg9bz60p7
 //create subscription

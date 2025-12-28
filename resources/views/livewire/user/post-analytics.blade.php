@@ -280,11 +280,19 @@
                 </div>
             </a>
         </div>
+
+        @if(userLevel() == 'Basic')
+
+            @include('layouts.upgrade')
+
+        @endif
+
+
     </div>
     <!-- END Simple -->
 
 
-@if(auth()->user()->email_verified_at == null)
+    @if(auth()->user()->email_verified_at == null)
         @include('layouts.accesscode_verification')
     @else
 

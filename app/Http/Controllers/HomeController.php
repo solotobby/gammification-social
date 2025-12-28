@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AccessCode;
 use App\Models\Level;
+use App\Models\LevelPlanId;
 use App\Models\LoginPoint;
 use App\Models\PartnerSlot;
 use App\Models\Transaction;
@@ -178,8 +179,10 @@ class HomeController extends Controller
 
    }
 
- 
-
+   public function createSubscription($levelId){
+        return upgradeLevel($levelId);
+   }   
+   
 
    public function verifyFlutterwavePayment($ref){
         

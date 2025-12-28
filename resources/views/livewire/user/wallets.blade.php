@@ -96,7 +96,7 @@
             </a>
         </div>
 
-        @if (userLevel() == 'Influencer' || userLevel() == 'Creator' || userLevel() == 'Basic')
+        @if (userLevel() == 'Influencer' || userLevel() == 'Creator')
             <div class="col-12 mb-3">
                 <button class="btn btn-sm btn-info" wire:click="refresh">Refresh Wallet</button>
             </div>
@@ -106,6 +106,12 @@
 
 
     </div>
+
+    @if(userLevel() == 'Basic')
+
+    @include('layouts.upgrade')
+    
+    @else
 
     <div class="row">
 
@@ -375,6 +381,8 @@
                 
             </div> --}}
     </div>
+
+    @endif
 
   @if(auth()->user()->email_verified_at == null)
         @include('layouts.accesscode_verification')
