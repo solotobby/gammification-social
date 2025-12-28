@@ -1,21 +1,6 @@
 <div>
     {{-- Knowing others is intelligence; knowing yourself is true wisdom. --}}
 
-    {{-- {{ $post->id }} --}}
-
-    {{-- <form method="POST" wire:submit.prevent="comment">
-        <input type="text" wire:model="message" name="message"  :value="old('message')" class="form-control form-control-alt" placeholder="Write a comment.." required>
-    </form>
-    <br>
-    @foreach ($comments as $com)
-        
-        {{ $com->message}} - {{ $com->created_at}} <br>
-        
-    @endforeach
-    <button wire:click='loadMoreComments'>Load More Comments</button> --}}
-
-
-
     <div class="row">
         <div class="col-md-8">
             <div wire:poll.visible.420s class="block block-rounded block-bordered" id="timelines">
@@ -79,13 +64,28 @@
 
 
                     @foreach ($timeline->images as $image)
-                        <div class="{{ $col }} mb-2">
+                    <div class="{{ $col }} mb-2">
+                <a
+                    href="{{ asset('storage/' . $image->path) }}"
+                    class="img-link img-link-simple img-link-zoom-in img-lightbox"
+                    title="Post image"
+                >
+                    <img
+                        class="img-fluid rounded"
+                        loading="lazy"
+                        src="{{ asset('storage/' . $image->path) }}"
+                        alt="Post image"
+                    >
+                </a>
+            </div>
+            
+                        {{-- <div class="{{ $col }} mb-2">
                             <a class="img-link img-link-simple img-link-zoom-in img-lightbox"
                                 href="{{ asset('storage/' . $image->path) }}">
                                 <img class="img-fluid rounded" loading="lazy" src="{{ asset('storage/' . $image->path) }}"
                                     alt="Post image">
                             </a>
-                        </div>
+                        </div> --}}
                     @endforeach
 
                 </div>
@@ -103,15 +103,7 @@
                             </a>
                         @endif
                                 
-                        {{-- @if($timeline->userLikes()->count() > 0)
-                        <a class="nav-link"  wire:click="dislike({{$timeline->unicode}})" href="javascript:void(0)">
-                            <i class="fa fa-thumbs-down opacity-50 me-1"></i> {{ $timeline->likes }}
-                        </a>
-                        @else
-                            <a class="nav-link"  wire:click="like({{$timeline->unicode}})" href="javascript:void(0)">
-                                <i class="fa fa-thumbs-up opacity-50 me-1"></i> {{ $timeline->likes }}
-                            </a>
-                        @endif --}}
+                        
                     </li>
                     <li class="nav-item me-1">
                     <a class="nav-link" href="javascript:void(0)">
@@ -153,12 +145,12 @@
 
                         @foreach ($comments as $comment)
                             <div class="d-flex">
-                                <a class="flex-shrink-0 img-link me-2" href="javascript:void(0)">
+                                <a class="flex-shrink-0 img-link me-2" href="{{url('profile/'.$comment->user->username)}}">
                                 <img class="img-avatar img-avatar32 img-avatar-thumb" src="{{asset('src/assets/media/avatars/avatar3.jpg')}}" alt="">
                                 </a>
                                 <div class="flex-grow-1">
                                     <p class="mb-1">
-                                        <a class="fw-semibold" href="javascript:void(0)">{{ $comment->user->name }}</a>   <span class="fs-sm text-muted">{{$comment->created_at?->shortAbsoluteDiffForHumans()}} ago</span> <br>
+                                        <a class="fw-semibold" href="{{url('profile/'.$comment->user->username)}}">{{ $comment->user->name }}</a>   <span class="fs-sm text-muted">{{$comment->created_at?->shortAbsoluteDiffForHumans()}} ago</span> <br>
                                         {{ $comment->message }}
                                     </p>
                                 </div>
@@ -263,6 +255,22 @@
                     });
                 }
         </script>
+
+        <script>
+document.addEventListener('DOMContentLoaded', function () {
+    $('.js-gallery').magnificPopup({
+        delegate: 'a',
+        type: 'image',
+        gallery: {
+            enabled: true
+        },
+        zoom: {
+            enabled: true,
+            duration: 300
+        }
+    });
+});
+</script>
 
 
         @include('layouts.engagement')

@@ -149,7 +149,7 @@
                         };
                     @endphp
 
-
+                   
                     @foreach ($timeline->images as $image)
                         <div class="{{ $col }} mb-2">
                             <a class="img-link img-link-simple img-link-zoom-in img-lightbox"

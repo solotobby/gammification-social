@@ -157,7 +157,7 @@
                   Post Images & Videos
                 </h4>
                 <p class="mb-0 text-muted">
-                  With you post, youu will be able to posts images and videos that can be monetized
+                  With your post, you will be able to posts images and videos that can be monetized
                 </p>
               </div>
             </div>
