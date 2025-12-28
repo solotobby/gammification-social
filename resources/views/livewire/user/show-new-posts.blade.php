@@ -42,8 +42,8 @@
                 <div class="block-content">
                     
                         <p style="color: dimgrey">
-                            {!! $timeline->content !!}
-                            {{-- {!! nl2br(e($timeline->content)) !!} --}}
+                            {{-- {!! $timeline->content !!} --}}
+                            {!! nl2br(e($timeline->content)) !!}
                         </p>
                     @php
                 $count = $timeline->images->count();
