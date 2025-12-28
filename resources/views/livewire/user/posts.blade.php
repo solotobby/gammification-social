@@ -75,6 +75,14 @@
                 <div class="alert alert-danger mb-2" role="alert">{{ $message }}</div>
             @enderror
 
+            @error('images')
+                <div class="alert alert-danger mb-2" role="alert">{{ $message }}</div>
+            @enderror
+
+            @error('images.*')
+                <div class="alert alert-danger mb-2" role="alert">{{ $message }}</div>
+            @enderror
+
 
             <div class="card mb-4">
 
@@ -82,7 +90,7 @@
                     <div class="card-body">
                         <div x-data="{ content: @entangle('content') }">
                             <textarea x-model="content" class="form-control" placeholder="Say something amazing"
-                                @if (!in_array(userLevel(), ['Creator', 'Influencer'])) maxlength="160" @endif ></textarea>
+                                @if (!in_array(userLevel(), ['Creator', 'Influencer'])) maxlength="160" @endif required></textarea>
                             @if (!in_array(userLevel(), ['Creator', 'Influencer']))
                                 <small class="text-muted" x-text="content.length + '/160 characters'"></small>
                             @endif
@@ -96,7 +104,7 @@
                                     <input type="file" wire:model="images" multiple accept="image/*" hidden
                                         @if (UserLevel() === 'Creator') x-bind:disabled="images.length >= 1" @endif
                                         @if (UserLevel() === 'Influencer') x-bind:disabled="images.length >= 4" @endif>
-                                        
+
                                 </label>
 
                                 <small class="text-muted d-block mt-1">
