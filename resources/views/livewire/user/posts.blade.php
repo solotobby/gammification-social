@@ -71,6 +71,9 @@
                     {{ session('error') }}
                 </div>
             @endif
+            @error('content')
+                <div class="alert alert-danger mb-2" role="alert">{{ $message }}</div>
+            @enderror
 
 
             <div class="card mb-4">
@@ -79,7 +82,7 @@
                     <div class="card-body">
                         <div x-data="{ content: @entangle('content') }">
                             <textarea x-model="content" class="form-control" placeholder="Say something amazing"
-                                @if (!in_array(userLevel(), ['Creator', 'Influencer'])) maxlength="160" @endif required></textarea>
+                                @if (!in_array(userLevel(), ['Creator', 'Influencer'])) maxlength="160" @endif ></textarea>
                             @if (!in_array(userLevel(), ['Creator', 'Influencer']))
                                 <small class="text-muted" x-text="content.length + '/160 characters'"></small>
                             @endif

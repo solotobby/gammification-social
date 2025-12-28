@@ -73,7 +73,22 @@ class Posts extends Component
 
     public function post()
     {
+
         $level = userLevel();
+
+        $rules = [
+            'content' => 'required|string',
+        ];
+
+        if (!in_array($level, ['Creator', 'Influencer'])) {
+            $rules['content'] .= '|max:160';
+            $rules['images'] = 'prohibited';
+        } else {
+            $rules['images'] = 'nullable|array|max:4';
+            $rules['images.*'] = 'image|max:2048';
+        }
+
+        $this->validate($rules);
 
 
         // Determine max length
