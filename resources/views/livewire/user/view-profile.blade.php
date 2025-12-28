@@ -43,8 +43,8 @@
             @endif
 
             <h2 class="fs-sm fw-medium text-muted mb-0">
-                <a href="javascript:void(0)" class="text-muted">{{ $user->followers()->count() }} Followers</a> &bull;
-                <a href="javascript:void(0)" class="text-muted">{{ $user->following()->count() }} Following</a> &bull;
+                <a href="javascript:void(0)" class="text-muted">{{ $user->followers }} Followers</a> &bull;
+                <a href="javascript:void(0)" class="text-muted">{{ $user->following }} Following</a> &bull;
                    
                 <a href="javascript:void(0)" class="text-muted">{{ sumCounter($user->total_likes, $user->total_likes_external) }}
                     Likes</a> 

@@ -23,11 +23,11 @@ class ViewProfile extends Component
 
     #[On('view-profile.{user.username}')]
 
-    public function mount($username, )
+    public function mount($username,)
     {
 
         $this->timeline($username);
-        $this->isFollowing = Auth::user()?->isFollowing($this->user ) ?? false;
+        $this->isFollowing = Auth::user()?->isFollowing($this->user) ?? false;
     }
 
     public function timeline($username)
@@ -50,8 +50,8 @@ class ViewProfile extends Component
             $post->decrement('likes');
         } else {
             // if (auth()->user()->id != $post->user_id) {
-                $post->likes()->create(['user_id' => Auth::id(), 'is_paid' => false, 'amount' => calculateUniqueEarningPerLike(), 'poster_user_id' => $post->user_id]);
-                $post->increment('likes');
+            $post->likes()->create(['user_id' => Auth::id(), 'is_paid' => false, 'amount' => calculateUniqueEarningPerLike(), 'poster_user_id' => $post->user_id]);
+            $post->increment('likes');
             // }
         }
 
@@ -63,66 +63,53 @@ class ViewProfile extends Component
     public function toggleFollow()
     {
 
-
-
         if (! Auth::check() || Auth::id() === $this->user->id) {
             return;
         }
 
-        $authUser = Auth::user();
+        $authUser = Auth::user(); // the logged-in user
+        $targetUser = $this->user; // the user being followed/unfollowed
+
 
         if ($this->isFollowing) {
             Follow::where([
                 'follower_id' => $authUser->id,
                 'following_id' => $this->user->id,
             ])->delete();
+
+            // Prevent negative counts
+            if ($authUser->following > 0) {
+                $authUser->decrement('following');
+            }
+
+            if ($targetUser->followers > 0) {
+                $targetUser->decrement('followers');
+            }
+
+
             // $authUser->following()->detach($this->user->id); //unfollow
             $this->isFollowing = false;
         } else {
+            //following $this->user->id user
+
             Follow::create([
-                'follower_id' => $authUser->id,
+                'follower_id' => $authUser->id, //update user following
                 'following_id' => $this->user->id,
             ]);
+            //increase 'following' by 1
+
+            // Increment counts
+            $authUser->increment('following');
+            $targetUser->increment('followers');
+
             // $authUser->following()->attach($this->user->id); //follow
             $this->isFollowing = true;
         }
 
-        
-        // $userToFollow = User::where('id', $userId)->first();
+       
 
-        // if (auth()->user()->isFollowing($userToFollow)) {
-        //     auth()->user()->unfollow($userToFollow);
-        // } else {
-        //     auth()->user()->follow($userToFollow);
-        // }
-
-        // $this->timeline($this->username);
 
     }
-
-
-
-    // public function like($id)
-    // {
-    //     // dd(auth()->user()->WithTotalLikes($id));
-
-    //     $post =  Post::where('unicode', $id)->first();
-    //     $post->likes += 1;
-    //     $post->save();
-
-    //     UserLike::create(['user_id' => auth()->user()->id, 'post_id' => $post->id]);
-    //     $this->dispatch('user.view-profile', id: $post->id);
-    // }
-
-    // public function dislike($id)
-    // {
-
-    //     $post =  Post::where('unicode', $id)->first();
-    //     $post->likes -= 1;
-    //     $post->save();
-    //     UserLike::where(['user_id' => auth()->user()->id, 'post_id' => $post->id])->delete();
-    //     $this->dispatch('user.view-profile', id: $post->id);
-    // }
 
     public function loadMore()
     {
