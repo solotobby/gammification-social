@@ -93,13 +93,15 @@
 
 
 
-            {{-- @if (auth()->user()->id == $timeline->user_id) --}}
-                <div class="block-options">
-                    <div class="dropdown">
+         
+            <div class="block-options">
 
+                @if (auth()->user()->id == $timeline->user_id)
+                    <div class="dropdown">
                         <button type="button" class="btn-block-option dropdown-toggle text-muted fs-sm"
                             data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Est. Earning
-                            {{ getCurrencyCode() }}{{ estimatedEarnings($timeline->id) }}</button>
+                            {{ getCurrencyCode() }}{{ estimatedEarnings($timeline->id) }}
+                        </button>
 
                         <div class="dropdown-menu dropdown-menu-end">
 
@@ -108,19 +110,28 @@
                             </a>
 
                             {{-- <a class="dropdown-item" href="javascript:void(0)">
-                      <i class="far fa-fw fa-thumbs-down text-warning me-1"></i> Stop following this user
-                      </a>
-                      <div role="separator" class="dropdown-divider"></div>
-                      <a class="dropdown-item" href="javascript:void(0)">
-                      <i class="fa fa-fw fa-exclamation-triangle me-1"></i> Report this post
-                      </a>
-                      <a class="dropdown-item" href="javascript:void(0)">
-                      <i class="fa fa-fw fa-bookmark me-1"></i> Bookmark this post
-                      </a> --}}
+                                                <i class="far fa-fw fa-thumbs-down text-warning me-1"></i> Stop following this user
+                                                </a>
+                                                <div role="separator" class="dropdown-divider"></div>
+                                                <a class="dropdown-item" href="javascript:void(0)">
+                                                <i class="fa fa-fw fa-exclamation-triangle me-1"></i> Report this post
+                                                </a>
+                                                <a class="dropdown-item" href="javascript:void(0)">
+                                                <i class="fa fa-fw fa-bookmark me-1"></i> Bookmark this post
+                                                </a> --}}
                         </div>
                     </div>
-                </div>
-            {{-- @endif --}}
+                @else
+                    <div class="dropdown">
+                        <button type="button" class="btn-block-option  text-muted fs-sm" aria-haspopup="true"
+                            aria-expanded="false">
+                            Est. Earning {{ getCurrencyCode() }}{{ estimatedEarnings($timeline->id) }}
+                        </button>
+                    </div>
+                @endif
+
+            </div>
+
         </div>
         <div class="block-content">
             <a href="{{ url('show/' . $timeline->id) }}" style="color: dimgrey">
@@ -145,17 +156,17 @@
                             1 => 'col-12',
                             2 => 'col-6',
                             3 => 'col-4',
-                            4 => 'col-3'
+                            4 => 'col-3',
                         };
                     @endphp
 
-                   
+
                     @foreach ($timeline->images as $image)
                         <div class="{{ $col }} mb-2">
                             <a class="img-link img-link-simple img-link-zoom-in img-lightbox"
                                 href="{{ asset('storage/' . $image->path) }}">
-                                <img class="img-fluid rounded" loading="lazy" src="{{ asset('storage/' . $image->path) }}"
-                                    alt="Post image">
+                                <img class="img-fluid rounded" loading="lazy"
+                                    src="{{ asset('storage/' . $image->path) }}" alt="Post image">
                             </a>
                         </div>
                     @endforeach
@@ -238,7 +249,7 @@
             </ul>
         </div>
         <div class="block-content block-content-full bg-body-light">
-            @if(userLevel() == 'Basic')
+            @if (userLevel() == 'Basic')
                 <li class="fa fa-usd"> </li> <a href="{{ url('upgrade') }}" class="text-mute">Monetize This Post</a>
             @endif
 

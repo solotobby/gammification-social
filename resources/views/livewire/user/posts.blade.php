@@ -46,7 +46,7 @@
                         Creator and Influencer accounts can post long text, images and also earn up to $2 (or it's equivalent) on every post. 
                         Basic users can earn but cannot withdraw earnings.
                         Upgrade to a Creator or Influencer today.
-                        
+
                     </div>
 
                     {{-- <form wire:submit.prevent="post">
@@ -86,27 +86,28 @@
 
                 <form wire:submit.prevent="post">
                     <div class="card-body">
+                        <?php $userLevel = userLevel(); ?>
                         <div x-data="{ content: @entangle('content') }">
                             <textarea x-model="content" class="form-control" placeholder="Say something amazing"
-                                @if (!in_array(userLevel(), ['Creator', 'Influencer'])) maxlength="160" @endif required></textarea>
-                            @if (!in_array(userLevel(), ['Creator', 'Influencer']))
+                                @if (!in_array($userLevel, ['Creator', 'Influencer'])) maxlength="160" @endif required></textarea>
+                            @if (!in_array($userLevel, ['Creator', 'Influencer']))
                                 <small class="text-muted" x-text="content.length + '/160 characters'"></small>
                             @endif
                         </div>
 
-                        @if (in_array(UserLevel(), ['Creator', 'Influencer']))
+                        @if (in_array($userLevel, ['Creator', 'Influencer']))
                             <div class="mt-3" x-data="{ images: @entangle('images') }">
 
                                 <label class="btn btn-light">
                                     <i class="fas fa-image"></i>
                                     <input type="file" wire:model="images" multiple accept="image/*" hidden
-                                        @if (UserLevel() === 'Creator') x-bind:disabled="images.length >= 1" @endif
-                                        @if (UserLevel() === 'Influencer') x-bind:disabled="images.length >= 4" @endif>
+                                        @if ($userLevel === 'Creator') x-bind:disabled="images.length >= 1" @endif
+                                        @if ($userLevel === 'Influencer') x-bind:disabled="images.length >= 4" @endif>
 
                                 </label>
 
                                 <small class="text-muted d-block mt-1">
-                                    {{ UserLevel() === 'Creator' ? 'Max 1 image' : 'Max 4 images' }}
+                                    {{ $userLevel === 'Creator' ? 'Max 1 image' : 'Max 4 images' }}
                                 </small>
 
                                 {{-- Preview + Remove --}}

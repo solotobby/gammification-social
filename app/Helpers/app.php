@@ -399,7 +399,7 @@ if (!function_exists('viewsAmountCalculator')) {
         }
 
         return DB::transaction(function () use ($postId) {
-            $viewsEarnings = UserView::where('post_id', $postId)->where('user_id', auth()->user()->id)->sum('amount');
+            $viewsEarnings = UserView::where('post_id', $postId)->sum('amount');
 
             $convertedAmount = convertToBaseCurrency(
                 $viewsEarnings,
@@ -415,13 +415,11 @@ if (!function_exists('viewsAmountCalculator')) {
 if (!function_exists('likesAmountCalculator')) {
     function likesAmountCalculator($postId): float
     {
-
-
         if (!$postId) {
             return 0.0;
         }
         return DB::transaction(function () use ($postId) {
-            $likesEarnings = UserLike::where('post_id', $postId)->where('user_id', auth()->user()->id)->sum('amount');
+            $likesEarnings = UserLike::where('post_id', $postId)->sum('amount');
 
             $convertedAmount = convertToBaseCurrency(
                 $likesEarnings,
@@ -443,7 +441,7 @@ if (!function_exists('commentsAmountCalculator')) {
             return 0.0;
         }
         return DB::transaction(function () use ($postId) {
-            $commentsEarnings = UserComment::where('post_id', $postId)->where('user_id', auth()->user()->id)->sum('amount');
+            $commentsEarnings = UserComment::where('post_id', $postId)->sum('amount');
 
             $convertedAmount = convertToBaseCurrency(
                 $commentsEarnings,
