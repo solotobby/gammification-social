@@ -249,7 +249,7 @@
             </ul>
         </div>
         <div class="block-content block-content-full bg-body-light">
-            @if (userLevel() == 'Basic')
+            @if (userLevel() == 'Basic' && $timeline->user_id == auth()->user()->id)
                 <li class="fa fa-usd"> </li> <a href="{{ url('upgrade') }}" class="text-mute">Monetize This Post</a>
             @endif
 
