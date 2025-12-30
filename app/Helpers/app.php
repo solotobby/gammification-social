@@ -356,9 +356,10 @@ if (!function_exists('estimatedEarnings')) {
 
         return DB::transaction(function () use ($postId) {
 
-            $allearnings = UserView::where('post_id', $postId)->where('user_id', auth()->user()->id)->where('created_at', '>=', now()->subDays(30))->sum('amount') +
-                UserLike::where('post_id', $postId)->where('user_id', auth()->user()->id)->where('created_at', '>=', now()->subDays(30))->sum('amount') +
-                UserComment::where('post_id', $postId)->where('user_id', auth()->user()->id)->where('created_at', '>=', now()->subDays(30))->sum('amount');
+            $allearnings = UserView::where('post_id', $postId)->where('created_at', '>=', now()->subDays(30))->sum('amount') +
+                UserLike::where('post_id', $postId)->where('created_at', '>=', now()->subDays(30))->sum('amount') +
+                UserComment::where('post_id', $postId)->where('created_at', '>=', now()->subDays(30))->sum('amount');
+
             $convertedAmount = convertToBaseCurrency(
                 $allearnings,
                 auth()->user()->wallet->currency
