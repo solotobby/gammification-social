@@ -4,6 +4,7 @@ namespace App\Livewire\User;
 
 use App\Models\Follow;
 use App\Models\Post;
+use App\Models\ProfileViews;
 use App\Models\User;
 use App\Models\UserLike;
 use Illuminate\Support\Facades\Auth;
@@ -28,6 +29,28 @@ class ViewProfile extends Component
 
         $this->timeline($username);
         $this->isFollowing = Auth::user()?->isFollowing($this->user) ?? false;
+        $this->recordProfileViews();
+    }
+
+    private function recordProfileViews()
+    {
+
+        $viewerId = auth()->id();
+        $userId = $this->user->id;
+
+        if ($viewerId === $userId) {
+            return;
+        }
+
+        $created = ProfileViews::firstOrCreate(
+            ['user_id' => $userId, 'viewer_id' => $viewerId]
+        );
+
+        $this->user->increment(
+            $created->wasRecentlyCreated
+                ? 'profile_views'
+                : 'profile_views_external'
+        );
     }
 
     public function timeline($username)
@@ -105,10 +128,6 @@ class ViewProfile extends Component
             // $authUser->following()->attach($this->user->id); //follow
             $this->isFollowing = true;
         }
-
-       
-
-
     }
 
     public function loadMore()
