@@ -42,13 +42,11 @@
                 <div class="block-content block-content-full">
                     <div class="alert alert-info">
 
-                        <b>You're missing something out</b><br>
-
-                        Sharing your post gives you a wider reach and makes you earn from your existing traffic on other
-                        social media. You can earn up to $100 on each post daily when you share to other social media.
-                        You can also earn $20 on each review video you make about Payhankey.
-                        <br>Simply make a 2-5mins video daily and tag us @payhankeyofficial on
-                        Instagram and TikTok.
+                        <b>Post, Grow engagements and Earn from every posts.</b><br>
+                        Creator and Influencer accounts can post long text, images and also earn up to $2 (or it's equivalent) on every post. 
+                        Basic users can earn but cannot withdraw earnings.
+                        Upgrade to a Creator or Influencer today.
+                        
                     </div>
 
                     {{-- <form wire:submit.prevent="post">

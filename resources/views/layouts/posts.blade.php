@@ -93,7 +93,7 @@
 
 
 
-            @if (auth()->user()->id == $timeline->user_id)
+            {{-- @if (auth()->user()->id == $timeline->user_id) --}}
                 <div class="block-options">
                     <div class="dropdown">
 
@@ -120,7 +120,7 @@
                         </div>
                     </div>
                 </div>
-            @endif
+            {{-- @endif --}}
         </div>
         <div class="block-content">
             <a href="{{ url('show/' . $timeline->id) }}" style="color: dimgrey">
@@ -238,6 +238,10 @@
             </ul>
         </div>
         <div class="block-content block-content-full bg-body-light">
+            @if(userLevel() == 'Basic')
+                <li class="fa fa-usd"> </li> <a href="{{ url('upgrade') }}" class="text-mute">Monetize This Post</a>
+            @endif
+
             {{-- <p class="fs-sm">
               <i class="fa fa-thumbs-up text-info"></i>
               <i class="fa fa-heart text-danger"></i>
