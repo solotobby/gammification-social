@@ -36,6 +36,9 @@
                                          <p>
                                             <strong>Account</strong> Monetization
                                         </p>
+                                         <p>
+                                            <strong>Can make</strong> Withdrawals
+                                        </p>
                                         @endif
                                         
                                         
@@ -83,6 +86,9 @@
                                             @if($level->name != 'Basic')
                                             <p>
                                                 <strong>Account</strong> Monetization
+                                            </p>
+                                            <p>
+                                                <strong>Can make</strong> Withdrawals
                                             </p>
                                             @endif
 

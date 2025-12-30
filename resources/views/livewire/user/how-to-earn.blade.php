@@ -15,15 +15,21 @@
                   <div class="row justify-content-center py-sm-1 py-md-2">
                     
                     <div class="col-12">
-                    Earning is easy on Payhankey when you post, comment, like and share as many times as possible.
+                    Earning is easy on Payhankey when you post, comment, like and share as many times as possible. 
+                    All users get up to $5 (equivalent of N7500) sign up bonus. 
+
                     <br> 
                     You can earn from:<br><br>
-                    1. Internal Content post and Engagements: We pay you for every comment you make on Payhankey. Every like and comment your posts gets earns you money. This means we pay you for liking and comment on your posts
-                    <br><br>2. External Views, comment and Likes: Payhankey pays you when you share your posts on other social media to get views, likes and comment.
-                    <br><br>3. Earn as a Promoter : You earn $1 from every 1000 views on review videos you make about Payhankey on Instagram or TikTok. Once the video (s) goes viral (20, 000 views and above), you earn $20 
-                    <br><br>4. Sign up bonus: For registering on Payhankey, you earn up to $3 sign up bonus
-                    <br><br>5. Referal bonus: We pay you up to $5 on each user you refer. Copy your referral link from your <a href="{{ url('profile/'.auth()->user()->id)}}"> Profile,</a>
-                         share with your friends, add to your social media bio for users to sign up using your referral link.
+                    1. Internal Content post and Engagements: We pay you for every post you make on Payhankey. This means even every like and comment your posts gets earns you money. Payhankey pays you for the likes, comments and views your posts gets.  
+                    <br> 
+
+                    To monetize your post, you must have an active badge of a Creator or an Influencer. Each badge is valid for only 30 days after which you can renew to continue to have access to monetization. Payhankey pays up to $0.8 for each view, and $0.4 each for each like and comment. 
+                    Creators and Influencers earn more while Basic user accounts are not monetized. 
+
+                    <br><br>2. Earn as a Promoter: You earn from every viral review videos you make about Payhankey on Instagram or TikTok. Make sure you tag us @payhankeyofficial before making the post. Once the video (s) goes viral (20, 000 views and above), you earn up to $20.
+                    <br><br>3. Sign up bonus: For registering on Payhankey, you earn up to $1 sign up bonu
+                    
+                    <br><br>4.Referral bonus: We pay you up to $0.75 on each user you refer. Copy your referral link from your <a href="{{ url('profile/'.auth()->user()->username) }}"> Profile </a>, share with your friends, add to your social media bio for users to sign up using your referral link. 
                     </div>
                   </div>
                 </div>
