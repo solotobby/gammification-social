@@ -32,7 +32,7 @@ class ViewProfile extends Component
         $this->recordProfileViews();
     }
 
-    private function recordProfileViews()
+    private function recordProfileViews(): void
     {
 
         $viewerId = auth()->id();

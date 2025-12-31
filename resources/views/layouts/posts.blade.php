@@ -110,15 +110,15 @@
                             </a>
 
                             {{-- <a class="dropdown-item" href="javascript:void(0)">
-                                                <i class="far fa-fw fa-thumbs-down text-warning me-1"></i> Stop following this user
-                                                </a>
-                                                <div role="separator" class="dropdown-divider"></div>
-                                                <a class="dropdown-item" href="javascript:void(0)">
-                                                <i class="fa fa-fw fa-exclamation-triangle me-1"></i> Report this post
-                                                </a>
-                                                <a class="dropdown-item" href="javascript:void(0)">
-                                                <i class="fa fa-fw fa-bookmark me-1"></i> Bookmark this post
-                                                </a> --}}
+                                <i class="far fa-fw fa-thumbs-down text-warning me-1"></i> Stop following this user
+                                </a>
+                                <div role="separator" class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="javascript:void(0)">
+                                <i class="fa fa-fw fa-exclamation-triangle me-1"></i> Report this post
+                                </a>
+                                <a class="dropdown-item" href="javascript:void(0)">
+                                <i class="fa fa-fw fa-bookmark me-1"></i> Bookmark this post
+                                </a> --}}
                         </div>
                     </div>
                 @else
@@ -243,9 +243,6 @@
                         </a>
                     </li>
                 @endif
-
-                {{-- <button type="button" class="btn btn-primary push mb-md-0" data-bs-toggle="modal" data-bs-target="#modal-block-fromright">Block Design</button> --}}
-                {{-- <button type="button" class="btn btn-alt-primary push mb-md-0" data-bs-toggle="modal" data-bs-target="#modal-default-fromright">Default</button> --}}
             </ul>
         </div>
         <div class="block-content block-content-full bg-body-light">
@@ -260,11 +257,11 @@
               <a class="fw-semibold" href="javascript:void(0)">Brian Cruz</a>,
               <a class="fw-semibold" href="javascript:void(0)">Lori Grant</a>,
               <a class="fw-semibold" href="javascript:void(0)">and 150 others</a>
-            </p> --}}
-            {{-- <form method="POST" wire:submit.prevent="comment">
+            </p>
+            <form method="POST" wire:submit.prevent="comment">
               <input type="text" wire:model="message" name="message"  :value="old('message')" class="form-control form-control-alt" placeholder="Write a comment..">
-            </form> --}}
-            {{-- <div class="pt-3 fs-sm">
+            </form>
+            <div class="pt-3 fs-sm">
               <div class="d-flex">
                 <a class="flex-shrink-0 img-link me-2" href="javascript:void(0)">
                   <img class="img-avatar img-avatar32 img-avatar-thumb" src="{{asset('src/assets/media/avatars/avatar3.jpg')}}" alt="">
@@ -373,24 +370,7 @@
     <!-- END From Right Block Modal -->
 
 
-    <!-- From Right Default Modal -->
-    {{-- <div class="modal fade" id="modal-default-fromright" tabindex="-1" role="dialog" aria-labelledby="modal-default-fromright" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-fromright" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title">Modal Title</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body pb-1">
-              <p>Potenti elit lectus augue eget iaculis vitae etiam, ullamcorper etiam bibendum ad feugiat magna accumsan dolor, nibh molestie cras hac ac ad massa, fusce ante convallis ante urna molestie vulputate bibendum tempus ante justo arcu erat accumsan adipiscing risus, libero condimentum venenatis sit nisl nisi ultricies sed, fames aliquet consectetur consequat nostra molestie neque nullam scelerisque neque commodo turpis quisque etiam egestas vulputate massa, curabitur tellus massa venenatis congue dolor enim integer luctus, nisi suscipit gravida fames quis vulputate nisi viverra luctus id leo dictum lorem, inceptos nibh orci.</p>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-sm btn-alt-secondary" data-bs-dismiss="modal">Close</button>
-              <button type="button" class="btn btn-sm btn-primary" data-bs-dismiss="modal">Done</button>
-            </div>
-          </div>
-        </div>
-    </div> --}}
+    
     <!-- END From Right Default Modal -->
     <script>
         function copyToClipboard(text) {
