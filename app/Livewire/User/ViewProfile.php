@@ -7,6 +7,7 @@ use App\Models\Post;
 use App\Models\ProfileViews;
 use App\Models\User;
 use App\Models\UserLike;
+use App\Notifications\GeneralNotification;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\Attributes\On;
@@ -51,6 +52,16 @@ class ViewProfile extends Component
                 ? 'profile_views'
                 : 'profile_views_external'
         );
+
+         if ($created->wasRecentlyCreated) {
+            $this->user->notify(new GeneralNotification([
+                'title'   => displayName(auth()->user()->name) . ' viewed your profile',
+                'message' => displayName(auth()->user()->name) . ' viewed your profile',
+                'icon'    => 'fa-eye text-primary',
+                'url'     => url('profile/' . auth()->user()->username),
+            ]));
+        }
+
     }
 
     public function timeline($username)
@@ -66,7 +77,7 @@ class ViewProfile extends Component
     {
 
         $post = Post::where('unicode', $postId)->first();
-
+        $user = User::find($post->user_id);
 
         if ($post->isLikedBy(Auth::user())) {
             $post->likes()->where('user_id', Auth::id())->delete();
@@ -75,6 +86,13 @@ class ViewProfile extends Component
             // if (auth()->user()->id != $post->user_id) {
             $post->likes()->create(['user_id' => Auth::id(), 'is_paid' => false, 'amount' => calculateUniqueEarningPerLike(), 'poster_user_id' => $post->user_id]);
             $post->increment('likes');
+
+            $user->notify(new GeneralNotification([
+                'title'   =>  displayName(auth()->user()->name).' liked your post',
+                'message' => displayName(auth()->user()->name).'liked your post',
+                'icon'    => 'fa-thumbs-up text-primary',
+                'url'     => url('show/'.$post->id),
+            ]));
             // }
         }
 
@@ -112,6 +130,15 @@ class ViewProfile extends Component
 
             // $authUser->following()->detach($this->user->id); //unfollow
             $this->isFollowing = false;
+
+            $this->user->notify(new GeneralNotification([
+                'title'   =>  displayName(auth()->user()->name).' unfollowed you',
+                'message' => displayName(auth()->user()->name).' unfollowed you',
+                'icon'    => 'fa-user-minus text-primary',
+                'url'     => url('profile/'.auth()->user()->username),
+            ]));
+
+
         } else {
             //following $this->user->id user
 
@@ -127,6 +154,14 @@ class ViewProfile extends Component
 
             // $authUser->following()->attach($this->user->id); //follow
             $this->isFollowing = true;
+
+            $this->user->notify(new GeneralNotification([
+                'title'   =>  displayName(auth()->user()->name).' followed you',
+                'message' => displayName(auth()->user()->name).' followed you',
+                'icon'    => 'fa-user-plus text-primary',
+                'url'     => url('profile/'.auth()->user()->username),
+            ]));
+
         }
     }
 

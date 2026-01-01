@@ -9,6 +9,7 @@ use App\Models\Transaction;
 use App\Models\User;
 use App\Models\UserLevel;
 use App\Models\Wallet;
+use App\Notifications\GeneralNotification;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Validate;
@@ -193,6 +194,7 @@ class Posts extends Component
     {
 
         $post = Post::where('unicode', $postId)->first();
+        $user = User::find($post->user_id);
 
         if ($post->isLikedBy(Auth::user())) {
             $post->likes()->where('user_id', Auth::id())->delete();
@@ -201,8 +203,22 @@ class Posts extends Component
             // if (auth()->user()->id != $post->user_id) {
             $post->likes()->create(['user_id' => Auth::id(), 'is_paid' => false, 'amount' => calculateUniqueEarningPerLike(), 'poster_user_id' => $post->user_id]);
             $post->increment('likes');
+
+            $user->notify(new GeneralNotification([
+                'title'   =>  displayName(auth()->user()->name).' liked your post',
+                'message' => displayName(auth()->user()->name).'liked your post',
+                'icon'    => 'fa-thumbs-up text-primary',
+                'url'     => url('show/'.$post->id),
+            ]));
+
+
             // }
         }
+
+        
+
+        //send Notification
+
 
         // $this->timelines();
 

@@ -674,7 +674,6 @@
                 <i class="fa fa-fw fa-user d-sm-none"></i>
                 <span class="d-none d-sm-inline-block">
                   {{ auth()->user()->name }}
-
                 </span>
                 <i class="fa fa-fw fa-angle-down opacity-50 ms-1 d-none d-sm-inline-block"></i>
               </button>
@@ -721,9 +720,15 @@
 
             <!-- Notifications Dropdown -->
             <div class="dropdown d-inline-block">
-              {{-- <button type="button" class="btn btn-alt-secondary" id="page-header-notifications-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            @auth
+                <livewire:user.navbar-notifications />
+            @endauth
+            </div>
+
+            {{-- <div class="dropdown d-inline-block">
+              <button type="button" class="btn btn-alt-secondary" id="page-header-notifications-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="fa fa-fw fa-bell"></i>
-              </button> --}}
+              </button>
               <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end p-0" aria-labelledby="page-header-notifications-dropdown">
                 <div class="bg-primary-dark rounded-top fw-semibold text-white text-center p-3">
                   Notifications
@@ -791,7 +796,7 @@
                   </a>
                 </div>
               </div>
-            </div>
+            </div> --}}
             <!-- END Notifications Dropdown -->
 
             <!-- Toggle Side Overlay -->
