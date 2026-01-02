@@ -78,7 +78,7 @@
         <a class="block block-rounded block-link-pop" href="javascript:void(0)">
           <div class="block-content block-content-full d-flex align-items-center justify-content-between">
             <div>
-              <i class="fa fa-2x fa-list text-primary"></i>
+              <i class="fa fa-2x fa-eye text-primary"></i>
             </div>
             <div class="ms-3 text-end">
               <p class="fs-3 fw-medium mb-0">
@@ -95,7 +95,7 @@
         <a class="block block-rounded block-link-pop" href="javascript:void(0)">
           <div class="block-content block-content-full d-flex align-items-center justify-content-between">
             <div>
-              <i class="fa fa-2x fa-list text-primary"></i>
+              <i class="fa fa-2x fa-thumbs-up text-primary"></i>
             </div>
             <div class="ms-3 text-end">
               <p class="fs-3 fw-medium mb-0">
@@ -112,7 +112,7 @@
         <a class="block block-rounded block-link-pop" href="javascript:void(0)">
           <div class="block-content block-content-full d-flex align-items-center justify-content-between">
             <div>
-              <i class="fa fa-2x fa-list text-primary"></i>
+              <i class="fa fa-2x fa-comments text-primary"></i>
             </div>
             <div class="ms-3 text-end">
               <p class="fs-3 fw-medium mb-0">
