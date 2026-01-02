@@ -215,15 +215,22 @@ class User extends Authenticatable
         )->withTimestamps();
     }
 
-    // public function isFollowing(User $user): bool
+    public function isFollowing(User $user): bool
+    {
+        return $this->following()->where('following_id', $user->id)->exists();
+    }
+
+
+    // public function isFollowing($userId)
     // {
-    //     return $this->following()->where('following_id', $user->id)->exists();
+    //     return $this->followingRelation()->where('following_id', $userId)->exists();
     // }
 
-
-    public function isFollowing($userId)
+    public function isFollowings($userId): bool
     {
-        return $this->followingRelation()->where('following_id', $userId)->exists();
+        return $this->following()
+            ->where('users.id', $userId)
+            ->exists();
     }
 
 }

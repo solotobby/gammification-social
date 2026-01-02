@@ -77,20 +77,24 @@ class ProfileConnections extends Component
 
         $user = User::where('username', $this->username)->first();
     
+        $connections = $this->activeTab === 'followers'
+        ? $user->followers()->paginate(12)
+        : $user->following()->paginate(12);
 
-        if ($this->activeTab === 'followers') {
-            $connections = $user
-                ->followersRelation()
-                ->with('followers')
-                ->latest()
-                ->paginate(20);
-        } else {
-            $connections = $user
-                ->followingRelation()
-                ->with('following')
-                ->latest()
-                ->paginate(20);
-        }
+
+        // if ($this->activeTab === 'followers') {
+        //     $connections = $user
+        //         ->followersRelation()
+        //         ->with('followers')
+        //         ->latest()
+        //         ->paginate(20);
+        // } else {
+        //     $connections = $user
+        //         ->followingRelation()
+        //         ->with('following')
+        //         ->latest()
+        //         ->paginate(20);
+        // }
 
 
         return view('livewire.user.profile-connections', ['connections' => $connections, 'user' => $user]);
