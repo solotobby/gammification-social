@@ -110,12 +110,7 @@
                             </a>
                             @if(userLevel(auth()->user()->id) == 'Creator' || userLevel(auth()->user()->id) == 'Influencer')
 
-                                {{-- <a class="dropdown-item" href="javascript:void(0)" data-bs-toggle="modal"
-                                    data-bs-target="#modal-block-from-edit-{{ $timeline->id }}">
-                                    <i class="far fa-fw fa-edit text-primary me-1"></i> Edit Post
-                                </a> --}}
-
-                                <a class="dropdown-item"
+                                {{-- <a class="dropdown-item"
                                     href="javascript:void(0)"
                                     wire:click="openEditModal({{ $timeline->unicode }})"
                                     data-bs-toggle="modal"
@@ -125,7 +120,7 @@
 
                                 <a class="dropdown-item" href="javascript:void(0)" wire:click="deletePost({{ $timeline->unicode }})">
                                     <i class="far fa-fw fa-trash-alt text-danger me-1"></i> Delete Post
-                                </a>
+                                </a> --}}
 
                             @endif
 
