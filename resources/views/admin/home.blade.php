@@ -24,7 +24,7 @@
       <div class="row">
         <!-- Quick Stats -->
         <div class="col-6 col-md-3">
-          <a class="block block-rounded block-link-pop text-center" href="javascript:void(0)">
+          <a class="block block-rounded block-link-pop text-center" href="{{url('user/list/all')}}">
             <div class="block-content block-content-full ratio ratio-16x9">
               <div class="d-flex justify-content-center align-items-center">
                 <div>
@@ -35,25 +35,28 @@
             </div>
           </a>
         </div>
-        <div class="col-6 col-md-3">
-          <a class="block block-rounded block-link-pop text-center" href="javascript:void(0)">
+        @foreach ($levelCounts as $level)
+           <div class="col-6 col-md-3">
+          <a class="block block-rounded block-link-pop text-center" href="{{url('user/list/'.$level->plan_name)}}">
             <div class="block-content block-content-full ratio ratio-16x9">
               <div class="d-flex justify-content-center align-items-center">
                 <div>
-                  <div class="fs-2 mb-1">{{ $partnerCount }}</div>
-                  <div class="text-muted">Partners</div>
+                  <div class="fs-2 mb-1">{{ $level->total }}</div>
+                  <div class="text-muted">{{$level->plan_name}}</div>
                 </div>
               </div>
             </div>
           </a>
         </div>
-        <div class="col-6 col-md-3">
+        @endforeach
+       
+        {{-- <div class="col-6 col-md-3">
           <a class="block block-rounded block-link-pop text-center" href="javascript:void(0)">
             <div class="block-content block-content-full ratio ratio-16x9">
               <div class="d-flex justify-content-center align-items-center">
                 <div>
                   <div class="fs-2 mb-1">{{ $accesscodeCount }}</div>
-                  <div class="text-muted">Access Codes</div>
+                  <div class="text-muted">Influencer</div>
                 </div>
               </div>
             </div>
@@ -70,7 +73,7 @@
               </div>
             </div>
           </a>
-        </div>
+        </div> --}}
         <!-- END Quick Stats -->
 
         <!-- Charts -->

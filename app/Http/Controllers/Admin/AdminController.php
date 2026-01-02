@@ -8,7 +8,9 @@ use App\Models\Partner;
 use App\Models\Post;
 use App\Models\Transaction;
 use App\Models\User;
+use App\Models\UserLevel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AdminController extends Controller
 {
@@ -28,13 +30,19 @@ class AdminController extends Controller
             $rev= $nairaInDollar+$usd;
 
             $posts = Post::query()->get(['views', 'views_external', 'likes', 'likes_external', 'comments', 'comment_external']);
-            //return $post->sum('views');
+           $levelCounts = UserLevel::where('status', 'active')
+                ->where('next_payment_date', '>', now())
+                ->groupBy('plan_name')
+                ->select('plan_name', DB::raw('COUNT(user_id) as total'))
+                ->get();
+        
             return view('admin.home', [
                 'userCount' => $userCount, 
                 'partnerCount' =>$partnerCount, 
                 'accesscodeCount' => $accesscodeCount,
                 'rev' => $rev, 
-                'posts' => $posts
+                'posts' => $posts,
+                'levelCounts' => $levelCounts
             ]);
         }
        

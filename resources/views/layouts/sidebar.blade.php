@@ -9,7 +9,7 @@
           <i class="nav-main-link-icon fa fa-home"></i>
           <span class="nav-main-link-name">Dashboard</span>
         </a>
-        <a class="nav-main-link" href="{{ url('user/list') }}">
+        <a class="nav-main-link" href="{{ url('user/list/all') }}">
           <i class="nav-main-link-icon fa fa-list"></i>
           <span class="nav-main-link-name">User List</span>
         </a>

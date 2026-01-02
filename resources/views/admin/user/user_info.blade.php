@@ -5,7 +5,7 @@
 
 
 <div class="content">
-    <h2 class="content-heading"> <i>{{ $user->name }} - {{ $user->wallet->level }}</i></h2>
+    <h2 class="content-heading"> <i>{{ $user->name }} - {{ $level }}</i></h2>
     <div class="row">
       <div class="col-md-6 col-xl-6">
         <a class="block block-rounded block-link-pop" href="javascript:void(0)">
@@ -151,7 +151,7 @@
 
     <div class="block block-rounded">
       <div class="block-header block-header-default">
-        <h3 class="block-title">List of Posts</h3>
+        <h3 class="block-title">List of Posts - {{ $posts->count() }} </h3>
       </div>
       <div class="block-content">
         <table class="table table-bordered table-striped table-vcenter js-dataTable-buttons">
@@ -159,9 +159,11 @@
             <tr>
               {{-- <th class="text-center" style="width: 80px;">#</th> --}}
               <th>Content</th>
-              <th>View-Ext_View-paid-Amt</th>
-              <th>Likes-Ext_Likes-paid-Amt</th>
-              <th>Comm-Ext_Comm-paid-Amt</th>
+              <th>Total Likes</th>
+              <th>Unique View</th>
+              <th>Total Views</th>
+              <th>Unique Comment</th>
+              <th>Total Comment</th>
               <th>When Posted</th>
             </tr>
           </thead>
@@ -175,17 +177,29 @@
                     {{-- <a href="{{ url('user/info/'.$post->id) }}">{{ $post->user->name }}</a> --}}
                   </td>
                   <td>
-                    {{ $post->views }}-{{ $post->views_external }}-{{ $post->paidExternalViews() }}|<span class="badge bg-info">${{ $post->paidExternalViews()*$singleViewExternal }}</span>
+                    {{ $post->likes }}
                   </td>
                   <td>
-                    {{ $post->likes }}/{{ $post->likes_external }}
-                    {{-- <span class="badge bg-info">{{ $post->views }}</span> --}}
+                    {{ $post->views }}
                   </td>
                   <td>
-                    {{ $post->comments }}-{{ $post->comment_external == null ? '0' : $post->comment_external }}-{{$post->paidExternalComments()}}| <span class="badge bg-info">${{$post->paidExternalComments()*$perCommentAmount }}</span>                  
+                    {{ sumCounter($post->views, $post->views_external)  }}
+                  </td>
+                   <td>
+                    {{ $post->comments }}
                   </td>
                   <td>
-                    <em class="text-muted">{{$post->created_at?->shortAbsoluteDiffForHumans()}} ago</em>
+                    {{ sumCounter($post->comments, $post->comments_external)  }}
+                  </td>
+                  
+                  
+                  
+                  <td>
+                    <em class="text-muted">{{
+                      $post->created_at
+                     
+                      }}</em>
+                       {{-- {{   $post->created_at?->shortAbsoluteDiffForHumans() }}  --}}
                   </td>
                 </tr>
               @endforeach
