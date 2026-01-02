@@ -140,7 +140,7 @@ class ViewProfile extends Component
 
 
         } else {
-            //following $this->user->id user
+          
 
             Follow::create([
                 'follower_id' => $authUser->id, //update user following

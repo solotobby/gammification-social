@@ -12,7 +12,7 @@ class Follow extends Model
 
     protected $fillable = ['follower_id', 'following_id'];
 
-    public function follower(){
+    public function followers(){
         return $this->belongsTo(User::class, 'follower_id');
     }
 

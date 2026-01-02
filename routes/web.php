@@ -9,6 +9,7 @@ use App\Livewire\User\Partners;
 use App\Livewire\User\PostAnalytics;
 use App\Livewire\User\Posts;
 use App\Livewire\User\Profile;
+use App\Livewire\User\ProfileConnections;
 use App\Livewire\User\PromotionalContent;
 use App\Livewire\User\Settings;
 use App\Livewire\User\ShowNewPosts;
@@ -123,6 +124,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('how/to/earn', HowToEarn::class);
         Route::get('upgrade', UpgradeAccount::class);
         Route::get('promotions', PromotionalContent::class);
+        Route::get('profile/{username}/connection', ProfileConnections::class);
     });
 
 

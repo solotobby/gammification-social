@@ -177,6 +177,21 @@ class User extends Authenticatable
         return $this->likes()->where('post_id', $post->id)->delete();
     }
 
+
+
+    public function followingRelation()
+    {
+        return $this->hasMany(Follow::class, 'follower_id');
+    }
+
+    // Users that follow this user
+    public function followersRelation()
+    {
+        return $this->hasMany(Follow::class, 'following_id');
+    }
+
+
+
     public function following()
     {
         return $this->belongsToMany(
@@ -200,9 +215,15 @@ class User extends Authenticatable
         )->withTimestamps();
     }
 
-    public function isFollowing(User $user): bool
+    // public function isFollowing(User $user): bool
+    // {
+    //     return $this->following()->where('following_id', $user->id)->exists();
+    // }
+
+
+    public function isFollowing($userId)
     {
-        return $this->following()->where('following_id', $user->id)->exists();
+        return $this->followingRelation()->where('following_id', $userId)->exists();
     }
 
 }
