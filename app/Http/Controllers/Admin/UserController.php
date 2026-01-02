@@ -16,24 +16,13 @@ class UserController extends Controller
     public function userList($level=null){
         $res = securityVerification();
         if($res == 'OK'){
-            $users = '';
-            if($level == 'all'){
-                $users = User::role('user')->orderBy('created_at', 'desc')->paginate(100);
-            }elseif($level == 'Basic'){
-                $users = User::whereHas('activeLevel', function ($q) {
-                    $q->where('plan_name', 'Basic');
-                })->with('activeLevel')->paginate(100);
-            
-            }elseif($level == 'Creator'){
-                $users = User::whereHas('activeLevel', function ($q) {
-                    $q->where('plan_name', 'Creator');
-                })->with('activeLevel')->paginate(100);
-            }elseif($level == 'Influencer'){
-                $users = User::whereHas('activeLevel', function ($q) {
-                    $q->where('plan_name', 'Influencer');
-                })->with('activeLevel')->paginate(100);
-            }
-           
+
+            $users = User::with('activeLevel')
+            ->role('user')
+            ->byLevel($level)
+            ->latest()
+            ->paginate(100);
+
             return view('admin.user.userlist', ['users' => $users, 'level' => $level]);
         }
     }

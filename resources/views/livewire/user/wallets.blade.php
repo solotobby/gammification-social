@@ -96,11 +96,11 @@
             </a>
         </div>
 
-        @if (userLevel() == 'Influencer' || userLevel() == 'Creator' || userLevel() == 'Basic')
+        {{-- @if (userLevel() == 'Influencer' || userLevel() == 'Creator' || userLevel() == 'Basic')
             <div class="col-12 mb-3">
                 <button class="btn btn-sm btn-info" wire:click="refresh">Refresh Wallet</button>
             </div>
-        @endif
+        @endif --}}
 
         
 

@@ -70,20 +70,17 @@ class User extends Authenticatable
         return $this->hasMany(Post::class);
     }
 
-    // public function level()
-    // {
-    //     //    return $this->belongsTo(AccessCode::class, 'access_code_id');
+    public function scopeByLevel($query, $level)
+    {
+        if ($level === 'all') {
+            return $query;
+        }
 
-    //     //return $this->belongsTo(Level::class);
+        return $query->whereHas('activeLevel', function ($q) use ($level) {
+            $q->where('plan_name', $level);
+        });
+    }
 
-    //     return activeLevel()->plan_name;
-    // }
-
-    // public function activeLevel()
-    // {
-    //     $currentDate = now();
-    //     return $this->hasOne(UserLevel::class, 'user_id')->where('status', 'active')->where('next_payment_date', '>', $currentDate);
-    // }
 
     public function activeLevel()
     {

@@ -10,7 +10,7 @@ class Analytics extends Component
     public $post;
     public function mount(){
         
-        $this->post = Post::where('user_id',auth()->user()->id)->get();
+        $this->post = Post::where('user_id', auth()->user()->id)->get();
         
     }
     public function render()

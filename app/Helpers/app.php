@@ -12,6 +12,7 @@ use App\Models\UserLike;
 use App\Models\UserView;
 use App\Models\ViewsExternal;
 use App\Models\Wallet;
+use Brick\Math\BigInteger;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
@@ -895,5 +896,13 @@ if (!function_exists('fetchSubscription')) {
         ])->throw();
 
         return json_decode($subData->getBody()->getContents(), true)['data'][0];
+    }
+}
+
+
+if(!function_exists('engagementEarnings')){
+    function engagementEarnings(int $total): float
+    {
+            return round($total / 1000, 2);
     }
 }
