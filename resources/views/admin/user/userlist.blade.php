@@ -19,13 +19,14 @@
     </div>
     <div class="block-content block-content-full">
       <!-- DataTables init on table by adding .js-dataTable-buttons class, functionality is initialized in js/pages/be_tables_datatables.min.js which was auto compiled from _js/pages/be_tables_datatables.js -->
-      <table class="table table-bordered table-striped table-vcenter js-dataTable-buttons">
+      <table class="table table-bordered table-striped table-vcenter">
         <thead>
           <tr>
             {{-- <th class="text-center" style="width: 80px;">#</th> --}}
             <th>Name</th>
             <th>Email</th>
             <th>Level</th>
+            <th>Verified at</th>
             <th>Heard</th>
             <th>Registered</th>
           </tr>
@@ -41,7 +42,10 @@
                     {{ $user->email }}
                 </td>
                 <td>
-                  <span class="badge bg-info">{{ $user->level->name }}</span>
+                  <span class="badge bg-info">{{ $user?->activeLevel?->plan_name ?? 'Basic'}}</span>
+                </td>
+                <td>
+                    {{ $user->email_verified_at }}
                 </td>
                 <td >
                   {{ $user->heard }}
@@ -51,11 +55,13 @@
                 </td>
               </tr>
             @endforeach
-         
-         
-         
         </tbody>
       </table>
+       {{-- Pagination --}}
+            <div class="mt-1">
+                {{ $users->links() }}
+            </div>
+
     </div>
   </div>
 </div>

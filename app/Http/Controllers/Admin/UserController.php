@@ -16,7 +16,7 @@ class UserController extends Controller
     public function userList(){
         $res = securityVerification();
         if($res == 'OK'){
-            $users = User::role('user')->orderBy('created_at', 'desc')->get();
+            $users = User::role('user')->orderBy('created_at', 'desc')->paginate(100);
             return view('admin.user.userlist', ['users' => $users]);
         }
     }
