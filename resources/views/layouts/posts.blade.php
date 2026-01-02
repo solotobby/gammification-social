@@ -106,8 +106,28 @@
                         <div class="dropdown-menu dropdown-menu-end">
 
                             <a class="dropdown-item" href="{{ url('post/timeline/' . $timeline->id . '/analytics') }}">
-                                <i class="far fa-fw fa-eye text-success me-1"></i> View Posts Earnings
+                                <i class="far fa-fw fa-eye text-success me-1"></i>Posts Est. Earnings
                             </a>
+                            @if(userLevel(auth()->user()->id) == 'Creator' || userLevel(auth()->user()->id) == 'Influencer')
+
+                                {{-- <a class="dropdown-item" href="javascript:void(0)" data-bs-toggle="modal"
+                                    data-bs-target="#modal-block-from-edit-{{ $timeline->id }}">
+                                    <i class="far fa-fw fa-edit text-primary me-1"></i> Edit Post
+                                </a> --}}
+
+                                <a class="dropdown-item"
+                                    href="javascript:void(0)"
+                                    wire:click="openEditModal({{ $timeline->unicode }})"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modal-block-from-edit">
+                                        <i class="far fa-fw fa-edit text-primary me-1"></i> Edit Post
+                                </a>
+
+                                <a class="dropdown-item" href="javascript:void(0)" wire:click="deletePost({{ $timeline->unicode }})">
+                                    <i class="far fa-fw fa-trash-alt text-danger me-1"></i> Delete Post
+                                </a>
+
+                            @endif
 
                             {{-- <a class="dropdown-item" href="javascript:void(0)">
                                 <i class="far fa-fw fa-thumbs-down text-warning me-1"></i> Stop following this user
@@ -369,9 +389,68 @@
     </div>
     <!-- END From Right Block Modal -->
 
+    <div class="modal fade" id="modal-block-from-edit" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-fromright">
+        <div class="modal-content">
+            <div class="block block-rounded block-themed mb-0">
+                <div class="block-header bg-primary-dark">
+                    <h3 class="block-title">Edit Post</h3>
+                    <button type="button" class="btn-block-option" data-bs-dismiss="modal">
+                        <i class="fa fa-fw fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="block-content">
+                    <form wire:submit.prevent="editPost">
+                        @php $userLevel = userLevel(); @endphp
+
+                        <div x-data="{ content: @entangle('content') }">
+                            <textarea
+                                x-model="content"
+                                class="form-control"
+                                placeholder="Edit your post"
+                                @if (!in_array($userLevel, ['Creator','Influencer'])) maxlength="160" @endif
+                                required
+                            ></textarea>
+
+                            @if (!in_array($userLevel, ['Creator','Influencer']))
+                                <small class="text-muted" x-text="content.length + '/160 characters'"></small>
+                            @endif
+                        </div>
+
+                        <button class="btn btn-primary w-100 mt-3">
+                            <i class="fa fa-edit me-1"></i> Update Post
+                        </button>
+                    </form>
+                </div>
+
+                <div class="block-content text-end bg-body">
+                    <button type="button" class="btn btn-sm btn-primary" data-bs-dismiss="modal">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<script>
+    document.addEventListener('livewire:init', () => {
+        Livewire.on('closeEditModal', () => {
+            const modal = bootstrap.Modal.getInstance(
+                document.getElementById('modal-block-from-edit')
+            );
+            modal?.hide();
+        });
+    });
+</script>
+
 
     
-    <!-- END From Right Default Modal -->
+    {{-- <!-- END From Right Default Modal -->
     <script>
         function copyToClipboard(text) {
             navigator.clipboard.writeText(text).then(function() {
@@ -380,7 +459,7 @@
                 alert('Could not copy text: ', err);
             });
         }
-    </script>
+    </script> --}}
 
 @empty
     <div class="alert alert-info">

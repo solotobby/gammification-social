@@ -32,6 +32,16 @@
                                         <i class="far fa-fw fa-eye text-success me-1"></i> View Posts Earnings
                                     </a>
 
+                                    @if (userLevel(auth()->user()->id) == 'Creator' || userLevel(auth()->user()->id) == 'Influencer')
+                                        <a class="dropdown-item" href="javascript:void(0)">
+                                            <i class="far fa-fw fa-edit text-primary me-1"></i> Edit Post
+                                        </a>
+
+                                        <a class="dropdown-item" href="javascript:void(0)"
+                                            wire:click="deletePost({{ $timeline->unicode }})">
+                                            <i class="far fa-fw fa-trash-alt text-danger me-1"></i> Delete Post
+                                        </a>
+                                    @endif
                                     {{-- <a class="dropdown-item" href="javascript:void(0)">
                                                 <i class="far fa-fw fa-thumbs-down text-warning me-1"></i> Stop following this user
                                                 </a>

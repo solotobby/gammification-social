@@ -41,12 +41,8 @@
             <div class="block block-bordered block-rounded">
                 <div class="block-content block-content-full">
                     <div class="alert alert-info">
-
                         <b>Post, Grow engagements and Earn from every posts.</b><br>
-                        Creator and Influencer accounts can post long text, images and also earn up to $2 (or it's equivalent) on every post. 
-                        Basic users can earn but cannot withdraw earnings.
-                        Upgrade to a Creator or Influencer today.
-
+                        Creator and Influencer accounts can post long text, images and also earn up to {{ getCurrencyCode() }}{{ convertToBaseCurrency(1, auth()->user()->wallet->currency) }} per 1,000 engagement on every post. Basic users can earn but cannot withdraw earnings. Upgrade to a Creator or Influencer to monetize earn from your engagements.
                     </div>
 
                     {{-- <form wire:submit.prevent="post">

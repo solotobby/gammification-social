@@ -6,6 +6,7 @@ use App\Models\Comment;
 use App\Models\Post;
 use App\Models\User;
 use App\Models\UserComment;
+use App\Models\UserLike;
 use App\Models\UserView;
 use App\Notifications\GeneralNotification;
 use Illuminate\Support\Facades\Auth;
@@ -118,6 +119,21 @@ class ShowNewPosts extends Component
         // $this->timeline->push($pst);
         // $this->dispatch('refreshComments');
 
+    }
+
+    public function deletePost($postId){
+        
+        $post = Post::where('unicode', $postId)->first();
+        $post->delete();
+
+        UserView::where('post_id', $post->id)->delete();
+        UserComment::where('post_id', $post->id)->delete();
+        UserLike::where('post_id', $post->id)->delete();
+
+        redirect('timeline');
+
+        session()->flash('success', "Post deleted");
+        
     }
 
 

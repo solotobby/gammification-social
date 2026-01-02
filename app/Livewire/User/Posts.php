@@ -7,7 +7,10 @@ use App\Models\Post;
 use App\Models\PostImages;
 use App\Models\Transaction;
 use App\Models\User;
+use App\Models\UserComment;
 use App\Models\UserLevel;
+use App\Models\UserLike;
+use App\Models\UserView;
 use App\Models\Wallet;
 use App\Notifications\GeneralNotification;
 use Illuminate\Database\Eloquent\Collection;
@@ -45,14 +48,46 @@ class Posts extends Component
         'GBP' => 0.79,
     ];
 
+    public $editingPostId = null;
+
     public $convertedAmount;
 
+    public function openEditModal($postId)
+    {
+        $post = Post::where('unicode', $postId)
+            ->where('user_id', auth()->id())
+            ->firstOrFail();
 
-    // public function mount(){
-    //     $user = UserLevel::where('user_id', auth()->user()->id)->first();
+            // dd($post);
 
-    //     dd($user);
-    // }
+        $this->editingPostId = $post->id;
+        $this->content = $post->content;
+    }
+
+    public function editPost()
+    {
+        $maxLength = in_array(userLevel(), ['Creator', 'Influencer']) ? null : 160;
+
+        if ($maxLength && strlen($this->content) > $maxLength) {
+            session()->flash('error', "Maximum {$maxLength} characters allowed.");
+            return;
+        }
+
+        Post::where('id', $this->editingPostId)
+            ->where('user_id', auth()->id())
+            ->update([
+                'content' => $this->content,
+            ]);
+
+        session()->flash('success', 'Post updated successfully.');
+
+        $this->reset('editingPostId', 'content');
+
+        // Close modal
+        $this->dispatch('closeEditModal');
+    }
+
+
 
     public function updatedImages()
     {
@@ -205,25 +240,32 @@ class Posts extends Component
             $post->increment('likes');
 
             $user->notify(new GeneralNotification([
-                'title'   =>  displayName(auth()->user()->name).' liked your post',
-                'message' => displayName(auth()->user()->name).'liked your post',
+                'title'   =>  displayName(auth()->user()->name) . ' liked your post',
+                'message' => displayName(auth()->user()->name) . 'liked your post',
                 'icon'    => 'fa-thumbs-up text-primary',
-                'url'     => url('show/'.$post->id),
+                'url'     => url('show/' . $post->id),
             ]));
 
 
             // }
         }
 
-        
-
-        //send Notification
-
-
-        // $this->timelines();
-
-        // $this->dispatch('user.timeline');
     }
+
+    public function deletePost($postId)
+    {
+
+        $post = Post::where('unicode', $postId)->first();
+        $post->delete();
+
+        UserView::where('post_id', $post->id)->delete();
+        UserComment::where('post_id', $post->id)->delete();
+        UserLike::where('post_id', $post->id)->delete();
+
+        session()->flash('success', "Post deleted");
+    }
+
+
 
     public function verifyAccessCode()
     {

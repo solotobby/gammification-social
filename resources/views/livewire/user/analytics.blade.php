@@ -1,5 +1,12 @@
 <div>
    
+   
+
+    <div class="alert alert-info">
+    🚀 Every <strong>1,000 engagements</strong> puts 
+    <strong>{{ getCurrencyCode() }}{{ convertToBaseCurrency(1, auth()->user()->wallet->currency) }}</strong> 
+    straight into your wallet. Keep engaging!
+</div>
 
     <h2 class="content-heading">Analytics</h2>
     <div class="row">
@@ -162,7 +169,7 @@
                 {{ getCurrencyCode() }}{{  convertToBaseCurrency($amountUSD, auth()->user()->wallet->currency) }}
               </p>
               <p class="text-muted mb-0">
-                Total Engagement
+                Estimated. Earning
               </p>
             </div>
           </div>
