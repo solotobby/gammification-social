@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\LevelManagementController;
+use App\Http\Controllers\Admin\UserController;
 use App\Livewire\CreateProduct;
 use App\Livewire\Level;
 use App\Livewire\User\Analytics;
@@ -132,8 +133,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('admin/home', [\App\Http\Controllers\Admin\AdminController::class, 'home'])->name('admin.home');
 
         Route::get('user/list/{level}', [\App\Http\Controllers\Admin\UserController::class, 'userList'])->name('user.list');
+        Route::get('user/search', [\App\Http\Controllers\Admin\UserController::class, 'userSearch']);
         Route::get('user/info/{id}', [\App\Http\Controllers\Admin\UserController::class, 'userInfo']);
         Route::post('user/credit/wallet', [\App\Http\Controllers\Admin\UserController::class, 'processWalletCredit'])->name('credit.wallet');
+        Route::post('process/upgrade', [UserController::class, 'upgradeProcess'])->name('upgrade.user');
 
         Route::get('send/access/code', [\App\Http\Controllers\Admin\AccessCodeController::class, 'sendAccessCode'])->name('access.code.send');
         Route::post('send/access/code', [\App\Http\Controllers\Admin\AccessCodeController::class, 'processValidateCode'])->name('immaculate');

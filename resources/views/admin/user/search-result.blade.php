@@ -14,22 +14,13 @@
  <div class="block block-rounded">
     <div class="block-header block-header-default">
       <h3 class="block-title">
-        Users List - <i>{{ $level }}</i>
+        Users List </i>
       </h3>
     </div>
     <div class="block-content block-content-full">
-      <form action="{{ url('user/search') }}" method="GET">
-     
-        <div class="mb-2">
-                  <div class="input-group">
-                    <input type="text" class="form-control" name="query" id="example-group1-input1" name="example-group1-input1">
-                  </div>   
-        </div>
-        <button class="btn btn-primary mb-2" type="submit"> Search</button>
-      </form>
 
-      <!-- DataTables init on table by adding .js-dataTable-buttons class, functionality is initialized in js/pages/be_tables_datatables.min.js which was auto compiled from _js/pages/be_tables_datatables.js -->
-      <table class="table table-bordered table-striped table-vcenter">
+
+<table class="table table-bordered table-striped table-vcenter">
         <thead>
           <tr>
             {{-- <th class="text-center" style="width: 80px;">#</th> --}}
@@ -72,13 +63,13 @@
                 {{ $users->links() }}
             </div>
 
+
+
     </div>
-  </div>
+ </div>
 </div>
-  <!-- END Dynamic Table with Export Buttons -->
 
 
-  
 @endsection
 
 @section('script')
@@ -100,3 +91,4 @@
 
 
 @endsection
+

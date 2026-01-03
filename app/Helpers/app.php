@@ -852,7 +852,7 @@ if (!function_exists('createSubscriptionNGN')) {
             'Content-Type' => 'application/json',
             'Authorization' => 'Bearer ' . env('PAYSTACK_SECRET_KEY')
         ])->post($url, [
-            "plan" => $planCode,
+            // "plan" => $planCode,
             'email' => $user->email,
             'amount' => $amount * 100, // first charge
             'callback_url' => route('upgrade.api'),

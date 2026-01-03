@@ -94,7 +94,6 @@ class HomeController extends Controller
         $reference = $params['reference'];
 
         //verify Payment
-
        $res = verifyPaystackPayment($reference); 
         $cusEmail = $res['customer']['email'];
        
@@ -103,7 +102,7 @@ class HomeController extends Controller
 
         
        $nextPaymentDate = Carbon::parse($subData['next_payment_date'])
-        ->timezone(config('app.timezone')); // optional
+        ->timezone(config('app.timezone')); 
        
 
        $level =  Level::where('name', $subData['plan']['name'])->first();
@@ -139,8 +138,6 @@ class HomeController extends Controller
              ]);
  
              return redirect('upgrade')->with('success', 'You Successfully upgraded to '.$subData['plan']['name']. ' your next payment is '. $nextPaymentDate);
- 
- 
 
    }
 
