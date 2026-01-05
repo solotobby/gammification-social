@@ -322,8 +322,31 @@ class Posts extends Component
 
     public function render()
     {
-        return view('livewire.user.posts', ['posts' => $this->getTimeline()]);
+
+        $posts = Post::take($this->perPage)
+            ->where('status', 'LIVE')
+            ->orderBy('created_at', 'desc')
+            ->get();
+        // Group posts by user_id
+        $groupedPosts = $posts->groupBy('user_id');
+
+        // Flatten the grouped collection in an interleaved manner
+        $interleavedPosts = new Collection();
+        while ($groupedPosts->isNotEmpty()) {
+            foreach ($groupedPosts as $userId => $userPosts) {
+                if ($userPosts->isNotEmpty()) {
+                    $interleavedPosts->push($userPosts->shift());
+                    if ($userPosts->isEmpty()) {
+                        $groupedPosts->forget($userId);
+                    }
+                }
+            }
+        }
+
+        return view('livewire.user.posts', ['posts' => $interleavedPosts]);
     }
+
+
 
     private function getTimeline(): Collection
     {
@@ -486,6 +509,9 @@ class Posts extends Component
         Cache::forget("feed:timeline:user:{$userId}:{$this->perPage}");
         Cache::forget("feed:priority-users:{$userId}");
     }
+
+
+
 
     public function loadMore(): void
     {
