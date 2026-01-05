@@ -13,8 +13,10 @@ use App\Models\UserLike;
 use App\Models\UserView;
 use App\Models\Wallet;
 use App\Notifications\GeneralNotification;
-use Illuminate\Database\Eloquent\Collection;
+// use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\Validate;
 use Livewire\WithFileUploads;
 use Livewire\Component;
@@ -24,7 +26,7 @@ class Posts extends Component
     use WithFileUploads;
 
 
-    public $perpage = 10;
+    public $perPage = 10;
 
     public $postId;
     #[Validate('required|string')]
@@ -52,13 +54,18 @@ class Posts extends Component
 
     public $convertedAmount;
 
+    protected $listeners = [
+        'refreshFeed' => 'clearFeedCache',
+    ];
+
+
     public function openEditModal($postId)
     {
         $post = Post::where('unicode', $postId)
             ->where('user_id', auth()->id())
             ->firstOrFail();
 
-            // dd($post);
+        // dd($post);
 
         $this->editingPostId = $post->id;
         $this->content = $post->content;
@@ -102,10 +109,7 @@ class Posts extends Component
     }
 
 
-    public function loadMore()
-    {
-        $this->perpage += 10;
-    }
+
 
     public function post()
     {
@@ -249,7 +253,6 @@ class Posts extends Component
 
             // }
         }
-
     }
 
     public function deletePost($postId)
@@ -319,27 +322,175 @@ class Posts extends Component
 
     public function render()
     {
+        return view('livewire.user.posts', ['posts' => $this->getTimeline()]);
+    }
 
-        $posts = Post::take($this->perpage)
-            ->where('status', 'LIVE')
-            ->orderBy('created_at', 'desc')
-            ->get();
-        // Group posts by user_id
-        $groupedPosts = $posts->groupBy('user_id');
+    private function getTimeline(): Collection
+    {
+        $user = Auth::user();
 
-        // Flatten the grouped collection in an interleaved manner
-        $interleavedPosts = new Collection();
-        while ($groupedPosts->isNotEmpty()) {
-            foreach ($groupedPosts as $userId => $userPosts) {
+        $cacheKey = "feed:timeline:user:{$user->id}:{$this->perPage}";
+
+        return Cache::remember($cacheKey, now()->addSeconds(30), function () use ($user, $cacheKey) {
+
+            // Track this cache key
+            $this->rememberUserCacheKey($user->id, $cacheKey);
+
+
+            $priorityKey = "feed:priority-users:{$user->id}";
+
+            // Track priority cache key
+            $this->rememberUserCacheKey($user->id, $priorityKey);
+
+
+
+            $posts = Post::where('posts.status', 'LIVE')
+                ->with('user')
+                ->leftJoin('follows', function ($join) use ($user) {
+                    $join->on('posts.user_id', '=', 'follows.following_id')
+                        ->where('follows.follower_id', $user->id);
+                })
+                ->select('posts.*')
+                ->selectRaw('CASE WHEN follows.id IS NOT NULL THEN 1 ELSE 0 END as priority')
+                ->orderByDesc('priority')
+                ->orderByDesc('posts.created_at')
+                ->take($this->perPage)
+                ->get();
+
+
+            $priorityPosts = $posts->where('priority', 1)->values();
+            $otherPosts    = $posts->where('priority', 0)->values();
+
+            return $this->interleaveByUser($priorityPosts)
+                ->merge($this->interleaveByUser($otherPosts))
+                ->take($this->perPage)
+                ->values();
+        });
+    }
+
+
+    private function rememberUserCacheKey(string $userId, string $key): void
+    {
+        $indexKey = "feed:keys:user:{$userId}";
+
+        $keys = Cache::get($indexKey, []);
+
+        if (!in_array($key, $keys)) {
+            $keys[] = $key;
+            Cache::put($indexKey, $keys, now()->addMinutes(10));
+        }
+    }
+
+
+
+    private function clearUserFeedCache(string $userId): void
+    {
+        $indexKey = "feed:keys:user:{$userId}";
+        $keys = Cache::get($indexKey, []);
+
+        foreach ($keys as $key) {
+            Cache::forget($key);
+        }
+
+        Cache::forget($indexKey);
+    }
+
+
+    // public function getTimeline(): Collection
+    // {
+    //     $user = Auth::user();
+    //     $cacheKey = "feed:timeline:user:{$user->id}:{$this->perPage}";
+
+    //     return Cache::remember($cacheKey, now()->addSeconds(30), function () use ($user) {
+
+    //         /*
+    //         |--------------------------------------------------------------------------
+    //         | 1. Cache priority user IDs (followers + following)
+    //         |--------------------------------------------------------------------------
+    //         */
+    //         $priorityUserIds = Cache::remember(
+    //             "feed:priority-users:{$user->id}",
+    //             now()->addMinutes(5),
+    //             function () use ($user) {
+    //                 return $user->following()
+    //                     ->pluck('users.id')
+    //                     ->merge($user->followers()->pluck('users.id'))
+    //                     ->unique()
+    //                     ->values();
+    //             }
+    //         );
+
+    //         /*
+    //         |--------------------------------------------------------------------------
+    //         | 2. Fetch posts with priority flag
+    //         |--------------------------------------------------------------------------
+    //         */
+    //         $posts = Post::where('status', 'LIVE')
+    //             ->with('user') // prevent N+1
+    //             ->select('posts.*')
+    //             ->selectRaw(
+    //                 'CASE WHEN user_id IN (?) THEN 1 ELSE 0 END as priority',
+    //                 [$priorityUserIds]
+    //             )
+    //             ->orderByDesc('priority')
+    //             ->orderByDesc('created_at')
+    //             ->take($this->perPage * 2) // buffer for interleaving
+    //             ->get();
+
+    //         /*
+    //         |--------------------------------------------------------------------------
+    //         | 3. Split by priority
+    //         |--------------------------------------------------------------------------
+    //         */
+    //         $priorityPosts = $posts->where('priority', 1)->values();
+    //         $otherPosts    = $posts->where('priority', 0)->values();
+
+    //         /*
+    //         |--------------------------------------------------------------------------
+    //         | 4. Interleave to prevent domination
+    //         |--------------------------------------------------------------------------
+    //         */
+    //         return $this->interleaveByUser($priorityPosts)
+    //             ->merge($this->interleaveByUser($otherPosts))
+    //             ->take($this->perPage)
+    //             ->values();
+    //     });
+
+
+    // }
+
+    private function interleaveByUser(Collection $posts): Collection
+    {
+        $grouped = $posts->groupBy('user_id');
+        $result = new Collection();
+
+        while ($grouped->isNotEmpty()) {
+            foreach ($grouped as $userId => $userPosts) {
                 if ($userPosts->isNotEmpty()) {
-                    $interleavedPosts->push($userPosts->shift());
-                    if ($userPosts->isEmpty()) {
-                        $groupedPosts->forget($userId);
-                    }
+                    $result->push($userPosts->shift());
+                }
+
+                if ($userPosts->isEmpty()) {
+                    $grouped->forget($userId);
                 }
             }
         }
 
-        return view('livewire.user.posts', ['posts' => $interleavedPosts]);
+        return $result;
+    }
+
+    public function clearFeedCache(): void
+    {
+        $userId = Auth::id();
+
+        Cache::forget("feed:timeline:user:{$userId}:{$this->perPage}");
+        Cache::forget("feed:priority-users:{$userId}");
+    }
+
+    public function loadMore(): void
+    {
+        $this->perPage += 10;
+
+        $this->clearFeedCache();
     }
 }

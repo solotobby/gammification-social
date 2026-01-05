@@ -10,6 +10,7 @@ use App\Models\UserLike;
 use App\Notifications\GeneralNotification;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\On;
 
 class ViewProfile extends Component
@@ -24,6 +25,8 @@ class ViewProfile extends Component
     public bool $isFollowing = false;
 
     #[On('view-profile.{user.username}')]
+
+    // #[On('refreshFeed')]
 
     public function mount($username,)
     {
@@ -53,7 +56,7 @@ class ViewProfile extends Component
                 : 'profile_views_external'
         );
 
-         if ($created->wasRecentlyCreated) {
+        if ($created->wasRecentlyCreated) {
             $this->user->notify(new GeneralNotification([
                 'title'   => displayName(auth()->user()->name) . ' viewed your profile',
                 'message' => displayName(auth()->user()->name) . ' viewed your profile',
@@ -61,7 +64,6 @@ class ViewProfile extends Component
                 'url'     => url('profile/' . auth()->user()->username),
             ]));
         }
-
     }
 
     public function timeline($username)
@@ -88,10 +90,10 @@ class ViewProfile extends Component
             $post->increment('likes');
 
             $user->notify(new GeneralNotification([
-                'title'   =>  displayName(auth()->user()->name).' liked your post',
-                'message' => displayName(auth()->user()->name).'liked your post',
+                'title'   =>  displayName(auth()->user()->name) . ' liked your post',
+                'message' => displayName(auth()->user()->name) . 'liked your post',
                 'icon'    => 'fa-thumbs-up text-primary',
-                'url'     => url('show/'.$post->id),
+                'url'     => url('show/' . $post->id),
             ]));
             // }
         }
@@ -132,15 +134,13 @@ class ViewProfile extends Component
             $this->isFollowing = false;
 
             $this->user->notify(new GeneralNotification([
-                'title'   =>  displayName(auth()->user()->name).' unfollowed you',
-                'message' => displayName(auth()->user()->name).' unfollowed you',
+                'title'   =>  displayName(auth()->user()->name) . ' unfollowed you',
+                'message' => displayName(auth()->user()->name) . ' unfollowed you',
                 'icon'    => 'fa-user-minus text-primary',
-                'url'     => url('profile/'.auth()->user()->username),
+                'url'     => url('profile/' . auth()->user()->username),
             ]));
-
-
         } else {
-          
+
 
             Follow::create([
                 'follower_id' => $authUser->id, //update user following
@@ -156,19 +156,52 @@ class ViewProfile extends Component
             $this->isFollowing = true;
 
             $this->user->notify(new GeneralNotification([
-                'title'   =>  displayName(auth()->user()->name).' followed you',
-                'message' => displayName(auth()->user()->name).' followed you',
+                'title'   =>  displayName(auth()->user()->name) . ' followed you',
+                'message' => displayName(auth()->user()->name) . ' followed you',
                 'icon'    => 'fa-user-plus text-primary',
-                'url'     => url('profile/'.auth()->user()->username),
+                'url'     => url('profile/' . auth()->user()->username),
             ]));
-
         }
+
+      
+        $this->clearUserFeedCache($authUser->id);
+        $this->clearUserFeedCache($targetUser->id);
+
+        $this->dispatch('refreshFeed');
     }
 
     public function loadMore()
     {
         $this->perpage += 10;
     }
+
+    private function rememberUserCacheKey(string $userId, string $key): void
+    {
+        $indexKey = "feed:keys:user:{$userId}";
+
+        $keys = Cache::get($indexKey, []);
+
+        if (!in_array($key, $keys)) {
+            $keys[] = $key;
+            Cache::put($indexKey, $keys, now()->addMinutes(10));
+        }
+    }
+
+
+
+    private function clearUserFeedCache(string $userId): void
+    {
+        $indexKey = "feed:keys:user:{$userId}";
+        $keys = Cache::get($indexKey, []);
+
+        foreach ($keys as $key) {
+            Cache::forget($key);
+        }
+
+        Cache::forget($indexKey);
+    }
+
+
 
     public function render()
     {
