@@ -216,12 +216,14 @@
 
     <div class="block block-rounded">
       <div class="block-header block-header-default">
-        <h3 class="block-title">Upgrade User</h3>
+        <h3 class="block-title">User Information</h3>
       </div>
       <div class="block-content">
         Access Code: {{ $access->code }} <br>
         Access Email: {{ $access->email }} <br>
         Access Activated: {{ $access->is_active == 1 ? 'Yes' : 'Not yet' }} <br>
+        Access Created On: {{ $access->created_at }} <br>
+        Access Updated On: {{ $access->updated_at }} <br>
       </div>
     </div>
 
