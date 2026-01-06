@@ -1,4 +1,5 @@
-<div class="col-md-4">
+<div class="col-md-4 mt-3">
+    <h4>Trending Members</h4>
     <!-- Group Suggestions -->
     @foreach (engagement() as $high)
     <div  class="block block-rounded bg-body-dark">

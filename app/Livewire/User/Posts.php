@@ -26,7 +26,7 @@ class Posts extends Component
     use WithFileUploads;
 
 
-    public $perPage = 10;
+    public $perPage = 25;
 
     public $postId;
     #[Validate('required|string')]
@@ -510,13 +510,9 @@ class Posts extends Component
         Cache::forget("feed:priority-users:{$userId}");
     }
 
-
-
-
     public function loadMore(): void
     {
-        $this->perPage += 10;
-
+        $this->perPage += 25;
         $this->clearFeedCache();
     }
 }
