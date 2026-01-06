@@ -22,11 +22,16 @@
                 <p><strong>Members:</strong> {{ $memberCount }}</p>
                 <p><strong>Total Engagement:</strong> {{ number_format($totalEngagement) }}</p>
             </div>
-
+            <?php 
+                $revTotal = $totalRevenue; 
+                $pltpool = $platformPool; 
+                $tpool = $tierPool;
+            
+            ?>
             <div class="col-md-6">
-                <p><strong>Total Revenue:</strong> ${{ number_format($totalRevenue, 2) }}</p>
-                <p><strong>Platform Cut (30%):</strong> ${{ number_format($platformPool, 2) }}</p>
-                <p><strong>Tier Pool (70%):</strong> ${{ number_format($tierPool, 2) }}</p> 
+                <p><strong>Total Revenue:</strong> &#8358;{{ number_format(convertToBaseCurrency($revTotal, 'NGN'), 2) }}</p>
+                <p><strong>Platform Cut (30%):</strong> &#8358;{{ number_format(convertToBaseCurrency($pltpool, 'NGN'), 2) }}</p>
+                <p><strong>Tier Pool (70%):</strong> &#8358;{{ number_format(convertToBaseCurrency($tpool, 'NGN'), 2) }}</p> 
                 
             </div>
 
