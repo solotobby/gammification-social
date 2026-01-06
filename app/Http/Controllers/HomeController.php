@@ -94,18 +94,25 @@ class HomeController extends Controller
         $reference = $params['reference'];
 
         //verify Payment
-       $res = verifyPaystackPayment($reference); 
+     $res = verifyPaystackPayment($reference); 
         $cusEmail = $res['customer']['email'];
+        $cusEmail = $res['metadata']['user_id'];
+        $cusLevel = $res['metadata']['level'];
+        $cusLevelId = $res['metadata']['level_id'];
+
+        [$cusEmail, $cusLevel, $cusLevelId];
        
         //fetch Subscription
-       $subData = fetchSubscription($cusEmail);
+    //    $subData = fetchSubscription($cusEmail);
 
         
-       $nextPaymentDate = Carbon::parse($subData['next_payment_date'])
-        ->timezone(config('app.timezone')); 
+       $nextPaymentDate =$next30Days = Carbon::now()->addDays(30);
        
-
-       $level =  Level::where('name', $subData['plan']['name'])->first();
+    //    Carbon::parse($subData['next_payment_date'])
+    //     ->timezone(config('app.timezone')); 
+       
+        $user = Auth::user();
+       $level =  Level::where('name', $cusLevel)->first();
 
         $updatedSub = UserLevel::updateOrCreate(
             [
@@ -114,30 +121,35 @@ class HomeController extends Controller
             ],
             [
                 'level_id' => $level->id,
-                'plan_name' => $subData['plan']['name'],
-                'plan_code' => $subData['plan']['plan_code'],
-                'subscription_code' => $subData['subscription_code'],
-                'email_token' => $subData['email_token'],
+                'plan_name' => $cusLevel,
+                'plan_code' => $cusLevelId,
+                'subscription_code' => $cusLevelId,
+                'email_token' => $cusLevelId,
                 'start_date' => now(),
-                'status' => $subData['status'],
+                'status' => 'active',
                 'next_payment_date' => $nextPaymentDate,
             ]
         );
 
-        $transaction= Transaction::create([
-                'user_id' => auth()->user()->id,
+        if($updatedSub){
+            $transaction= Transaction::create([
+                'user_id' => $user->id,
                 'ref' => $reference,
-                'amount' => $subData['amount']/100,
-                'currency' => $subData['plan']['currency'],
+                'amount' => $res['amount']/100,
+                'currency' => $user->wallet->currency,
                 'status' =>  'successful',
                 'type' => 'upgrade_purchase',
                 'action' => 'Credit',
-                'description' => auth()->user()->name.' upgraded to '.$subData['plan']['name'], 
+                'description' => $user->name.' upgraded to '.$cusLevel, 
                 'meta' => null,
                 'customer' => null
              ]);
+
+             return redirect('upgrade')->with('success', 'You Successfully upgraded to '.$cusLevel. ' your next payment is '. $nextPaymentDate);
+        }
+        
  
-             return redirect('upgrade')->with('success', 'You Successfully upgraded to '.$subData['plan']['name']. ' your next payment is '. $nextPaymentDate);
+             
 
    }
 
