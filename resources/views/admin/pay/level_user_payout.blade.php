@@ -61,7 +61,9 @@
                                 <td>{{ $user['name'] }}</td>
                                 <td>{{ number_format($user['engagement']) }}</td>
                                 <td>{{ $user['percentage'] }}%</td>
-                                <td>{{ number_format($user['payout'], 2) }}</td>
+                                <td>
+                                    &#8358;{{ number_format(convertToBaseCurrency($user['payout'], 'NGN'), 2) }}    
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>
