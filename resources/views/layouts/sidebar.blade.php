@@ -34,7 +34,7 @@
 
         <a class="nav-main-link" href="{{ url('payouts') }}">
           <i class="nav-main-link-icon fa fa-list"></i>
-          <span class="nav-main-link-name">Partner Payments</span>
+          <span class="nav-main-link-name">Pro-Rata</span>
         </a> 
        
       </li>
