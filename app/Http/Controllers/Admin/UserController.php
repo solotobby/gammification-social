@@ -69,7 +69,7 @@ class UserController extends Controller
             $withrawals = Transaction::where('type', 'withdrawals')->where('user_id', $user->id)->sum('amount');
             $posts = Post::where('user_id', $user->id)->get();
             $level = $user?->activeLevel?->plan_name;
-            $access = AccessCode::where('email', $user->email)->latest();
+            $access = AccessCode::where('email', $user->email)->latest()->first();
 
             return view('admin.user.user_info', ['user' => $user, 'withdrawals' => $withrawals, 'posts' => $posts,  'level' => $level, 'levels' => $levels, 'access' => $access]);
         }
