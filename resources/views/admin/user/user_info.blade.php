@@ -78,6 +78,8 @@
     </div>
 
 
+
+
     <!-- Groups -->
     <div class="block block-rounded">
       <div class="block-header block-header-default">
@@ -208,6 +210,18 @@
 
           
         </form>
+      </div>
+    </div>
+
+
+    <div class="block block-rounded">
+      <div class="block-header block-header-default">
+        <h3 class="block-title">Upgrade User</h3>
+      </div>
+      <div class="block-content">
+        Access Code: {{ $access->code }} <br>
+        Access Email: {{ $access->email }} <br>
+        Access Activated: {{ $access->is_active == 1 ? 'Yes' : 'Not yet' }} <br>
       </div>
     </div>
 

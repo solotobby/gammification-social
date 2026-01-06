@@ -106,7 +106,7 @@ class HomeController extends Controller
     //    $subData = fetchSubscription($cusEmail);
 
         
-       $nextPaymentDate =$next30Days = Carbon::now()->addDays(30);
+       $nextPaymentDate = Carbon::now()->addDays(30);
        
     //    Carbon::parse($subData['next_payment_date'])
     //     ->timezone(config('app.timezone')); 
