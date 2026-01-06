@@ -24,4 +24,8 @@ class UserLevel extends Model
             ->where('status', 'active')
             ->where('next_payment_date', '>', now());
     }
+
+    public function user(){
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }

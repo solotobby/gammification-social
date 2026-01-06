@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\LevelManagementController;
+use App\Http\Controllers\Admin\MonthlyPayoutController;
 use App\Http\Controllers\Admin\UserController;
 use App\Livewire\CreateProduct;
 use App\Livewire\Level;
@@ -151,6 +152,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('withdrawal/list/{id}', [\App\Http\Controllers\Admin\WithdrawalController::class, 'withdrawalListUpdate']);
         Route::get('level/management', [\App\Http\Controllers\Admin\LevelManagementController::class, 'index']);
         Route::get('generate/plan/{id}', [LevelManagementController::class, 'generatePaystackPlanId']);
+        Route::get('payouts', [MonthlyPayoutController::class, 'payouts']);
+        Route::get('/payouts/monthly/levels/{level}', [MonthlyPayoutController::class, 'levelUserBreakdown']);
 
 
     });

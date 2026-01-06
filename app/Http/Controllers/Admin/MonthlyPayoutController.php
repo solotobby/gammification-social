@@ -1,0 +1,186 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\User;
+use App\Models\UserComment;
+use App\Models\UserLevel;
+use App\Models\UserLike;
+use App\Models\UserView;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+
+class MonthlyPayoutController extends Controller
+{
+    public function payouts(Request $request)
+    {
+
+        // Get month from query (?month=2026-01)
+        $month = $request->query('month');
+
+        if ($month) {
+            $startOfMonth = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
+            $endOfMonth   = Carbon::createFromFormat('Y-m', $month)->endOfMonth();
+        } else {
+            $startOfMonth = Carbon::now()->startOfMonth();
+            $endOfMonth   = Carbon::now()->endOfMonth();
+        }
+
+        // Plan prices in dollars
+        $planPrices = [
+            'Creator' => 1,
+            'Influencer' => 5,
+        ];
+
+        $levels = ['Creator', 'Influencer'];
+        $result = [];
+
+        foreach ($levels as $levelName) {
+
+            // Active members in this level
+            $members = UserLevel::where('status', 'active')
+                ->where('plan_name', $levelName)
+                ->where('next_payment_date', '>=', $startOfMonth)
+                ->get();
+
+            $memberCount = $members->count();
+
+            if ($memberCount === 0) {
+                continue;
+            }
+
+            // Revenue calculation
+            $totalRevenue = $memberCount * $planPrices[$levelName];
+            $platformPool = round($totalRevenue * 0.30, 2);
+            $tierPool     = round($totalRevenue * 0.70, 2);
+
+            // Engagement calculation
+            $totalEngagement = 0;
+
+            foreach ($members as $member) {
+                $totalEngagement += $this->getEngagementPoints(
+                    $member->user_id,
+                    $startOfMonth,
+                    $endOfMonth
+                );
+            }
+
+            $result[] = [
+                'Tier'              => $levelName,
+                'Platform Pool'     => $platformPool,
+                'Tier Pool'         => $tierPool,
+                'Total Engagement'  => $totalEngagement,
+                'Total Payout'      => $tierPool,
+                'Members'           => $memberCount,
+            ];
+        }
+
+
+
+
+        return view('admin.pay.monthly_payout', [
+            'results' => $result,
+            'month'  => $startOfMonth->format('F Y'),
+            'monthParam' => $month
+        ]);
+    }
+
+
+    protected function getEngagementPoints($userId, $startDate, $endDate)
+    {
+        $views = UserView::where('poster_user_id', $userId)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->count();
+
+        $likes = UserLike::where('poster_user_id', $userId)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->count();
+
+        $comments = UserComment::where('poster_user_id', $userId)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->count();
+
+        return $views + $likes + $comments;
+    }
+
+    public function levelUserBreakdown(Request $request, $tier)
+    {
+        $month = $request->query('month');
+
+        if ($month) {
+            $startOfMonth = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
+            $endOfMonth   = Carbon::createFromFormat('Y-m', $month)->endOfMonth();
+        } else {
+            $startOfMonth = Carbon::now()->startOfMonth();
+            $endOfMonth   = Carbon::now()->endOfMonth();
+        }
+
+        $planPrices = [
+            'Creator' => 1,
+            'Influencer' => 5,
+        ];
+
+        // Fetch members WITH tier info
+        $members = UserLevel::where('status', 'active')
+            ->where('plan_name', $tier)
+            ->where('created_at', '<=', $endOfMonth)
+            ->where(function ($q) use ($startOfMonth) {
+                $q->whereNull('next_payment_date')
+                    ->orWhere('next_payment_date', '>=', $startOfMonth);
+            })
+            ->with('user:id,name')
+            ->get();
+
+        $memberCount = $members->count();
+        if ($memberCount === 0) {
+            return redirect()->back()->with('error', 'No users found.');
+        }
+
+        // Tier pool
+        $revenue  = $memberCount * $planPrices[$tier];
+        $tierPool = round($revenue * 0.70, 2);
+
+        $totalEngagement = 0;
+        $userEngagements = [];
+
+        foreach ($members as $member) {
+            $points = $this->getEngagementPoints(
+                $member->user_id,
+                $startOfMonth,
+                $endOfMonth
+            );
+
+            $userEngagements[] = [
+                'user_id'    => $member->user_id,
+                'name'       => $member->user->name ?? 'N/A',
+                'engagement' => $points
+            ];
+
+            $totalEngagement += $points;
+        }
+
+        // Pro-rata payout
+        foreach ($userEngagements as &$user) {
+            $user['percentage'] = $totalEngagement > 0
+                ? round(($user['engagement'] / $totalEngagement) * 100, 2)
+                : 0;
+
+            $user['payout'] = $totalEngagement > 0
+                ? round(($user['engagement'] / $totalEngagement) * $tierPool, 2)
+                : 0;
+        }
+
+        return view('admin.pay.level_user_payout', [
+            'tier'            => $tier,
+            'users'           => $userEngagements,
+            'tierPool'        => $tierPool,
+            'platformPool'    => round($revenue * 0.30, 2),
+            'totalRevenue'    => $revenue,
+            'totalEngagement' => $totalEngagement,
+            'memberCount'     => $memberCount,
+            'month'           => $startOfMonth->format('F Y'),
+            'monthParam'      => $month
+        ]);
+    }
+}

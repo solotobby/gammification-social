@@ -32,10 +32,10 @@
           <span class="nav-main-link-name">Level Management</span>
         </a>
 
-        {{-- <a class="nav-main-link" href="{{ url('partner/payments') }}">
+        <a class="nav-main-link" href="{{ url('payouts') }}">
           <i class="nav-main-link-icon fa fa-list"></i>
           <span class="nav-main-link-name">Partner Payments</span>
-        </a>  --}}
+        </a> 
        
       </li>
     </ul>
