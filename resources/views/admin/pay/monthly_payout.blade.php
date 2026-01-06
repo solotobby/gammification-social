@@ -35,12 +35,16 @@
 
                     <tbody>
                         @forelse($results as $level)
+                        <?php $amount = $level['Total Payout'];
+                                $amount1 = $level['Platform Pool'];
+                                $amount2 = $level['Tier Pool'];
+                        ?>
                             <tr>
                                 <td>{{ $level['Tier'] }}</td>
-                                <td>{{ number_format($level['Platform Pool'], 2) }}</td>
-                                <td>{{ number_format($level['Tier Pool'], 2) }}</td>
+                                <td>&#8358;{{ number_format(convertToBaseCurrency($amount1, 'NGN'), 2) }}</td>
+                                <td>&#8358;{{ number_format(convertToBaseCurrency($amount2, 'NGN'), 2) }}</td>
                                 <td>{{ number_format($level['Total Engagement']) }}</td>
-                                <?php $amount = $level['Total Payout'];  ?>
+                                
                                 <td> &#8358;{{ number_format( convertToBaseCurrency($amount, 'NGN'), 2 ) }}</td>
                                 <td>{{ $level['Members'] }}</td>
                                 <td> <a href="{{ url('/payouts/monthly/levels/'.$level['Tier']) }}?month={{ $monthParam }}" class="btn btn-info btn-sm"> View Users</a> </td>
