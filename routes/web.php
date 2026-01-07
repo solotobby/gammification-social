@@ -17,6 +17,7 @@ use App\Livewire\User\Settings;
 use App\Livewire\User\ShowNewPosts;
 use App\Livewire\User\ShowPost;
 use App\Livewire\User\Timeline;
+use App\Livewire\User\TransactionList;
 use App\Livewire\User\UpgradeAccount;
 use App\Livewire\User\ViewProfile;
 use App\Livewire\User\Wallets;
@@ -127,6 +128,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('upgrade', UpgradeAccount::class);
         Route::get('promotions', PromotionalContent::class);
         Route::get('profile/{username}/connection', ProfileConnections::class);
+        Route::get('transaction/list', TransactionList::class);
     });
 
 

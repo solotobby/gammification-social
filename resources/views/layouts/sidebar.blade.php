@@ -78,10 +78,10 @@
             <span class="nav-main-link-name">Upgrade Level</span>
           </a>
 
-          {{-- <a class="nav-main-link" href="{{ url('promotions') }}">
-            <i class="nav-main-link-icon fa fa-bullhorn"></i>
-            <span class="nav-main-link-name">Promotional Content</span>
-          </a> --}}
+          <a class="nav-main-link" href="{{ url('transaction/list') }}">
+            <i class="nav-main-link-icon fa fa-table"></i>
+            <span class="nav-main-link-name">Transaction</span>
+          </a>
 
           {{-- <a class="nav-main-link" href="{{ url('partner') }}">
             <i class="nav-main-link-icon fa fa-briefcase"></i>

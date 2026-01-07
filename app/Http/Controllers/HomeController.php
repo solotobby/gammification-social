@@ -10,6 +10,7 @@ use App\Models\PartnerSlot;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Models\UserLevel;
+use App\Models\Wallet;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -111,8 +112,13 @@ class HomeController extends Controller
     //    Carbon::parse($subData['next_payment_date'])
     //     ->timezone(config('app.timezone')); 
        
-        $user = Auth::user();
-       $level =  Level::where('name', $cusLevel)->first();
+      $user = Auth::user();
+      $level =  Level::where('name', $cusLevel)->first();
+
+      $regBonus = $level->reg_bonus; //in dollars
+       $convertRegBonus = convertToBaseCurrency($regBonus, $user->wallet->currency);
+
+
 
         $updatedSub = UserLevel::updateOrCreate(
             [
@@ -132,7 +138,12 @@ class HomeController extends Controller
         );
 
         if($updatedSub){
-            $transaction= Transaction::create([
+
+            $wl = Wallet::where('user_id', $user->id)->first();
+            $wl->balance += $convertRegBonus;
+            $wl->save();
+
+            Transaction::create([
                 'user_id' => $user->id,
                 'ref' => $reference,
                 'amount' => $res['amount']/100,
@@ -141,6 +152,19 @@ class HomeController extends Controller
                 'type' => 'upgrade_purchase',
                 'action' => 'Credit',
                 'description' => $user->name.' upgraded to '.$cusLevel, 
+                'meta' => null,
+                'customer' => null
+             ]);
+
+            Transaction::create([
+                'user_id' => $user->id,
+                'ref' => $reference,
+                'amount' => $convertRegBonus,
+                'currency' => $user->wallet->currency,
+                'status' =>  'successful',
+                'type' => 'reg_bonus',
+                'action' => 'Credit',
+                'description' => 'Upgrade Bonus for '.$cusLevel, 
                 'meta' => null,
                 'customer' => null
              ]);
