@@ -119,7 +119,7 @@
                     <ul class="list-group">
                       @foreach ($withdrawals as $with)
                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                        {{$with->description}} - {{ $with->amount }}
+                        {{$with->description}} - {{ $with->amount }} - {{ $with->created_at }}
                         <span class="badge badge-primary badge-pill">{{ $with->amount }}</span>
                       </li>
                       @endforeach
