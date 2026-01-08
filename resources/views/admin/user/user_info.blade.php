@@ -116,7 +116,13 @@
 
 
 
-                    <ul class="list-group">
+                   
+
+
+                @endif
+
+
+                 <ul class="list-group">
                       @foreach ($withdrawals as $with)
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                         {{$with->description}} - {{ $with->amount }} - {{ $with->created_at }}
@@ -124,9 +130,6 @@
                       </li>
                       @endforeach
                     </ul>
-
-
-                @endif
 
             </div>
 
