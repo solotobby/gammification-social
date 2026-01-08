@@ -83,11 +83,11 @@ class UserController extends Controller
             if ($request->validationCode == $validation) {
                 // return $request;
 
-                 $level = Level::find($request->level);
+                $level = Level::find($request->level);
                 $user = User::find($request->user_id);
 
                 $nextPaymentDate = now()->addDays(30);
-                $updatedSub = UserLevel::updateOrCreate(
+                UserLevel::updateOrCreate(
                     [
                         'user_id' => $request->user_id,
 
@@ -106,9 +106,13 @@ class UserController extends Controller
                 $currency = $user->wallet->currency;
                 $convertedAmount = convertToBaseCurrency($level->amount, $currency);
 
+                $wl = Wallet::where('user_id', $user->id)->first();
+                $wl->balance += $convertedAmount;
+                $wl->save();
+
                 $reference = time() . rand(999, 9999);
 
-                $transaction = Transaction::create([
+            Transaction::create([
                     'user_id' => $user->id,
                     'ref' => $reference,
                     'amount' => $convertedAmount,
@@ -120,6 +124,21 @@ class UserController extends Controller
                     'meta' => null,
                     'customer' => null
                 ]);
+
+            Transaction::create([
+                'user_id' => $user->id,
+                'ref' => $reference,
+                'amount' => $convertedAmount,
+                'currency' => $user->wallet->currency,
+                'status' =>  'successful',
+                'type' => 'reg_bonus_admin_assisted',
+                'action' => 'Credit',
+                'description' => 'Upgrade Bonus by admin for '.$level->name, 
+                'meta' => null,
+                'customer' => null
+             ]);
+
+
 
 
                  return back()->with('success', 'Upgrade Successful: '.$level->name);

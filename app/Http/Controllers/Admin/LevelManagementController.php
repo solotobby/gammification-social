@@ -43,6 +43,8 @@ class LevelManagementController extends Controller
                 'status' => 'active'
             ]);
 
+            
+
             return back()->with('success', 'Plan created Successfully');
             
         } else {
