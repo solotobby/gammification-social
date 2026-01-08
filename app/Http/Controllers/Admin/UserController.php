@@ -76,6 +76,14 @@ class UserController extends Controller
         }
     }
 
+    public function updateCurrency(Request $request){
+        $wall = Wallet::where('user_id', $request->user_id)->first();
+        $wall->currency = $request->currency;
+        $wall->save();
+        return back()->with('success', 'Account Currency Changed to : ' . $wall->currency);
+
+    }
+
     public function upgradeProcess(Request $request)
     {
         $res = securityVerification();

@@ -133,10 +133,65 @@
         </div>
 
 
+ 
 
+                  <div class="block block-rounded">
+            <div class="block-header block-header-default">
+                <h3 class="block-title">Credit Wallet</h3>
+            </div>
+            <div class="block-content">
+                <form method="POST" action="{{ route('update.current') }}">
+                    @csrf
+                    <div class="row">
+                        <div class="col-lg-4">
+                            <p class="text-muted">
+                                You can change a user Currency here
+                            </p>
+                        </div>
+                        <div class="col-lg-8 col-xl-5">
+                            {{-- @if (session('success'))
+                                <div class="alert alert-success" role="alert">
+                                    {{ session('success') }}
+                                </div>
+                            @endif
+
+                            @if (session('error'))
+                                <div class="alert alert-danger" role="alert">
+                                    {{ session('error') }}
+                                </div>
+                            @endif --}}
+                            <div class="mb-4">
+                                <select class="form-control mt-2"
+                                        name="currency"
+                                        {{-- wire:model.defer="currency" --}}
+                                        required>
+
+                                        <option value="">Select Currency</option>
+                                        <option value="USD">USD – US Dollar</option>
+                                        <option value="EUR">EUR – Euro</option>
+                                        <option value="GBP">GBP – British Pound</option>
+                                        <option value="NGN">NGN – Nigerian Naira</option>
+                        </select>
+                               
+                            </div>
+                            <input type="hidden" value="{{ $user->id }}" name="user_id">
+                        
+
+                            <div class="mb-4">
+                                <button type="submit" class="btn btn-sm btn-primary">Securely Credit User</button>
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- END Text -->
+
+
+                </form>
+            </div>
+        </div>      
 
         <!-- Groups -->
-        <div class="block block-rounded">
+        {{-- <div class="block block-rounded">
             <div class="block-header block-header-default">
                 <h3 class="block-title">Credit Wallet</h3>
             </div>
@@ -146,7 +201,7 @@
                     <div class="row">
                         <div class="col-lg-4">
                             <p class="text-muted">
-                                {{-- Prepend or Append Text next to your inputs, useful if you you would like to add extra info --}}
+                                Prepend or Append Text next to your inputs, useful if you you would like to add extra info
                             </p>
                         </div>
                         <div class="col-lg-8 col-xl-5">
@@ -171,27 +226,7 @@
                                 </div>
                             </div>
                             <input type="hidden" value="{{ $user->id }}" name="user_id">
-                            {{-- <div class="mb-4">
-                <div class="input-group">
-                    <span class="input-group-text">
-                      Level
-                    </span>
-                    <select name="level" class="form-control" required>
-                        @foreach ($levels as $level)
-                            <option value="{{ $level->id }}">{{$level->name}}</option>
-                        @endforeach
-                    </select>
-                </div>
-              </div> --}}
-                            {{-- <div class="mb-4">
-                <div class="input-group">
-                    <span class="input-group-text">
-                      Validate
-                    </span>
-                    <input type="text" class="form-control" name="validationCode" id="validationCode" placeholder="Enter validation code" required>
-                  </div>
-              </div> --}}
-
+                        
 
                             <div class="mb-4">
                                 <button type="submit" class="btn btn-sm btn-primary">Securely Credit User</button>
@@ -204,7 +239,7 @@
 
                 </form>
             </div>
-        </div>
+        </div> --}}
         <!-- END Groups -->
 
         <div class="block block-rounded">
@@ -221,7 +256,7 @@
                             </p>
                         </div>
                         <div class="col-lg-8 col-xl-5">
-                            @if (session('success'))
+                            {{-- @if (session('success'))
                                 <div class="alert alert-success" role="alert">
                                     {{ session('success') }}
                                 </div>
@@ -231,7 +266,7 @@
                                 <div class="alert alert-danger" role="alert">
                                     {{ session('error') }}
                                 </div>
-                            @endif
+                            @endif --}}
                             <input type="hidden" value="{{ $user->id }}" name="user_id">
                             <div class="mb-4">
                                 <div class="input-group">

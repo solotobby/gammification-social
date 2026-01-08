@@ -139,6 +139,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('user/search', [\App\Http\Controllers\Admin\UserController::class, 'userSearch']);
         Route::get('user/info/{id}', [\App\Http\Controllers\Admin\UserController::class, 'userInfo']);
         Route::post('user/credit/wallet', [\App\Http\Controllers\Admin\UserController::class, 'processWalletCredit'])->name('credit.wallet');
+        Route::post('user/update/currency', [\App\Http\Controllers\Admin\UserController::class, 'updateCurrency'])->name('update.current');
         Route::post('process/upgrade', [UserController::class, 'upgradeProcess'])->name('upgrade.user');
         Route::get('add/bonus/{userId}/{levelid}', [UserController::class, 'creditBonus']);
 
