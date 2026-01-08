@@ -114,15 +114,10 @@
                     {{ convertToBaseCurrency($userLevel->reg_bonus, $currency) }} <br><br>
                     <a href="{{ url('add/bonus/' . $user->id . '/' . $level) }}" class="btn btn-primary mb-2"> Update Bonus </a>
 
-
-
-                   
-
-
                 @endif
-
+                    <hr>
                     <h4> Mini Trsansction list </h4>
-                 <ul class="list-group mt-3">
+                    <ul class="list-group mt-3">
                       @foreach ($withdrawals as $with)
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                         {{$with->description}} - {{ $with->amount }} - {{ $with->created_at }}
