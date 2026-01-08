@@ -105,10 +105,10 @@ class UserController extends Controller
                     ]
                 );
                 $currency = $user->wallet->currency;
-                $convertedAmount = convertToBaseCurrency($level->amount, $currency);
+                $convertedAmount = convertToBaseCurrency($level->reg_bonus, $currency);
 
                 $wl = Wallet::where('user_id', $user->id)->first();
-                $wl->balance += $convertedAmount;
+                $wl->balance = $convertedAmount;
                 $wl->save();
 
                 $reference = time() . rand(999, 9999);
@@ -165,7 +165,7 @@ class UserController extends Controller
             $wl = Wallet::where('user_id', $userId)->first();
 
             $convertedAmount = convertToBaseCurrency($levelInfo->reg_bonus, $wl->currency);
-            $wl->balance += $convertedAmount;
+            $wl->balance = $convertedAmount;
             $wl->save();
 
             $reference = time() . rand(999, 99999);
