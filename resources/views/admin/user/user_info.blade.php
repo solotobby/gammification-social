@@ -100,6 +100,7 @@
         Name: {{ $user->name }} <br>
         Username: {{ $user->username }} <br>
         Entry Channel: {{ $user->heard }} <br>
+        Base Currency: {{ $user->wallet->currency }} <br>
         Access Code: {{ $access->code }} <br>
         Access Email: {{ $access->email }} <br>
         Access Activated: {{ $access->is_active == 1 ? 'Yes' : 'Not yet' }} <br>
