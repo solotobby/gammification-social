@@ -121,8 +121,8 @@
 
                 @endif
 
-
-                 <ul class="list-group">
+                    <h4> Mini Trsansction list </h4>
+                 <ul class="list-group mt-3">
                       @foreach ($withdrawals as $with)
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                         {{$with->description}} - {{ $with->amount }} - {{ $with->created_at }}
