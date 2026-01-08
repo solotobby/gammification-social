@@ -108,8 +108,8 @@
                     <h1 class="hero-1-title fw-bold text-shadow mb-4">Monetize your Posts</h1>
                     <div class="w-75 mb-5 mb-lg-0">
                         <p class="text-muted mb-5 pb-5 font-size-17">The social media that pays you for every posts,
-                            views, comments and likes. Withdraw your earnings anytime. Minimum withdrawal is $20 or its equivalent in your local currency.
-                            <br>Withdrawals are processed via Paypal, USDT or your Local Bank. Signup is <b>100%</b> free.
+                            views, comments and likes. Withdraw your earnings anytime. Minimum payout is $1 or its equivalent in your local currency.
+                            <br>Payouts are processed on the 2nd of everymonth via Paypal, USDT or your Local Bank. Signup is <b>100%</b> free.
                         </p>
                         {{-- <p><span class="font-size-20 me-2">🥳️</span>Join our mailing list to receive updates before creating an account.</p>
                         <div class="subscribe-form">
@@ -666,18 +666,19 @@
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                     data-bs-target="#collapseThree-3" aria-expanded="false"
                                     aria-controls="collapseThree-3">
-                                    How do I withdraw my earnings?
+                                    How do I get my earnings on Payhankey?
                                 </button>
                             </h2>
                             <div id="collapseThree-3" class="accordion-collapse collapse"
                                 aria-labelledby="headingThree-3" data-bs-parent="#accordionExample">
                                 <div class="accordion-body">
-                                    Payhankey allows all users to withdraw anytime once they have a minimum of $20 (or
+                                    Payhankey pays into your local bank, Paypal Account or USDT on the 2nd of everymonth. Minimum payout is $1 and its equivalent in your local currency.
+                                    {{-- Payhankey allows all users to withdraw anytime once they have a minimum of $20 (or
                                     its equivalent in your local currency).
                                     To withdraw, Login to your dashboard to provide your withdrawal information.You can
                                     withdraw via Paypal, USDT or to your Local Bank.
                                     Withdrawals are processed within 24 hours to 48 hours depending on your withdrawal
-                                    method.
+                                    method. --}}
                                 </div>
                             </div>
                         </div>
