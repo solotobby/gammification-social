@@ -44,7 +44,7 @@
                         <b>Post, Grow engagements and Earn from every posts.</b><br>
                         Creator and Influencer accounts can post long text, images and also earn up to {{ getCurrencyCode() }}{{ convertToBaseCurrency(1, auth()->user()->wallet->currency) }} per 1,000 engagement on every post. Basic users can earn but cannot withdraw earnings. Upgrade to a Creator or Influencer to monetize earn from your engagements.
                         <br>
-                        Minimum payout is {{ getCurrencyCode() }}{{ convertToBaseCurrency(1, auth()->user()->wallet->currency) }} which will be paid at on the 2nd of every month. 
+                        Minimum payout is {{ getCurrencyCode() }}{{ convertToBaseCurrency(1, auth()->user()->wallet->currency) }} which will be paid on the 2nd of every month. 
                     </div>
 
                     {{-- <form wire:submit.prevent="post">
