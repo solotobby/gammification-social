@@ -140,7 +140,7 @@ class HomeController extends Controller
         if($updatedSub){
 
             $wl = Wallet::where('user_id', $user->id)->first();
-            $wl->balance += $convertRegBonus;
+            $wl->balance = $convertRegBonus;
             $wl->save();
 
             Transaction::create([
