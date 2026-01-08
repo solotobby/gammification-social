@@ -178,7 +178,7 @@
                         
 
                             <div class="mb-4">
-                                <button type="submit" class="btn btn-sm btn-primary">Securely Credit User</button>
+                                <button type="submit" class="btn btn-sm btn-primary">Change Currency</button>
                             </div>
 
                         </div>
