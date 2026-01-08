@@ -15,7 +15,7 @@
             </div>
             <div class="ms-3 text-end">
               <p class="fs-3 fw-medium mb-0">
-                ${{  $user->wallet->balance }}
+                {{ getCurrencyCode($user->wallet->currency) }}{{  $user->wallet->balance }}
               </p>
               <p class="text-muted mb-0">
                 Main Balance <span><small>(Earnings from signup bonus and content monetization)</small></span>
@@ -32,7 +32,7 @@
             </div>
             <div class="ms-3 text-end">
               <p class="fs-3 fw-medium mb-0">
-                ${{  $user->wallet->referral_balance }}
+                {{ getCurrencyCode($user->wallet->currency) }}{{  $user->wallet->referral_balance }}
               </p>
               <p class="text-muted mb-0">
                 Referral Balance <span><small>(Earnings from inviting friends on Payhankey)</small></span>
@@ -49,7 +49,7 @@
             </div>
             <div class="ms-3 text-end">
               <p class="fs-3 fw-medium mb-0">
-                ${{ $user->wallet->promoter_balance }}
+                {{ getCurrencyCode($user->wallet->currency) }}{{ $user->wallet->promoter_balance }}
               </p>
               <p class="text-muted mb-0">
                 Promotion Balance <span><small>(Earnings from promoting Payhankey)</small></span>
@@ -66,7 +66,7 @@
             </div>
             <div class="ms-3 text-end">
               <p class="fs-3 fw-medium mb-0">
-               ${{ $withdrawals }}
+               {{ getCurrencyCode($user->wallet->currency) }}{{ $withdrawals }}
               </p>
               <p class="text-muted mb-0">
                 Total Withdrawal <span><small>(Earnings withdrawn from your wallet)</small></span>
@@ -78,11 +78,25 @@
     </div>
 
 
-    <div class="block block-rounded">
+    <div class="block block-rounded mb-2">
       <div class="block-header block-header-default">
         <h3 class="block-title">User Information</h3>
       </div>
       <div class="block-content">
+
+        @if (session('success'))
+                <div class="alert alert-success" role="alert">
+                    {{ session('success') }}
+                </div>
+                @endif
+
+                @if (session('error'))
+                <div class="alert alert-danger" role="alert">
+                    {{ session('error') }}
+                </div>
+                @endif
+
+
         Name: {{ $user->name }} <br>
         Username: {{ $user->username }} <br>
         Entry Channel: {{ $user->heard }} <br>
@@ -91,7 +105,17 @@
         Access Activated: {{ $access->is_active == 1 ? 'Yes' : 'Not yet' }} <br>
         Access Created On: {{ $access->created_at }} <br>
         Access Updated On: {{ $access->updated_at }} <br>
+
+
+         @if($level == 'Creator' || $level == 'Influencer')
+         <hr>
+          <a href="{{ url('add/bonus/'.$user->id.'/'.$level) }}" class="btn btn-primary mb-2"> Update Bonus </a>
+        @endif
+     
       </div>
+
+     
+
     </div>
 
 

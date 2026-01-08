@@ -140,6 +140,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('user/info/{id}', [\App\Http\Controllers\Admin\UserController::class, 'userInfo']);
         Route::post('user/credit/wallet', [\App\Http\Controllers\Admin\UserController::class, 'processWalletCredit'])->name('credit.wallet');
         Route::post('process/upgrade', [UserController::class, 'upgradeProcess'])->name('upgrade.user');
+        Route::get('add/bonus/{userId}/{levelid}', [UserController::class, 'creditBonus']);
 
         Route::get('send/access/code', [\App\Http\Controllers\Admin\AccessCodeController::class, 'sendAccessCode'])->name('access.code.send');
         Route::post('send/access/code', [\App\Http\Controllers\Admin\AccessCodeController::class, 'processValidateCode'])->name('immaculate');

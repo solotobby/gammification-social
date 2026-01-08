@@ -112,7 +112,7 @@ class UserController extends Controller
 
                 $reference = time() . rand(999, 9999);
 
-            Transaction::create([
+                Transaction::create([
                     'user_id' => $user->id,
                     'ref' => $reference,
                     'amount' => $convertedAmount,
@@ -120,29 +120,69 @@ class UserController extends Controller
                     'status' =>  'successful',
                     'type' => 'upgrade_purchase_admin_assisted',
                     'action' => 'Credit',
-                    'description' => $user->name . ' upgraded to ' . $level->name .' by admin',
+                    'description' => $user->name . ' upgraded to ' . $level->name . ' by admin',
                     'meta' => null,
                     'customer' => null
                 ]);
 
+                Transaction::create([
+                    'user_id' => $user->id,
+                    'ref' => $reference,
+                    'amount' => $convertedAmount,
+                    'currency' => $user->wallet->currency,
+                    'status' =>  'successful',
+                    'type' => 'reg_bonus_admin_assisted',
+                    'action' => 'Credit',
+                    'description' => 'Upgrade Bonus by admin for ' . $level->name,
+                    'meta' => null,
+                    'customer' => null
+                ]);
+                return back()->with('success', 'Upgrade Successful: ' . $level->name);
+            }
+        }
+    }
+
+    public function creditBonus($userId, $level)
+    {
+
+        
+        if ($level == 'Creator' || $level == 'Influencer') {
+
+            
+        //  $exists = Transaction::where('user_id', $userId)
+        //             ->whereIn('type', ['reg_bonus', 'reg_bonus_admin_assisted'])
+        //             ->exists();
+
+        //         if ($exists) {
+        //             return back()->with('error', 'Bonus already exists for thr user');
+        //         }
+
+
+
+
+            $levelInfo = Level::where('name', $level)->first();
+            $wl = Wallet::where('user_id', $userId)->first();
+
+            $convertedAmount = convertToBaseCurrency($levelInfo->reg_bonus, $wl->currency);
+            $wl->balance += $convertedAmount;
+            $wl->save();
+
+            $reference = time() . rand(999, 99999);
             Transaction::create([
-                'user_id' => $user->id,
+                'user_id' => $userId,
                 'ref' => $reference,
                 'amount' => $convertedAmount,
-                'currency' => $user->wallet->currency,
+                'currency' => $wl->currency,
                 'status' =>  'successful',
                 'type' => 'reg_bonus_admin_assisted',
                 'action' => 'Credit',
-                'description' => 'Upgrade Bonus by admin for '.$level->name, 
+                'description' => 'Upgrade Bonus by admin for ' . $levelInfo->name,
                 'meta' => null,
                 'customer' => null
-             ]);
-
-
-
-
-                 return back()->with('success', 'Upgrade Successful: '.$level->name);
-            }
+            ]);
+            return back()->with('success', 'Upgrade Bonus added for ' . $levelInfo->name);
+        } else {
+            return back()->with('error', 'Upgrade bonus is allowed for only Creator and Influencer ');
         }
     }
 
