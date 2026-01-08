@@ -66,12 +66,13 @@ class UserController extends Controller
         if ($res == 'OK') {
             $levels = Level::all();
             $user = User::find($id);
-            $withrawals = Transaction::where('type', 'withdrawals')->where('user_id', $user->id)->sum('amount');
+            $withrawals = Transaction::whereIn('type', ['reg_bonus', 'reg_bonus_admin_assisted'])->where('user_id', $user->id)->orderBy('created_at', 'DESC')->get();
             $posts = Post::where('user_id', $user->id)->get();
             $level = $user?->activeLevel?->plan_name;
             $access = AccessCode::where('email', $user->email)->latest()->first();
+            $userLevel = Level::where('name', $level)->first();
 
-            return view('admin.user.user_info', ['user' => $user, 'withdrawals' => $withrawals, 'posts' => $posts,  'level' => $level, 'levels' => $levels, 'access' => $access]);
+            return view('admin.user.user_info', ['user' => $user, 'withdrawals' => $withrawals, 'posts' => $posts,  'level' => $level, 'levels' => $levels, 'access' => $access, 'userLevel' => $userLevel]);
         }
     }
 
@@ -180,7 +181,7 @@ class UserController extends Controller
                 'meta' => null,
                 'customer' => null
             ]);
-            return back()->with('success', 'Upgrade Bonus added for ' . $levelInfo->name);
+            return back()->with('success', 'Upgrade Bonus added for ' . $levelInfo->name . ' at ' .$wl->currency.  $convertedAmount);
         } else {
             return back()->with('error', 'Upgrade bonus is allowed for only Creator and Influencer ');
         }
