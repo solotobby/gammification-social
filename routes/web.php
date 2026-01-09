@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Livewire\CreateProduct;
 use App\Livewire\Level;
 use App\Livewire\User\Analytics;
+use App\Livewire\User\BankInformation;
 use App\Livewire\User\HowToEarn;
 use App\Livewire\User\Partners;
 use App\Livewire\User\PostAnalytics;
@@ -13,6 +14,7 @@ use App\Livewire\User\Posts;
 use App\Livewire\User\Profile;
 use App\Livewire\User\ProfileConnections;
 use App\Livewire\User\PromotionalContent;
+use App\Livewire\User\ReferralList;
 use App\Livewire\User\Settings;
 use App\Livewire\User\ShowNewPosts;
 use App\Livewire\User\ShowPost;
@@ -22,6 +24,7 @@ use App\Livewire\User\UpgradeAccount;
 use App\Livewire\User\ViewProfile;
 use App\Livewire\User\Wallets;
 use App\Livewire\ViewPost;
+use App\Models\Referral;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -129,6 +132,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('promotions', PromotionalContent::class);
         Route::get('profile/{username}/connection', ProfileConnections::class);
         Route::get('transaction/list', TransactionList::class);
+        Route::get('referral/list', ReferralList::class);
+        Route::get('bank/information', BankInformation::class);
     });
 
 

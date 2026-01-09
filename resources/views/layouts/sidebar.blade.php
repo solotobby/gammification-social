@@ -83,15 +83,22 @@
             <span class="nav-main-link-name">Transaction</span>
           </a>
 
-          {{-- <a class="nav-main-link" href="{{ url('partner') }}">
-            <i class="nav-main-link-icon fa fa-briefcase"></i>
-            <span class="nav-main-link-name">Become a Partner</span>
+          {{-- <a class="nav-main-link" href="{{ url('referral/list') }}">
+            <i class="nav-main-link-icon fa fa-users"></i>
+            <span class="nav-main-link-name">My Referrals</span>
           </a> --}}
   
+          <a class="nav-main-link" href="{{ url('bank/information') }}">
+            <i class="nav-main-link-icon fa fa-usd"></i>
+            <span class="nav-main-link-name">Bank Information</span>
+          </a>
+
           <a class="nav-main-link" href="{{ url('how/to/earn') }}">
             <i class="nav-main-link-icon fa fa-usd"></i>
             <span class="nav-main-link-name">How to Earn</span>
           </a>
+
+          
   
         </li>
         

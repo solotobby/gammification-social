@@ -18,6 +18,7 @@ use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Spatie\Permission\Models\Role;
@@ -65,74 +66,155 @@ class RegisterController extends Controller
     }
 
 
-
     public function regUser(Request $request)
     {
-
         $validated = $request->validate([
-            'name' => ['required', 'string', 'min:3'],
-            'username' => ['required', 'string', 'min:3', 'max:255', 'unique:users'],
-            // 'phone' => ['numeric', 'unique:users'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            // 'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'password' => ['required', 'string', 'min:8'],
-            // 'access_code' => ['required', 'string'],
-            'referral_code' => ['sometimes']
+            'name' => 'required|string|min:3',
+            'username' => 'required|string|min:3|max:255|unique:users,username',
+            'email' => 'required|string|email|max:255|unique:users,email',
+            'password' => 'required|string|min:8',
+            'referral_code' => 'nullable|string'
         ]);
 
-        // return $validated;
 
-        if (!empty($validated['referral_code'])) {
-            //validate referral code
-            $refffff = User::where(['referral_code' => $validated['referral_code']])->first();
+        DB::transaction(function () use ($validated, $request) {
 
-            if (!$refffff) {
-                return back()->with('error', 'Invalid Referral Code');
+            // Validate referral code once
+            $referrer = null;
+            if (!empty($validated['referral_code'])) {
+                $referrer = User::where('referral_code', $validated['referral_code'])->firstOrFail();
             }
-        }
 
+            $level = Level::where('name', 'Basic')->firstOrFail();
 
-        $user = User::create([
-            'name' => $validated['name'],
-            'username' => 'user' . rand(1000, 10000000), //$validated['username'],
-            // 'phone' => $validated['phone'],
-            'referral_code' => Str::random(7),
-            'email' => $validated['email'],
-            'username' => $validated['username'],
-            'password' => Hash::make($validated['password']),
-            // 'access_code_id' => $accessCode->id
-        ]);
+            $user = User::create([
+                'name' => $validated['name'],
+                'username' => $validated['username'],
+                'email' => $validated['email'],
+                'referral_code' => Str::random(7),
+                'password' => Hash::make($validated['password']),
+            ]);
 
-        if ($user) {
+            UserLevel::create([
+                'user_id' => $user->id,
+                'level_id' => $level->id,
+                'plan_name' => $level->name,
+                'next_payment_date' => now()->addYear(),
+            ]);
 
-            $level = Level::where('name', 'Basic')->first();
-            $userLevel = UserLevel::create(['user_id' => $user->id, 'level_id' => $level->id]);
-            $userLevel->level_id = $level->id;
-            $userLevel->plan_name = $level->name;
-            $userLevel->next_payment_date = Carbon::now()->addDays(365);
-            $userLevel->save();
+            $user->assignRole('user');
 
-            $roleId = Role::where('name', 'user')->first()->id;
-            $user->assignRole($roleId);
+            Wallet::create([
+                'user_id' => $user->id,
+                'balance' => $level->reg_bonus,
+                'promoter_balance' => 0,
+                'referral_balance' => 0,
+                'currency' => 'USD',
+                'level' => $level->name
+            ]);
 
-            Wallet::create(['user_id' => $user->id, 'balance' => $level->reg_bonus, 'promoter_balance' => '0.00', 'referral_balance' => '0.00', 'currency' => 'USD', 'level' => $level->name]);
+            $accessCode = AccessCode::create([
+                'tx_id' => time() . rand(1000, 9000),
+                'name' => $level->name,
+                'email' => $validated['email'],
+                'amount' => $level->amount,
+                'code' => generateCode(7),
+                'level_id' => $level->id,
+                'is_active' => false
+            ]);
 
-            $code = generateCode(7);
-            $ref = time() . rand(1000, 9000);
-            $accessCode = AccessCode::create(['tx_id' => $ref, 'name' => $level->name, 'email' => $request->email, 'amount' => $level->amount, 'code' => $code, 'level_id' => $level->id, 'is_active' => false]);
+            $user->update(['access_code_id' => $accessCode->id]);
 
-            $user->access_code_id = $accessCode->id;
-            $user->save();
-
-            if ($accessCode) {
-
-                Mail::to($request->email)->send(new AccessCodeMail($code, $user)); //send access code mail
-
-                Auth::login($user);
-                return redirect('home');
+            // Create referral record
+            if ($referrer) {
+                Referral::create([
+                    'user_id' =>  $user->id,  //new user  
+                    'referral_id' =>$referrer->id //referred new user
+                ]);
             }
-        }
+
+            Mail::to($validated['email'])->send(new AccessCodeMail($accessCode->code, $user));
+
+            Auth::login($user);
+        });
+
+        return redirect('home');
     }
+
+
+
+    // public function regUser(Request $request)
+    // {
+
+    //     $validated = $request->validate([
+    //         'name' => ['required', 'string', 'min:3'],
+    //         'username' => ['required', 'string', 'min:3', 'max:255', 'unique:users'],
+    //         // 'phone' => ['numeric', 'unique:users'],
+    //         'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+    //         // 'password' => ['required', 'string', 'min:8', 'confirmed'],
+    //         'password' => ['required', 'string', 'min:8'],
+    //         // 'access_code' => ['required', 'string'],
+    //         'referral_code' => ['sometimes']
+    //     ]);
+
+    //     // return $validated;
+
+    //     if (!empty($validated['referral_code'])) {
+    //         //validate referral code
+    //         $refffff = User::where(['referral_code' => $validated['referral_code']])->first();
+
+    //         if (!$refffff) {
+    //             return back()->with('error', 'Invalid Referral Code');
+    //         }
+    //     }
+
+
+    //     $user = User::create([
+    //         'name' => $validated['name'],
+    //         'username' => 'user' . rand(1000, 10000000), //$validated['username'],
+    //         // 'phone' => $validated['phone'],
+    //         'referral_code' => Str::random(7),
+    //         'email' => $validated['email'],
+    //         'username' => $validated['username'],
+    //         'password' => Hash::make($validated['password']),
+    //         // 'access_code_id' => $accessCode->id
+    //     ]);
+
+    //     if ($user) {
+
+    //         $level = Level::where('name', 'Basic')->first();
+    //         $userLevel = UserLevel::create(['user_id' => $user->id, 'level_id' => $level->id]);
+    //         $userLevel->level_id = $level->id;
+    //         $userLevel->plan_name = $level->name;
+    //         $userLevel->next_payment_date = Carbon::now()->addDays(365);
+    //         $userLevel->save();
+
+    //         $roleId = Role::where('name', 'user')->first()->id;
+    //         $user->assignRole($roleId);
+
+    //         Wallet::create(['user_id' => $user->id, 'balance' => $level->reg_bonus, 'promoter_balance' => '0.00', 'referral_balance' => '0.00', 'currency' => 'USD', 'level' => $level->name]);
+
+    //         $code = generateCode(7);
+    //         $ref = time() . rand(1000, 9000);
+    //         $accessCode = AccessCode::create(['tx_id' => $ref, 'name' => $level->name, 'email' => $request->email, 'amount' => $level->amount, 'code' => $code, 'level_id' => $level->id, 'is_active' => false]);
+
+    //         $user->access_code_id = $accessCode->id;
+    //         $user->save();
+
+    //         if($validated['referral_code']){
+    //             $refffff = User::where(['referral_code' => $validated['referral_code']])->first();
+    //             Referral::create(['user_id' => $user->id, 'referral_id' => $refffff->id]);
+    //         }
+
+    //         if ($accessCode) {
+
+    //             Mail::to($request->email)->send(new AccessCodeMail($code, $user)); //send access code mail
+
+    //             Auth::login($user);
+    //             return redirect('home');
+    //         }
+    //     }
+    // }
 
 
 
@@ -167,7 +249,6 @@ class RegisterController extends Controller
             $updatedCode->code = $code;
             $updatedCode->is_active = false;
             $updatedCode->save();
-
         } else {
             $level = Level::where('id', $user->level_id)->first();
             $ref = time() . rand(1000, 9000);
@@ -175,17 +256,17 @@ class RegisterController extends Controller
         }
 
         $level = Level::where('id', $user->level_id)->first();
-       $nextPaymentDate = null;
-        if($level->name == 'Creator' || $level->name == 'Influencer'){
-            $nextPaymentDate = Carbon::now()->addDays(30);//->format('Y-m-d H:i:s');
-        }else{
+        $nextPaymentDate = null;
+        if ($level->name == 'Creator' || $level->name == 'Influencer') {
+            $nextPaymentDate = Carbon::now()->addDays(30); //->format('Y-m-d H:i:s');
+        } else {
             $nextPaymentDate = Carbon::now()->addDays(365);
         }
 
         UserLevel::updateOrCreate(
             [
                 'user_id' => auth()->id(),
-                
+
             ],
             [
                 'level_id' => $level->id,

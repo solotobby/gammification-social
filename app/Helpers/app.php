@@ -580,6 +580,7 @@ if (!function_exists('bankList')) {
         return json_decode($res->getBody()->getContents(), true)['data'];
     }
 }
+
 if (!function_exists('generateVirtualAccount')) {
     function generateVirtualAccount($partner)
     {
