@@ -11,21 +11,27 @@ use App\Models\UserView;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
+
 class MonthlyPayoutController extends Controller
 {
     public function payouts(Request $request)
     {
 
         // Get month from query (?month=2026-01)
-        $month = $request->query('month');
+        $month =  now()->format('Y-m'); //$request->query('month');
 
-        if ($month) {
-            $startOfMonth = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
-            $endOfMonth   = Carbon::createFromFormat('Y-m', $month)->endOfMonth();
-        } else {
-            $startOfMonth = Carbon::now()->startOfMonth();
-            $endOfMonth   = Carbon::now()->endOfMonth();
-        }
+        // if ($month) {
+        //     $startOfMonth = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
+        //     $endOfMonth   = Carbon::createFromFormat('Y-m', $month)->endOfMonth();
+        // } else {
+        //     $startOfMonth = Carbon::now()->startOfMonth();
+        //     $endOfMonth   = Carbon::now()->endOfMonth();
+        // }
+
+
+        $startOfMonth = Carbon::now()->startOfMonth();
+        $endOfMonth   = Carbon::now()->endOfMonth();
+
 
         // Plan prices in dollars
         $planPrices = [
@@ -52,8 +58,9 @@ class MonthlyPayoutController extends Controller
 
             // Revenue calculation
             $totalRevenue = $memberCount * $planPrices[$levelName];
-            $platformPool = round($totalRevenue * 0.30, 2);
-            $tierPool     = round($totalRevenue * 0.70, 2);
+            $platformRev = round($totalRevenue * 0.30, 2); ///platform cut
+            $levelPool     = round($totalRevenue * 0.60, 2); ///sharing percentage
+            $savingsPool     = round($totalRevenue * 0.10, 2); //savings
 
             // Engagement calculation
             $totalEngagement = 0;
@@ -67,22 +74,25 @@ class MonthlyPayoutController extends Controller
             }
 
             $result[] = [
-                'Tier'              => $levelName,
-                'Platform Pool'     => $platformPool,
-                'Tier Pool'         => $tierPool,
-                'Total Engagement'  => $totalEngagement,
-                'Total Payout'      => $tierPool,
-                'Members'           => $memberCount,
+                'level'                 => $levelName,
+                'totalRev'              => $totalRevenue,
+                'platformRev'           => $platformRev,
+                'levelPool'             => $levelPool,
+                'totalEngagement'       => $totalEngagement,
+                'savingsPool'           => $savingsPool,
+                'memberCount'               => $memberCount,
+
             ];
         }
-
 
 
 
         return view('admin.pay.monthly_payout', [
             'results' => $result,
             'month'  => $startOfMonth->format('F Y'),
-            'monthParam' => $month
+            'monthParam' => $month,
+            'startMonth' => $startOfMonth,
+            'endMonth' => $endOfMonth
         ]);
     }
 
@@ -104,17 +114,21 @@ class MonthlyPayoutController extends Controller
         return $views + $likes + $comments;
     }
 
+
     public function levelUserBreakdown(Request $request, $tier)
     {
-        $month = $request->query('month');
+        $month =  now()->format('Y-m'); //$request->query('month');
 
-        if ($month) {
-            $startOfMonth = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
-            $endOfMonth   = Carbon::createFromFormat('Y-m', $month)->endOfMonth();
-        } else {
-            $startOfMonth = Carbon::now()->startOfMonth();
-            $endOfMonth   = Carbon::now()->endOfMonth();
-        }
+        // if ($month) {
+        //     $startOfMonth = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
+        //     $endOfMonth   = Carbon::createFromFormat('Y-m', $month)->endOfMonth();
+        // } else {
+        //     $startOfMonth = Carbon::now()->startOfMonth();
+        //     $endOfMonth   = Carbon::now()->endOfMonth();
+        // }
+
+        $startOfMonth = Carbon::now()->startOfMonth();
+        $endOfMonth   = Carbon::now()->endOfMonth();
 
         $planPrices = [
             'Creator' => 1,
@@ -132,6 +146,7 @@ class MonthlyPayoutController extends Controller
             ->with('user:id,name')
             ->get();
 
+
         $memberCount = $members->count();
         if ($memberCount === 0) {
             return redirect()->back()->with('error', 'No users found.');
@@ -139,7 +154,7 @@ class MonthlyPayoutController extends Controller
 
         // Tier pool
         $revenue  = $memberCount * $planPrices[$tier];
-        $tierPool = round($revenue * 0.70, 2);
+        $tierPool = round($revenue * 0.60, 2);
 
         $totalEngagement = 0;
         $userEngagements = [];
@@ -176,6 +191,7 @@ class MonthlyPayoutController extends Controller
             'users'           => $userEngagements,
             'tierPool'        => $tierPool,
             'platformPool'    => round($revenue * 0.30, 2),
+            'savingsPool'    => round($revenue * 0.10, 2),
             'totalRevenue'    => $revenue,
             'totalEngagement' => $totalEngagement,
             'memberCount'     => $memberCount,

@@ -7,16 +7,16 @@
         <div class="block block-rounded">
             <div class="block-header block-header-default">
                 <h3 class="block-title">
-                    Monthly Payout Overview (Pro-rata) </i>
+                    Monthly Payout Overview (Pro-rata) -  <i>{{ \Carbon\Carbon::parse($startMonth)->format('jS \\of M') }} to  {{ \Carbon\Carbon::parse($endMonth)->format('jS \\of M Y') }} </i>
                 </h3>
             </div>
             <div class="block-content block-content-full">
 
-                <form method="GET" class="mb-4">
+                {{-- <form method="GET" class="mb-4">
                     <label for="month" class="form-label">Select Month</label>
                     <input type="month" name="month" id="month" value="{{ $monthParam }}" class="form-control"
                         style="max-width: 200px" onchange="this.form.submit()">
-                </form>
+                </form> --}}
 
 
 
@@ -24,10 +24,11 @@
                     <thead>
                         <tr>
                             <th>Tier</th>
-                            <th>Platform Pool ($)</th>
-                            <th>Tier Pool ($)</th>
+                            <th>Total Rev. ($)</th>
+                            <th>Platform Rev ($)</th>
+                            <th>Level Rev ($)</th>
+                            <th>Savings ($)</th>
                             <th>Total Engagement</th>
-                            <th>Total Payout ($)</th>
                             <th>Members</th>
                             <th>Action</th>
                         </tr>
@@ -35,19 +36,26 @@
 
                     <tbody>
                         @forelse($results as $level)
-                        <?php $amount = $level['Total Payout'];
-                                $amount1 = $level['Platform Pool'];
-                                $amount2 = $level['Tier Pool'];
-                        ?>
+                            <?php
+                            $totalRev = $level['totalRev'];
+                            $platformRev = $level['platformRev'];
+                            $levelPool = $level['levelPool'];
+                            $savingsPool = $level['savingsPool'];
+                            $totalEngagement = $level['totalEngagement'];
+                            ?>
                             <tr>
-                                <td>{{ $level['Tier'] }}</td>
-                                <td>&#8358;{{ number_format(convertToBaseCurrency($amount1, 'NGN'), 2) }}</td>
-                                <td>&#8358;{{ number_format(convertToBaseCurrency($amount2, 'NGN'), 2) }}</td>
-                                <td>{{ number_format($level['Total Engagement']) }}</td>
-                                
-                                <td> &#8358;{{ number_format( convertToBaseCurrency($amount, 'NGN'), 2 ) }}</td>
-                                <td>{{ $level['Members'] }}</td>
-                                <td> <a href="{{ url('/payouts/monthly/levels/'.$level['Tier']) }}?month={{ $monthParam }}" class="btn btn-info btn-sm"> View Users</a> </td>
+                                <td>{{ $level['level'] }}</td>
+                                <td>&#8358;{{ number_format(convertToBaseCurrency($totalRev, 'NGN'), 2) }}</td>
+                                <td>&#8358;{{ number_format(convertToBaseCurrency($platformRev, 'NGN'), 2) }}</td>
+                                <td>&#8358;{{ number_format(convertToBaseCurrency($levelPool, 'NGN'), 2) }}</td>
+                                <td> &#8358;{{ number_format(convertToBaseCurrency($savingsPool, 'NGN'), 2) }}</td>
+                                <td>{{ number_format($level['totalEngagement']) }}</td>
+                                <td>{{ $level['memberCount'] }}</td>
+                                <td> <a href="{{ url('/payouts/monthly/levels/'.$level['level']) }}"
+                                        class="btn btn-info btn-sm"> View Users</a> </td>
+
+                                {{-- <td> <a href="{{ url('/payouts/monthly/levels/' . $level['level']) }}?month={{ $monthParam }}"
+                                        class="btn btn-info btn-sm"> View Users</a> </td> --}}
                             </tr>
                         @empty
                             <tr>

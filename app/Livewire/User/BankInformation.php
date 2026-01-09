@@ -50,112 +50,80 @@ class BankInformation extends Component
     }
 
 
+    
+
     public function createWithdrawalMethod()
     {
-
+        
         $validated = $this->validate([
-            'account_number' => 'numeric|unique:withdrawal_methods',
+            'account_number' => 'nullable|numeric|unique:withdrawal_methods',
             'country' => 'required|string',
-            'bank_code' => 'string|sometimes',
-            'payment_method' => 'string|sometimes',
-            'paypal_email' => 'email|unique:withdrawal_methods',
-            'usdt_wallet' => 'string|unique:withdrawal_methods',
+            'bank_code' => 'nullable|string',
+            'payment_method' => 'nullable|string',
+            'paypal_email' => 'nullable|email|unique:withdrawal_methods',
+            'usdt_wallet' => 'nullable|string|unique:withdrawal_methods',
         ]);
 
-       
+        $paymentMethod = $validated['country'] === 'Nigeria' ? 'bank_transfer' : $this->payment_method;
 
-        if ($validated['country'] == 'Nigeria') {
-            $paymentMethod = 'bank_transfer';
-            // $currency = 'NGN';
-             $bank = ($validated['bank_code']);
-            [$bankCode, $bankName] = array_map('trim', explode(',', $bank));
-        } else {
-            $paymentMethod = $this->payment_method;
-            // $currency = 'USD';
+  
+        $errors = [];
+
+        if ($paymentMethod === 'bank_transfer') {
+            if (empty($validated['bank_code'])) $errors[] = 'Bank Name is required';
+            if (empty($validated['account_number'])) $errors[] = 'Account Number is required';
         }
 
-
-
-        //validation
-        if ($paymentMethod == 'bank_transfer') {
-
-            if ($validated['bank_code'] == '') {
-                session()->flash('fail', 'Bank Name is required');
-                // Redirect back to the form
-                return redirect()->back();
-            }
-
-            if ($validated['account_number'] == '') {
-                session()->flash('fail', 'Account Number is required');
-                // Redirect back to the form
-                return redirect()->back();
-            }
+        if ($paymentMethod === 'paypal' && empty($validated['paypal_email'])) {
+            $errors[] = 'Paypal email is required';
         }
 
-        if ($paymentMethod == 'paypal') {
-
-
-            if ($validated['paypal_email'] == '') {
-                session()->flash('fail', 'Paypal email is required');
-                // Redirect back to the form
-                return redirect()->back();
-            }
+        if ($paymentMethod === 'usdt' && empty($validated['usdt_wallet'])) {
+            $errors[] = 'USDT Wallet address is required';
         }
 
-        if ($paymentMethod == 'usdt') {
-            if ($validated['usdt_wallet'] == '') {
-                session()->flash('fail', 'USDT Wallet address is required');
-                // Redirect back to the form
-                return redirect()->back();
+        
+        if (!empty($errors)) {
+            foreach ($errors as $error) {
+                session()->flash('fail', $error);
             }
+            return redirect()->back();
         }
 
-        if ($validated['country'] == 'Nigeria') {
-            ///resolve bank information
-           $trf =  $this->transferRecipient(auth()->user()->name, $this->account_number, $bankCode);
+        $data = [
+            'user_id' => auth()->user()->id,
+            'account_number' => null,
+            'account_name' => null,
+            'currency' => $validated['country'] === 'Nigeria' ? $this->baseCurrency : 'USD',
+            'recipient_code' => null,
+            'bank_name' => null,
+            'payment_method' => $paymentMethod,
+            'paypal_email' => $validated['paypal_email'] ?? null,
+            'usdt_wallet' => $validated['usdt_wallet'] ?? null,
+            'country' => $validated['country']
+        ];
 
-           
-           $trf['details']['account_number']; 
-           $trf['details']['account_name']; 
-           $trf['details']['bank_name'];
 
+        if ($validated['country'] === 'Nigeria') {
+            [$bankCode, $bankName] = array_map('trim', explode(',', $validated['bank_code']));
+            $trf = $this->transferRecipient(auth()->user()->name, $validated['account_number'], $bankCode);
 
-            WithdrawalMethod::create([
-                'user_id' => auth()->user()->id,
+            $data = array_merge($data, [
                 'account_number' => $trf['details']['account_number'],
                 'account_name' => $trf['details']['account_name'],
-                'currency' => $this->baseCurrency,
-                'recipient_code' => $trf['recipient_code'],
                 'bank_name' => $trf['details']['bank_name'],
-                'payment_method' => $paymentMethod, //$validated['payment_method'], 
-                'paypal_email' => $validated['paypal_email'],
-                'usdt_wallet' => $validated['usdt_wallet'],
-                'country' => $validated['country']
-            ]);
-
-
-        }else{
-
-            WithdrawalMethod::create([
-                'user_id' => auth()->user()->id,
-                'account_number' => null,
-                'account_name' => null,
-                'currency' => 'USD', //$this->baseCurrency,
-                'recipient_code' => null,
-                'bank_name' => null,
-                'payment_method' => $paymentMethod, //$validated['payment_method'], 
-                'paypal_email' => $validated['paypal_email'],
-                'usdt_wallet' => $validated['usdt_wallet'],
-                'country' => $validated['country']
+                'recipient_code' => $trf['recipient_code']
             ]);
         }
+
+    
+        WithdrawalMethod::create($data);
 
        
         $this->reset('country');
         return redirect()->to('/bank/information');
-
-       
     }
+
 
     // private function resolveBankAccount($accountNumber, $bankCode)
     // {
@@ -175,14 +143,15 @@ class BankInformation extends Component
     //     return json_decode($res->getBody()->getContents(), true)['data'];
     // }
 
-    private function transferRecipient($account_name, $account_number, $bank_code){
+    private function transferRecipient($account_name, $account_number, $bank_code)
+    {
 
         $data = [
-            "type"=> "nuban",
-            "name"=> $account_name,
-            "account_number"=> $account_number,
-            "bank_code"=> $bank_code,
-            "currency"=> "NGN"
+            "type" => "nuban",
+            "name" => $account_name,
+            "account_number" => $account_number,
+            "bank_code" => $bank_code,
+            "currency" => "NGN"
         ];
         $res = Http::withHeaders([
             'Accept' => 'application/json',
@@ -191,7 +160,6 @@ class BankInformation extends Component
         ])->post('https://api.paystack.co/transferrecipient', $data);
 
         return json_decode($res->getBody()->getContents(), true)['data'];
-        
     }
 
 
