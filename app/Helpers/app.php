@@ -817,25 +817,24 @@ if (!function_exists('upgradeLevel')) {
         $user = Auth::user();
         $level = Level::find($levelId);
 
-
         if (!$level) {
             session()->flash('error', 'Invalid Level Selected');
             return;
         }
 
-
         $userCurrency = userBaseCurrency($user->id);
 
         //get plan code based on currency and plan
-        $levelPlan = LevelPlanId::where('level_name', $level->name)->where('currency', $userCurrency)->first();
+        // $levelPlan = LevelPlanId::where('level_name', $level->name)->where('currency', $userCurrency)->first();
 
 
-        $convertedAmount = convertToBaseCurrency($levelPlan->amount, $userCurrency);
+        $convertedAmount = convertToBaseCurrency($level->amount, 'NGN'); ///convert all currency to NGN Via route
 
-        if ($levelPlan) {
+        
+        if ($level) {
 
-            if ($userCurrency == 'NGN') {
-                return createSubscriptionNGN($levelPlan->plan_code, $levelPlan->amount, $level);
+            if ($userCurrency == 'NGN' || $userCurrency == 'USD' || $userCurrency == 'EURO' || $userCurrency == 'GBP') {
+                return createSubscriptionNGN($convertedAmount, $level);
             }
         }
     }
@@ -843,7 +842,7 @@ if (!function_exists('upgradeLevel')) {
 
 if (!function_exists('createSubscriptionNGN')) {
 
-    function createSubscriptionNGN($planCode, $amount, $level)
+    function createSubscriptionNGN( $amount, $level)
     {
         $user = Auth::user();
 
