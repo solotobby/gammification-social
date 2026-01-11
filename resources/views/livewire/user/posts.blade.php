@@ -144,10 +144,12 @@
 
 
 
-    @if (auth()->user()->email_verified_at == null)
+     @include('layouts.onboarding')
+
+    {{-- @if (auth()->user()->email_verified_at == null)
         @include('layouts.accesscode_verification')
     @else
-        @include('layouts.onboarding')
-    @endif
+       
+    @endif --}}
 
 </div>

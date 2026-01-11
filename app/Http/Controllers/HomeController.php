@@ -82,6 +82,10 @@ class HomeController extends Controller
         $user->is_onboarded = true;
         $user->heard = $request->heard;
         $user->save();
+        $wl = Wallet::where('user_id', auth()->user()->id)->first();
+        $wl->currency = $request->currency;
+        $wl->save();
+        
         return redirect('timeline');
     }
 

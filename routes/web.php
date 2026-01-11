@@ -27,6 +27,8 @@ use App\Livewire\ViewPost;
 use App\Models\Referral;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use Illuminate\Http\Request;
 
 /*
 |--------------------------------------------------------------------------
@@ -94,6 +96,29 @@ Route::group(['namespace' => 'auth'], function () {
 
     // Route::post('post/comment', [\App\Http\Controllers\GeneralController::class, 'comment']);
 
+    Route::get('/email/verify', function () {
+        return view('auth.verify-email');
+    })->middleware('auth')->name('verification.notice');
+
+    Route::get('/email/verify', function () {
+        return view('auth.verify-email');
+    })->middleware('auth')->name('verification.notice');
+
+
+
+    Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+        $request->fulfill();
+
+        return redirect('/home');
+    })->middleware(['auth', 'signed'])->name('verification.verify');
+
+    Route::post('/email/verification-notification', function (Request $request) {
+        $request->user()->sendEmailVerificationNotification();
+
+        return back()->with('message', 'Verification link sent!');
+    })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
+
+    
 
 });
 
@@ -101,7 +126,7 @@ Auth::routes();
 
 
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/home', [\App\Http\Controllers\HomeController::class, 'index'])->name('home');
     Route::get('user/home', [\App\Http\Controllers\HomeController::class, 'userHome'])->name('user.home');
@@ -110,7 +135,7 @@ Route::middleware(['auth'])->group(function () {
 
         Route::post('complete/onboarding', [\App\Http\Controllers\HomeController::class, 'completeOnboarding'])->name('complete.onboarding');
         Route::post('access/code/verification', [\App\Http\Controllers\HomeController::class, 'accessCodeVerification'])->name('access.code.verification');
-        
+
         Route::get('validate/api', [\App\Http\Controllers\HomeController::class, 'validateApi']);
         Route::get('upgrade/api', [\App\Http\Controllers\HomeController::class, 'upgradeApi'])->name('upgrade.api');
         Route::get('subscribe/{levelId}', [\App\Http\Controllers\HomeController::class, 'createSubscription'])->name('subscribe');
@@ -163,7 +188,5 @@ Route::middleware(['auth'])->group(function () {
         Route::get('generate/plan/{id}', [LevelManagementController::class, 'generatePaystackPlanId']);
         Route::get('payouts', [MonthlyPayoutController::class, 'payouts']);
         Route::get('/payouts/monthly/levels/{level}', [MonthlyPayoutController::class, 'levelUserBreakdown']);
-
-
     });
 });

@@ -833,7 +833,7 @@ if (!function_exists('upgradeLevel')) {
         
         if ($level) {
 
-            if ($userCurrency == 'NGN' || $userCurrency == 'USD' || $userCurrency == 'EURO' || $userCurrency == 'GBP') {
+            if ($userCurrency == 'NGN' || $userCurrency == 'USD' || $userCurrency == 'EUR' || $userCurrency == 'GBP') {
                 return createSubscriptionNGN($convertedAmount, $level);
             }
         }

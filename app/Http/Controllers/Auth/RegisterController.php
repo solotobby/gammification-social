@@ -22,6 +22,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Spatie\Permission\Models\Role;
+use Illuminate\Auth\Events\Registered;
+
 
 class RegisterController extends Controller
 {
@@ -133,7 +135,9 @@ class RegisterController extends Controller
                 ]);
             }
 
-            Mail::to($validated['email'])->send(new AccessCodeMail($accessCode->code, $user));
+            event(new Registered($user));
+
+            // Mail::to($validated['email'])->send(new AccessCodeMail($accessCode->code, $user));
 
             Auth::login($user);
         });
