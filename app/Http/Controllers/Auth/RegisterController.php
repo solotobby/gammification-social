@@ -232,11 +232,11 @@ class RegisterController extends Controller
         if (Auth::attempt(['email' => $validated['email'], 'password' => $validated['password']])) {
             // Authentication passed...
             session()->regenerate();
-            if (auth()->user()->email_verified_at == null) {
-                $this->verifyExistingUserEmail(auth()->user());
+            // if (auth()->user()->email_verified_at == null) {
+            //     $this->verifyExistingUserEmail(auth()->user());
 
-                return redirect()->intended('home')->with('info', 'Please verify your email. An access code has been sent to your email');
-            }
+            //     return redirect()->intended('home')->with('info', 'Please verify your email. An access code has been sent to your email');
+            // }
 
             return redirect()->intended('home');
         } else {
