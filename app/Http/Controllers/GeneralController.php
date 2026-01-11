@@ -23,17 +23,8 @@ use Stevebauman\Location\Facades\Location;
 
 class GeneralController extends Controller
 {
-    public function devy(){
-        // $users = User::role('user')->orderBy('created_at', 'desc')->get();
-
-        // foreach($users as $user){
-        //     $levelId = AccessCode::where('id', $user->access_code_id)->first()->level_id;
-        //     $newUser = User::where('id', $user->id)->first();
-        //     $newUser->level_id = $levelId;
-        //     $newUser->save();
-        // }
-
-        return 'Okay good';
+    public function how(){
+        return view('how');
     }
 
     public function privacyPolicy(){

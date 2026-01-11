@@ -13,6 +13,10 @@
                     <li class="nav-item">
                         <a data-scroll href="#about" class="nav-link">About Us</a>
                     </li>
+                    <li class="nav-item">
+                        <a data-scroll href="{{ url('how-it-works') }}" class="nav-link">How It Works</a>
+                    </li>
+                       
                     
                     {{-- <li class="nav-item">
                         <a data-scroll href="{{ url('privacy/policy') }}" class="nav-link">Privacy Policy</a>

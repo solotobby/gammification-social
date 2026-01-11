@@ -70,18 +70,18 @@
                     <li class="nav-item">
                         <a data-scroll href="#features" class="nav-link">Features</a>
                     </li>
-                    <li class="nav-item">
+                    {{-- <li class="nav-item">
                         <a data-scroll href="{{ url('#pricing') }}" class="nav-link">Access Code</a>
-                    </li>
-                    <li class="nav-item">
+                    </li> --}}
+                    {{-- <li class="nav-item">
                         <a data-scroll href="{{ url('howtoearn') }}" class="nav-link">How to Earn</a>
-                    </li>
-                    <li class="nav-item">
+                    </li> --}}
+                    {{-- <li class="nav-item">
                         <a data-scroll href="{{ url('privacy/policy') }}" class="nav-link">Privacy Policy</a>
                     </li>
                     <li class="nav-item">
                         <a data-scroll href="{{ url('#contact') }}#contact" class="nav-link">Contact Us</a>
-                    </li>
+                    </li> --}}
                 </ul>
                 <ul class="navbar-nav navbar-center">
                     <li class="nav-item">

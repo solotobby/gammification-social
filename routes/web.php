@@ -7,6 +7,7 @@ use App\Livewire\CreateProduct;
 use App\Livewire\Level;
 use App\Livewire\User\Analytics;
 use App\Livewire\User\BankInformation;
+use App\Livewire\User\HowItWorks;
 use App\Livewire\User\HowToEarn;
 use App\Livewire\User\Partners;
 use App\Livewire\User\PostAnalytics;
@@ -61,7 +62,7 @@ Route::group(['namespace' => 'auth'], function () {
     Route::get('access/code/{level}', [\App\Http\Controllers\GeneralController::class, 'accessCode']);
     Route::post('process/access/code', [\App\Http\Controllers\GeneralController::class, 'processAccessCode']);
 
-    Route::get('howtoearn', [\App\Http\Controllers\GeneralController::class, 'howToEarn']);
+    Route::get('how-it-works', [\App\Http\Controllers\GeneralController::class, 'how']);
 
     Route::get('success', [\App\Http\Controllers\GeneralController::class, 'success']);
     Route::get('error', [\App\Http\Controllers\GeneralController::class, 'error']);
@@ -159,6 +160,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('transaction/list', TransactionList::class);
         Route::get('referral/list', ReferralList::class);
         Route::get('bank/information', BankInformation::class);
+        Route::get('how/it/works', HowItWorks::class);
     });
 
 
