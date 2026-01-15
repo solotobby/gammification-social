@@ -2,10 +2,12 @@
 
 namespace App\Console\Commands;
 
+use App\Mail\GeneralMail;
 use App\Models\EngagementDailyStat;
 use App\Models\EngagementMonthlyStat;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Mail;
 
 class MonthlyEngagementStat extends Command
 {
@@ -64,6 +66,21 @@ class MonthlyEngagementStat extends Command
                 ]
             );
         }
+
+        $subject = 'Monthly Engagement Registered';
+        $content = "Registered Monthly Stats successfully";
+
+        Mail::to('oluwatobi@freebyztechnologies.com')
+            ->send(new GeneralMail(
+                (object)[
+                    'name' => 'Oluwatobi Solomon',
+                    'email' => 'oluwatobi@freebyztechnologies.com'
+                ],
+                $subject,
+                $content
+            ));
+
+
 
         return Command::SUCCESS;
     }

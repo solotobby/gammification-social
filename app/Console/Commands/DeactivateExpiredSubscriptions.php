@@ -62,21 +62,22 @@ class DeactivateExpiredSubscriptions extends Command
             }
 
             $this->info("Deactivated {$expired->count()} subscriptions.");
+
+            $subject = 'Deactivated Sunscriober';
+            $content = "Deactivated {$expired->count()} subscriptions today";
+
+            Mail::to('oluwatobi@freebyztechnologies.com')
+                ->send(new GeneralMail(
+                    (object)[
+                        'name' => 'Daniel',
+                        'email' => 'oluwatobi@freebyztechnologies.com'
+                    ],
+                    $subject,
+                    $content
+                ));
         });
 
 
-        $subject = 'Promoter Wallet Credited';
-        $content = "Your promoter wallet has been credited with $";
-
-        Mail::to('solotob3@gmail.com')
-            ->send(new GeneralMail(
-                (object)[
-                    'name' => 'Daniel',
-                    'email' => 'solotob3@gmail.com'
-                ],
-                $subject,
-                $content
-            ));
 
 
         return Command::SUCCESS;

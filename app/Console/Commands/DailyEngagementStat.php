@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Mail\GeneralMail;
 use App\Models\EngagementDailyStat;
 use App\Models\UserComment;
 use App\Models\UserLevel;
@@ -9,6 +10,7 @@ use App\Models\UserLike;
 use App\Models\UserView;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class DailyEngagementStat extends Command
 {
@@ -79,6 +81,20 @@ class DailyEngagementStat extends Command
                 ]);
             });
         }
+
+         $subject = 'Daily Engagement Registered';
+        $content = "Registered Daily Stats successfully";
+
+        
+        Mail::to('oluwatobi@freebyztechnologies.com')
+            ->send(new GeneralMail(
+                (object)[
+                    'name' => 'Oluwatobi Solomon',
+                    'email' => 'oluwatobi@freebyztechnologies.com'
+                ],
+                $subject,
+                $content
+            ));
 
         return Command::SUCCESS;
     }

@@ -24,11 +24,10 @@ class Kernel extends ConsoleKernel
             ->onOneServer()->runInBackground();
 
         $schedule->command('subscriptions:deactivate-expired')
-            ->everyMinute();
-            // ->dailyAt('00:55')          // 5 minutes after midnight
-            // ->withoutOverlapping()
-            // ->onOneServer()
-            // ->runInBackground();
+            ->dailyAt('00:55')          // 5 minutes after midnight
+            ->withoutOverlapping()
+            ->onOneServer()
+            ->runInBackground();
     }
 
     protected $commands = [
