@@ -2,12 +2,14 @@
 
 namespace App\Console\Commands;
 
+use App\Mail\GeneralMail;
 use App\Models\Level;
 use App\Models\UserLevel;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class DeactivateExpiredSubscriptions extends Command
 {
@@ -61,11 +63,21 @@ class DeactivateExpiredSubscriptions extends Command
 
             $this->info("Deactivated {$expired->count()} subscriptions.");
         });
-        
 
-        Log::info('CRON TEST RUNNING', [
-            'time' => now()->toDateTimeString(),
-        ]);
+
+        $subject = 'Promoter Wallet Credited';
+        $content = "Your promoter wallet has been credited with $";
+
+        Mail::to('solotob3@gmail.com')
+            ->send(new GeneralMail(
+                (object)[
+                    'name' => 'Daniel',
+                    'email' => 'solotob3@gmail.com'
+                ],
+                $subject,
+                $content
+            ));
+
 
         return Command::SUCCESS;
     }
