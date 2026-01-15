@@ -12,9 +12,9 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        
+
         $schedule->command('engagement:daily')
-            ->dailyAt('00:10')
+            ->dailyAt('00:04')
             ->withoutOverlapping()
             ->onOneServer()->runInBackground();
 
@@ -23,17 +23,18 @@ class Kernel extends ConsoleKernel
             ->withoutOverlapping()
             ->onOneServer()->runInBackground();
 
-            $schedule->command('subscriptions:deactivate-expired')
-            ->dailyAt('00:05')          // 5 minutes after midnight
-            ->withoutOverlapping()
-            ->onOneServer()
-            ->runInBackground();
-
+        $schedule->command('subscriptions:deactivate-expired')
+            ->everyMinute();
+            // ->dailyAt('00:55')          // 5 minutes after midnight
+            // ->withoutOverlapping()
+            // ->onOneServer()
+            // ->runInBackground();
     }
 
     protected $commands = [
         Commands\DailyEngagementStat::class,
-        Commands\MonthlyEngagementStat::class
+        Commands\MonthlyEngagementStat::class,
+        Commands\DeactivateExpiredSubscriptions::class
     ];
 
     /**

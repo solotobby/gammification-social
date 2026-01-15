@@ -7,6 +7,7 @@ use App\Models\UserLevel;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class DeactivateExpiredSubscriptions extends Command
 {
@@ -60,6 +61,11 @@ class DeactivateExpiredSubscriptions extends Command
 
             $this->info("Deactivated {$expired->count()} subscriptions.");
         });
+        
+
+        Log::info('CRON TEST RUNNING', [
+            'time' => now()->toDateTimeString(),
+        ]);
 
         return Command::SUCCESS;
     }
