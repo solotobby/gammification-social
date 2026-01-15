@@ -12,15 +12,36 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        
+        $schedule->command('engagement:daily')
+            ->dailyAt('00:10')
+            ->withoutOverlapping()
+            ->onOneServer()->runInBackground();
+
+        $schedule->command('engagement:monthly')
+            ->monthlyOn(1, '01:00') // Run on 1st of every month at 01:00 AM
+            ->withoutOverlapping()
+            ->onOneServer()->runInBackground();
+
+            $schedule->command('subscriptions:deactivate-expired')
+            ->dailyAt('00:05')          // 5 minutes after midnight
+            ->withoutOverlapping()
+            ->onOneServer()
+            ->runInBackground();
+
     }
+
+    protected $commands = [
+        Commands\DailyEngagementStat::class,
+        Commands\MonthlyEngagementStat::class
+    ];
 
     /**
      * Register the commands for the application.
      */
     protected function commands(): void
     {
-        $this->load(__DIR__.'/Commands');
+        $this->load(__DIR__ . '/Commands');
 
         require base_path('routes/console.php');
     }

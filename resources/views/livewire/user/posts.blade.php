@@ -45,6 +45,8 @@
                         Creator and Influencer accounts can post long text, images and also earn up to {{ getCurrencyCode() }}{{ convertToBaseCurrency(1, auth()->user()->wallet->currency) }} per 1,000 engagement on every post. Basic users can earn but cannot withdraw earnings. Upgrade to a Creator or Influencer to monetize earn from your engagements.
                         <br>
                         Minimum payout is {{ getCurrencyCode() }}{{ convertToBaseCurrency(1, auth()->user()->wallet->currency) }} which will be paid on the 2nd of every month. 
+                        <br>
+                        Learn more about <a href="{{ url('how/it/works') }}" target="_blank"> how Payhankey works  here </a>
                     </div>
 
                     {{-- <form wire:submit.prevent="post">
