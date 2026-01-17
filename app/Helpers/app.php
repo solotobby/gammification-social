@@ -170,44 +170,40 @@ if (!function_exists('processPayment')) {
     }
 }
 
-
-
 //this will be called to update the unique view earnings
 if (!function_exists('calculateUniqueEarningPerView')) {
     function calculateUniqueEarningPerView()
     {
-        $user = Auth::user();
-        $level = Level::where('name', userLevel())->first();
-
-        $earningPer1000Views = $level->earning_per_view;
-        $earningPerView = $earningPer1000Views / 1000;
-        return $earningPerView;
+        if(userLevel() == 'Basic' || userLevel() == 'Creator'){
+            return 0.00002;
+        }else{
+            return 0.0008;
+        }
     }
 }
 
 if (!function_exists('calculateUniqueEarningPerLike')) {
     function calculateUniqueEarningPerLike()
     {
-        $user = Auth::user();
-        $level = Level::where('name', userLevel())->first();
-
-        $earningPer1000Likes = $level->earning_per_like;
-        $earningPerLike = $earningPer1000Likes / 1000;
-        return $earningPerLike;
+        if(userLevel() == 'Basic' || userLevel() == 'Creator'){
+            return 0.00002;
+        }else{
+            return 0.0004;
+        }
     }
 }
 
 if (!function_exists('calculateUniqueEarningPerComment')) {
     function calculateUniqueEarningPerComment()
     {
-        $user = Auth::user();
-        $level = Level::where('name', userLevel())->first();
-
-        $earningPer1000Comments = $level->earning_per_comment;
-        $earningPerComment = $earningPer1000Comments / 1000;
-        return $earningPerComment;
+        if(userLevel() == 'Basic' || userLevel() == 'Creator'){
+            return 0.00002;
+        }else{
+            return 0.0004;
+        }
     }
 }
+
 if (!function_exists('getLevels')) {
     function getLevels()
     {

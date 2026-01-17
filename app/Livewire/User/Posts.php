@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\Validate;
 use Livewire\WithFileUploads;
 use Livewire\Component;
+use Illuminate\Support\Facades\DB;
 
 class Posts extends Component
 {
@@ -227,32 +228,41 @@ class Posts extends Component
         }
     }
 
-
-
     public function toggleLike($postId)
     {
+        $user = Auth::user();
 
-        $post = Post::where('unicode', $postId)->first();
-        $user = User::find($post->user_id);
+        $post = Post::with('user') // eager load user
+            ->where('unicode', $postId)
+            ->firstOrFail();
 
-        if ($post->isLikedBy(Auth::user())) {
-            $post->likes()->where('user_id', Auth::id())->delete();
-            $post->decrement('likes');
-        } else {
-            // if (auth()->user()->id != $post->user_id) {
-            $post->likes()->create(['user_id' => Auth::id(), 'is_paid' => false, 'amount' => calculateUniqueEarningPerLike(), 'poster_user_id' => $post->user_id]);
-            $post->increment('likes');
+        DB::transaction(function () use ($post, $user) {
+            $like = $post->likes()->where('user_id', $user->id)->first();
 
-            $user->notify(new GeneralNotification([
-                'title'   =>  displayName(auth()->user()->name) . ' liked your post',
-                'message' => displayName(auth()->user()->name) . 'liked your post',
-                'icon'    => 'fa-thumbs-up text-primary',
-                'url'     => url('show/' . $post->id),
-            ]));
+            if ($like) {
+                // Unlike
+                $like->delete();
+                $post->decrement('likes');
+            } else {
+                // Like
+                $post->likes()->create([
+                    'user_id' => $user->id,
+                    'is_paid' => false,
+                    'amount'  => calculateUniqueEarningPerLike(),
+                    'poster_user_id' => $post->user_id,
+                ]);
 
+                $post->increment('likes');
 
-            // }
-        }
+                // Queue the notification for async processing
+                $post->user->notify((new GeneralNotification([
+                    'title'   => displayName($user->name) . ' liked your post',
+                    'message' => displayName($user->name) . ' liked your post',
+                    'icon'    => 'fa-thumbs-up text-primary',
+                    'url'     => url('show/' . $post->id),
+                ]))->delay(now()->addSeconds(1))); // small delay to decouple DB write
+            }
+        });
     }
 
     public function deletePost($postId)
@@ -323,33 +333,13 @@ class Posts extends Component
     public function render()
     {
 
-        // $posts = Post::take($this->perPage)
-        //     ->where('status', 'LIVE')
-        //     ->orderBy('created_at', 'desc')
-        //     ->get();
-        // // Group posts by user_id
-        // $groupedPosts = $posts->groupBy('user_id');
-
-        // // Flatten the grouped collection in an interleaved manner
-        // $interleavedPosts = new Collection();
-        // while ($groupedPosts->isNotEmpty()) {
-        //     foreach ($groupedPosts as $userId => $userPosts) {
-        //         if ($userPosts->isNotEmpty()) {
-        //             $interleavedPosts->push($userPosts->shift());
-        //             if ($userPosts->isEmpty()) {
-        //                 $groupedPosts->forget($userId);
-        //             }
-        //         }
-        //     }
-        // }
-
         // Use window function to rank posts per user
         $posts = Post::select('*')
             ->where('status', 'LIVE')
             ->selectRaw('ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY created_at DESC) as row_num')
             ->orderBy('row_num')            // interleave by row number
             ->orderBy('created_at', 'desc') // newest posts first within same row_num
-            ->limit($this->perPage * 5)     // fetch extra posts to ensure enough for interleaving
+            ->limit($this->perPage * 2)     // fetch extra posts to ensure enough for interleaving
             ->with('user')                  // eager load user to prevent N+1
             ->get();
 
@@ -366,7 +356,6 @@ class Posts extends Component
 
         // Limit final output to perPage
         $interleavedPosts = $interleavedPosts->take($this->perPage);
-
 
         return view('livewire.user.posts', ['posts' => $interleavedPosts]);
     }
