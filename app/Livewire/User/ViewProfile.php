@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\On;
+use Illuminate\Support\Facades\DB;
 
 class ViewProfile extends Component
 {
@@ -77,31 +78,78 @@ class ViewProfile extends Component
 
     public function toggleLike($postId)
     {
+        $user = Auth::user();
 
-        $post = Post::where('unicode', $postId)->first();
-        $user = User::find($post->user_id);
+        // Fetch post with owner user eager-loaded
+        $post = Post::with('user')
+            ->where('unicode', $postId)
+            ->firstOrFail(); // fail early if post not found
 
-        if ($post->isLikedBy(Auth::user())) {
-            $post->likes()->where('user_id', Auth::id())->delete();
-            $post->decrement('likes');
-        } else {
-            // if (auth()->user()->id != $post->user_id) {
-            $post->likes()->create(['user_id' => Auth::id(), 'is_paid' => false, 'amount' => calculateUniqueEarningPerLike(), 'poster_user_id' => $post->user_id]);
-            $post->increment('likes');
-
-            $user->notify(new GeneralNotification([
-                'title'   =>  displayName(auth()->user()->name) . ' liked your post',
-                'message' => displayName(auth()->user()->name) . 'liked your post',
-                'icon'    => 'fa-thumbs-up text-primary',
-                'url'     => url('show/' . $post->id),
-            ]));
-            // }
+        // Prevent users from liking their own post (optional)
+        if ($post->user_id === $user->id) {
+            return; // simply do nothing
         }
 
-        $this->timeline($this->username);
+        DB::transaction(function () use ($post, $user) {
+            // Check if already liked
+            $like = $post->likes()->where('user_id', $user->id)->first();
 
-        // $this->dispatch('user.timeline');
+            if ($like) {
+                // Unlike: delete like & decrement counter atomically
+                $like->delete();
+                $post->decrement('likes');
+            } else {
+                // Like: create record & increment counter atomically
+                $post->likes()->create([
+                    'user_id'        => $user->id,
+                    'is_paid'        => false,
+                    'amount'         => calculateUniqueEarningPerLike(),
+                    'poster_user_id' => $post->user_id,
+                ]);
+                $post->increment('likes');
+
+                // Queue notification for async processing
+                $post->user->notify((new GeneralNotification([
+                    'title'   => displayName($user->name) . ' liked your post',
+                    'message' => displayName($user->name) . ' liked your post',
+                    'icon'    => 'fa-thumbs-up text-primary',
+                    'url'     => url('show/' . $post->id),
+                ]))->delay(now()->addSeconds(1)));
+            }
+        });
+
+        // Refresh the timeline efficiently
+        $this->timeline($this->username);
     }
+
+
+    // public function toggleLike($postId)
+    // {
+
+    //     $post = Post::where('unicode', $postId)->first();
+    //     $user = User::find($post->user_id);
+
+    //     if ($post->isLikedBy(Auth::user())) {
+    //         $post->likes()->where('user_id', Auth::id())->delete();
+    //         $post->decrement('likes');
+    //     } else {
+    //         // if (auth()->user()->id != $post->user_id) {
+    //         $post->likes()->create(['user_id' => Auth::id(), 'is_paid' => false, 'amount' => calculateUniqueEarningPerLike(), 'poster_user_id' => $post->user_id]);
+    //         $post->increment('likes');
+
+    //         $user->notify(new GeneralNotification([
+    //             'title'   =>  displayName(auth()->user()->name) . ' liked your post',
+    //             'message' => displayName(auth()->user()->name) . 'liked your post',
+    //             'icon'    => 'fa-thumbs-up text-primary',
+    //             'url'     => url('show/' . $post->id),
+    //         ]));
+    //         // }
+    //     }
+
+    //     $this->timeline($this->username);
+
+    //     // $this->dispatch('user.timeline');
+    // }
 
     public function toggleFollow()
     {
@@ -163,7 +211,7 @@ class ViewProfile extends Component
             ]));
         }
 
-      
+
         $this->clearUserFeedCache($authUser->id);
         $this->clearUserFeedCache($targetUser->id);
 
