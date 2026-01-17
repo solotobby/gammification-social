@@ -323,25 +323,50 @@ class Posts extends Component
     public function render()
     {
 
-        $posts = Post::take($this->perPage)
-            ->where('status', 'LIVE')
-            ->orderBy('created_at', 'desc')
-            ->get();
-        // Group posts by user_id
-        $groupedPosts = $posts->groupBy('user_id');
+        // $posts = Post::take($this->perPage)
+        //     ->where('status', 'LIVE')
+        //     ->orderBy('created_at', 'desc')
+        //     ->get();
+        // // Group posts by user_id
+        // $groupedPosts = $posts->groupBy('user_id');
 
-        // Flatten the grouped collection in an interleaved manner
+        // // Flatten the grouped collection in an interleaved manner
+        // $interleavedPosts = new Collection();
+        // while ($groupedPosts->isNotEmpty()) {
+        //     foreach ($groupedPosts as $userId => $userPosts) {
+        //         if ($userPosts->isNotEmpty()) {
+        //             $interleavedPosts->push($userPosts->shift());
+        //             if ($userPosts->isEmpty()) {
+        //                 $groupedPosts->forget($userId);
+        //             }
+        //         }
+        //     }
+        // }
+
+        // Use window function to rank posts per user
+        $posts = Post::select('*')
+            ->where('status', 'LIVE')
+            ->selectRaw('ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY created_at DESC) as row_num')
+            ->orderBy('row_num')            // interleave by row number
+            ->orderBy('created_at', 'desc') // newest posts first within same row_num
+            ->limit($this->perPage * 5)     // fetch extra posts to ensure enough for interleaving
+            ->with('user')                  // eager load user to prevent N+1
+            ->get();
+
+        // Group by row number
+        $groupedByRow = $posts->groupBy('row_num');
+
+        // Flatten in interleaved order
         $interleavedPosts = new Collection();
-        while ($groupedPosts->isNotEmpty()) {
-            foreach ($groupedPosts as $userId => $userPosts) {
-                if ($userPosts->isNotEmpty()) {
-                    $interleavedPosts->push($userPosts->shift());
-                    if ($userPosts->isEmpty()) {
-                        $groupedPosts->forget($userId);
-                    }
-                }
+        foreach ($groupedByRow as $rowGroup) {
+            foreach ($rowGroup as $post) {
+                $interleavedPosts->push($post);
             }
         }
+
+        // Limit final output to perPage
+        $interleavedPosts = $interleavedPosts->take($this->perPage);
+
 
         return view('livewire.user.posts', ['posts' => $interleavedPosts]);
     }

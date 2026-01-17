@@ -56,7 +56,9 @@ Route::group(['namespace' => 'auth'], function () {
     Route::get('reg', [\App\Http\Controllers\Auth\RegisterController::class, 'reg']);
 
     Route::post('process/reg', [\App\Http\Controllers\Auth\RegisterController::class, 'regUser'])->name('reg.user');
-    Route::post('user/login', [\App\Http\Controllers\Auth\RegisterController::class, 'loginUser'])->name('login.user');
+    
+    Route::post('user/login', [\App\Http\Controllers\Auth\RegisterController::class, 'loginUser'])
+    ->middleware('throttle:5,1')->name('login.user');
 
 
     Route::get('access/code/{level}', [\App\Http\Controllers\GeneralController::class, 'accessCode']);
@@ -118,9 +120,6 @@ Route::group(['namespace' => 'auth'], function () {
 
         return back()->with('message', 'Verification link sent!');
     })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
-
-    
-
 });
 
 Auth::routes();

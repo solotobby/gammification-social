@@ -830,7 +830,7 @@ if (!function_exists('upgradeLevel')) {
 
         $convertedAmount = convertToBaseCurrency($level->amount, 'NGN'); ///convert all currency to NGN Via route
 
-        
+
         if ($level) {
 
             if ($userCurrency == 'NGN' || $userCurrency == 'USD' || $userCurrency == 'EUR' || $userCurrency == 'GBP') {
@@ -842,7 +842,7 @@ if (!function_exists('upgradeLevel')) {
 
 if (!function_exists('createSubscriptionNGN')) {
 
-    function createSubscriptionNGN( $amount, $level)
+    function createSubscriptionNGN($amount, $level)
     {
         $user = Auth::user();
 
@@ -901,9 +901,9 @@ if (!function_exists('fetchSubscription')) {
 }
 
 
-if(!function_exists('engagementEarnings')){
+if (!function_exists('engagementEarnings')) {
     function engagementEarnings(int $total): float
     {
-            return round($total / 1000, 2);
+        return round($total / 1000, 2);
     }
 }
