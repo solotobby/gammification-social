@@ -70,6 +70,12 @@ class DailyEngagementStat extends Command
 
                 $points = $views + $likes + $comments;
 
+                if ($points === 0) {
+                    return;
+                }
+
+                
+
                 EngagementDailyStat::create([
                     'user_id'  => $userLevel->user_id,
                     'tier'     => $userLevel->plan_name,
@@ -82,10 +88,10 @@ class DailyEngagementStat extends Command
             });
         }
 
-         $subject = 'Daily Engagement Registered';
+        $subject = 'Daily Engagement Registered';
         $content = "Registered Daily Stats successfully";
 
-        
+
         Mail::to('oluwatobi@freebyztechnologies.com')
             ->send(new GeneralMail(
                 (object)[
