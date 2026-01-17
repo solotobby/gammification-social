@@ -86,9 +86,9 @@ class ViewProfile extends Component
             ->firstOrFail(); // fail early if post not found
 
         // Prevent users from liking their own post (optional)
-        if ($post->user_id === $user->id) {
-            return; // simply do nothing
-        }
+        // if ($post->user_id === $user->id) {
+        //     return; // simply do nothing
+        // }
 
         DB::transaction(function () use ($post, $user) {
             // Check if already liked
