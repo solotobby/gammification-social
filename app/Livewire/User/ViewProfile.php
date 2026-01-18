@@ -85,11 +85,6 @@ class ViewProfile extends Component
             ->where('unicode', $postId)
             ->firstOrFail(); // fail early if post not found
 
-        // Prevent users from liking their own post (optional)
-        // if ($post->user_id === $user->id) {
-        //     return; // simply do nothing
-        // }
-
         DB::transaction(function () use ($post, $user) {
             // Check if already liked
             $like = $post->likes()->where('user_id', $user->id)->first();

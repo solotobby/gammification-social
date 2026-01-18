@@ -4,7 +4,7 @@
     <style>
         .form-control {
             resize: none;
-            height: 100px;
+            
             /* Adjust the height as needed */
         }
 
@@ -42,7 +42,7 @@
                 <div class="block-content block-content-full">
                     <div class="alert alert-info">
                         <b>Post, Grow engagements and Earn from every posts.</b><br>
-                        Creator and Influencer accounts can post long text, images and also earn up to {{ getCurrencyCode() }}{{ convertToBaseCurrency(1, auth()->user()->wallet->currency) }} per 1,000 engagement on every post. Basic users can earn but cannot withdraw earnings. Upgrade to a Creator or Influencer to monetize earn from your engagements.
+                        Creator and Influencer accounts can post long text, images and also earn up to {{ getCurrencyCode() }}{{ convertToBaseCurrency(1, auth()->user()->wallet->currency) }} per 1,000 engagement on every post. Basic users can earn but cannot withdraw earnings. Upgrade to a Creator or Influencer to earn from your engagements.
                         <br>
                         Minimum payout is {{ getCurrencyCode() }}{{ convertToBaseCurrency(1, auth()->user()->wallet->currency) }} which will be paid on the 2nd of every month. 
                         <br>
@@ -85,10 +85,10 @@
             <div class="card mb-4">
 
                 <form wire:submit.prevent="post">
-                    <div class="card-body">
+                    <div class="card-body ">
                         <?php $userLevel = userLevel(); ?>
                         <div x-data="{ content: @entangle('content') }">
-                            <textarea x-model="content" class="form-control" placeholder="Say something amazing"
+                            <textarea x-model="content" class="form-control" placeholder="Say something amazing" rows="4"
                                 @if (!in_array($userLevel, ['Creator', 'Influencer'])) maxlength="160" @endif required></textarea>
                             @if (!in_array($userLevel, ['Creator', 'Influencer']))
                                 <small class="text-muted" x-text="content.length + '/160 characters'"></small>
@@ -137,7 +137,7 @@
             </div>
 
 
-            @include('layouts.posts', $posts)
+            @include('layouts.feeds', $posts)
 
 
         </div>

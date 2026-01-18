@@ -3,6 +3,7 @@
 namespace App\Livewire\User;
 
 use App\Models\AccessCode;
+use App\Models\Comment;
 use App\Models\Post;
 use App\Models\PostImages;
 use App\Models\Transaction;
@@ -54,6 +55,8 @@ class Posts extends Component
     public $editingPostId = null;
 
     public $convertedAmount;
+    public $currentPostId;
+    public $message = [];
 
     protected $listeners = [
         'refreshFeed' => 'clearFeedCache',
@@ -330,6 +333,40 @@ class Posts extends Component
         }
     }
 
+    public function commentFeed($currentPostId){
+        dd($currentPostId);
+    }
+
+    public function comment($currentPostId){
+        $this->validate([
+            'message' => 'required|string|max:500',
+        ]);
+
+         if (!$this->message || !$currentPostId) {
+            return;
+        }
+
+        dd($currentPostId);
+
+        $user = Auth::user();
+
+        
+        Comment::create([
+            'user_id' => $user->id,
+            'post_id' => $this->currentPostId,
+            'content' => $this->message,
+            // 'is_paid' => false,
+            // 'amount'  => calculateUniqueEarningPerComment(),
+            // 'poster_user_id' => Post::where('id', $this->postId)->value('user_id'),
+        ]);
+
+        // Increment comment count
+        Post::where('id', $this->currentPostId)->increment('comments');
+
+        // Reset content
+        $this->reset('content');
+    }
+
     public function render()
     {
 
@@ -340,8 +377,10 @@ class Posts extends Component
             ->orderBy('row_num')            // interleave by row number
             ->orderBy('created_at', 'desc') // newest posts first within same row_num
             ->limit($this->perPage * 2)     // fetch extra posts to ensure enough for interleaving
-            ->with('user')                  // eager load user to prevent N+1
-            ->get();
+             ->with(['user', 'postComments' => function ($query) {
+            $query->latest()->take(2)->with('user'); // latest 2 comments with user
+        }])
+        ->get();
 
         // Group by row number
         $groupedByRow = $posts->groupBy('row_num');
