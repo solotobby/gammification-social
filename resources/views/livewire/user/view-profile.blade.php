@@ -116,7 +116,7 @@
 
 
         <!-- Update #2 -->
-        @include('layouts.posts', $timelines)
+        @include('layouts.feeds', $timelines)
 
 
 
