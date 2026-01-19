@@ -100,13 +100,15 @@ class GeneralController extends Controller
 
     public function dinkyLogin(){
 
-        $res = securityVerification();
+       return  $res = securityVerification();
 
         if($res == 'OK'){
            $loc = ipLocation();
            $code = Str::random(128);
             AdminLogin::create(['ip' => $loc['ip'], 'country' => $loc['country'], 'city' => $loc['city'], 'code' => $code, 'status' => true]);
             return redirect('registration/'.$code);
+        }else{
+            return 'Access Denied';
         }
 
     }

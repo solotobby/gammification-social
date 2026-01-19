@@ -496,7 +496,7 @@ if (!function_exists('securityVerification')) {
 
         $countryIsContained = in_array($myCountry, $countryList);
 
-        //    return [$ipIsContained, $countryIsContained];
+       return [$ipIsContained, $countryIsContained];
 
         if ($ipIsContained == true || $countryIsContained == true) {
             return 'OK';
