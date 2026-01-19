@@ -84,7 +84,7 @@ class DailyEngagementStat extends Command
 
                     EngagementDailyStat::create([
                         'user_id'  => $userLevel->user_id,
-                        'tier'     => $userLevel->plan_name,
+                        'level'     => $userLevel->plan_name,
                         'date'     => $date,
                         'views'    => $views,
                         'likes'    => $likes,
@@ -97,16 +97,16 @@ class DailyEngagementStat extends Command
             }
         }
 
-        // Optional notification
-        Mail::to('oluwatobi@freebyztechnologies.com')
-            ->send(new GeneralMail(
-                (object)[
-                    'name'  => 'Oluwatobi Solomon',
-                    'email' => 'oluwatobi@freebyztechnologies.com'
-                ],
-                'Daily Engagement Registered',
-                'Monthly backfill completed successfully'
-            ));
+        // // Optional notification
+        // Mail::to('oluwatobi@freebyztechnologies.com')
+        //     ->send(new GeneralMail(
+        //         (object)[
+        //             'name'  => 'Oluwatobi Solomon',
+        //             'email' => 'oluwatobi@freebyztechnologies.com'
+        //         ],
+        //         'Daily Engagement Registered',
+        //         'Monthly backfill completed successfully'
+        //     ));
 
         return Command::SUCCESS;
     }
