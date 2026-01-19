@@ -14,6 +14,7 @@ use App\Models\PartnerSlot;
 use App\Models\Post;
 use App\Models\Transaction;
 use App\Models\User;
+use App\Models\UserLevel;
 use App\Models\ViewsExternal;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -38,6 +39,16 @@ class GeneralController extends Controller
     public function admin(){
         return view('admin.home');
     }
+
+    public function test()
+    {
+        
+        return UserLevel::where('status', 'active')
+            ->whereIn('plan_name', ['Creator', 'Influencer'])
+            ->select('user_id', 'plan_name')
+            ->get();
+    }
+
     
     public function accessCode($level){
         if($level == 'beginner' || $level == 'creator' || $level == 'influencer' ){

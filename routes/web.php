@@ -49,6 +49,7 @@ Route::group(['namespace' => 'auth'], function () {
         return view('welcome');
     });
 
+    Route::get('test', [\App\Http\Controllers\GeneralController::class, 'test']);
     Route::get('fix', [\App\Http\Controllers\GeneralController::class, 'devy']);
     Route::get('privacy/policy', [\App\Http\Controllers\GeneralController::class, 'privacyPolicy']);
 

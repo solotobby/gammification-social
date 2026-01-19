@@ -325,4 +325,6 @@ class HomeController extends Controller
 
         return json_decode($res->getBody()->getContents(), true);
     }
+
+    
 }
