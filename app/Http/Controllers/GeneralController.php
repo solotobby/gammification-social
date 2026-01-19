@@ -100,7 +100,7 @@ class GeneralController extends Controller
 
     public function dinkyLogin(){
 
-       return  $res = securityVerification();
+       $res = securityVerification();
 
         if($res == 'OK'){
            $loc = ipLocation();

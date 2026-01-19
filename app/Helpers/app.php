@@ -492,13 +492,13 @@ if (!function_exists('securityVerification')) {
         $myIp =  $myLocation['ip'];
         $myCountry =  $myLocation['country'];
 
-        return [$myIp, $myCountry, $ipList, $countryList];
+        [$myIp, $myCountry, $ipList, $countryList];
 
         $ipIsContained = in_array($myIp, $ipList);
 
         $countryIsContained = in_array($myCountry, $countryList);
 
-       return [$ipIsContained, $countryIsContained];
+    //    return [$ipIsContained, $countryIsContained];
 
         if ($ipIsContained == true || $countryIsContained == true) {
             return 'OK';
