@@ -227,4 +227,18 @@ class UserController extends Controller
             return back()->with('success', 'Wallet Credited');
         }
     }
+
+    public function postList($id)
+    {
+        $user = User::find($id);
+        $posts = Post::where('user_id', $id)->get();
+        return view('admin.user.posts', ['posts' => $posts, 'user' => $user]);
+    }
+
+    public function transactionList($id)
+    {
+        $user = User::find($id);
+        $transactions = Transaction::where('user_id', $id)->orderBy('created_at', 'DESC')->get();
+        return view('admin.user.transactions', ['transactions' => $transactions, 'user' => $user]);
+    }
 }

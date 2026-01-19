@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\LevelManagementController;
 use App\Http\Controllers\Admin\MonthlyPayoutController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\UserEngagementController;
 use App\Livewire\CreateProduct;
 use App\Livewire\Level;
 use App\Livewire\User\Analytics;
@@ -190,5 +191,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('generate/plan/{id}', [LevelManagementController::class, 'generatePaystackPlanId']);
         Route::get('payouts', [MonthlyPayoutController::class, 'payouts']);
         Route::get('/payouts/monthly/levels/{level}', [MonthlyPayoutController::class, 'levelUserBreakdown']);
+        Route::get('user/engagement/analytics/{id}', [UserEngagementController::class, 'engagementAnalytics']);
+        Route::get('user/transaction/list/{id}', [UserController::class, 'transactionList']);
+        Route::get('user/post/list/{id}', [UserController::class, 'postList']);
     });
 });

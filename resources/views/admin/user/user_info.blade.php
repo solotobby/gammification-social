@@ -64,7 +64,7 @@
                         </div>
                         <div class="ms-3 text-end">
                             <p class="fs-3 fw-medium mb-0">
-                              0
+                                0
                                 {{-- {{ getCurrencyCode($user->wallet->currency) }}{{ $withdrawals }} --}}
                             </p>
                             <p class="text-muted mb-0">
@@ -112,19 +112,16 @@
                     <hr>
                     Expected Bonus: {{ getCurrencyCode($user->wallet->currency) }}
                     {{ convertToBaseCurrency($userLevel->reg_bonus, $currency) }} <br><br>
-                    <a href="{{ url('add/bonus/' . $user->id . '/' . $level) }}" class="btn btn-primary mb-2"> Update Bonus </a>
+                    <a href="{{ url('add/bonus/' . $user->id . '/' . $level) }}" class="btn btn-primary mb-2"> Update Bonus
+                    </a>
+
+                    <a href="{{ url('user/engagement/analytics/' . $user->id) }}" class="btn btn-secondary mb-2"> Daily Engagement Analytics </a>
 
                 @endif
-                    <hr>
-                    <h4> Mini Trsansction list </h4>
-                    <ul class="list-group mt-3">
-                      @foreach ($withdrawals as $with)
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                        {{$with->description}} - {{ $with->amount }} - {{ $with->created_at }}
-                        <span class="badge badge-primary badge-pill">{{ $with->amount }}</span>
-                      </li>
-                      @endforeach
-                    </ul>
+                <a href="{{ url('user/transaction/list/' . $user->id) }}" class="btn btn-success mb-2"> View Transaction </a>
+                 <a href="{{ url('user/post/list/' . $user->id) }}" class="btn btn-warning mb-2"> View Posts </a>
+
+               
 
             </div>
 
@@ -133,9 +130,9 @@
         </div>
 
 
- 
 
-                  <div class="block block-rounded">
+
+        <div class="block block-rounded">
             <div class="block-header block-header-default">
                 <h3 class="block-title">Credit Wallet</h3>
             </div>
@@ -161,21 +158,18 @@
                                 </div>
                             @endif --}}
                             <div class="mb-4">
-                                <select class="form-control mt-2"
-                                        name="currency"
-                                        {{-- wire:model.defer="currency" --}}
-                                        required>
+                                <select class="form-control mt-2" name="currency" {{-- wire:model.defer="currency" --}} required>
 
-                                        <option value="">Select Currency</option>
-                                        <option value="USD">USD – US Dollar</option>
-                                        <option value="EUR">EUR – Euro</option>
-                                        <option value="GBP">GBP – British Pound</option>
-                                        <option value="NGN">NGN – Nigerian Naira</option>
-                        </select>
-                               
+                                    <option value="">Select Currency</option>
+                                    <option value="USD">USD – US Dollar</option>
+                                    <option value="EUR">EUR – Euro</option>
+                                    <option value="GBP">GBP – British Pound</option>
+                                    <option value="NGN">NGN – Nigerian Naira</option>
+                                </select>
+
                             </div>
                             <input type="hidden" value="{{ $user->id }}" name="user_id">
-                        
+
 
                             <div class="mb-4">
                                 <button type="submit" class="btn btn-sm btn-primary">Change Currency</button>
@@ -188,7 +182,7 @@
 
                 </form>
             </div>
-        </div>      
+        </div>
 
         <!-- Groups -->
         {{-- <div class="block block-rounded">
@@ -306,66 +300,7 @@
         </div>
 
 
-
-
-
-
-        <div class="block block-rounded">
-            <div class="block-header block-header-default">
-                <h3 class="block-title">List of Posts - {{ $posts->count() }} </h3>
-            </div>
-            <div class="block-content">
-                <table class="table table-bordered table-striped table-vcenter js-dataTable-buttons">
-                    <thead>
-                        <tr>
-                            {{-- <th class="text-center" style="width: 80px;">#</th> --}}
-                            <th>Content</th>
-                            <th>Total Likes</th>
-                            <th>Unique View</th>
-                            <th>Total Views</th>
-                            <th>Unique Comment</th>
-                            <th>Total Comment</th>
-                            <th>When Posted</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($posts as $post)
-                            <tr>
-                                {{-- <td class="text-center">1</td> --}}
-                                <td>
-                                    {{ \Illuminate\Support\Str::words($post->content, 3, '...') }}
-                                    {{-- {{ $post->content }} --}}
-                                    {{-- <a href="{{ url('user/info/'.$post->id) }}">{{ $post->user->name }}</a> --}}
-                                </td>
-                                <td>
-                                    {{ $post->likes }}
-                                </td>
-                                <td>
-                                    {{ $post->views }}
-                                </td>
-                                <td>
-                                    {{ sumCounter($post->views, $post->views_external) }}
-                                </td>
-                                <td>
-                                    {{ $post->comments }}
-                                </td>
-                                <td>
-                                    {{ sumCounter($post->comments, $post->comments_external) }}
-                                </td>
-
-
-
-                                <td>
-                                    <em class="text-muted">{{ $post->created_at }}</em>
-                                    {{-- {{   $post->created_at?->shortAbsoluteDiffForHumans() }}  --}}
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-
-            </div>
-        </div>
+       
     </div>
     <!-- END Page Content -->
 @endsection
