@@ -92,11 +92,10 @@
 
                             @foreach ($timeline->images as $image)
                                 <div class="{{ $col }} mb-2">
-                                    <a href="{{ asset('storage/' . $image->path) }}"
-                                        class="img-link img-link-simple img-link-zoom-in img-lightbox"
-                                        title="Post image">
-                                        <img class="img-fluid rounded" loading="lazy"
-                                            src="{{ asset('storage/' . $image->path) }}" alt="Post image">
+                                    <a class="img-link img-link-simple img-link-zoom-in img-lightbox"
+                                        href="{{ asset($image->path) }}">
+                                        <img class="img-fluid rounded" loading="lazy" src="{{ asset($image->path) }}"
+                                            alt="Post image">
                                     </a>
                                 </div>
                             @endforeach
