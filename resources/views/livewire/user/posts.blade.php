@@ -1,10 +1,17 @@
 <div>
     {{-- A good traveler has no fixed plans and is not intent upon arriving. --}}
 
+   
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
+
+
+
     <style>
         .form-control {
             resize: none;
-            
+
             /* Adjust the height as needed */
         }
 
@@ -42,11 +49,17 @@
                 <div class="block-content block-content-full">
                     <div class="alert alert-info">
                         <b>Post, Grow engagements and Earn from every posts.</b><br>
-                        Creator and Influencer accounts can post long text, images and also earn up to {{ getCurrencyCode() }}{{ convertToBaseCurrency(1, auth()->user()->wallet->currency) }} per 1,000 engagement on every post. Basic users can earn but cannot withdraw earnings. Upgrade to a Creator or Influencer to earn from your engagements.
+                        Creator and Influencer accounts can post long text, images and also earn up to
+                        {{ getCurrencyCode() }}{{ convertToBaseCurrency(1, auth()->user()->wallet->currency) }} per
+                        1,000 engagement on every post. Basic users can earn but cannot withdraw earnings. Upgrade to a
+                        Creator or Influencer to earn from your engagements.
                         <br>
-                        Minimum payout is {{ getCurrencyCode() }}{{ convertToBaseCurrency(1, auth()->user()->wallet->currency) }} which will be paid on the 2nd of every month. 
+                        Minimum payout is
+                        {{ getCurrencyCode() }}{{ convertToBaseCurrency(1, auth()->user()->wallet->currency) }} which
+                        will be paid on the 2nd of every month.
                         <br>
-                        Learn more about <a href="{{ url('how/it/works') }}" target="_blank"> how Payhankey works  here </a>
+                        Learn more about <a href="{{ url('how/it/works') }}" target="_blank"> how Payhankey works here
+                        </a>
                     </div>
 
                     {{-- <form wire:submit.prevent="post">
@@ -146,7 +159,15 @@
 
 
 
-     @include('layouts.onboarding')
+    @include('layouts.onboarding')
+
+    
+
+
+   
+
+
+
 
     {{-- @if (auth()->user()->email_verified_at == null)
         @include('layouts.accesscode_verification')

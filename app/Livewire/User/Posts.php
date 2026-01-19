@@ -22,6 +22,7 @@ use Livewire\Attributes\Validate;
 use Livewire\WithFileUploads;
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class Posts extends Component
 {
@@ -180,22 +181,36 @@ class Posts extends Component
         if (isSimilar($content, $getContent, 4)) {
             session()->flash('info', 'This content is too similar to existing content, therefore it will not be posted.');
             $this->reset('content');
-        } else {
+            return;
+        } 
             $uniqueCode = rand(1000, 9999) . time();
             $timelines = Post::create(['user_id' => auth()->user()->id, 'content' => $content, 'unicode' => $uniqueCode, 'status' => 'LIVE']);
 
-            foreach ($this->images as $image) {
-                $path = $image->store('post_images', 'public');
+            if (!empty($this->images)) {
+                foreach ($this->images as $image) {
+                    $uploadedFileUrl = cloudinary()->upload($image->getRealPath(), [
+                        'folder' => 'payhankey_post_images',
+                    ])->getSecurePath();
 
-                PostImages::create(['user_id' => Auth::id(), 'post_id' => $timelines->id, 'path' => $path]);
+                    PostImages::create([
+                        'user_id' => Auth::id(),
+                        'post_id' => $timelines->id,
+                        'path' => $uploadedFileUrl,
+                    ]);
+                }
 
-                // $post->images()->create([
-                //     'path' => $path,
-                // ]);
             }
 
+            // foreach ($this->images as $image) {
+            //     $path = $image->store('post_images', 'public');
+
+            //     PostImages::create(['user_id' => Auth::id(), 'post_id' => $timelines->id, 'path' => $path]);
+
+               
+            // }
+
             $this->reset('content', 'images');
-        }
+        
     }
 
     private function isSimilar($newData, $existingData, $threshold = 5)

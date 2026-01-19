@@ -1,11 +1,11 @@
 @forelse ($posts as $timeline)
 
-{{-- <div wire:poll.visible.430s class="block block-rounded block-bordered" id="timelines"> --}}
-<div  wire:ignore.self class="block block-rounded block-bordered" id="timelines">
+    {{-- <div wire:poll.visible.430s class="block block-rounded block-bordered" id="timelines"> --}}
+    <div wire:ignore.self class="block block-rounded block-bordered" id="timelines">
 
         <div class="block-header block-header-default">
 
-             <div class="d-flex align-items-center">
+            <div class="d-flex align-items-center">
                 @if (userLevel($timeline->user->id) == 'Basic')
                     <a class="img-link me-1" href="{{ url('profile/' . $timeline->user->username) }}">
                         <img class="img-avatar img-avatar32 img-avatar-thumb"
@@ -17,7 +17,7 @@
 
 
                     <span class="fs-sm text-muted ms-2">{{ $timeline->created_at?->shortAbsoluteDiffForHumans() }}
-                        </span>
+                    </span>
                 @elseif (userLevel($timeline->user->id) == 'Creator')
                     <a class="img-link me-1" href="{{ url('profile/' . $timeline->user->username) }}">
                         <img class="img-avatar img-avatar32 img-avatar-thumb"
@@ -71,11 +71,11 @@
                         {{ $timeline->created_at?->shortAbsoluteDiffForHumans() }}
                     </span>
                 @endif
-             </div>
+            </div>
 
-              <div class="block-options">
+            <div class="block-options">
 
-                 @if (auth()->user()->id == $timeline->user_id)
+                @if (auth()->user()->id == $timeline->user_id)
                     <div class="dropdown">
                         <button type="button" class="btn-block-option dropdown-toggle text-muted fs-sm"
                             data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Est. Earning
@@ -123,7 +123,7 @@
                 @endif
 
 
-              </div>
+            </div>
 
         </div>
 
@@ -137,7 +137,7 @@
                 </p>
             </a>
 
-             @php
+           @php
                 $count = $timeline->images->count();
             @endphp
 
@@ -158,9 +158,9 @@
                     @foreach ($timeline->images as $image)
                         <div class="{{ $col }} mb-2">
                             <a class="img-link img-link-simple img-link-zoom-in img-lightbox"
-                                href="{{ asset('storage/' . $image->path) }}">
+                                href="{{ asset( $image->path) }}">
                                 <img class="img-fluid rounded" loading="lazy"
-                                    src="{{ asset('storage/' . $image->path) }}" alt="Post image">
+                                    src="{{ asset( $image->path) }}" alt="Post image">
                             </a>
                         </div>
                     @endforeach
@@ -168,7 +168,7 @@
                 </div>
             @endif
 
-           
+
             <ul class="nav nav-pills fs-sm push " style="color: #5A4FDC">
                 <li class="nav-item me-1">
 
@@ -238,7 +238,7 @@
                   <button type="submit" class="btn btn-primary mt-2">Comment</button>
             </form>
 
-            @if($timeline->postComments->count() > 0)
+            @if ($timeline->postComments->count() > 0)
                 <div class="pt-3 fs-sm">
                     <div class="d-flex">
                         <a class="flex-shrink-0 img-link me-2" href="javascript:void(0)">
@@ -247,7 +247,7 @@
                         </a>
                     
                         <div class="flex-grow-1">
-                            @foreach($timeline->postComments as $comment)
+                            @foreach ($timeline->postComments as $comment)
                             <div class="mb-1">
                                 <a class="fw-semibold" href="javascript:void(0)">{{ $comment->user->name }}</a>
                               
@@ -274,7 +274,7 @@
         </div>
 
 
-</div>
+    </div>
 
 @empty
     <div class="alert alert-info">
