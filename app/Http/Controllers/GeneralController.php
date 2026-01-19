@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\AccessCodeMail;
+use App\Mail\GeneralMail;
 use App\Models\AccessCode;
 use App\Models\AdminLogin;
 use App\Models\Comment;
@@ -42,11 +43,19 @@ class GeneralController extends Controller
 
     public function test()
     {
-        
-        return UserLevel::where('status', 'active')
-            ->whereIn('plan_name', ['Creator', 'Influencer'])
-            ->select('user_id', 'plan_name')
-            ->get();
+         $subject = 'Daily Engagement Registered';
+        $content = "Registered Daily Stats successfully";
+
+        Mail::to('solotob3@gmail.com')
+            ->send(new GeneralMail(
+                (object)[
+                    'name' => 'Oluwatobi Solomon',
+                    'email' => 'solotob3@gmail.com'
+                ],
+                $subject,
+                $content
+            ));
+        return ipLocation();
     }
 
     
