@@ -9,7 +9,7 @@
                 @if (userLevel($timeline->user->id) == 'Basic')
                     <a class="img-link me-1" href="{{ url('profile/' . $timeline->user->username) }}">
                         <img class="img-avatar img-avatar32 img-avatar-thumb"
-                            src="{{ asset('src/assets/media/avatars/avatar11.jpg') }}" alt="Avatar">
+                            src="{{ $timeline->user->avatar ?? asset('src/assets/media/avatars/avatar13.jpg') }}" alt="Avatar">
                     </a>
 
                     <a class="fw-semibold" href="{{ url('profile/' . $timeline->user->username) }}"
@@ -21,7 +21,7 @@
                 @elseif (userLevel($timeline->user->id) == 'Creator')
                     <a class="img-link me-1" href="{{ url('profile/' . $timeline->user->username) }}">
                         <img class="img-avatar img-avatar32 img-avatar-thumb"
-                            src="{{ asset('src/assets/media/avatars/avatar11.jpg') }}" alt="Avatar">
+                            src="{{ $timeline->user->avatar ?? asset('src/assets/media/avatars/avatar13.jpg') }}" alt="Avatar">
                     </a>
                     {{-- Username + Verified Tick --}}
                     <div class="d-flex align-items-center">
@@ -47,7 +47,7 @@
                     {{-- Avatar --}}
                     <a class="img-link me-2" href="{{ url('profile/' . $timeline->user->username) }}">
                         <img class="img-avatar img-avatar32 img-avatar-thumb rounded-circle border border-primary border-2"
-                            src="{{ asset('src/assets/media/avatars/avatar11.jpg') }}" alt="Avatar">
+                            src="{{ $timeline->user->avatar ?? asset('src/assets/media/avatars/avatar13.jpg') }}" alt="Avatar">
                     </a>
 
                     {{-- Username + Verified Tick --}}

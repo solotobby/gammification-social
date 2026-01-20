@@ -13,15 +13,19 @@ use Livewire\Component;
 use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\On;
 use Illuminate\Support\Facades\DB;
+use Livewire\WithFileUploads;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class ViewProfile extends Component
 {
+    use WithFileUploads;
 
     public $username, $timelines, $highestEngagement;
 
     public User $user;
 
     public $perpage = 10;
+    public $avatar = null;
 
     public bool $isFollowing = false;
 
@@ -35,6 +39,7 @@ class ViewProfile extends Component
         $this->timeline($username);
         $this->isFollowing = Auth::user()?->isFollowing($this->user) ?? false;
         $this->recordProfileViews();
+        $this->avatar = $this->user->avatar;
     }
 
     private function recordProfileViews(): void
@@ -115,6 +120,27 @@ class ViewProfile extends Component
 
         // Refresh the timeline efficiently
         $this->timeline($this->username);
+    }
+
+    public function updatedAvatar()
+    {
+        $this->validate([
+            'avatar' => 'image|max:2048', // 2MB
+        ]);
+
+        $uploaded = Cloudinary::upload($this->avatar->getRealPath(), [
+            'folder' => 'payhankey_avatars',
+            'public_id' => 'user_' . auth()->id(),
+            'overwrite' => true,
+        ]);
+
+        auth()->user()->update([
+            'avatar' => $uploaded->getSecurePath(),
+        ]);
+
+        $this->reset('avatar');
+        $this->timeline($this->username);
+        session()->flash('success', 'Profile avatar updated!');
     }
 
 

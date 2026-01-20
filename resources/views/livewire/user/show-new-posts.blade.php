@@ -8,13 +8,16 @@
                     <div>
                         <a class="img-link me-1" href="javascript:void(0)">
                             <img class="img-avatar img-avatar32 img-avatar-thumb"
-                                src="{{ asset('src/assets/media/avatars/avatar11.jpg') }}" alt="">
+                                src="{{ $timeline->user->avatar ?? asset('src/assets/media/avatars/avatar13.jpg') }}" alt="">
                         </a>
                         <a class="fw-semibold" href="{{ url('profile/' . $timeline->user->username) }}"
                             style="color: #5A4FDC">{{ displayName($timeline->user->name) }}</a>
                         <span class="fs-sm text-muted">{{ $timeline->created_at?->shortAbsoluteDiffForHumans() }}
                             ago</span>
                     </div>
+
+
+                    
 
                     <div class="block-options">
 
@@ -196,6 +199,10 @@
                     </div>
                 </div>
             </div>
+            <a href="javascript:void(0)" class="btn btn-secondary btn-sm mb-4" onclick="history.back();">
+                <i class="fa fa-arrow-left opacity-50 me-1"></i> Back
+            </a>
+
         </div>
 
 
