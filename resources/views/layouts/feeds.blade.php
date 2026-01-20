@@ -281,3 +281,5 @@
         You have not made any post. Click <a href="{{ url('timeline') }}">here</a> to start posting
     </div>
 @endforelse
+
+<button wire:click='loadMore' class="btn btn-alt-primary btn-sm">Load More Feeds</button>
