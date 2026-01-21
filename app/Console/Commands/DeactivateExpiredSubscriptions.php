@@ -53,7 +53,7 @@ class DeactivateExpiredSubscriptions extends Command
 
             foreach ($expired as $sub) {
                 $sub->update([
-                    'level_id' => $level->id,
+                    'level_id' => $level->id, // Downgrade to Basic level
                     'plan_name' => 'Basic',
                     'status'     => 'active',
                     'start_date'   => now(),
