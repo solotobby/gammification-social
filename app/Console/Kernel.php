@@ -55,20 +55,20 @@ class Kernel extends ConsoleKernel
                     ->lockForUpdate()
                     ->get();
 
-                if ($expired->isEmpty()) {
-                    //$this->info('No expired subscriptions found.');
-                    return;
-                }
+                // if ($expired->isEmpty()) {
+                //     //$this->info('No expired subscriptions found.');
+                //     return;
+                // }
 
-                foreach ($expired as $sub) {
-                    $sub->update([
-                        'level_id' => $level->id, // Downgrade to Basic level
-                        'plan_name' => 'Basic',
-                        'status'     => 'active',
-                        'start_date'   => now(),
-                        'next_payment_date' => now()->addYear() // safer than 30 days
-                    ]);
-                }
+                // foreach ($expired as $sub) {
+                //     $sub->update([
+                //         'level_id' => $level->id, // Downgrade to Basic level
+                //         'plan_name' => 'Basic',
+                //         'status'     => 'active',
+                //         'start_date'   => now(),
+                //         'next_payment_date' => now()->addYear() // safer than 30 days
+                //     ]);
+                // }
 
                 $subject = 'Deactivated Subscription';
                 $content = "Deactivated {$expired->count()} subscriptions today";
