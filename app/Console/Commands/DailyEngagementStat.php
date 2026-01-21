@@ -174,19 +174,19 @@ class DailyEngagementStat extends Command
             });
         }
 
-        // $subject = 'Daily Engagement Registered';
-        // $content = "Registered Daily Stats successfully";
+        $subject = 'Daily Engagement Registered';
+        $content = "Registered Daily Stats successfully";
 
 
-        // Mail::to('oluwatobi@freebyztechnologies.com')
-        //     ->send(new GeneralMail(
-        //         (object)[
-        //             'name' => 'Oluwatobi Solomon',
-        //             'email' => 'oluwatobi@freebyztechnologies.com'
-        //         ],
-        //         $subject,
-        //         $content
-        //     ));
+        Mail::to('solotob3@gmail.com')
+            ->send(new GeneralMail(
+                (object)[
+                    'name' => 'Oluwatobi Solomon',
+                    'email' => 'solotob3@gmail.com'
+                ],
+                $subject,
+                $content
+            ));
 
         return Command::SUCCESS;
     }
