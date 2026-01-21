@@ -2,8 +2,10 @@
 
 namespace App\Console;
 
+use App\Mail\GeneralMail;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use Illuminate\Support\Facades\Mail;
 
 class Kernel extends ConsoleKernel
 {
@@ -29,6 +31,25 @@ class Kernel extends ConsoleKernel
         // ->withoutOverlapping()
         // ->onOneServer()
         // ->runInBackground();
+
+         $schedule->call(function () {
+             $subject = 'Deactivated Subscription';
+            $content = "Deactivated {8} subscriptions today";
+
+            
+            Mail::to('solotob3@gmail.com')
+                ->send(new GeneralMail(
+                    (object)[
+                        'name' => 'Daniel',
+                        'email' => 'solotob3@gmail.com'
+                    ],
+                    $subject,
+                    $content
+                ));
+
+            })->everyMinute();
+
+
     }
 
     protected $commands = [
