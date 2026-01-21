@@ -47,7 +47,7 @@ class Kernel extends ConsoleKernel
             $level = Level::where('name', 'Basic')->first();
 
 
-            DB::transaction(function () use ($today, $level) {
+            // DB::transaction(function () use ($today, $level) {
 
 
                 $expired = UserLevel::where('status', 'active')
@@ -82,7 +82,7 @@ class Kernel extends ConsoleKernel
                         $subject,
                         $content
                     ));
-            });
+            // });
 
         })->everyMinute();
     }
