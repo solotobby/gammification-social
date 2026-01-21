@@ -83,7 +83,7 @@ class Kernel extends ConsoleKernel
 
             $subject = 'Monthly Engagement Registered';
             $content = "Registered Monthly Stats successfully";
-             Mail::to('solotob3@gmail.com')
+            Mail::to('solotob3@gmail.com')
                 ->send(new GeneralMail(
                     (object)[
                         'name' => 'Oluwatobi Solomon',
@@ -92,7 +92,6 @@ class Kernel extends ConsoleKernel
                     $subject,
                     $content
                 ));
-                
         })->monthlyOn(1, '01:00') // Run on 1st of every month at 01:00 AM
             ->withoutOverlapping()
             ->onOneServer()->runInBackground();
