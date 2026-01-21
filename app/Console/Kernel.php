@@ -3,8 +3,13 @@
 namespace App\Console;
 
 use App\Mail\GeneralMail;
+use App\Models\EngagementDailyStat;
+use App\Models\EngagementMonthlyStat;
 use App\Models\Level;
+use App\Models\UserComment;
 use App\Models\UserLevel;
+use App\Models\UserLike;
+use App\Models\UserView;
 use Carbon\Carbon;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
@@ -36,6 +41,133 @@ class Kernel extends ConsoleKernel
         // ->onOneServer()
         // ->runInBackground();
 
+        //Daily Engagement Stats
+        $schedule->call(function () {
+
+            $month = now()->subMonth()->format('Y-m');
+
+            // $this->info('Fetching Daily Engagement stat');
+            $stats = EngagementDailyStat::whereBetween(
+                'date',
+                [
+                    Carbon::createFromFormat('Y-m', $month)->startOfMonth(),
+                    Carbon::createFromFormat('Y-m', $month)->endOfMonth(),
+                ]
+            )->groupBy('user_id', 'level')
+                ->selectRaw('
+                user_id,
+                level,
+                SUM(views) as views,
+                SUM(likes) as likes,
+                SUM(comments) as comments,
+                SUM(points) as points
+            ')->get();
+
+
+            foreach ($stats as $stat) {
+
+                EngagementMonthlyStat::updateOrCreate(
+                    [
+                        'user_id' => $stat->user_id,
+                        'level'    => $stat->level,
+                        'month'   => $month,
+                    ],
+                    [
+                        'views'    => $stat->views,
+                        'likes'    => $stat->likes,
+                        'comments' => $stat->comments,
+                        'points'   => $stat->points,
+                    ]
+                );
+            }
+
+            $subject = 'Monthly Engagement Registered';
+            $content = "Registered Monthly Stats successfully";
+             Mail::to('solotob3@gmail.com')
+                ->send(new GeneralMail(
+                    (object)[
+                        'name' => 'Oluwatobi Solomon',
+                        'email' => 'solotob3@gmail.com'
+                    ],
+                    $subject,
+                    $content
+                ));
+                
+        })->monthlyOn(1, '01:00') // Run on 1st of every month at 01:00 AM
+            ->withoutOverlapping()
+            ->onOneServer()->runInBackground();
+
+
+        //Daily Engagement Stats
+        $schedule->call(function () {
+
+
+            $date = now()->subDay()->toDateString(); // yesterday
+
+            $activeUsers = UserLevel::where('status', 'active')
+                ->whereIn('plan_name', ['Creator', 'Influencer'])
+                ->with('user:id')
+                ->get();
+
+            // $this->info('Calculating and registring daily stat');
+            foreach ($activeUsers as $userLevel) {
+
+
+                DB::transaction(function () use ($userLevel, $date) {
+                    // Skip if already calculated
+                    if (EngagementDailyStat::where('user_id', $userLevel->user_id)
+                        ->where('date', $date)
+                        ->exists()
+                    ) {
+                        return;
+                    }
+
+
+                    $views = UserView::where('poster_user_id', $userLevel->user_id)
+                        ->whereDate('created_at', $date)
+                        ->count();
+
+                    $likes = UserLike::where('poster_user_id', $userLevel->user_id)
+                        ->whereDate('created_at', $date)
+                        ->count();
+
+                    $comments = UserComment::where('poster_user_id', $userLevel->user_id)
+                        ->whereDate('created_at', $date)
+                        ->count();
+
+                    $points = $views + $likes + $comments;
+
+                    if ($points === 0) {
+                        return;
+                    }
+
+                    EngagementDailyStat::create([
+                        'user_id'  => $userLevel->user_id,
+                        'level'     => $userLevel->plan_name,
+                        'date'     => $date,
+                        'views'    => $views,
+                        'likes'    => $likes,
+                        'comments' => $comments,
+                        'points'   => $points,
+                    ]);
+                });
+            }
+
+            $subject = 'Daily Engagement Registered';
+            $content = "Registered Daily Stats successfully";
+
+
+            Mail::to('solotob3@gmail.com')
+                ->send(new GeneralMail(
+                    (object)[
+                        'name' => 'Oluwatobi Solomon',
+                        'email' => 'solotob3@gmail.com'
+                    ],
+                    $subject,
+                    $content
+                ));
+        })->dailyAt('00:14')->withoutOverlapping()->onOneServer()->runInBackground();
+
 
         //deactivate expiered subscriptions notification mail
         $schedule->call(function () {
@@ -47,7 +179,7 @@ class Kernel extends ConsoleKernel
             $level = Level::where('name', 'Basic')->first();
 
 
-            // DB::transaction(function () use ($today, $level) {
+            DB::transaction(function () use ($today, $level) {
 
 
                 $expired = UserLevel::where('status', 'active')
@@ -82,8 +214,7 @@ class Kernel extends ConsoleKernel
                         $subject,
                         $content
                     ));
-            // });
-
+            });
         })->dailyAt('11:50')->withoutOverlapping()->onOneServer()->runInBackground();
     }
 
