@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\EngagementPayoutController;
 use App\Http\Controllers\Admin\LevelManagementController;
 use App\Http\Controllers\Admin\MonthlyPayoutController;
 use App\Http\Controllers\Admin\UserController;
@@ -194,5 +195,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('user/engagement/analytics/{id}', [UserEngagementController::class, 'engagementAnalytics']);
         Route::get('user/transaction/list/{id}', [UserController::class, 'transactionList']);
         Route::get('user/post/list/{id}', [UserController::class, 'postList']);
+        Route::get('user/engagement/payouts', [EngagementPayoutController::class, 'index']);
     });
 });

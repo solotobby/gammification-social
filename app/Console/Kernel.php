@@ -5,6 +5,7 @@ namespace App\Console;
 use App\Mail\GeneralMail;
 use App\Models\EngagementDailyStat;
 use App\Models\EngagementMonthlyStat;
+use App\Models\FremiumEngagementStat;
 use App\Models\Level;
 use App\Models\UserComment;
 use App\Models\UserLevel;
@@ -41,7 +42,7 @@ class Kernel extends ConsoleKernel
         // ->onOneServer()
         // ->runInBackground();
 
-        //Daily Engagement Stats
+        //Monthly Engagement Stats
         $schedule->call(function () {
 
             $month = now()->subMonth()->format('Y-m');
@@ -92,9 +93,8 @@ class Kernel extends ConsoleKernel
                     $subject,
                     $content
                 ));
-        })->monthlyOn(1, '01:00') // Run on 1st of every month at 01:00 AM
-            ->withoutOverlapping()
-            ->onOneServer()->runInBackground();
+        })->monthlyOn(1, '01:00');
+        //->withoutOverlapping()->onOneServer()->runInBackground();
 
 
         //Daily Engagement Stats
@@ -165,7 +165,8 @@ class Kernel extends ConsoleKernel
                     $subject,
                     $content
                 ));
-        })->dailyAt('00:14')->withoutOverlapping()->onOneServer()->runInBackground();
+        })->dailyAt('00:14');
+        //->withoutOverlapping()->onOneServer()->runInBackground();
 
 
         //deactivate expiered subscriptions notification mail
@@ -214,7 +215,80 @@ class Kernel extends ConsoleKernel
                         $content
                     ));
             });
-        })->dailyAt('11:50')->withoutOverlapping()->onOneServer()->runInBackground();
+        })->dailyAt('11:50');
+        //->withoutOverlapping()->onOneServer()->runInBackground();
+
+
+         //Freemium Daily Engagement Stats
+        $schedule->call(function () {
+
+            $date = now()->subDay()->toDateString(); // yesterday
+
+            $activeUsers = UserLevel::where('status', 'active')
+                // ->whereIn('plan_name', ['Creator', 'Influencer'])
+                ->with('user:id')
+                ->get();
+
+            // $this->info('Calculating and registring daily stat');
+            foreach ($activeUsers as $userLevel) {
+
+
+                DB::transaction(function () use ($userLevel, $date) {
+                    // Skip if already calculated
+                    if (EngagementDailyStat::where('user_id', $userLevel->user_id)
+                        ->where('date', $date)
+                        ->exists()
+                    ) {
+                        return;
+                    }
+
+
+                    $views = UserView::where('user_id', $userLevel->user_id)
+                        ->whereDate('created_at', $date)
+                        ->count();
+
+                    $likes = UserLike::where('user_id', $userLevel->user_id)
+                        ->whereDate('created_at', $date)
+                        ->count();
+
+                    $comments = UserComment::where('user_id', $userLevel->user_id)
+                        ->whereDate('created_at', $date)
+                        ->count();
+
+                    $points = $views + $likes + $comments;
+
+                    if ($points === 0) {
+                        return;
+                    }
+
+                    FremiumEngagementStat::create([
+                        'user_id'  => $userLevel->user_id,
+                        'level'     => $userLevel->plan_name,
+                        'date'     => $date,
+                        'views'    => $views,
+                        'likes'    => $likes,
+                        'comments' => $comments,
+                        'points'   => $points,
+                    ]);
+                });
+            }
+
+            $subject = 'Freemium Daily Engagement Registered';
+            $content = "Registered Freemium Daily Stats successfully";
+
+
+            Mail::to('solotob3@gmail.com')
+                ->send(new GeneralMail(
+                    (object)[
+                        'name' => 'Oluwatobi Solomon',
+                        'email' => 'solotob3@gmail.com'
+                    ],
+                    $subject,
+                    $content
+                ));
+        })->dailyAt('00:40');
+        //->withoutOverlapping()->onOneServer()->runInBackground();
+
     }
 
     /**

@@ -175,9 +175,6 @@
                                 method is set up correctly to avoid delays.
                         </div>
 
-
-
-
                     </div>
                 </div>
             </div>

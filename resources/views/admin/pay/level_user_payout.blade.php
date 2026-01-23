@@ -13,7 +13,7 @@
             <div class="card mb-4">
                 <div class="card-body">
                     <h4 class="card-title mb-3">
-                        {{ $tier }} – Monthly Payout Summary
+                        {{ $level }} – Monthly Payout Summary
                     </h4>
 
                     <div class="row">
@@ -27,7 +27,7 @@
                         $pltpool = $platformPool;
                         $tpool = $tierPool;
                         $spool = $savingsPool;
-                        
+                        $fpool = $fremiumPool;
                         ?>
                         <div class="col-md-6">
                             <p><strong>Total Revenue:</strong>
@@ -38,6 +38,8 @@
                                 &#8358;{{ number_format(convertToBaseCurrency($tpool, 'NGN'), 2) }}</p>
                             <p><strong>Savings Pool (10%):</strong>
                                 &#8358;{{ number_format(convertToBaseCurrency($spool, 'NGN'), 2) }}</p>
+                            <p><strong>Fremium Pool (10%):</strong>
+                                &#8358;{{ number_format(convertToBaseCurrency($fpool, 'NGN'), 2) }}</p>
 
                         </div>
 
@@ -52,7 +54,6 @@
                 <table class="table table-bordered table-striped mt-3">
                     <thead class="table-dark">
                         <tr>
-
                             <th>Name</th>
                             <th>Engagement</th>
                             <th>Engagement %</th>
@@ -63,7 +64,6 @@
                     <tbody>
                         @foreach ($users as $user)
                             <tr>
-
                                 <td>{{ $user['name'] }}</td>
                                 <td>{{ number_format($user['engagement']) }}</td>
                                 <td>{{ $user['percentage'] }}%</td>

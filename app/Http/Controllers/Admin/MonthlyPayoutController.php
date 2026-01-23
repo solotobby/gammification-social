@@ -59,8 +59,9 @@ class MonthlyPayoutController extends Controller
             // Revenue calculation
             $totalRevenue = $memberCount * $planPrices[$levelName];
             $platformRev = round($totalRevenue * 0.30, 2); ///platform cut
-            $levelPool     = round($totalRevenue * 0.60, 2); ///sharing percentage
+            $levelPool     = round($totalRevenue * 0.50, 2); ///sharing percentage
             $savingsPool     = round($totalRevenue * 0.10, 2); //savings
+            $fremiumPool     = round($totalRevenue * 0.10, 2); //fremium
 
             // Engagement calculation
             $totalEngagement = 0;
@@ -81,6 +82,7 @@ class MonthlyPayoutController extends Controller
                 'totalEngagement'       => $totalEngagement,
                 'savingsPool'           => $savingsPool,
                 'memberCount'               => $memberCount,
+                'fremiumPool'           => $fremiumPool,
 
             ];
         }
@@ -115,7 +117,7 @@ class MonthlyPayoutController extends Controller
     }
 
 
-    public function levelUserBreakdown(Request $request, $tier)
+    public function levelUserBreakdown(Request $request, $level)
     {
         $month =  now()->format('Y-m'); //$request->query('month');
 
@@ -135,9 +137,9 @@ class MonthlyPayoutController extends Controller
             'Influencer' => 5,
         ];
 
-        // Fetch members WITH tier info
+        // Fetch members WITH level info
         $members = UserLevel::where('status', 'active')
-            ->where('plan_name', $tier)
+            ->where('plan_name', $level)
             ->where('created_at', '<=', $endOfMonth)
             ->where(function ($q) use ($startOfMonth) {
                 $q->whereNull('next_payment_date')
@@ -153,8 +155,8 @@ class MonthlyPayoutController extends Controller
         }
 
         // Tier pool
-        $revenue  = $memberCount * $planPrices[$tier];
-        $tierPool = round($revenue * 0.60, 2);
+        $revenue  = $memberCount * $planPrices[$level];
+        $tierPool = round($revenue * 0.50, 2);
 
         $totalEngagement = 0;
         $userEngagements = [];
@@ -187,11 +189,12 @@ class MonthlyPayoutController extends Controller
         }
 
         return view('admin.pay.level_user_payout', [
-            'tier'            => $tier,
+            'level'            => $level,
             'users'           => $userEngagements,
             'tierPool'        => $tierPool,
             'platformPool'    => round($revenue * 0.30, 2),
-            'savingsPool'    => round($revenue * 0.10, 2),
+            'savingsPool'     => round($revenue * 0.10, 2),
+            'fremiumPool'     => round($revenue * 0.10, 2),
             'totalRevenue'    => $revenue,
             'totalEngagement' => $totalEngagement,
             'memberCount'     => $memberCount,
@@ -199,6 +202,8 @@ class MonthlyPayoutController extends Controller
             'monthParam'      => $month
         ]);
     }
+
+    
 
     
 }
