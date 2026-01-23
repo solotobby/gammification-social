@@ -25,25 +25,6 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
 
-        $schedule->command('engagement:daily')->everyMinute();
-
-        // $schedule->command('engagement:monthly')
-        //     ->monthlyOn(1, '01:00') // Run on 1st of every month at 01:00 AM
-        //     ->withoutOverlapping()
-        //     ->onOneServer()->runInBackground();
-
-        // $schedule->command('subscriptions:deactivate-expired')
-        //     ->everyMinute();
-        // ->dailyAt('00:55');          // 5 minutes after midnight
-        // ->withoutOverlapping()
-        // ->onOneServer()
-        // ->runInBackground();
-
-
-        
-
-
-
         //Monthly Engagement Stats
         $schedule->call(function () {
 
@@ -289,10 +270,22 @@ class Kernel extends ConsoleKernel
                 ));
         })->dailyAt('00:40');
 
-        // $schedule->call(function () {
+        $schedule->call(function () {
+            $subject = 'Daily Engagement Registered - updated';
+            $content = "Registered Daily Stats successfully";
 
+
+             Mail::to('solotob3@gmail.com')
+                ->send(new GeneralMail(
+                    (object)[
+                        'name' => 'Oluwatobi Solomon',
+                        'email' => 'solotob3@gmail.com'
+                    ],
+                    $subject,
+                    $content
+                ));
            
-        // })->everyMinute();
+        })->everyMinute();
        
     }
 
