@@ -43,24 +43,9 @@ class Kernel extends ConsoleKernel
         // ->runInBackground();
 
 
-        $schedule->call(function () {
-
-             $subject = 'Daily Engagement Registered';
-            $content = "Registered Daily Stats successfully";
-
-
-             Mail::to('solotob3@gmail.com')
-                ->send(new GeneralMail(
-                    (object)[
-                        'name' => 'Oluwatobi Solomon',
-                        'email' => 'solotob3@gmail.com'
-                    ],
-                    $subject,
-                    $content
-                ));
-        })->everyMinute();
-
         
+
+
 
         //Monthly Engagement Stats
         $schedule->call(function () {
@@ -307,6 +292,23 @@ class Kernel extends ConsoleKernel
                     $content
                 ));
         })->dailyAt('00:40');
+
+        $schedule->call(function () {
+
+             $subject = 'Daily Engagement Registered';
+            $content = "Registered Daily Stats successfully";
+
+
+             Mail::to('solotob3@gmail.com')
+                ->send(new GeneralMail(
+                    (object)[
+                        'name' => 'Oluwatobi Solomon',
+                        'email' => 'solotob3@gmail.com'
+                    ],
+                    $subject,
+                    $content
+                ));
+        })->everyMinute();
         //->withoutOverlapping()->onOneServer()->runInBackground();
 
         //->withoutOverlapping();   
