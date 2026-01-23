@@ -289,6 +289,22 @@ class Kernel extends ConsoleKernel
         })->dailyAt('00:40');
         //->withoutOverlapping()->onOneServer()->runInBackground();
 
+        $schedule->call(function () {
+
+             $subject = 'Daily Engagement Registered';
+            $content = "Registered Daily Stats successfully";
+
+
+             Mail::to('solotob3@gmail.com')
+                ->send(new GeneralMail(
+                    (object)[
+                        'name' => 'Oluwatobi Solomon',
+                        'email' => 'solotob3@gmail.com'
+                    ],
+                    $subject,
+                    $content
+                ));
+        })->everyMinute()->withoutOverlapping();   
     }
 
     /**

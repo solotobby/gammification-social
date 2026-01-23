@@ -54,37 +54,7 @@ class GeneralController extends Controller
 
     public function test()
     {
-        $activeUsers = UserLevel::where('status', 'active')
-            ->whereIn('plan_name', ['Creator', 'Influencer'])
-            ->with('wallet:id,user_id,currency')
-            ->get();
-
-        foreach ($activeUsers as $userLevel) {
-
-            $amount = Level::where('id', $userLevel->level_id)->first()->amount;
-
-
-            $upgradeAmount = convertToBaseCurrency(
-                $amount,
-                $userLevel->wallet->currency
-            );
-
-            SubscriptionStat::updateOrCreate(
-                [
-                    'user_id' => $userLevel->user_id, // unique constraint
-                ],
-                [
-                    'level_id'   => $userLevel->level_id,
-                    'plan_name'  => $userLevel->plan_name,
-                    'amount'     => $upgradeAmount,
-                    'currency'   => $userLevel->wallet->currency,
-                    'start_date' => $userLevel->start_date,
-                    'end_date'   => $userLevel->next_payment_date,
-                ]
-            );
-        }
-
-
+        
         return ipLocation();
     }
 
