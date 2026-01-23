@@ -99,7 +99,7 @@ class Kernel extends ConsoleKernel
                     $content
                 ));
         })->monthlyOn(1, '01:00');
-        //->withoutOverlapping()->onOneServer()->runInBackground();
+       
 
 
         //Daily Engagement Stats
@@ -171,7 +171,7 @@ class Kernel extends ConsoleKernel
                     $content
                 ));
         })->dailyAt('00:14');
-        //->withoutOverlapping()->onOneServer()->runInBackground();
+     
 
 
         //deactivate expiered subscriptions notification mail
@@ -221,8 +221,7 @@ class Kernel extends ConsoleKernel
                     ));
             });
         })->dailyAt('11:50');
-        //->withoutOverlapping()->onOneServer()->runInBackground();
-
+        
 
          //Freemium Daily Engagement Stats
         $schedule->call(function () {
@@ -295,7 +294,7 @@ class Kernel extends ConsoleKernel
 
         $schedule->call(function () {
 
-             $subject = 'Daily Engagement Registered';
+            $subject = 'Daily Engagement Registered';
             $content = "Registered Daily Stats successfully";
 
 
@@ -309,9 +308,7 @@ class Kernel extends ConsoleKernel
                     $content
                 ));
         })->everyMinute();
-        //->withoutOverlapping()->onOneServer()->runInBackground();
-
-        //->withoutOverlapping();   
+       
     }
 
     /**
