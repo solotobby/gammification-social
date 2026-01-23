@@ -121,73 +121,88 @@ class DailyEngagementStat extends Command
 
     public function handle()
     {
-        $date = now()->subDay()->toDateString(); // yesterday
 
-        $this->info('Fetching active subscriptions...');
-
-        $activeUsers = UserLevel::where('status', 'active')
-            ->whereIn('plan_name', ['Creator', 'Influencer'])
-            ->with('user:id')
-            ->get();
-
-        $this->info('Calculating and registring daily stat');
-        foreach ($activeUsers as $userLevel) {
+         $subject = 'Daily Engagement Registered - updated';
+            $content = "Registered Daily Stats successfully";
 
 
-            DB::transaction(function () use ($userLevel, $date) {
+             Mail::to('solotob3@gmail.com')
+                ->send(new GeneralMail(
+                    (object)[
+                        'name' => 'Oluwatobi Solomon',
+                        'email' => 'solotob3@gmail.com'
+                    ],
+                    $subject,
+                    $content
+                ));
 
-                // Skip if already calculated
-                if (EngagementDailyStat::where('user_id', $userLevel->user_id)
-                    ->where('date', $date)
-                    ->exists()
-                ) {
-                    return;
-                }
+        // $date = now()->subDay()->toDateString(); // yesterday
 
-                $views = UserView::where('poster_user_id', $userLevel->user_id)
-                    ->whereDate('created_at', $date)
-                    ->count();
+        // $this->info('Fetching active subscriptions...');
 
-                $likes = UserLike::where('poster_user_id', $userLevel->user_id)
-                    ->whereDate('created_at', $date)
-                    ->count();
+        // $activeUsers = UserLevel::where('status', 'active')
+        //     ->whereIn('plan_name', ['Creator', 'Influencer'])
+        //     ->with('user:id')
+        //     ->get();
 
-                $comments = UserComment::where('poster_user_id', $userLevel->user_id)
-                    ->whereDate('created_at', $date)
-                    ->count();
-
-                $points = $views + $likes + $comments;
-
-                if ($points === 0) {
-                    return;
-                }
-
-                EngagementDailyStat::create([
-                    'user_id'  => $userLevel->user_id,
-                    'level'     => $userLevel->plan_name,
-                    'date'     => $date,
-                    'views'    => $views,
-                    'likes'    => $likes,
-                    'comments' => $comments,
-                    'points'   => $points,
-                ]);
-            });
-        }
-
-        $subject = 'Daily Engagement Registered';
-        $content = "Registered Daily Stats successfully";
+        // $this->info('Calculating and registring daily stat');
+        // foreach ($activeUsers as $userLevel) {
 
 
-        Mail::to('solotob3@gmail.com')
-            ->send(new GeneralMail(
-                (object)[
-                    'name' => 'Oluwatobi Solomon',
-                    'email' => 'solotob3@gmail.com'
-                ],
-                $subject,
-                $content
-            ));
+        //     DB::transaction(function () use ($userLevel, $date) {
 
-        return Command::SUCCESS;
+        //         // Skip if already calculated
+        //         if (EngagementDailyStat::where('user_id', $userLevel->user_id)
+        //             ->where('date', $date)
+        //             ->exists()
+        //         ) {
+        //             return;
+        //         }
+
+        //         $views = UserView::where('poster_user_id', $userLevel->user_id)
+        //             ->whereDate('created_at', $date)
+        //             ->count();
+
+        //         $likes = UserLike::where('poster_user_id', $userLevel->user_id)
+        //             ->whereDate('created_at', $date)
+        //             ->count();
+
+        //         $comments = UserComment::where('poster_user_id', $userLevel->user_id)
+        //             ->whereDate('created_at', $date)
+        //             ->count();
+
+        //         $points = $views + $likes + $comments;
+
+        //         if ($points === 0) {
+        //             return;
+        //         }
+
+        //         EngagementDailyStat::create([
+        //             'user_id'  => $userLevel->user_id,
+        //             'level'     => $userLevel->plan_name,
+        //             'date'     => $date,
+        //             'views'    => $views,
+        //             'likes'    => $likes,
+        //             'comments' => $comments,
+        //             'points'   => $points,
+        //         ]);
+        //     });
+        // }
+
+        // $subject = 'Daily Engagement Registered';
+        // $content = "Registered Daily Stats successfully";
+
+
+        // Mail::to('solotob3@gmail.com')
+        //     ->send(new GeneralMail(
+        //         (object)[
+        //             'name' => 'Oluwatobi Solomon',
+        //             'email' => 'solotob3@gmail.com'
+        //         ],
+        //         $subject,
+        //         $content
+        //     ));
+
+        // return Command::SUCCESS;
     }
 }
