@@ -22,6 +22,7 @@ use App\Models\UserLike;
 use App\Models\UserView;
 use App\Models\ViewsExternal;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -56,7 +57,7 @@ class GeneralController extends Controller
 
             // $this->info('Calculating and registring daily stat');
             foreach ($activeUsers as $userLevel) {
-
+            
 
                 DB::transaction(function () use ($userLevel, $date) {
                     // Skip if already calculated
