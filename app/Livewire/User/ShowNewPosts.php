@@ -33,15 +33,42 @@ class ShowNewPosts extends Component
     public function toggleLike($postId)
     {
 
-
+        $user = Auth::user();
         $post = Post::where('unicode', $postId)->first();
+
+        // 🚫 Self-like: label as self-like
+        $type = 'like';
+
+        if ($user->id === $post->user_id) {
+            $type = 'self-like';
+        } else {
+            // Increment external likes for analytics
+            $type = 'like';
+        }
+
+
 
         if ($post->isLikedBy(Auth::user())) {
             $post->likes()->where('user_id', Auth::id())->delete();
             $post->decrement('likes');
         } else {
-            $post->likes()->create(['user_id' => Auth::id()]);
+            $post->likes()->create([
+                'user_id' => Auth::id(),
+                'is_paid' => false,
+                'amount'  => calculateUniqueEarningPerLike(),
+                'poster_user_id' => $post->user_id,
+                'type' => $type
+            ]);
             $post->increment('likes');
+
+            // Queue the notification for async processing
+            $post->user->notify((new GeneralNotification([
+                'title'   => displayName($user->name) . ' liked your post',
+                'message' => displayName($user->name) . ' liked your post',
+                'icon'    => 'fa-thumbs-up text-primary',
+                'url'     => url('show/' . $post->id),
+            ]))->delay(now()->addSeconds(1))); // small delay to decouple DB write
+
         }
 
         // $this->timeline($post->id);
@@ -62,21 +89,22 @@ class ShowNewPosts extends Component
         $message    = $this->message;
 
         DB::transaction(function () use ($authUserId, $postId, $message) {
-
-            // 1️⃣ Create comment
+            
             Comment::create([
                 'user_id' => $authUserId,
                 'post_id' => $postId,
                 'message' => $message,
             ]);
 
-            // 2️⃣ Fetch post owner only
+           
             $post = Post::select('id', 'user_id')
                 ->whereKey($postId)
                 ->lockForUpdate() // 🔒 prevents race conditions
                 ->firstOrFail();
 
-            // 3️⃣ Check unique comment
+            $isSelfComment = $authUserId === $post->user_id;
+
+         
             $isFirstComment = ! UserComment::where([
                 'user_id' => $authUserId,
                 'post_id' => $postId,
@@ -84,19 +112,20 @@ class ShowNewPosts extends Component
 
             if ($isFirstComment) {
 
-                // 4️⃣ Record unique comment
+            
                 UserComment::create([
                     'user_id'        => $authUserId,
                     'post_id'        => $postId,
                     'is_paid'        => false,
                     'amount'         => calculateUniqueEarningPerComment(),
                     'poster_user_id' => $post->user_id,
+                    'type'           => $isSelfComment ? 'self-comment' : 'comment',
                 ]);
 
-                // 5️⃣ Atomic increment
+                // Atomic increment
                 Post::whereKey($postId)->increment('comments');
 
-                // 6️⃣ Notify post owner (no self notification)
+                // Notify post owner (no self notification)
                 if ($authUserId !== $post->user_id) {
                     User::whereKey($post->user_id)->first()
                         ->notify(new GeneralNotification([
@@ -112,17 +141,18 @@ class ShowNewPosts extends Component
             }
         });
 
-        // 7️⃣ Reset input AFTER commit
+        //  Reset input AFTER commit
         $this->reset('message');
-        
+
         // $this->reset('message');
         // $this->timeline->push($pst);
         // $this->dispatch('refreshComments');
 
     }
 
-    public function deletePost($postId){
-        
+    public function deletePost($postId)
+    {
+
         $post = Post::where('unicode', $postId)->first();
         $post->delete();
 
@@ -133,27 +163,39 @@ class ShowNewPosts extends Component
         redirect('timeline');
 
         session()->flash('success', "Post deleted");
-        
     }
 
 
     public function render()
     {
 
-        $post = Post::with(['postComments'])->where('id', $this->postQuery)->first();
+        $userId = auth()->id();
+        $post = Post::whereKey($this->postQuery)->firstOrFail();
 
-        $regView = UserView::where(['user_id' => auth()->user()->id, 'post_id' => $this->postQuery])->first();
-        if (!$regView) {
-            // if (auth()->user()->id != $post->user_id) {
-            UserView::create(['user_id' => auth()->user()->id, 'post_id' => $this->postQuery, 'is_paid' => false, 'amount' => calculateUniqueEarningPerView(), 'poster_user_id' => $post->user_id]);
-            $post->views += 1;  //UNIQUE VIEW COUNT
-            $post->save();
-            // }
+        DB::transaction(function () use ($post, $userId) {
 
-        } else {
-            $post->views_external += 1; //unmonetized view count
-            $post->save();
-        }
+            $isSelfView = $userId === $post->user_id;
+
+            $view = UserView::firstOrCreate(
+                [
+                    'user_id' => $userId,
+                    'post_id' => $post->id,
+                ],
+                [
+                    'is_paid' => false,
+                    'amount' => calculateUniqueEarningPerView(),
+                    'poster_user_id' => $post->user_id,
+                    'type' => $isSelfView ? 'self-view' : 'view',
+                ]
+            );
+
+            if ($view->wasRecentlyCreated) {
+                $post->increment('views');
+            } else {
+                $post->increment('views_external');
+            }
+        });
+
 
 
         $comments = Comment::where(['post_id' => $this->postQuery])->take($this->perpage)->orderBy('created_at', 'desc')->get();

@@ -270,23 +270,23 @@ class Kernel extends ConsoleKernel
                 ));
         })->dailyAt('00:40');
 
-        // $schedule->call(function () {
-        //     $subject = 'Daily Engagement Registered - updated';
-        //     $content = "Registered Daily Stats successfully";
+        $schedule->call(function () {
+            $subject = 'Daily Engagement Registered - updated';
+            $content = "Registered Daily Stats successfully";
 
 
-        //      Mail::to('solotob3@gmail.com')
-        //         ->send(new GeneralMail(
-        //             (object)[
-        //                 'name' => 'Oluwatobi Solomon',
-        //                 'email' => 'solotob3@gmail.com'
-        //             ],
-        //             $subject,
-        //             $content
-        //         ));
-           
-        // })->everyMinute();
-       
+             Mail::to('solotob3@gmail.com')
+                ->send(new GeneralMail(
+                    (object)[
+                        'name' => 'Oluwatobi Solomon',
+                        'email' => 'solotob3@gmail.com'
+                    ],
+                    $subject,
+                    $content
+                ));
+
+        })->hourly();
+
     }
 
     /**

@@ -10,7 +10,7 @@ class UserView extends Model
 {
     use HasFactory, UuidTrait;
 
-    protected $fillable = ['user_id', 'post_id', 'is_paid', 'amount', 'poster_user_id'];
+    protected $fillable = ['user_id', 'post_id', 'is_paid', 'amount', 'poster_user_id', 'type'];
 
     public function user(){
         return $this->belongsTo(User::class);

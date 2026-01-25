@@ -182,35 +182,33 @@ class Posts extends Component
             session()->flash('info', 'This content is too similar to existing content, therefore it will not be posted.');
             $this->reset('content');
             return;
-        } 
-            $uniqueCode = rand(1000, 9999) . time();
-            $timelines = Post::create(['user_id' => auth()->user()->id, 'content' => $content, 'unicode' => $uniqueCode, 'status' => 'LIVE']);
+        }
+        $uniqueCode = rand(1000, 9999) . time();
+        $timelines = Post::create(['user_id' => auth()->user()->id, 'content' => $content, 'unicode' => $uniqueCode, 'status' => 'LIVE']);
 
-            if (!empty($this->images)) {
-                foreach ($this->images as $image) {
-                    $uploadedFileUrl = cloudinary()->upload($image->getRealPath(), [
-                        'folder' => 'payhankey_post_images',
-                    ])->getSecurePath();
+        if (!empty($this->images)) {
+            foreach ($this->images as $image) {
+                $uploadedFileUrl = cloudinary()->upload($image->getRealPath(), [
+                    'folder' => 'payhankey_post_images',
+                ])->getSecurePath();
 
-                    PostImages::create([
-                        'user_id' => Auth::id(),
-                        'post_id' => $timelines->id,
-                        'path' => $uploadedFileUrl,
-                    ]);
-                }
-
+                PostImages::create([
+                    'user_id' => Auth::id(),
+                    'post_id' => $timelines->id,
+                    'path' => $uploadedFileUrl,
+                ]);
             }
+        }
 
-            // foreach ($this->images as $image) {
-            //     $path = $image->store('post_images', 'public');
+        // foreach ($this->images as $image) {
+        //     $path = $image->store('post_images', 'public');
 
-            //     PostImages::create(['user_id' => Auth::id(), 'post_id' => $timelines->id, 'path' => $path]);
+        //     PostImages::create(['user_id' => Auth::id(), 'post_id' => $timelines->id, 'path' => $path]);
 
-               
-            // }
 
-            $this->reset('content', 'images');
-        
+        // }
+
+        $this->reset('content', 'images');
     }
 
     private function isSimilar($newData, $existingData, $threshold = 5)
@@ -255,6 +253,8 @@ class Posts extends Component
             ->firstOrFail();
 
         DB::transaction(function () use ($post, $user) {
+            $isSelfView = $user->id === $post->user_id;
+
             $like = $post->likes()->where('user_id', $user->id)->first();
 
             if ($like) {
@@ -268,6 +268,7 @@ class Posts extends Component
                     'is_paid' => false,
                     'amount'  => calculateUniqueEarningPerLike(),
                     'poster_user_id' => $post->user_id,
+                    'type' => $isSelfView ? 'self-like' : 'like',
                 ]);
 
                 $post->increment('likes');
@@ -348,16 +349,18 @@ class Posts extends Component
         }
     }
 
-    public function commentFeed($currentPostId){
+    public function commentFeed($currentPostId)
+    {
         dd($currentPostId);
     }
 
-    public function comment($currentPostId){
+    public function comment($currentPostId)
+    {
         $this->validate([
             'message' => 'required|string|max:500',
         ]);
 
-         if (!$this->message || !$currentPostId) {
+        if (!$this->message || !$currentPostId) {
             return;
         }
 
@@ -365,7 +368,7 @@ class Posts extends Component
 
         $user = Auth::user();
 
-        
+
         Comment::create([
             'user_id' => $user->id,
             'post_id' => $this->currentPostId,
@@ -392,10 +395,10 @@ class Posts extends Component
             ->orderBy('row_num')            // interleave by row number
             ->orderBy('created_at', 'desc') // newest posts first within same row_num
             ->limit($this->perPage * 2)     // fetch extra posts to ensure enough for interleaving
-             ->with(['user', 'postComments' => function ($query) {
-            $query->latest()->take(2)->with('user'); // latest 2 comments with user
-        }])
-        ->get();
+            ->with(['user', 'postComments' => function ($query) {
+                $query->latest()->take(2)->with('user'); // latest 2 comments with user
+            }])
+            ->get();
 
         // Group by row number
         $groupedByRow = $posts->groupBy('row_num');

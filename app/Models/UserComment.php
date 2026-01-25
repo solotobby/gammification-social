@@ -10,7 +10,7 @@ class UserComment extends Model
 {
     use HasFactory, UuidTrait;
 
-    protected $fillable = ['user_id', 'post_id', 'amount', 'poster_user_id', 'is_paid'];
+    protected $fillable = ['user_id', 'post_id', 'amount', 'poster_user_id', 'is_paid', 'type'];
 
     public function user(){
         return $this->belongsTo(User::class);
