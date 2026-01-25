@@ -172,7 +172,7 @@
                                     href="{{ url('profile/' . $comment->user->username) }}">
                                     <img class="img-avatar img-avatar32 img-avatar-thumb"
                                         {{-- src="{{ asset('src/assets/media/avatars/avatar3.jpg') }}" alt=""> --}}
-                                        src="{{ $timeline->user->avatar ?? asset('src/assets/media/avatars/avatar3.jpg') }}" alt="">
+                                        src="{{ $comment->user->avatar ?? asset('src/assets/media/avatars/avatar3.jpg') }}" alt="">
                                 </a>
                                 <div class="flex-grow-1">
                                     <p class="mb-1">
