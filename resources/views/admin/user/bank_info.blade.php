@@ -62,9 +62,11 @@
                     </tbody>
                 </table>
 
-                <div class="d-flex justify-content-center mt-4">
-                    {{ $withdrawals->links() }}
+                 <div class="d-flex justify-content-center mt-4">
+                        {{$withdrawals->links('vendor.pagination.bootstrap-5') }}
                 </div>
+
+                
 
 
                 {{-- <a href="{{ url('user/info/' . $user->id) }}" class="btn btn-secondary mt-3"> Back to Users </a> --}}
