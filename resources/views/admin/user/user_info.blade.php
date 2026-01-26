@@ -108,6 +108,38 @@
                 Access Created On: {{ $access->created_at }} <br>
                 Access Updated On: {{ $access->updated_at }} <br>
 
+
+
+
+            </div>
+
+            <div class="block-content">
+                <div class="row py-sm-3 py-md-2">
+                    @if ($withdrawalMethod)
+                        @if ($withdrawalMethod->payment_method == 'usdt')
+                           <strong>Your preferred Payment method: USDT</strong>
+                            USDT Wallet Address: {{ maskCode($withdrawalMethod->usdt_wallet) }}
+                        @elseif($withdrawalMethod->payment_method == 'paypal')
+                            <strong>Your preferred Payment method : Paypal</strong>
+                            PayPal Email: {{ maskCode($withdrawalMethod->paypal_email) }}
+                        @else
+                             <strong>Withdrawal Information</strong>
+                            Account Name: {{ $withdrawalMethod->account_name }} <br>
+                            Bank Name: {{ $withdrawalMethod->bank_name }}<br>
+                            Account Number: {{ $withdrawalMethod->account_number }}
+                        @endif
+                        
+                    @else
+                        <div class="alert alert-danger text-center mt-2">
+                            Withdrawal Method not Set yet
+                        </div>
+                    @endif
+
+
+                </div>
+
+
+
                 @if ($level == 'Creator' || $level == 'Influencer')
                     <hr>
                     Expected Bonus: {{ getCurrencyCode($user->wallet->currency) }}
@@ -115,19 +147,24 @@
                     <a href="{{ url('add/bonus/' . $user->id . '/' . $level) }}" class="btn btn-primary mb-2"> Update Bonus
                     </a>
 
-                    <a href="{{ url('user/engagement/analytics/' . $user->id) }}" class="btn btn-secondary mb-2"> Daily Engagement Analytics </a>
-
+                    <a href="{{ url('user/engagement/analytics/' . $user->id) }}" class="btn btn-secondary mb-2"> Daily
+                        Engagement Analytics </a>
                 @endif
-                <a href="{{ url('user/transaction/list/' . $user->id) }}" class="btn btn-success mb-2"> View Transaction </a>
-                 <a href="{{ url('user/post/list/' . $user->id) }}" class="btn btn-warning mb-2"> View Posts </a>
+                <a href="{{ url('user/transaction/list/' . $user->id) }}" class="btn btn-success mb-2"> View Transaction
+                </a>
+                <a href="{{ url('user/post/list/' . $user->id) }}" class="btn btn-warning mb-2"> View Posts </a>
 
-               
+
 
             </div>
 
 
 
+
+
+
         </div>
+
 
 
 
@@ -300,7 +337,7 @@
         </div>
 
 
-       
+
     </div>
     <!-- END Page Content -->
 @endsection

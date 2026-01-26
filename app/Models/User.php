@@ -57,6 +57,10 @@ class User extends Authenticatable implements MustVerifyEmail
         'password' => 'hashed',
     ];
 
+    public function withdrawalMethod(){
+        return $this->hasOne(WithdrawalMethod::class, 'user_id');
+    }
+
     public function wallet()
     {
         return $this->hasOne(Wallet::class, 'user_id');

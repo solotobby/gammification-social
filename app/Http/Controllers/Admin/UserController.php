@@ -73,8 +73,9 @@ class UserController extends Controller
             $level = $user?->activeLevel?->plan_name;
             $access = AccessCode::where('email', $user->email)->latest()->first();
             $userLevel = Level::where('name', $level)->first();
+            $withdrawalMethod = WithdrawalMethod::where('user_id', $user->id)->first();
 
-            return view('admin.user.user_info', ['user' => $user, 'withdrawals' => $withrawals, 'posts' => $posts,  'level' => $level, 'levels' => $levels, 'access' => $access, 'userLevel' => $userLevel]);
+            return view('admin.user.user_info', ['user' => $user, 'withdrawals' => $withrawals, 'withdrawalMethod' => $withdrawalMethod, 'posts' => $posts,  'level' => $level, 'levels' => $levels, 'access' => $access, 'userLevel' => $userLevel]);
         }
     }
 
