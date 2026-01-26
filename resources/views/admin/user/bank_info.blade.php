@@ -62,6 +62,8 @@
                     </tbody>
                 </table>
 
+                {{ $posts->links() }}
+
 
                 {{-- <a href="{{ url('user/info/' . $user->id) }}" class="btn btn-secondary mt-3"> Back to Users </a> --}}
             </div>
