@@ -131,17 +131,10 @@ class HomeController extends Controller
 
             $currency = $user->wallet->currency;
 
-            $regBonus = convertToBaseCurrency(
-                $level->reg_bonus,
-                $currency
-            );
-
             $upgradeAmount = convertToBaseCurrency(
                 $level->amount,
                 $currency
             );
-
-            
 
             // Subscription update
             UserLevel::updateOrCreate(
@@ -158,32 +151,55 @@ class HomeController extends Controller
                 ]
             );
 
-            // Wallet credit (increment, not overwrite)
-            $user->wallet->increment('balance', $regBonus);
+            //checkSubscription
+            $checkSubs = SubscriptionStat::where('user_id', $user->id)->exists();
 
-            // Transactions
-            Transaction::create([
-                'user_id'    => $user->id,
-                'ref'        => $reference,
-                'amount'     => $res['amount'] / 100,
-                'currency'   => $currency,
-                'status'     => 'successful',
-                'type'       => 'upgrade_purchase',
-                'action'     => 'Credit',
-                'description' => "{$user->name} upgraded to {$level->name}",
-            ]);
+            if ($checkSubs) {
+                // Transactions
+                Transaction::create([
+                    'user_id'    => $user->id,
+                    'ref'        => $reference,
+                    'amount'     => $res['amount'] / 100,
+                    'currency'   => $currency,
+                    'status'     => 'successful',
+                    'type'       => 'upgrade_purchase',
+                    'action'     => 'Credit',
+                    'description' => "{$user->name} upgraded to {$level->name}",
+                ]);
 
-            Transaction::create([
-                'user_id'    => $user->id,
-                'ref'        => $reference . '-bonus',
-                'amount'     => $regBonus,
-                'currency'   => $currency,
-                'status'     => 'successful',
-                'type'       => 'reg_bonus',
-                'action'     => 'Credit',
-                'description' => "Upgrade bonus for {$level->name}",
-            ]);
+            } else {
 
+                $regBonus = convertToBaseCurrency(
+                    $level->reg_bonus,
+                    $currency
+                );
+
+                // Transactions
+                Transaction::create([
+                    'user_id'    => $user->id,
+                    'ref'        => $reference,
+                    'amount'     => $res['amount'] / 100,
+                    'currency'   => $currency,
+                    'status'     => 'successful',
+                    'type'       => 'upgrade_purchase',
+                    'action'     => 'Credit',
+                    'description' => "{$user->name} upgraded to {$level->name}",
+                ]);
+
+                // Wallet credit (increment, not overwrite)
+                $user->wallet->increment('balance', $regBonus);
+                Transaction::create([
+                    'user_id'    => $user->id,
+                    'ref'        => $reference . '-bonus',
+                    'amount'     => $regBonus,
+                    'currency'   => $currency,
+                    'status'     => 'successful',
+                    'type'       => 'reg_bonus',
+                    'action'     => 'Credit',
+                    'description' => "Upgrade bonus for {$level->name}",
+                ]);
+            }
+            
             SubscriptionStat::create([
                 'user_id'   => $user->id,
                 'level_id'  => $level->id,
@@ -325,6 +341,4 @@ class HomeController extends Controller
 
         return json_decode($res->getBody()->getContents(), true);
     }
-
-    
 }

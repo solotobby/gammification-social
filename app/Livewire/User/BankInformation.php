@@ -2,6 +2,7 @@
 
 namespace App\Livewire\User;
 
+use App\Models\User;
 use App\Models\WithdrawalMethod;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -90,8 +91,10 @@ class BankInformation extends Component
             return redirect()->back();
         }
 
+        $user = Auth::user();
+
         $data = [
-            'user_id' => auth()->user()->id,
+            'user_id' => $user->id,
             'account_number' => null,
             'account_name' => null,
             'currency' => $validated['country'] === 'Nigeria' ? $this->baseCurrency : 'USD',
@@ -106,7 +109,7 @@ class BankInformation extends Component
 
         if ($validated['country'] === 'Nigeria') {
             [$bankCode, $bankName] = array_map('trim', explode(',', $validated['bank_code']));
-            $trf = $this->transferRecipient(auth()->user()->name, $validated['account_number'], $bankCode);
+            $trf = $this->transferRecipient($user->name, $validated['account_number'], $bankCode);
 
             $data = array_merge($data, [
                 'account_number' => $trf['details']['account_number'],
@@ -114,6 +117,11 @@ class BankInformation extends Component
                 'bank_name' => $trf['details']['bank_name'],
                 'recipient_code' => $trf['recipient_code']
             ]);
+
+            $updateUserName = User::find($user->id);
+            $updateUserName->name = $trf['details']['account_name'];
+            $updateUserName->save();
+            
         }
 
     

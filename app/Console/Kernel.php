@@ -77,7 +77,7 @@ class Kernel extends ConsoleKernel
                     $content
                 ));
         })->monthlyOn(1, '01:00');
-       
+
 
 
         //Daily Engagement Stats
@@ -107,14 +107,17 @@ class Kernel extends ConsoleKernel
 
                     $views = UserView::where('poster_user_id', $userLevel->user_id)
                         ->whereDate('created_at', $date)
+                        ->where('type', 'view')
                         ->count();
 
                     $likes = UserLike::where('poster_user_id', $userLevel->user_id)
                         ->whereDate('created_at', $date)
+                        ->where('type', 'like')
                         ->count();
 
                     $comments = UserComment::where('poster_user_id', $userLevel->user_id)
                         ->whereDate('created_at', $date)
+                        ->where('type', 'comment')
                         ->count();
 
                     $points = $views + $likes + $comments;
@@ -149,7 +152,7 @@ class Kernel extends ConsoleKernel
                     $content
                 ));
         })->dailyAt('00:14');
-     
+
 
 
         //deactivate expiered subscriptions notification mail
@@ -199,9 +202,9 @@ class Kernel extends ConsoleKernel
                     ));
             });
         })->dailyAt('11:50');
-        
 
-         //Freemium Daily Engagement Stats
+
+        //Freemium Daily Engagement Stats
         $schedule->call(function () {
 
             $date = now()->subDay()->toDateString(); // yesterday
@@ -227,14 +230,17 @@ class Kernel extends ConsoleKernel
 
                     $views = UserView::where('user_id', $userLevel->user_id)
                         ->whereDate('created_at', $date)
+                        ->where('type', 'view')
                         ->count();
 
                     $likes = UserLike::where('user_id', $userLevel->user_id)
                         ->whereDate('created_at', $date)
+                        ->where('type', 'like')
                         ->count();
 
                     $comments = UserComment::where('user_id', $userLevel->user_id)
                         ->whereDate('created_at', $date)
+                        ->where('type', 'comment')
                         ->count();
 
                     $points = $views + $likes + $comments;
@@ -270,23 +276,21 @@ class Kernel extends ConsoleKernel
                 ));
         })->dailyAt('00:40');
 
-        $schedule->call(function () {
-            $subject = 'Daily Engagement Registered - updated';
-            $content = "Registered Daily Stats successfully";
+        // $schedule->call(function () {
+        //     $subject = 'Daily Engagement Registered - updated';
+        //     $content = "Registered Daily Stats successfully";
 
 
-             Mail::to('solotob3@gmail.com')
-                ->send(new GeneralMail(
-                    (object)[
-                        'name' => 'Oluwatobi Solomon',
-                        'email' => 'solotob3@gmail.com'
-                    ],
-                    $subject,
-                    $content
-                ));
-
-        })->hourly();
-
+        //     Mail::to('solotob3@gmail.com')
+        //         ->send(new GeneralMail(
+        //             (object)[
+        //                 'name' => 'Oluwatobi Solomon',
+        //                 'email' => 'solotob3@gmail.com'
+        //             ],
+        //             $subject,
+        //             $content
+        //         ));
+        // })->hourly();
     }
 
     /**

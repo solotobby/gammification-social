@@ -34,7 +34,7 @@
                                 &#8358;{{ number_format(convertToBaseCurrency($revTotal, 'NGN'), 2) }}</p>
                             <p><strong>Platform Cut (30%):</strong>
                                 &#8358;{{ number_format(convertToBaseCurrency($pltpool, 'NGN'), 2) }}</p>
-                            <p><strong>Tier Pool (60%):</strong>
+                            <p><strong>Tier Pool (50%):</strong>
                                 &#8358;{{ number_format(convertToBaseCurrency($tpool, 'NGN'), 2) }}</p>
                             <p><strong>Savings Pool (10%):</strong>
                                 &#8358;{{ number_format(convertToBaseCurrency($spool, 'NGN'), 2) }}</p>

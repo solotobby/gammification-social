@@ -196,5 +196,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('user/transaction/list/{id}', [UserController::class, 'transactionList']);
         Route::get('user/post/list/{id}', [UserController::class, 'postList']);
         Route::get('user/engagement/payouts', [EngagementPayoutController::class, 'index']);
+        Route::get('user/bank/information', [UserController::class, 'bankInformation']);
     });
 });

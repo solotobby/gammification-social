@@ -11,6 +11,8 @@ use App\Models\Transaction;
 use App\Models\User;
 use App\Models\UserLevel;
 use App\Models\Wallet;
+use App\Models\WithdrawalMethod;
+use App\Models\Withdrawals;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
@@ -77,9 +79,13 @@ class UserController extends Controller
     }
 
     public function updateCurrency(Request $request){
+
         $wall = Wallet::where('user_id', $request->user_id)->first();
         $wall->currency = $request->currency;
         $wall->save();
+        
+        WithdrawalMethod::where('user_id', $request->user_id)->delete();
+
         return back()->with('success', 'Account Currency Changed to : ' . $wall->currency);
 
     }
@@ -240,5 +246,10 @@ class UserController extends Controller
         $user = User::find($id);
         $transactions = Transaction::where('user_id', $id)->orderBy('created_at', 'DESC')->get();
         return view('admin.user.transactions', ['transactions' => $transactions, 'user' => $user]);
+    }
+
+    public function bankInformation(){
+        $withdrawals = WithdrawalMethod::orderBy('created_at', 'desc')->paginate(50);
+        return view('admin.user.bank_info', ['withdrawals' => $withdrawals]);
     }
 }
