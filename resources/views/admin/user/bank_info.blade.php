@@ -62,9 +62,11 @@
                     </tbody>
                 </table>
 
-                 <div class="d-flex justify-content-center mt-4">
-                        {{$withdrawals->links('vendor.pagination.bootstrap-5') }}
+                <div class="d-flex justify-content-center mt-4">
+                        {!! $withdrawals->links('pagination::bootstrap-4') !!} 
                 </div>
+
+                 
 
                 
 
