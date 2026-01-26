@@ -62,7 +62,7 @@
                     </tbody>
                 </table>
 
-                {{ $posts->links() }}
+                {{ $withdrawals->links() }}
 
 
                 {{-- <a href="{{ url('user/info/' . $user->id) }}" class="btn btn-secondary mt-3"> Back to Users </a> --}}
