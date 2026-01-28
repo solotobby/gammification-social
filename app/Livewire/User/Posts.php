@@ -395,9 +395,9 @@ class Posts extends Component
             ->orderBy('row_num')            // interleave by row number
             ->orderBy('created_at', 'desc') // newest posts first within same row_num
             ->limit($this->perPage * 2)     // fetch extra posts to ensure enough for interleaving
-            ->with(['user', 'postComments' => function ($query) {
-                $query->latest()->take(2)->with('user'); // latest 2 comments with user
-            }])
+            // ->with(['user', 'postComments' => function ($query) {
+            //     $query->latest()->take(2)->with('user'); // latest 2 comments with user
+            // }])
             ->get();
 
         // Group by row number

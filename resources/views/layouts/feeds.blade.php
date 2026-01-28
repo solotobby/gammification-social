@@ -224,15 +224,18 @@
             @if (userLevel() == 'Basic' && $timeline->user_id == auth()->user()->id)
                 <li class="fa fa-usd"> </li> <a href="{{ url('upgrade') }}" class="text-mute">Monetize This Post</a>
             @endif
-            {{-- <hr>
-            <p class="fs-sm">
+            <hr>
+
+            {{-- <p class="fs-sm">
                 <i class="fa fa-thumbs-up text-info"></i>
-                <i class="fa fa-heart text-danger"></i>
+                <i class="fa fa-comment text-danger"></i>
                 <i class="far fa-smile text-warning me-1"></i>
-                <a class="fw-semibold" href="javascript:void(0)">Brian Cruz</a>,
+                <a class="f w-semibold" href="javascript:void(0)">Brian Cruz</a>,
                 <a class="fw-semibold" href="javascript:void(0)">Lori Grant</a>,
                 <a class="fw-semibold" href="javascript:void(0)">and 150 others</a>
-            </p>
+            </p> --}}
+
+            {{-- 
             <form method="POST" wire:submit.prevent="commentFeed({{ $timeline->id }})">
                  <input type="text" wire:model.defer="messages.{{ $timeline->id }}" placeholder="Write a comment..." class="form-control form-control-alt">
                   <button type="submit" class="btn btn-primary mt-2">Comment</button>

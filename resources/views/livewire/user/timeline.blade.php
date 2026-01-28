@@ -1,7 +1,4 @@
 <div>
-    {{-- A good traveler has no fixed plans and is not intent upon arriving. --}}
-
-   
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css">
     <script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
@@ -42,6 +39,7 @@
         }
     </style>
 
+
     <div class="row">
         <div class="col-md-8">
 
@@ -72,6 +70,7 @@
                     </form> --}}
                 </div>
             </div>
+
             @if (session()->has('info'))
                 <div class="alert alert-warning mb-2" role="alert">
                     {{ session('info') }}
@@ -95,9 +94,10 @@
             @enderror
 
 
+
             <div class="card mb-4">
 
-                <form wire:submit.prevent="post">
+                <form wire:submit.prevent="createPost">
                     <div class="card-body ">
                         <?php $userLevel = userLevel(); ?>
                         <div x-data="{ content: @entangle('content') }">
@@ -146,34 +146,30 @@
                         <button class="btn btn-primary btn-block"> <i class="fa fa-pencil-alt opacity-50 me-1"></i>
                             Post</button>
                     </div>
+
                 </form>
             </div>
 
+            @foreach ($posts as $post)
+                <livewire:user.post-content :post="$post" :wire:key="'post-'.$post->id" />
+            @endforeach
 
-            @include('layouts.feeds', $posts)
+            <div x-data x-intersect="$wire.loadNextBatch()" class="py-4 text-center text-muted">
+                <span wire:loading>Loading more posts…</span>
+            </div>
 
+            {{-- <div x-data x-intersect="$wire.loadMore()" class="py-4 text-center text-muted">
+                <span wire:loading>Loading more posts…</span>
+            </div> --}}
+
+            {{-- <button wire:click="loadMore" class="btn btn-light w-100 mt-3">
+                Load more
+            </button> --}}
 
         </div>
-        
         @include('layouts.engagement')
+
     </div>
 
-
-
-    @include('layouts.onboarding')
-
-    
-
-
-   
-
-
-
-
-    {{-- @if (auth()->user()->email_verified_at == null)
-        @include('layouts.accesscode_verification')
-    @else
-       
-    @endif --}}
 
 </div>
