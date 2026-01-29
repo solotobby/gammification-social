@@ -25,6 +25,15 @@ class PostComments extends Component
     {
         $this->post = $post;
 
+        
+        $this->loadComments();
+            
+
+            // $this->commentsCount = $this->post->comments ?? $this->post->postComments()->count();
+    }
+
+    public function loadComments(){
+
         $this->comments = $this->post->postComments()
             ->with('user')
             ->latest()   // orders by created_at DESC (newest first)
@@ -43,10 +52,9 @@ class PostComments extends Component
 
             $this->commentsCount = $this->post->comments ?? $this->post->comment + $this->post->comments_external;
 
-            $this->comments = collect();
             
 
-            // $this->commentsCount = $this->post->comments ?? $this->post->postComments()->count();
+
     }
 
 
@@ -81,6 +89,8 @@ class PostComments extends Component
 
         $this->message = '';
         // $this->emit('refreshComments'); // optional for parent component
+
+        $this->loadComments();
     }
 
 
