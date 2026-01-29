@@ -41,9 +41,12 @@ class PostComments extends Component
                 ];
             });
 
-            // $this->commentsCount = $this->post->comments ?? $this->post->comment + $this->post->comments_external;
+            $this->commentsCount = $this->post->comments ?? $this->post->comment + $this->post->comments_external;
 
-            $this->commentsCount = $this->post->comments ?? $this->post->postComments()->count();
+            $this->comments = collect();
+            
+
+            // $this->commentsCount = $this->post->comments ?? $this->post->postComments()->count();
     }
 
 
@@ -64,7 +67,8 @@ class PostComments extends Component
 
 
         $this->comments->prepend([
-            // 'id' => $this->post->id, //'tmp-' . uniqid(),
+            // // 'id' => $this->post->id, //'tmp-' . uniqid(),
+          
             'user_id' => $user->id,
             'user_name' => $user->name,
             'user_avatar' => $user->avatar ?? 'src/assets/media/avatars/avatar3.jpg',
