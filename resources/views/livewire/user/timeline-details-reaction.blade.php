@@ -41,13 +41,13 @@
                 <i class="fa fa-share opacity-50 me-1"></i>
             </a>
         </li>
-        @if ($user->id == $post->user_id)
+        {{-- @if ($user->id == $post->user_id)
             <li class="nav-item">
                 <a class="nav-link" href="{{ url('post/timeline/' . $post->id . '/analytics') }}">
                     <i class="si si-bar-chart opacity-50 me-1"></i>
                 </a>
             </li>
-        @endif
+        @endif --}}
 
     </ul>
 
