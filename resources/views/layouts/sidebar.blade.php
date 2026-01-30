@@ -36,6 +36,10 @@
           <i class="nav-main-link-icon fa fa-list"></i>
           <span class="nav-main-link-name">Pro-Rata</span>
         </a> 
+        <a class="nav-main-link" href="{{ url('current/payouts') }}">
+          <i class="nav-main-link-icon fa fa-list"></i>
+          <span class="nav-main-link-name">Current Payout</span>
+        </a> 
         {{-- <a class="nav-main-link" href="{{ url('user/engagement/payouts') }}">
           <i class="nav-main-link-icon fa fa-list"></i>
           <span class="nav-main-link-name">Freemium Payouts</span>

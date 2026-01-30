@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\EngagementDailyStat;
+use App\Models\SubscriptionStat;
 use App\Models\User;
 use App\Models\UserComment;
 use App\Models\UserLevel;
@@ -14,6 +16,49 @@ use Illuminate\Http\Request;
 
 class MonthlyPayoutController extends Controller
 {
+    public function index()
+    {
+
+        $currentMonth =  now()->format('Y-m');
+        // $substat = SubscriptionStat::whereMonth('created_at', $currentMonth)->get();
+        $substat = SubscriptionStat::whereBetween('created_at', [
+            now()->startOfMonth(),
+            now()->endOfMonth(),
+        ])->paginate(50);
+
+        return view('admin.pay.payout', ['stats' => $substat, 'currentMonth' => $currentMonth]);
+    }
+
+    public function processLevelPrayout($level){
+        //fetch the people to get paid from last month activities
+        // return $level;
+
+
+        //  $month = now()->subMonth()->format('Y-m');
+         $month = now()->format('Y-m');
+
+    
+            // $this->info('Fetching Daily Engagement stat');
+            $stats = EngagementDailyStat::whereBetween(
+                'date',
+                [
+                    Carbon::createFromFormat('Y-m', $month)->startOfMonth(),
+                    Carbon::createFromFormat('Y-m', $month)->endOfMonth(),
+                ]
+            )->groupBy('user_id', 'level')
+                ->selectRaw('
+                user_id,
+                level,
+                SUM(views) as views,
+                SUM(likes) as likes,
+                SUM(comments) as comments,
+                SUM(points) as points
+            ')->get();
+
+            return $stats;
+    }
+
+
     public function payouts(Request $request)
     {
 
@@ -202,8 +247,4 @@ class MonthlyPayoutController extends Controller
             'monthParam'      => $month
         ]);
     }
-
-    
-
-    
 }

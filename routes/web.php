@@ -194,7 +194,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('level/management', [\App\Http\Controllers\Admin\LevelManagementController::class, 'index']);
         Route::get('generate/plan/{id}', [LevelManagementController::class, 'generatePaystackPlanId']);
         Route::get('payouts', [MonthlyPayoutController::class, 'payouts']);
+        Route::get('current/payouts', [MonthlyPayoutController::class, 'index']);
         Route::get('/payouts/monthly/levels/{level}', [MonthlyPayoutController::class, 'levelUserBreakdown']);
+        Route::get('process/payouts/monthly/levels/{level}', [MonthlyPayoutController::class, 'processLevelPrayout']);
         Route::get('user/engagement/analytics/{id}', [UserEngagementController::class, 'engagementAnalytics']);
         Route::get('user/transaction/list/{id}', [UserController::class, 'transactionList']);
         Route::get('user/post/list/{id}', [UserController::class, 'postList']);
