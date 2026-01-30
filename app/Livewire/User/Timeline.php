@@ -73,18 +73,85 @@ class Timeline extends Component
         'loadMorePosts' => '$refresh',
     ];
 
-    public $posts; 
-    public $buffer = [];    // preloaded next batch
-    public $perPage = 3;   // batch size
-    public $page = 1;       // current page
-    public $loadingNext = false;
+    // public $posts; 
+    // public $buffer = [];    // preloaded next batch
+    // public $perPage = 3;   // batch size
+    // public $page = 1;       // current page
+    // public $loadingNext = false;
+
+    public Collection $posts;
+    public Collection $buffer;
+
+    public int $perPage = 5;          // batch size
+    public ?string $cursor = null;    // cursor for pagination
+    public bool $loadingNext = false;
+    public bool $hasMore = true;
 
 
     public function mount()
     {
-        $this->loadPosts();
+        // $this->loadPosts();
+        // $this->preloadNext();
+
+        $this->posts = collect();
+        $this->buffer = collect();
+
+        $this->loadInitial();
         $this->preloadNext();
     }
+     // Core batch query using cursor
+    protected function fetchBatch(?string $cursor = null)
+    {
+        return Post::with('user')
+            ->where('status', 'LIVE')
+            ->when($cursor, fn ($q) => $q->where('created_at', '<', $cursor))
+            ->orderByDesc('created_at')
+            ->limit($this->perPage)
+            ->get();
+    }
+
+    public function loadInitial()
+    {
+        $batch = $this->fetchBatch();
+
+        if ($batch->isEmpty()) {
+            $this->hasMore = false;
+            return;
+        }
+
+        $this->posts = $batch;
+        $this->cursor = $batch->last()->created_at;
+    }
+
+    // Preload next batch for smooth scroll
+    public function preloadNext()
+    {
+        if (! $this->hasMore) return;
+
+        $this->buffer = $this->fetchBatch($this->cursor);
+
+        if ($this->buffer->isEmpty()) {
+            $this->hasMore = false;
+        }
+    }
+
+    // Load the preloaded batch
+    public function loadNextBatch()
+    {
+        if ($this->loadingNext || $this->buffer->isEmpty()) return;
+
+        $this->loadingNext = true;
+
+        $this->posts = $this->posts->concat($this->buffer);
+
+        $this->cursor = $this->buffer->last()->created_at;
+
+        $this->buffer = collect();
+        $this->preloadNext();
+
+        $this->loadingNext = false;
+    }
+
 
 
     public function createPost()
@@ -169,14 +236,6 @@ class Timeline extends Component
                 ]);
             }
         }
-
-        // foreach ($this->images as $image) {
-        //     $path = $image->store('post_images', 'public');
-
-        //     PostImages::create(['user_id' => Auth::id(), 'post_id' => $timelines->id, 'path' => $path]);
-
-
-        // }
 
         $this->reset('content', 'images');
 
@@ -267,32 +326,32 @@ class Timeline extends Component
 
     }
 
-    public function preloadNext()
-    {
-        $this->buffer = Post::with('user')
-            ->latest()
-            ->skip($this->perPage * $this->page)
-            ->take($this->perPage)
-            ->get();
-    }
+    // public function preloadNext()
+    // {
+    //     $this->buffer = Post::with('user')
+    //         ->latest()
+    //         ->skip($this->perPage * $this->page)
+    //         ->take($this->perPage)
+    //         ->get();
+    // }
 
-    public function loadNextBatch()
-    {
-        if ($this->loadingNext || $this->buffer->isEmpty()) return;
+    // public function loadNextBatch()
+    // {
+    //     if ($this->loadingNext || $this->buffer->isEmpty()) return;
 
-        $this->loadingNext = true;
+    //     $this->loadingNext = true;
 
-        // Append buffer to posts
-        $this->posts = $this->posts->merge($this->buffer);
+    //     // Append buffer to posts
+    //     $this->posts = $this->posts->merge($this->buffer);
 
-        // increment page
-        $this->page++;
+    //     // increment page
+    //     $this->page++;
 
-        // preload next batch
-        $this->preloadNext();
+    //     // preload next batch
+    //     $this->preloadNext();
 
-        $this->loadingNext = false;
-    }
+    //     $this->loadingNext = false;
+    // }
 
 
 
