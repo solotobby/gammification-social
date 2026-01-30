@@ -171,14 +171,17 @@ class MonthlyPayoutController extends Controller
     {
         $views = UserView::where('poster_user_id', $userId)
             ->whereBetween('created_at', [$startDate, $endDate])
+            ->where('type', 'view')
             ->count();
 
         $likes = UserLike::where('poster_user_id', $userId)
             ->whereBetween('created_at', [$startDate, $endDate])
+            ->where('type', 'like')
             ->count();
 
         $comments = UserComment::where('poster_user_id', $userId)
             ->whereBetween('created_at', [$startDate, $endDate])
+            ->where('type', 'comment')
             ->count();
 
         return $views + $likes + $comments;
