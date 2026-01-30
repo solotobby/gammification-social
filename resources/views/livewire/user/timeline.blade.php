@@ -62,7 +62,7 @@
                 </div>
             </div>
 
-           
+
 
             @foreach (['success' => 'success', 'info' => 'warning', 'error' => 'danger'] as $key => $type)
                 @if (session()->has($key))
@@ -146,14 +146,32 @@
                 <livewire:user.post-content :post="$post" :wire:key="'post-'.$post->id" />
             @endforeach
 
-
+            {{-- 
             @if ($hasMore)
                 <div class="text-center my-3">
                     <button wire:click="loadNextPage" class="btn btn-sm btn-primary">
                         Load More Feeds
                     </button>
                 </div>
+            @endif --}}
+
+            @if ($hasMore)
+                <div class="text-center my-3">
+                    <button wire:click="loadNextPage" wire:loading.attr="disabled" class="btn btn-sm btn-primary">
+                        {{-- Normal state --}}
+                        <span wire:loading.remove>
+                            Load More Feeds
+                        </span>
+
+                        {{-- Loading state --}}
+                        <span wire:loading>
+                            <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                            Loading feeds...
+                        </span>
+                    </button>
+                </div>
             @endif
+
 
             {{-- <div class="text-center my-3" x-show="$wire.loadingNext">
                 <div class="spinner-border text-primary" role="status">
