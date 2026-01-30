@@ -52,7 +52,8 @@ class MonthlyPayoutController extends Controller
                 SUM(views) as views,
                 SUM(likes) as likes,
                 SUM(comments) as comments,
-                SUM(points) as points
+                SUM(points) as points,
+                created_at
             ')->get();
 
             return $stats;
