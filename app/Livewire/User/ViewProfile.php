@@ -113,7 +113,7 @@ class ViewProfile extends Component
                     'title'   => displayName($user->name) . ' liked your post',
                     'message' => displayName($user->name) . ' liked your post',
                     'icon'    => 'fa-thumbs-up text-primary',
-                    'url'     => url('show/' . $post->id),
+                    'url'     => url('timeline/' . $post->id),
                 ]))->delay(now()->addSeconds(1)));
             }
         });

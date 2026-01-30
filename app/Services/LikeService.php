@@ -54,7 +54,7 @@ class LikeService
                         'title'   => displayName($user->name) . ' liked your post',
                         'message' => displayName($user->name) . ' liked your post',
                         'icon'    => 'fa-heart text-danger',
-                        'url'     => url('show/' . $post->id),
+                        'url'     => url('timeline/' . $post->id),
                     ]))->delay(now()->addSeconds(1))
                 );
             }

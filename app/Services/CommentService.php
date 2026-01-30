@@ -69,7 +69,7 @@ class CommentService
                         'title'   => displayName($user->name) . ' commented on your post',
                         'message' => displayName($user->name) . ' commented on your post',
                         'icon'    => 'fa-comment text-primary',
-                        'url'     => url('show/' . $post->id),
+                        'url'     => url('timeline/' . $post->id),
                     ]));
                 }
 
