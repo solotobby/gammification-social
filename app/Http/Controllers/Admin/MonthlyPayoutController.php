@@ -30,54 +30,55 @@ class MonthlyPayoutController extends Controller
         return view('admin.pay.payout', ['stats' => $substat, 'currentMonth' => $currentMonth]);
     }
 
-    public function processLevelPrayout($level){
+    public function processLevelPrayout($level)
+    {
         //fetch the people to get paid from last month activities
         // return $level;
 
 
         //  $month = now()->subMonth()->format('Y-m');
-         $month = now()->format('Y-m');
+        $month = now()->format('Y-m');
 
-    
-            // $this->info('Fetching Daily Engagement stat');
-            $stats = EngagementDailyStat::whereBetween(
-                'date',
-                [
-                    Carbon::createFromFormat('Y-m', $month)->startOfMonth(),
-                    Carbon::createFromFormat('Y-m', $month)->endOfMonth(),
-                ]
-            )->groupBy('user_id', 'level')
-                ->selectRaw('
+
+        // $this->info('Fetching Daily Engagement stat');
+        $stats = EngagementDailyStat::whereBetween(
+            'date',
+            [
+                Carbon::createFromFormat('Y-m', $month)->startOfMonth(),
+                Carbon::createFromFormat('Y-m', $month)->endOfMonth(),
+            ]
+        )->groupBy('user_id', 'level')
+            ->selectRaw('
                 user_id,
                 level,
                 SUM(views) as views,
                 SUM(likes) as likes,
                 SUM(comments) as comments,
-                SUM(points) as points,
+                SUM(points) as points
             ')->get();
 
-            $monthlyEngament = [];
+        $monthlyEngament = [];
 
-            foreach ($stats as $stat) {
+        foreach ($stats as $stat) {
 
-              $monthlyEngament []=   EngagementMonthlyStat::updateOrCreate(
-                    [
-                        'user_id' => $stat->user_id,
-                        'level'    => $stat->level,
-                        'month'   => $month,
-                    ],
-                    [
-                        'views'    => $stat->views,
-                        'likes'    => $stat->likes,
-                        'comments' => $stat->comments,
-                        'points'   => $stat->points,
-                    ]
-                );
-            }
+            $monthlyEngament[] =   EngagementMonthlyStat::updateOrCreate(
+                [
+                    'user_id' => $stat->user_id,
+                    'level'    => $stat->level,
+                    'month'   => $month,
+                ],
+                [
+                    'views'    => $stat->views,
+                    'likes'    => $stat->likes,
+                    'comments' => $stat->comments,
+                    'points'   => $stat->points,
+                ]
+            );
+        }
 
 
 
-            return $monthlyEngament;
+        return $monthlyEngament;
     }
 
 
