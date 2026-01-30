@@ -60,10 +60,10 @@
                                     <a href="{{ url('/payouts/monthly/levels/' . $level['level']) }}"
                                         class="btn btn-info btn-sm"> View Users</a> 
                                 </td>
-                                <td> 
+                                {{-- <td> 
                                     <a href="{{ url('/process/payouts/monthly/levels/' . $level['level']) }}"
                                         class="btn btn-info btn-sm"> Process Payout</a> 
-                                </td>
+                                </td> --}}
 
                                 {{-- <td> <a href="{{ url('/payouts/monthly/levels/' . $level['level']) }}?month={{ $monthParam }}"
                                         class="btn btn-info btn-sm"> View Users</a> </td> --}}

@@ -36,8 +36,8 @@ class MonthlyPayoutController extends Controller
         // return $level;
 
 
-        //  $month = now()->subMonth()->format('Y-m');
-        $month = now()->format('Y-m');
+         $month = now()->subMonth()->format('Y-m');
+        // $month = now()->format('Y-m');
 
 
         // $this->info('Fetching Daily Engagement stat');
