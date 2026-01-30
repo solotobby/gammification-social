@@ -155,21 +155,14 @@
             @endforeach
 
             <div x-data x-intersect="$wire.loadNextBatch()" class="py-4 text-center text-muted">
-                <span wire:loading>Loading more posts…</span>
+                <span wire:loading>Loading more feeds…</span>
             </div>
-
-            {{-- <div x-data x-intersect="$wire.loadMore()" class="py-4 text-center text-muted">
-                <span wire:loading>Loading more posts…</span>
-            </div> --}}
-
-            {{-- <button wire:click="loadMore" class="btn btn-light w-100 mt-3">
-                Load more
-            </button> --}}
 
         </div>
         @include('layouts.engagement')
 
     </div>
 
+    @include('layouts.onboarding')
 
 </div>

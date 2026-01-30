@@ -75,7 +75,7 @@ class Timeline extends Component
 
     public $posts; 
     public $buffer = [];    // preloaded next batch
-    public $perPage = 5;   // batch size
+    public $perPage = 3;   // batch size
     public $page = 1;       // current page
     public $loadingNext = false;
 
@@ -236,6 +236,35 @@ class Timeline extends Component
             ->latest()
             ->take($this->perPage * $this->page)
             ->get();
+
+
+            // Use window function to rank posts per user
+        $posts = Post::select('*')
+            ->where('status', 'LIVE')
+            ->selectRaw('ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY created_at DESC) as row_num')
+            ->orderBy('row_num')            // interleave by row number
+            ->orderBy('created_at', 'desc') // newest posts first within same row_num
+            ->limit($this->perPage *  $this->page)     // fetch extra posts to ensure enough for interleaving
+            // ->with(['user', 'postComments' => function ($query) {
+            //     $query->latest()->take(2)->with('user'); // latest 2 comments with user
+            // }])
+            ->get();
+
+        // Group by row number
+        $groupedByRow = $posts->groupBy('row_num');
+
+        // Flatten in interleaved order
+        $interleavedPosts = new Collection();
+        foreach ($groupedByRow as $rowGroup) {
+            foreach ($rowGroup as $post) {
+                $interleavedPosts->push($post);
+            }
+        }
+
+        // Limit final output to perPage
+        $this->posts = $interleavedPosts->take($this->perPage);
+
+
     }
 
     public function preloadNext()

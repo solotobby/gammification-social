@@ -143,11 +143,19 @@
 
 
         <div class="block-content">
-            <a href="{{ url('show/' . $post->id) }}" style="color: dimgrey">
+            <a href="{{ url('timeline/' . $post->id) }}" style="color: dimgrey">
                 <p style="color: dimgrey">
                     {{-- {!! $post->content !!} --}}
 
-                    {!! nl2br(e($post->content)) !!}
+                    {{-- {!! nl2br(e($post->content)) !!} --}}
+
+                    {!! nl2br(e(\Illuminate\Support\Str::limit($post->content, 160))) !!}
+
+                    @if(strlen($post->content) > 160)
+                        <a href="{{ url('timeline/'.$post->id) }}" class="text-primary fw-semibold">
+                            Read more
+                        </a>
+                    @endif
 
                 </p>
             </a>
@@ -201,7 +209,7 @@
 
                 {{-- 💬 Comments --}}
                 <li class="nav-item me-2">
-                    <a class="nav-link" href="javascript:void(0)">
+                    <a class="nav-link" href="{{ url('show/' . $post->id) }}">
                         <i class="fa fa-comment-alt opacity-50 me-1"></i>
                         {{ $commentCount }}
                         {{-- {{ sumCounter($post->comments, $post->comments_external) }} --}}
@@ -235,98 +243,101 @@
 
             </ul>
 
-
-
-            {{-- <ul class="nav nav-pills fs-sm push " style="color: #5A4FDC">
-                <li class="nav-item me-1">
-
-
-                    @if ($post->isLikedBy(auth()->user()))
-                        <a class="nav-link" wire:click="toggleLike({{ $post->unicode }})" href="javascript:void(0)">
-                            <i class="fa fa-thumbs-down opacity-50 me-1"></i>
-                            {{ sumCounter($post->likes, $post->likes_external) }}
-                        </a>
-                    @else
-                        <a class="nav-link" wire:click="toggleLike({{ $post->unicode }})" href="javascript:void(0)">
-                            <i class="fa fa-thumbs-up opacity-50 me-1"></i>
-                            {{ sumCounter($post->likes, $post->likes_external) }}
-                        </a>
-                    @endif
-
-
-                </li>
-                <li class="nav-item me-1">
-                    <a class="nav-link" href="{{ url('show/' . $post->id) }}">
-                        <i class="fa fa-comment-alt opacity-50 me-1"></i>
-                        {{ sumCounter($post->comments, $post->comments_external) }}
-                    </a>
-                </li>
-                <li class="nav-item me-1">
-                    <a class="nav-link" href="javascript:void(0)">
-                        <i class="fa fa-eye opacity-50 me-1"></i>
-                        {{ sumCounter($post->views, $post->views_external) }}
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="javascript:void(0)" data-bs-toggle="modal"
-                        data-bs-target="#modal-block-fromright-{{ $post->id }}">
-                        <i class="fa fa-share opacity-50 me-1"></i>
-                    </a>
-                </li>
-                @if (auth()->user()->id == $post->user_id)
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url('post/timeline/' . $post->id . '/analytics') }}">
-                            <i class="si si-bar-chart opacity-50 me-1"></i>
-                        </a>
-                    </li>
-                @endif
-            </ul> --}}
-
-
         </div>
-         <div class="block-content block-content-full bg-body-light">
 
-        <livewire:user.post-comments
-                    :post="$post"
-                    :wire:key="'post-comments-'.$post->id"
-                />
-         </div>
+        {{-- Comment section --}}
+        <div class="block-content block-content-full bg-body-light">
 
-        {{-- @foreach ($posts as $timeline)
-            <livewire:post-comments
-                :post-id="$timeline->id"
-                :wire:key="'post-comments-'.$timeline->id"
-            />
-        @endforeach --}}
-
-        {{-- <livewire:user.post-comments
-            :post-id="$timeline->id"
-            :wire:key="'comments-'.$timeline->id"
-        /> --}}
+            <livewire:user.post-comments :post="$post" :wire:key="'post-comments-'.$post->id" />
+        </div>
 
 
     </div>
-    {{-- <div class="card mb-3">
-        <div class="card-body">
 
-            <strong>{{ $post->user->name }}</strong>
-            <p class="mt-2">{{ $post->content }}</p>
 
-            <div class="d-flex gap-3 text-muted">
-                <button wire:click="toggleLike" class="btn btn-link p-0">
-                    ❤️ {{ $likesCount }}
-                </button>
+    <!-- From Right Block Modal -->
+    <div class="modal fade" id="modal-block-fromright-{{ $post->id }}" tabindex="-1" role="dialog"
+        aria-labelledby="modal-block-fromright" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-fromright" role="document">
+            <div class="modal-content">
+                <div class="block block-rounded block-themed block-transparent mb-0">
+                    <div class="block-header bg-primary-dark">
+                        <h3 class="block-title">Share Post</h3>
+                        <div class="block-options">
+                            <button type="button" class="btn-block-option" data-bs-dismiss="modal"
+                                aria-label="Close">
+                                <i class="fa fa-fw fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="block-content">
+                        <p>
+                            Share this Post on all social media and make money when people view, like or comment on the
+                            post
+                        </p>
+                        <p>
+                            {{ url('timeline/' . $post->id) }}
+                        </p>
 
-                <span>
-                    👁 {{ $post->views }}
-                </span>
+                        <?php
+                        $url = url('timeline/' . $post->id);
+                        ?>
+
+
+                        <button type="button" onclick="copyToClipboard('{{ $url }}')"
+                            class="btn btn-sm btn-alt-secondary" data-bs-dismiss="modal">Copy Link</button>
+                        <hr>
+                        <ul class="nav nav-pills fs-sm push">
+                            <li class="nav-item me-1">
+
+
+                                <a class="nav-link"
+                                    href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode($url) }}"
+                                    target="_blank">
+                                    <i class="fab fa-facebook fa-2x opacity-50 me-1"></i>
+                                </a>
+
+
+                            </li>
+                            <li class="nav-item me-1">
+                                <a class="nav-link"
+                                    href="https://twitter.com/intent/tweet?url={{ urlencode($url) }}&text=Check%20this%20out!"
+                                    target="_blank">
+                                    <i class="fab fa-square-x-twitter fa-2x opacity-50 me-1"></i>
+                                </a>
+                            </li>
+                            <li class="nav-item me-1">
+                                <a class="nav-link" href="https://www.instagram.com/?url={{ urlencode($url) }}"
+                                    target="_blank">
+                                    <i class="fab fa-instagram fa-2x opacity-50 me-1"></i>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                    href="https://www.linkedin.com/shareArticle?mini=true&url={{ urlencode($url) }}"
+                                    target="_blank">
+                                    <i class="fab fa-linkedin-in fa-2x opacity-50 me-1"></i>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                    href="https://pinterest.com/pin/create/button/?url={{ urlencode($url) }}"
+                                    target="_blank">
+                                    <i class="fab fa-pinterest-p fa-2x opacity-50 me-1"></i>
+                                </a>
+                            </li>
+                        </ul>
+
+                    </div>
+                    <div class="block-content block-content-full text-end bg-body">
+                        <button type="button" class="btn btn-sm btn-primary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
             </div>
-
-            {{-- Comments --}}
-    {{-- <livewire:post-comments
-            :post-id="$post->id"
-            :wire:key="'comments-'.$post->id"
-        /> --
         </div>
-    </div> --}}
+    </div>
+    <!-- END From Right Block Modal -->
+
+
+
 </div>

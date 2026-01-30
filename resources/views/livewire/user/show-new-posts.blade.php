@@ -106,6 +106,7 @@
                         </div>
                     @endif
                     <hr>
+
                     <ul class="nav nav-pills fs-sm push" style="color: #5A4FDC">
                         <li class="nav-item me-1">
                             @if ($timeline->isLikedBy(auth()->user()))
@@ -150,6 +151,7 @@
                             </li>
                         @endif
                     </ul>
+
                 </div>
                 <div class="block-content block-content-full bg-body-light">
                     {{-- <p class="fs-sm">
@@ -294,6 +296,7 @@
             </div>
         </div>
         <!-- END From Right Block Modal -->
+        
         <script>
             function copyToClipboard(text) {
                 navigator.clipboard.writeText(text).then(function() {

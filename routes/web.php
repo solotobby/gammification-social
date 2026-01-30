@@ -22,6 +22,7 @@ use App\Livewire\User\Settings;
 use App\Livewire\User\ShowNewPosts;
 use App\Livewire\User\ShowPost;
 use App\Livewire\User\Timeline;
+use App\Livewire\User\TimelineDetails;
 use App\Livewire\User\TransactionList;
 use App\Livewire\User\UpgradeAccount;
 use App\Livewire\User\ViewProfile;
@@ -147,6 +148,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::get('timeline', Posts::class);
         Route::get('new/timeline', Timeline::class);
+        Route::get('timeline/{post}', TimelineDetails::class);
 
         Route::get('profile/{username}', ViewProfile::class);
         // Route::get('show/{query}', ShowPost::class)->name('show');

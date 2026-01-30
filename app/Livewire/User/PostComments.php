@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\Auth;
 class PostComments extends Component
 {
 
-
     public Post $post;
     public $message = '';
     public $postId;
