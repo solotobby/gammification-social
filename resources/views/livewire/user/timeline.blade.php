@@ -164,25 +164,25 @@ x-data
                 <livewire:user.post-content :post="$post" :wire:key="'post-'.$post->id" />
             @endforeach
 
-            <div class="text-center my-3" x-show="$wire.loadingNext">
+            {{-- <div class="text-center my-3" x-show="$wire.loadingNext">
                 <div class="spinner-border text-primary" role="status">
                     <span class="visually-hidden">Loading...</span>
                 </div>
             </div>
 
-            {{-- Optional end-of-feed message --}}
+            Optional end-of-feed message
             <div class="text-center my-3" x-show="! $wire.hasMore && ! $wire.loadingNext">
                 <small class="text-muted">No more posts</small>
-            </div>
+            </div> --}}
 
 
 
-            {{-- <div x-data x-intersect="$wire.loadNextBatch()" class="py-4 text-center text-muted">
+            <div x-data x-intersect="$wire.loadNextBatch()" class="py-4 text-center text-muted">
                 <div class="spinner-border text-primary" role="status">
                     <span class="visually-hidden">Loading...</span>
                 </div>
-                <span wire:loading>Loading more feeds…</span>
-            </div> --}}
+                {{-- <span wire:loading>Loading more feeds…</span> --}}
+            </div>
 
         </div>
         @include('layouts.engagement')
