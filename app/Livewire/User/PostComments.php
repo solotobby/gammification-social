@@ -42,8 +42,9 @@ class PostComments extends Component
                 return [
                     'id' => $comment->id,
                     'user_id' => $comment->user_id,
-                    'user_name' => $comment->user->name,
-                    'user_avatar' => $comment->user->avatar ?? 'src/assets/media/avatars/avatar3.jpg',
+                    'name' => $comment->user->name,
+                    'username' => $comment->user->username,
+                    'avatar' => $comment->user->avatar,// ?? 'src/assets/media/avatars/avatar3.jpg',
                     'message' => $comment->message,
                     'created_at' => $comment->created_at->toDateTimeString(),
                 ];
@@ -77,8 +78,9 @@ class PostComments extends Component
             // // 'id' => $this->post->id, //'tmp-' . uniqid(),
           
             'user_id' => $user->id,
-            'user_name' => $user->name,
-            'user_avatar' => $user->avatar ?? 'src/assets/media/avatars/avatar3.jpg',
+            'name' => $user->name,
+            'username' => $user->username,
+            'avatar' => $user->avatar ?? 'src/assets/media/avatars/avatar3.jpg',
             'message' => $this->message,
             'created_at' => now()->toDateTimeString(),
         ]);
