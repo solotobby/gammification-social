@@ -9,7 +9,8 @@
                 @if (userLevel($timeline->user->id) == 'Basic')
                     <a class="img-link me-1" href="{{ url('profile/' . $timeline->user->username) }}">
                         <img class="img-avatar img-avatar32 img-avatar-thumb"
-                            src="{{ $timeline->user->avatar ?? asset('src/assets/media/avatars/avatar13.jpg') }}" alt="Avatar">
+                            src="{{ $timeline->user->avatar ?? asset('src/assets/media/avatars/avatar13.jpg') }}"
+                            alt="Avatar">
                     </a>
 
                     <a class="fw-semibold" href="{{ url('profile/' . $timeline->user->username) }}"
@@ -21,7 +22,8 @@
                 @elseif (userLevel($timeline->user->id) == 'Creator')
                     <a class="img-link me-1" href="{{ url('profile/' . $timeline->user->username) }}">
                         <img class="img-avatar img-avatar32 img-avatar-thumb"
-                            src="{{ $timeline->user->avatar ?? asset('src/assets/media/avatars/avatar13.jpg') }}" alt="Avatar">
+                            src="{{ $timeline->user->avatar ?? asset('src/assets/media/avatars/avatar13.jpg') }}"
+                            alt="Avatar">
                     </a>
                     {{-- Username + Verified Tick --}}
                     <div class="d-flex align-items-center">
@@ -47,7 +49,8 @@
                     {{-- Avatar --}}
                     <a class="img-link me-2" href="{{ url('profile/' . $timeline->user->username) }}">
                         <img class="img-avatar img-avatar32 img-avatar-thumb rounded-circle border border-primary border-2"
-                            src="{{ $timeline->user->avatar ?? asset('src/assets/media/avatars/avatar13.jpg') }}" alt="Avatar">
+                            src="{{ $timeline->user->avatar ?? asset('src/assets/media/avatars/avatar13.jpg') }}"
+                            alt="Avatar">
                     </a>
 
                     {{-- Username + Verified Tick --}}
@@ -128,16 +131,24 @@
         </div>
 
         <div class="block-content">
-            <a href="{{ url('show/' . $timeline->id) }}" style="color: dimgrey">
+            <a href="{{ url('timeline/' . $timeline->id) }}" style="color: dimgrey">
                 <p style="color: dimgrey">
                     {{-- {!! $timeline->content !!} --}}
 
-                    {!! nl2br(e($timeline->content)) !!}
+                    {{-- {!! nl2br(e($timeline->content)) !!} --}}
+
+                     {!! nl2br(e(\Illuminate\Support\Str::limit($timeline->content, 160))) !!}
+
+                    @if (strlen($timeline->content) > 160)
+                        <a href="{{ url('timeline/' . $timeline->id) }}" class="text-primary fw-semibold">
+                            Read more
+                        </a>
+                    @endif
 
                 </p>
             </a>
 
-           @php
+            @php
                 $count = $timeline->images->count();
             @endphp
 
@@ -158,9 +169,9 @@
                     @foreach ($timeline->images as $image)
                         <div class="{{ $col }} mb-2">
                             <a class="img-link img-link-simple img-link-zoom-in img-lightbox"
-                                href="{{ asset( $image->path) }}">
-                                <img class="img-fluid rounded" loading="lazy"
-                                    src="{{ asset( $image->path) }}" alt="Post image">
+                                href="{{ asset($image->path) }}">
+                                <img class="img-fluid rounded" loading="lazy" src="{{ asset($image->path) }}"
+                                    alt="Post image">
                             </a>
                         </div>
                     @endforeach
@@ -172,8 +183,22 @@
             <ul class="nav nav-pills fs-sm push " style="color: #5A4FDC">
                 <li class="nav-item me-1">
 
-
                     @if ($timeline->isLikedBy(auth()->user()))
+                        <a class="nav-link" wire:click="toggleLike({{ $timeline->unicode }})"
+                            href="javascript:void(0)">
+                            <i class="fas fa-heart text-danger me-1"></i>
+                            {{ sumCounter($timeline->likes, $timeline->likes_external) }}
+                        </a>
+                    @else
+                        <a class="nav-link" wire:click="toggleLike({{ $timeline->unicode }})"
+                            href="javascript:void(0)">
+                            <i class="far fa-heart opacity-50 me-1"></i>
+                            {{ sumCounter($timeline->likes, $timeline->likes_external) }}
+                        </a>
+                    @endif
+
+
+                    {{-- @if ($timeline->isLikedBy(auth()->user()))
                         <a class="nav-link" wire:click="toggleLike({{ $timeline->unicode }})"
                             href="javascript:void(0)">
                             <i class="fa fa-thumbs-down opacity-50 me-1"></i>
@@ -185,12 +210,12 @@
                             <i class="fa fa-thumbs-up opacity-50 me-1"></i>
                             {{ sumCounter($timeline->likes, $timeline->likes_external) }}
                         </a>
-                    @endif
+                    @endif --}}
 
 
                 </li>
                 <li class="nav-item me-1">
-                    <a class="nav-link" href="{{ url('show/' . $timeline->id) }}">
+                    <a class="nav-link" href="{{ url('timeline/' . $timeline->id) }}">
                         <i class="fa fa-comment-alt opacity-50 me-1"></i>
                         {{ sumCounter($timeline->comments, $timeline->comments_external) }}
                     </a>
@@ -279,7 +304,7 @@
 
     </div>
 
-     <!-- From Right Block Modal -->
+    <!-- From Right Block Modal -->
     <div class="modal fade" id="modal-block-fromright-{{ $timeline->id }}" tabindex="-1" role="dialog"
         aria-labelledby="modal-block-fromright" aria-hidden="true">
         <div class="modal-dialog modal-dialog-fromright" role="document">

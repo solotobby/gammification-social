@@ -31,11 +31,7 @@ use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 #[On('user.timeline')]
 class Timeline extends Component
 {
-
-
     use WithFileUploads, WithPagination;
-
-
 
     public $postId;
     #[Validate('required|string')]
@@ -402,34 +398,13 @@ class Timeline extends Component
     // }
 
 
-
-
-
     public function loadMore()
     {
         $this->dispatch('loadMorePosts');
     }
 
-
-
-
-
     public function render()
     {
-        // $timelines= Post::with('likes')
-        //         ->where('status', 'LIVE')
-        //         ->orderBy('created_at', 'desc')
-        //         ->take($this->perPage)->get();
-
-        // $posts = Post::with('user')
-        //     ->latest()
-        //     ->paginate(2);
-
-        return view(
-            'livewire.user.timeline'
-            // [
-            //     'posts' => $posts
-            // ]
-        )->layout('layouts.app');;
+        return view('livewire.user.timeline')->layout('layouts.app');
     }
 }

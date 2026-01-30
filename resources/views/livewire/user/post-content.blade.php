@@ -151,8 +151,8 @@
 
                     {!! nl2br(e(\Illuminate\Support\Str::limit($post->content, 160))) !!}
 
-                    @if(strlen($post->content) > 160)
-                        <a href="{{ url('timeline/'.$post->id) }}" class="text-primary fw-semibold">
+                    @if (strlen($post->content) > 160)
+                        <a href="{{ url('timeline/' . $post->id) }}" class="text-primary fw-semibold">
                             Read more
                         </a>
                     @endif
@@ -200,8 +200,7 @@
                         <i class="fa fa-heart transition"
                             style="
                     color: {{ $likedByMe ? '#e0245e' : '#6c757d' }};
-                    opacity: {{ $likedByMe ? '1' : '.6' }};
-                "></i>
+                    opacity: {{ $likedByMe ? '1' : '.6' }};"></i>
 
                         <span>{{ number_format($likesCount) }}</span>
                     </a>

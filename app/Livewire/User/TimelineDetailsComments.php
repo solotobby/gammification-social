@@ -146,8 +146,9 @@ class TimelineDetailsComments extends Component
             // // 'id' => $this->post->id, //'tmp-' . uniqid(),
 
             'user_id' => $user->id,
-            'user_name' => $user->name,
-            'user_avatar' => $user->avatar ?? 'src/assets/media/avatars/avatar3.jpg',
+            'name' => $user->name,
+            'username' => $user->username,
+            'avatar' => $user->avatar ?? 'src/assets/media/avatars/avatar3.jpg',
             'message' => $this->message,
             'created_at' => now()->toDateTimeString(),
         ]);
@@ -156,7 +157,6 @@ class TimelineDetailsComments extends Component
         $this->dispatch('commentAdded');
 
         $this->message = '';
-        // $this->emit('refreshComments'); // optional for parent component
 
         $this->loadComments();
     }
