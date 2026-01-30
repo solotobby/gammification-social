@@ -24,7 +24,6 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-
         //Monthly Engagement Stats
         $schedule->call(function () {
 

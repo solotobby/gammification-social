@@ -217,7 +217,7 @@
                 <li class="nav-item me-1">
                     <a class="nav-link" href="{{ url('timeline/' . $timeline->id) }}">
                         <i class="fa fa-comment-alt opacity-50 me-1"></i>
-                        {{ sumCounter($timeline->comments, $timeline->comments_external) }}
+                        {{ sumCounter($timeline->comments, $timeline->comment_external) }}
                     </a>
                 </li>
                 <li class="nav-item me-1">

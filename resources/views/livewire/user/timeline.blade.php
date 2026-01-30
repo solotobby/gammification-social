@@ -59,28 +59,20 @@
                         Learn more about <a href="{{ url('how/it/works') }}" target="_blank"> how Payhankey works here
                         </a>
                     </div>
-
-                    {{-- <form wire:submit.prevent="post">
-                        <div class="input-group mb-3">
-                            <textarea wire:model="content" name="content" class="form-control form-control-alt @error('content') is-invalid @enderror" placeholder="Say something amazing" required></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-block">
-                            <i class="fa fa-pencil-alt opacity-50 me-1"></i> Post
-                        </button>
-                    </form> --}}
                 </div>
             </div>
 
-            @if (session()->has('info'))
-                <div class="alert alert-warning mb-2" role="alert">
-                    {{ session('info') }}
-                </div>
-            @endif
-            @if (session()->has('error'))
-                <div class="alert alert-danger mb-2" role="alert">
-                    {{ session('error') }}
-                </div>
-            @endif
+           
+
+            @foreach (['success' => 'success', 'info' => 'warning', 'error' => 'danger'] as $key => $type)
+                @if (session()->has($key))
+                    <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 3000)" x-show="show" x-transition.opacity
+                        class="alert alert-{{ $type }} mb-2" role="alert">
+                        {{ session($key) }}
+                    </div>
+                @endif
+            @endforeach
+
             @error('content')
                 <div class="alert alert-danger mb-2" role="alert">{{ $message }}</div>
             @enderror
@@ -155,10 +147,10 @@
             @endforeach
 
 
-             @if ($hasMore)
+            @if ($hasMore)
                 <div class="text-center my-3">
-                    <button wire:click="loadNextPage" class="btn btn-sm btn-light">
-                        Load More Posts
+                    <button wire:click="loadNextPage" class="btn btn-sm btn-primary">
+                        Load More Feeds
                     </button>
                 </div>
             @endif

@@ -9,7 +9,8 @@
             transform: scale(1.2);
         }
     </style>
-    <div wire:ignore.self class="block block-rounded block-bordered" id="posts">
+    {{-- <div wire:ignore.self class="block block-rounded block-bordered" id="posts"> --}}
+    <div wire:poll.visible.430s class="block block-rounded block-bordered" id="posts">
 
         <div class="block-header block-header-default">
 
@@ -208,7 +209,7 @@
 
                 {{-- 💬 Comments --}}
                 <li class="nav-item me-2">
-                    <a class="nav-link" href="{{ url('show/' . $post->id) }}">
+                    <a class="nav-link" href="{{ url('timeline/' . $post->id) }}">
                         <i class="fa fa-comment-alt opacity-50 me-1"></i>
                         {{ $commentCount }}
                         {{-- {{ sumCounter($post->comments, $post->comments_external) }} --}}

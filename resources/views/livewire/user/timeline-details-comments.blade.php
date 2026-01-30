@@ -1,7 +1,7 @@
 <div>
     {{-- In work, do what you enjoy. --}}
 
-    <form wire:submit.prevent="commentFeed">
+    <form wire:submit.prevent="commentFeed" class="mb-2">
         <input type="text" wire:model.defer="message" placeholder="Write a comment..."
             class="form-control form-control-alt">
     </form>

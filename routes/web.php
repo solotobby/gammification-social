@@ -146,13 +146,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // Route::get('timeline', Timeline::class);
 
-        Route::get('timeline', Posts::class);
-        Route::get('new/timeline', Timeline::class);
+        // Route::get('timeline', Posts::class);
+        Route::get('timeline', Timeline::class);
         Route::get('timeline/{post}', TimelineDetails::class);
 
         Route::get('profile/{username}', ViewProfile::class);
         // Route::get('show/{query}', ShowPost::class)->name('show');
-        Route::get('show/{query}', ShowNewPosts::class);
+        // Route::get('show/{query}', ShowNewPosts::class);
         Route::get('post/timeline/{id}/analytics', PostAnalytics::class);
         Route::get('analytics', Analytics::class);
         Route::get('settings', Settings::class);

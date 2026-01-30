@@ -209,6 +209,8 @@ class Posts extends Component
         // }
 
         $this->reset('content', 'images');
+
+         session()->flash('info', 'This content is too similar to existing content, therefore it will not be posted.');
     }
 
     private function isSimilar($newData, $existingData, $threshold = 5)

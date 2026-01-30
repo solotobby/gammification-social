@@ -280,8 +280,11 @@ class Timeline extends Component
                 ]);
             }
         }
+         session()->flash('success', 'Your post was successful!');
 
         $this->reset('content', 'images');
+
+        
 
         // Refresh feed
         // $this->resetPage();
