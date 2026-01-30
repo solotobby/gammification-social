@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\EngagementDailyStat;
+use App\Models\EngagementMonthlyStat;
 use App\Models\SubscriptionStat;
 use App\Models\User;
 use App\Models\UserComment;
@@ -53,10 +54,30 @@ class MonthlyPayoutController extends Controller
                 SUM(likes) as likes,
                 SUM(comments) as comments,
                 SUM(points) as points,
-                created_at
             ')->get();
 
-            return $stats;
+            $monthlyEngament = [];
+
+            foreach ($stats as $stat) {
+
+              $monthlyEngament []=   EngagementMonthlyStat::updateOrCreate(
+                    [
+                        'user_id' => $stat->user_id,
+                        'level'    => $stat->level,
+                        'month'   => $month,
+                    ],
+                    [
+                        'views'    => $stat->views,
+                        'likes'    => $stat->likes,
+                        'comments' => $stat->comments,
+                        'points'   => $stat->points,
+                    ]
+                );
+            }
+
+
+
+            return $monthlyEngament;
     }
 
 
