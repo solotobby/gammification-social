@@ -1,14 +1,4 @@
-<div 
-x-data
-    x-init="
-        window.addEventListener('scroll', () => {
-            let bottomOfWindow = (window.innerHeight + window.scrollY) >= (document.body.offsetHeight - 300);
-            if (bottomOfWindow) {
-                @this.loadNextBatch()
-            }
-        });
-    "
->
+<div>
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css">
     <script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
@@ -164,6 +154,15 @@ x-data
                 <livewire:user.post-content :post="$post" :wire:key="'post-'.$post->id" />
             @endforeach
 
+
+             @if ($hasMore)
+                <div class="text-center my-3">
+                    <button wire:click="loadNextPage" class="btn btn-sm btn-light">
+                        Load More Posts
+                    </button>
+                </div>
+            @endif
+
             {{-- <div class="text-center my-3" x-show="$wire.loadingNext">
                 <div class="spinner-border text-primary" role="status">
                     <span class="visually-hidden">Loading...</span>
@@ -177,12 +176,12 @@ x-data
 
 
 
-            <div x-data x-intersect="$wire.loadNextBatch()" class="py-4 text-center text-muted">
+            {{-- <div x-data x-intersect="$wire.loadNextBatch()" class="py-4 text-center text-muted">
                 <div class="spinner-border text-primary" role="status">
                     <span class="visually-hidden">Loading...</span>
                 </div>
-                {{-- <span wire:loading>Loading more feeds…</span> --}}
-            </div>
+                {{-- <span wire:loading>Loading more feeds…</span> --
+            </div> --}}
 
         </div>
         @include('layouts.engagement')

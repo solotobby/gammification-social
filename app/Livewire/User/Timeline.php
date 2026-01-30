@@ -85,6 +85,8 @@ class Timeline extends Component
     public int $perPage = 5;          // batch size
     public ?string $cursor = null;    // cursor for pagination
     public bool $loadingNext = false;
+
+    public int $page = 1;
     public bool $hasMore = true;
 
 
@@ -94,63 +96,109 @@ class Timeline extends Component
         // $this->preloadNext();
 
         $this->posts = collect();
-        $this->buffer = collect();
+        $this->loadPosts();
+        // $this->buffer = collect();
 
-        $this->loadInitial();
-        $this->preloadNext();
+        // $this->loadInitial();
+        // $this->preloadNext();
     }
-     // Core batch query using cursor
-    protected function fetchBatch(?string $cursor = null)
+
+    public function loadPosts()
     {
-        return Post::with('user')
+        // Step 1: get latest posts per user (interleaving)
+        $query = Post::with('user')
             ->where('status', 'LIVE')
-            ->when($cursor, fn ($q) => $q->where('created_at', '<', $cursor))
-            ->orderByDesc('created_at')
-            ->limit($this->perPage)
-            ->get();
+            ->latest('created_at');
+
+        // Fetch more than perPage to allow interleaving
+        $allPosts = $query->take($this->perPage * $this->page * 2)
+                          ->get();
+
+        // Step 2: group by user
+        $grouped = $allPosts->groupBy('user_id');
+
+        // Step 3: interleave posts: take first from each user, then second, etc.
+        $interleaved = collect();
+        $index = 0;
+
+        do {
+            $added = 0;
+            foreach ($grouped as $userPosts) {
+                if (isset($userPosts[$index])) {
+                    $interleaved->push($userPosts[$index]);
+                    $added++;
+                }
+            }
+            $index++;
+        } while ($added > 0 && $interleaved->count() < $this->perPage * $this->page);
+
+        // Step 4: limit final posts
+        $this->posts = $interleaved->take($this->perPage * $this->page);
+
+        // Step 5: check if there are more posts
+        $this->hasMore = $allPosts->count() > $this->posts->count();
     }
 
-    public function loadInitial()
+    public function loadNextPage()
     {
-        $batch = $this->fetchBatch();
+        if (!$this->hasMore) return;
 
-        if ($batch->isEmpty()) {
-            $this->hasMore = false;
-            return;
-        }
-
-        $this->posts = $batch;
-        $this->cursor = $batch->last()->created_at;
+        $this->page++;
+        $this->loadPosts();
     }
 
-    // Preload next batch for smooth scroll
-    public function preloadNext()
-    {
-        if (! $this->hasMore) return;
+     // Core batch query using cursor
+    // protected function fetchBatch(?string $cursor = null)
+    // {
+    //     return Post::with('user')
+    //         ->where('status', 'LIVE')
+    //         ->when($cursor, fn ($q) => $q->where('created_at', '<', $cursor))
+    //         ->orderByDesc('created_at')
+    //         ->limit($this->perPage)
+    //         ->get();
+    // }
 
-        $this->buffer = $this->fetchBatch($this->cursor);
+    // public function loadInitial()
+    // {
+    //     $batch = $this->fetchBatch();
 
-        if ($this->buffer->isEmpty()) {
-            $this->hasMore = false;
-        }
-    }
+    //     if ($batch->isEmpty()) {
+    //         $this->hasMore = false;
+    //         return;
+    //     }
 
-    // Load the preloaded batch
-    public function loadNextBatch()
-    {
-        if ($this->loadingNext || $this->buffer->isEmpty()) return;
+    //     $this->posts = $batch;
+    //     $this->cursor = $batch->last()->created_at;
+    // }
 
-        $this->loadingNext = true;
+    // // Preload next batch for smooth scroll
+    // public function preloadNext()
+    // {
+    //     if (! $this->hasMore) return;
 
-        $this->posts = $this->posts->concat($this->buffer);
+    //     $this->buffer = $this->fetchBatch($this->cursor);
 
-        $this->cursor = $this->buffer->last()->created_at;
+    //     if ($this->buffer->isEmpty()) {
+    //         $this->hasMore = false;
+    //     }
+    // }
 
-        $this->buffer = collect();
-        $this->preloadNext();
+    // // Load the preloaded batch
+    // public function loadNextBatch()
+    // {
+    //     if ($this->loadingNext || $this->buffer->isEmpty()) return;
 
-        $this->loadingNext = false;
-    }
+    //     $this->loadingNext = true;
+
+    //     $this->posts = $this->posts->concat($this->buffer);
+
+    //     $this->cursor = $this->buffer->last()->created_at;
+
+    //     $this->buffer = collect();
+    //     $this->preloadNext();
+
+    //     $this->loadingNext = false;
+    // }
 
 
 
@@ -289,42 +337,42 @@ class Timeline extends Component
     }
 
 
-    public function loadPosts()
-    {
-        $this->posts = Post::with('user')
-            ->latest()
-            ->take($this->perPage * $this->page)
-            ->get();
+    // public function loadPosts()
+    // {
+    //     $this->posts = Post::with('user')
+    //         ->latest()
+    //         ->take($this->perPage * $this->page)
+    //         ->get();
 
 
-            // Use window function to rank posts per user
-        $posts = Post::select('*')
-            ->where('status', 'LIVE')
-            ->selectRaw('ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY created_at DESC) as row_num')
-            ->orderBy('row_num')            // interleave by row number
-            ->orderBy('created_at', 'desc') // newest posts first within same row_num
-            ->limit($this->perPage *  $this->page)     // fetch extra posts to ensure enough for interleaving
-            // ->with(['user', 'postComments' => function ($query) {
-            //     $query->latest()->take(2)->with('user'); // latest 2 comments with user
-            // }])
-            ->get();
+    //         // Use window function to rank posts per user
+    //     $posts = Post::select('*')
+    //         ->where('status', 'LIVE')
+    //         ->selectRaw('ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY created_at DESC) as row_num')
+    //         ->orderBy('row_num')            // interleave by row number
+    //         ->orderBy('created_at', 'desc') // newest posts first within same row_num
+    //         ->limit($this->perPage *  $this->page)     // fetch extra posts to ensure enough for interleaving
+    //         // ->with(['user', 'postComments' => function ($query) {
+    //         //     $query->latest()->take(2)->with('user'); // latest 2 comments with user
+    //         // }])
+    //         ->get();
 
-        // Group by row number
-        $groupedByRow = $posts->groupBy('row_num');
+    //     // Group by row number
+    //     $groupedByRow = $posts->groupBy('row_num');
 
-        // Flatten in interleaved order
-        $interleavedPosts = new Collection();
-        foreach ($groupedByRow as $rowGroup) {
-            foreach ($rowGroup as $post) {
-                $interleavedPosts->push($post);
-            }
-        }
+    //     // Flatten in interleaved order
+    //     $interleavedPosts = new Collection();
+    //     foreach ($groupedByRow as $rowGroup) {
+    //         foreach ($rowGroup as $post) {
+    //             $interleavedPosts->push($post);
+    //         }
+    //     }
 
-        // Limit final output to perPage
-        $this->posts = $interleavedPosts->take($this->perPage);
+    //     // Limit final output to perPage
+    //     $this->posts = $interleavedPosts->take($this->perPage);
 
 
-    }
+    // }
 
     // public function preloadNext()
     // {
