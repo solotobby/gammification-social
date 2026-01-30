@@ -78,7 +78,7 @@ class Timeline extends Component
     public Collection $posts;
     public Collection $buffer;
 
-    public int $perPage = 5;          // batch size
+    public int $perPage = 10;          // batch size
     public ?string $cursor = null;    // cursor for pagination
     public bool $loadingNext = false;
 
