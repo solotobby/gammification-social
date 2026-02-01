@@ -89,26 +89,36 @@ class PayoutController extends Controller
             $userName =  $engagementStat->user->name;
             $amount = number_format($payout->amount, 2);
             $duration = \Carbon\Carbon::createFromFormat('Y-m', $payout->month)->format('F Y');
+            $currency = $payout->currency ?? 'NGN';
 
             $subject = '🎉 Your Payhankey payout has been processed!';
 
             $content = "
-                Hi {$userName}, 💜
+                        <p>
+                            Great news! We’re excited to let you know that your
+                            <strong>Payhankey payout has been successfully processed!</strong>.
+                        </p>
 
-                Great news! We’re excited to let you know that your Payhankey payout has been successfully processed!.
+                        <p>
+                            💰 <strong>Payout Amount:</strong> NGN' . e($amount) . '<br>
+                            📅 <strong>Period Covered:</strong> ' . e($duration) . '
+                        </p>
 
-                💰 **Payout Amount:** {$amount}  
-                📅 **Period Covered:** {$duration}  
+                        <p>
+                            This payout reflects your engagement and performance on Payhankey during
+                            the selected period. Thank you for creating, engaging, and being an
+                            important part of our community — <strong>your efforts truly matter</strong>.
+                        </p>
 
-                This payout reflects your engagement and performance on Payhankey during the selected period. Thank you for creating, engaging, and being an important part of our community — your efforts truly matter.
+                        <p>
+                            If you have any questions about your payout or need assistance, our support
+                            team is always here for you.
+                        </p>
 
-                If you have any questions about your payout or need assistance, our support team is always here for you.
-
-                Keep creating. Keep growing.  
-                We’re rooting for you 🚀
-
-                With love,  
-                **The Payhankey Team** 💜
+                        <p>
+                            Keep creating. Keep growing.<br>
+                            We’re rooting for you 🚀
+                        </p>
         ";
 
 

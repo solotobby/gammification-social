@@ -58,7 +58,7 @@
             <img src="{{ asset('logo.png') }}" alt="Company Logo" sizes="40">
         </div>
         <div class="content">
-            <h1>{{$subject}}</h1>
+            <h4>{{$subject}}</h4>
             <p>Dear, {{ $user->name }}</p>
 
             {!! $content !!}
