@@ -84,7 +84,7 @@
                                     ) }}
                                 </td>
                                 <td>
-                                    <span class="badge bg-{{ ($user['status'] ?? '') === 'Queued' ? 'secondary' : 'warning' }}">
+                                    <span class="badge bg-{{ ($user['status'] ?? '') === 'Paid' ? 'secondary' : 'warning' }}">
                                         {{ $user['status'] ?? 'Pending' }}
                                     </span>
                                 </td>
@@ -94,12 +94,14 @@
                                            class="btn btn-sm btn-primary">
                                             Queue Payout
                                         </a>
+                                    @elseif(($user['status'] ?? '') !== 'Paid')
+                                        <span class="text-muted">Processed</span>
                                     @else
                                     <a href="{{ url('view/payout/info/' . $user['id']) }}"
                                            class="btn btn-sm btn-secondary">
                                             View Info
                                         </a>
-                                        {{-- <span class="text-muted">Processed</span> --}}
+                                       
                                     @endif
                                 </td>
                             </tr>
