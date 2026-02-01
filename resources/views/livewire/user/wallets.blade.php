@@ -169,7 +169,7 @@
                                 <div class="ms-2 me-auto">
                                     <div class="fw-bold">Payout on Engagement</div>
 
-                                    {{ number_format(@$payouts->amount ?? 'Pending') }}
+                                    {{ number_format(@$payouts->amount) ?? 'Pending' }}
 
                                     {{-- <i>Payment will be updated on the
                                        <b> {{ Carbon\Carbon::now()->addMonth()->day(1)->format('F j, Y') }}</b></i> --}}
