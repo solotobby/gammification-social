@@ -10,7 +10,7 @@ class EngagementMonthlyStat extends Model
 {
     use HasFactory, UuidTrait;
 
-    protected $fillable = ['user_id', 'level', 'month', 'views', 'likes', 'comments', 'points'];
+    protected $fillable = ['user_id', 'level', 'month', 'views', 'likes', 'comments', 'points', 'amount', 'status'];
 
     public function user()
     {

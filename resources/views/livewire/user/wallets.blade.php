@@ -156,12 +156,52 @@
                                 </div>
 
                             </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-start">
+                                <div class="ms-2 me-auto">
+                                    <div class="fw-bold">Currency</div>
+
+                                    {{ $payouts->currency }}
+                                </div>
+
+                            </li>
 
                             <li class="list-group-item d-flex justify-content-between align-items-start">
                                 <div class="ms-2 me-auto">
-                                    <div class="fw-bold">Pay Out Amount</div>
-                                    <i>Payment will be updated on the
-                                       <b> {{ Carbon\Carbon::now()->addMonth()->day(1)->format('F j, Y') }}</b></i>
+                                    <div class="fw-bold">Payout on Engagement</div>
+
+                                    {{ number_format($payouts->amount ?? 'Pending') }}
+
+                                    {{-- <i>Payment will be updated on the
+                                       <b> {{ Carbon\Carbon::now()->addMonth()->day(1)->format('F j, Y') }}</b></i> --}}
+
+                                    {{-- {{ getCurrencyCode() }}{{ $subscription->pay_out_amount }} --}}
+                                </div>
+
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-start">
+                                <div class="ms-2 me-auto">
+                                    <div class="fw-bold">Bonus</div>
+
+
+
+                                    {{ number_format($wallets->balance, 2) }}
+
+                                    {{-- <i>Payment will be updated on the
+                                       <b> {{ Carbon\Carbon::now()->addMonth()->day(1)->format('F j, Y') }}</b></i> --}}
+
+                                </div>
+
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-start">
+                                <div class="ms-2 me-auto">
+                                    <div class="fw-bold">Total Pay</div>
+
+                                    {{-- {{ number_format($payouts->amount ?? 'Pending') }} --}}
+
+                                    {{ number_format($wallets->balance + $payouts->amount ?? 0, 2) }}
+
+                                    {{-- <i>Payment will be updated on the
+                                       <b> {{ Carbon\Carbon::now()->addMonth()->day(1)->format('F j, Y') }}</b></i> --}}
 
                                     {{-- {{ getCurrencyCode() }}{{ $subscription->pay_out_amount }} --}}
                                 </div>
@@ -171,8 +211,9 @@
                         </ol>
 
                         <div class="alert alert-info mt-3" role="alert">
-                            <strong>Note:</strong> Payouts are set on the 1st of every month and processed on the 2nd of the same month. Ensure your withdrawal
-                                method is set up correctly to avoid delays.
+                            <strong>Note:</strong> Payouts are set on the 1st of every month and processed on the 2nd of
+                            the same month. Ensure your withdrawal
+                            method is set up correctly to avoid delays.
                         </div>
 
                     </div>

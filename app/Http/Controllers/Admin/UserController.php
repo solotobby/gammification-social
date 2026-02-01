@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Mail\GeneralMail;
 use App\Models\AccessCode;
 use App\Models\Level;
+use App\Models\Payout;
 use App\Models\Post;
 use App\Models\Transaction;
 use App\Models\User;
@@ -74,8 +75,27 @@ class UserController extends Controller
             $access = AccessCode::where('email', $user->email)->latest()->first();
             $userLevel = Level::where('name', $level)->first();
             $withdrawalMethod = WithdrawalMethod::where('user_id', $user->id)->first();
+            $lastMonth = now()->subMonth()->format('Y-m');
+            $payouts = Payout::where('user_id', $user->id)
+                ->where('month', $lastMonth)->frist();
+            //     ->latest()
+            //     ->get();
 
-            return view('admin.user.user_info', ['user' => $user, 'withdrawals' => $withrawals, 'withdrawalMethod' => $withdrawalMethod, 'posts' => $posts,  'level' => $level, 'levels' => $levels, 'access' => $access, 'userLevel' => $userLevel]);
+            // $latestPayout = $payouts->first(); 
+           
+
+            return view('admin.user.user_info', [
+                'user' => $user, 
+                'withdrawals' => $withrawals, 
+                'withdrawalMethod' => $withdrawalMethod, 
+                'posts' => $posts,  
+                'level' => $level, 
+                'levels' => $levels, 
+                'access' => $access, 
+                'userLevel' => $userLevel,
+                'payouts'          => $payouts,
+                // 'latestPayout'     => $latestPayout,
+            ]);
         }
     }
 

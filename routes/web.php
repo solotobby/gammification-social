@@ -204,5 +204,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('user/engagement/payouts', [EngagementPayoutController::class, 'index']);
         Route::get('user/bank/information', [UserController::class, 'bankInformation']);
         Route::get('monthly/payout/{level}', [PayoutController::class, 'index']);
+        Route::get('user/queue/payout/{id}', [PayoutController::class, 'queuePayout']);
+        Route::get('view/payout/info/{id}', [PayoutController::class, 'viewPayoutInformation']);
     });
 });

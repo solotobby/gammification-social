@@ -2,11 +2,13 @@
 
 namespace App\Livewire\User;
 
+use App\Models\Payout;
 use App\Models\Transaction;
 use App\Models\UserLevel;
 use App\Models\Wallet;
 use App\Models\WithdrawalMethod;
 use App\Models\Withdrawals;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\Attributes\Validate;
 
@@ -41,6 +43,7 @@ class Wallets extends Component
     public $currency;
     public $paidWithdrawals;
     public $subscription;
+    public $payouts;
 
 
 
@@ -49,12 +52,16 @@ class Wallets extends Component
 
     public function mount()
     {
+        $user = Auth::user();
 
         $this->wallets = auth()->user()->wallet;
         $this->withdrawals = WithdrawalMethod::where(['user_id' => auth()->user()->id])->first(); //auth()->user()->usdt_wallet_address;
         $this->paidWithdrawals = Transaction::where('type', 'withdrawals')->where('user_id', auth()->user()->id)->sum('amount');
         $this->subscription = UserLevel::where('user_id', auth()->user()->id)->where('status', 'active')->first();
-
+        
+        $lastMonth = now()->subMonth()->format('Y-m');
+            $this->payouts = Payout::where('user_id', $user->id)
+                ->where('month', $lastMonth)->first();
     }
 
     public function refresh()
