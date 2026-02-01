@@ -39,11 +39,32 @@
         <a class="nav-main-link" href="{{ url('current/payouts') }}">
           <i class="nav-main-link-icon fa fa-list"></i>
           <span class="nav-main-link-name">Current Payout</span>
-        </a> 
-        {{-- <a class="nav-main-link" href="{{ url('user/engagement/payouts') }}">
-          <i class="nav-main-link-icon fa fa-list"></i>
-          <span class="nav-main-link-name">Freemium Payouts</span>
-        </a>  --}}
+        </a>
+
+         <li class="nav-main-item">
+          <a class="nav-main-link nav-main-link-submenu" data-toggle="submenu" aria-haspopup="true" aria-expanded="false" href="#">
+            <i class="nav-main-link-icon fa fa-usd"></i>
+            <span class="nav-main-link-name">Payouts</span>
+          </a>
+          <ul class="nav-main-submenu">
+            <li class="nav-main-item">
+              <a class="nav-main-link" href="{{ url('monthly/payout/Influencer') }}">
+                <span class="nav-main-link-name">Influncers</span>
+              </a>
+            </li>
+            <li class="nav-main-item">
+              <a class="nav-main-link" href="{{ url('monthly/payout/Creator') }}">
+                <span class="nav-main-link-name">Creators</span>
+              </a>
+            </li>
+            <li class="nav-main-item">
+              <a class="nav-main-link" href="{{ url('monthly/payout/Basic') }}">
+                <span class="nav-main-link-name">Basic</span>
+              </a>
+            </li>
+          </ul>
+        </li>
+        
         <a class="nav-main-link" href="{{ url('user/bank/information') }}">
           <i class="nav-main-link-icon fa fa-list"></i>
           <span class="nav-main-link-name">Bank Account</span>

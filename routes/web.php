@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\EngagementPayoutController;
 use App\Http\Controllers\Admin\LevelManagementController;
 use App\Http\Controllers\Admin\MonthlyPayoutController;
+use App\Http\Controllers\Admin\PayoutController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\UserEngagementController;
 use App\Livewire\CreateProduct;
@@ -202,5 +203,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('user/post/list/{id}', [UserController::class, 'postList']);
         Route::get('user/engagement/payouts', [EngagementPayoutController::class, 'index']);
         Route::get('user/bank/information', [UserController::class, 'bankInformation']);
+        Route::get('monthly/payout/{level}', [PayoutController::class, 'index']);
     });
 });
