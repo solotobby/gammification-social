@@ -7,6 +7,7 @@ use App\Mail\GeneralMail;
 use App\Models\EngagementMonthlyStat;
 use App\Models\Payout;
 use App\Models\User;
+use App\Notifications\GeneralNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
@@ -121,6 +122,15 @@ class PayoutController extends Controller
                         </p>
         ";
 
+
+            $engagementStat->user->notify(
+                (new GeneralNotification([
+                    'title'   => '🚀 Payhankey Payout Processed!!',
+                    'message' => 'Great news! We’re excited to let you know that your Payhankey payout has been successfully processed!',
+                    'icon'    => 'fa-heart text-danger',
+                    'url'     => url('wallets'),
+                ]))->delay(now()->addSeconds(1))
+            );
 
             Mail::to($userEmail)
                 ->send(new GeneralMail(
