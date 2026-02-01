@@ -100,8 +100,8 @@ class PayoutController extends Controller
                         </p>
 
                         <p>
-                            💰 <strong>Payout Amount:</strong> NGN' . e($amount) . '<br>
-                            📅 <strong>Period Covered:</strong> ' . e($duration) . '
+                            💰 <strong>Payout Amount:</strong> NGN $amount <br>
+                            📅 <strong>Period Covered:</strong> $duration
                         </p>
 
                         <p>
