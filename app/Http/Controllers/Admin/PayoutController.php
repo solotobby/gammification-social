@@ -125,9 +125,9 @@ class PayoutController extends Controller
 
             $engagementStat->user->notify(
                 (new GeneralNotification([
-                    'title'   => 'Payhankey Payout Processed!!',
+                    'title'   => '🚀 Payhankey Payout Processed!!',
                     'message' => 'Great news! We’re excited to let you know that your Payhankey payout has been successfully processed!',
-                    'icon'    => '🚀',
+                    'icon'    => 'fa-usd text-danger',
                     'url'     => url('wallets'),
                 ]))->delay(now()->addSeconds(1))
             );
