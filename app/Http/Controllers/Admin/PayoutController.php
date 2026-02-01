@@ -7,8 +7,10 @@ use App\Mail\GeneralMail;
 use App\Models\EngagementMonthlyStat;
 use App\Models\Payout;
 use App\Models\User;
+use App\Models\WithdrawalMethod;
 use App\Notifications\GeneralNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 
 class PayoutController extends Controller
@@ -149,8 +151,98 @@ class PayoutController extends Controller
     public function viewPayoutInformation($engagementStatId)
     {
 
-        $payoutInformation = Payout::where('engagement_monthly_stats_id', $engagementStatId)->first();
-        return view('admin.payouts.show', ['payout' => $payoutInformation]);
+        $res = securityVerification();
+        if ($res == 'OK') {
+            $payoutInformation = Payout::where('engagement_monthly_stats_id', $engagementStatId)->first();
+            $withdrawal = WithdrawalMethod::where('user_id', $payoutInformation->user_id)->first();
+            return view('admin.payouts.show', ['payout' => $payoutInformation, 'withdrawals' => $withdrawal]);
+        }
+    }
+
+    // public function fundTransfer(Request $request)
+    // {
+    //     $res = securityVerification();
+    //     if ($res == 'OK') {
+
+    //         $validation =  env('VALIDATION_CODE');
+    //         if ($request->validationCode === $validation) {
+
+    //         $fetch = WithdrawalMethod::where('user_id', $request->user_id)->first();
+
+    //         if($fetch){
+    //             $this->transferFund($fetch->amount, $fetch->recipient_code);
+    //         }
+
+    //         }else{
+    //             return 'error';
+    //         }
+    //     }
+    // }
+
+    public function fundTransfer(Request $request)
+    {
+        // 1️⃣ Security check
+        if (securityVerification() !== 'OK') {
+            return response()->json(['status' => 'error', 'message' => 'Security verification failed'], 403);
+        }
+
+        // 2️⃣ Validate request
+        $request->validate([
+            'user_id' => 'required|uuid|exists:users,id',
+            'validationCode' => 'required|string',
+        ]);
+
+        // 3️⃣ Check validation code
+        if ($request->validationCode !== env('VALIDATION_CODE')) {
+            return response()->json(['status' => 'error', 'message' => 'Invalid validation code'], 422);
+        }
+
+        $payoutInfo = Payout::find($request->payout_id);
+
+
+        // 4️⃣ Fetch withdrawal method
+        $withdrawal = WithdrawalMethod::where('user_id', $request->user_id)->first();
+        if (!$withdrawal) {
+            return response()->json(['status' => 'error', 'message' => 'Withdrawal method not found'], 404);
+        }
+
+        // 5️⃣ Perform transfer
+        try {
+            $transferData = $this->transferFund($payoutInfo->amount, $withdrawal->recipient_code);
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Fund transfer initiated',
+                'data' => $transferData
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Transfer failed: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+    // private function transferFund($amount, $recipientCode)
+    private function transferFund($amount, string $recipientCode): array
+    {
+        $payload = [
+            "source" => "balance",
+            "amount" => intval($amount * 100), // Convert to kobo/ng subunit
+            "recipient" => $recipientCode,
+            "reference" => time() . rand(1000, 9999),
+            "reason" => "Payhankey Payout"
+        ];
+
+        $response = Http::withHeaders([
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer ' . env('PAYSTACK_SECRET_KEY')
+        ])->post('https://api.paystack.co/transfer', $payload)
+            ->throw() // Automatically throws if 4xx or 5xx
+            ->json();
+
+        return $response['data'] ?? [];
     }
 
     private function processPremium(string $level, string $lastMonth): array

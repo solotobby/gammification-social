@@ -206,5 +206,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('monthly/payout/{level}', [PayoutController::class, 'index']);
         Route::get('user/queue/payout/{id}', [PayoutController::class, 'queuePayout']);
         Route::get('view/payout/info/{id}', [PayoutController::class, 'viewPayoutInformation']);
+        Route::post('fund/transfer', [PayoutController::class, 'fundTransfer'])->name('fund.transfer');
     });
 });

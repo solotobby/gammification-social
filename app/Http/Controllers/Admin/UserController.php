@@ -77,7 +77,7 @@ class UserController extends Controller
             $withdrawalMethod = WithdrawalMethod::where('user_id', $user->id)->first();
             $lastMonth = now()->subMonth()->format('Y-m');
             $payouts = Payout::where('user_id', $user->id)
-                ->where('month', $lastMonth)->frist();
+                ->where('month', $lastMonth)->first();
             //     ->latest()
             //     ->get();
 
