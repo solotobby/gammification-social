@@ -184,7 +184,7 @@
                                 </div>
 
                             </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-start">
+                            {{-- <li class="list-group-item d-flex justify-content-between align-items-start">
                                 <div class="ms-2 me-auto">
                                     <div class="fw-bold">Bonus</div>
 
@@ -192,9 +192,15 @@
 
                                     {{ number_format($wallets->balance, 2) }}
 
-                                    {{-- <i>Payment will be updated on the
-                                       <b> {{ Carbon\Carbon::now()->addMonth()->day(1)->format('F j, Y') }}</b></i> --}}
+                                </div>
 
+                            </li> --}}
+
+                             <li class="list-group-item d-flex justify-content-between align-items-start">
+                                <div class="ms-2 me-auto">
+                                    <div class="fw-bold">PayOut Status</div>
+
+                                    {{ @$payouts->status }}
                                 </div>
 
                             </li>
@@ -204,7 +210,7 @@
 
                                     {{-- {{ number_format($payouts->amount ?? 'Pending') }} --}}
 
-                                    {{ number_format($wallets->balance + @$payouts->amount ?? 0, 2) }}
+                                    {{ number_format( @$payouts->amount ?? 0, 2) }}
 
                                     {{-- <i>Payment will be updated on the
                                        <b> {{ Carbon\Carbon::now()->addMonth()->day(1)->format('F j, Y') }}</b></i> --}}
