@@ -89,7 +89,7 @@
                                     </span>
                                 </td>
                                 <td>
-                                    @if(($user['status'] ?? '') !== 'Queued')
+                                    @if(($user['status'] ?? '') == 'Pending')
                                         <a href="{{ url('user/queue/payout/' . $user['id']) }}"
                                            class="btn btn-sm btn-primary">
                                             Queue Payout
