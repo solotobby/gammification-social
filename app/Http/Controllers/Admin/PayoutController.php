@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Mail\GeneralMail;
 use App\Models\EngagementMonthlyStat;
 use App\Models\Payout;
+use App\Models\Transaction;
 use App\Models\User;
+use App\Models\Wallet;
 use App\Models\WithdrawalMethod;
 use App\Notifications\GeneralNotification;
 use Illuminate\Http\Request;
@@ -66,9 +68,7 @@ class PayoutController extends Controller
     public function queuePayout($id)
     {
         $engagementStat = EngagementMonthlyStat::find($id);
-
-        //email
-
+        // $fetchWallet = Wallet::where('user_id', $engagementStat->user_id)->first();
 
         $payout = Payout::create([
             'engagement_monthly_stats_id' => $id,
@@ -81,6 +81,9 @@ class PayoutController extends Controller
             'status' => 'Queued',
             'type' => 'Premium'
         ]);
+
+       
+
 
 
 
@@ -155,29 +158,12 @@ class PayoutController extends Controller
         if ($res == 'OK') {
             $payoutInformation = Payout::where('engagement_monthly_stats_id', $engagementStatId)->first();
             $withdrawal = WithdrawalMethod::where('user_id', $payoutInformation->user_id)->first();
-            return view('admin.payouts.show', ['payout' => $payoutInformation, 'withdrawals' => $withdrawal]);
+            $wallet = Wallet::where('user_id', $payoutInformation->user_id)->first();
+            return view('admin.payouts.show', ['payout' => $payoutInformation, 'withdrawals' => $withdrawal, 'wallet' => $wallet]);
         }
     }
 
-    // public function fundTransfer(Request $request)
-    // {
-    //     $res = securityVerification();
-    //     if ($res == 'OK') {
 
-    //         $validation =  env('VALIDATION_CODE');
-    //         if ($request->validationCode === $validation) {
-
-    //         $fetch = WithdrawalMethod::where('user_id', $request->user_id)->first();
-
-    //         if($fetch){
-    //             $this->transferFund($fetch->amount, $fetch->recipient_code);
-    //         }
-
-    //         }else{
-    //             return 'error';
-    //         }
-    //     }
-    // }
 
     public function fundTransfer(Request $request)
     {
@@ -199,6 +185,10 @@ class PayoutController extends Controller
 
         $payoutInfo = Payout::find($request->payout_id);
 
+        if($payoutInfo->status == 'Paid'){
+             return response()->json(['status' => 'error', 'message' => 'Payment Already Processed'], 422);
+        }
+
 
         // 4️⃣ Fetch withdrawal method
         $withdrawal = WithdrawalMethod::where('user_id', $request->user_id)->first();
@@ -206,14 +196,50 @@ class PayoutController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Withdrawal method not found'], 404);
         }
 
+         //check Wallet balance
+        $fetchWallet = Wallet::where('user_id', $request->user_id)->first();
+        $walletBalance = $fetchWallet->balance; //convertToBaseCurrency($fetchWallet->balance, $fetchWallet->currency);
+        if ($fetchWallet->balance > 0) {
+            Payout::create([
+                'engagement_monthly_stats_id' => $payoutInfo->engagement_monthly_stats_id,
+                'user_id' => $request->user_id,
+                'level' => $payoutInfo->level,
+                'amount' => $walletBalance,
+                'total_engagement' => 0.00,
+                'month' => $payoutInfo->month,
+                'currency' => $fetchWallet->currency ?? 'NGN',
+                'status' => 'Queued',
+                'type' => 'Bonus'
+            ]);
+
+            $fetchWallet->balance = 0.00;
+            $fetchWallet->save();
+        }
+
         // 5️⃣ Perform transfer
         try {
 
-            $transferData = $this->transferFund($payoutInfo->amount, $withdrawal->recipient_code);
+            $amount =  $payoutInfo->amount + $walletBalance;
+
+            $transferData = $this->transferFund($amount, $withdrawal->recipient_code);
 
             $payoutInfo->update(['status' => 'Paid']);
 
-            $updatengagment = EngagementMonthlyStat::where('id', $payoutInfo->engagement_monthly_stats_id)->update(['status' => 'Paid']);
+            // $updatengagment = EngagementMonthlyStat::where('id', $payoutInfo->engagement_monthly_stats_id)->update(['status' => 'Paid']);
+
+            
+
+            Transaction::create([
+                    'user_id'    => $request->user_id,
+                    'ref'        => time(). '-payouts',
+                    'amount'     => $amount,
+                    'currency'   => $fetchWallet->currency,
+                    'status'     => 'successful',
+                    'type'       => 'payhankey_payout_and_bonus',
+                    'action'     => 'Credit',
+                    'description' => "Payhankey Payout for : ".$payoutInfo->month,
+                ]);
+
 
 
             $payoutInfo->user->notify(
@@ -226,8 +252,8 @@ class PayoutController extends Controller
             );
 
 
-           $userName = $payoutInfo->user->name;
-           $userEmail = $payoutInfo->user->email;
+            $userName = $payoutInfo->user->name;
+            $userEmail = $payoutInfo->user->email;
 
             $amount = number_format($payoutInfo->amount, 2);
             $duration = \Carbon\Carbon::createFromFormat('Y-m', $payoutInfo->month)->format('F Y');

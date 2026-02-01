@@ -65,11 +65,42 @@
                             </div>
 
                         </li>
+                         <li class="list-group-item d-flex justify-content-between align-items-start">
+                            <div class="ms-2 me-auto">
+                                <div class="fw-bold">Original Currency</div>
+
+                                {{ $wallet->currency }}
+
+                            </div>
+
+                        </li>
                         <li class="list-group-item d-flex justify-content-between align-items-start">
                             <div class="ms-2 me-auto">
                                 <div class="fw-bold">Next Payout Date</div>
 
                                 {{ Carbon\Carbon::now()->addMonth()->day(1)->format('F j, Y') }}
+                            </div>
+
+                        </li>
+                         <li class="list-group-item d-flex justify-content-between align-items-start">
+                            <div class="ms-2 me-auto">
+                                <div class="fw-bold">Pay Out Status</div>
+
+                                {{ $payout->status }}
+                            </div>
+
+                        </li>
+                         <li class="list-group-item d-flex justify-content-between align-items-start">
+                            <div class="ms-2 me-auto">
+                                <div class="fw-bold">Wallet Balance</div>
+
+                                {{ $wallet->balance }}
+
+                                {{-- <i>Payment will be updated on the
+
+                                    <b> {{ Carbon\Carbon::now()->addMonth()->day(1)->format('F j, Y') }}</b></i> --}}
+
+                                {{-- {{ getCurrencyCode() }}{{ $subscription->pay_out_amount }} --}}
                             </div>
 
                         </li>
@@ -88,21 +119,28 @@
                             </div>
 
                         </li>
-
-                        <li class="list-group-item d-flex justify-content-between align-items-start">
+                         <li class="list-group-item d-flex justify-content-between align-items-start">
                             <div class="ms-2 me-auto">
-                                <div class="fw-bold">Pay Out Status</div>
+                                <div class="fw-bold">Total PayOut</div>
 
-                                {{ $payout->status }}
+                             {{ $payout->amount +  $wallet->balance}}
                             </div>
 
                         </li>
 
+                       
+
                     </ol>
+                   
 
                 </div>
+
+                
             </div>
+             
         </div>
+        <a href="{{ url('user/info/'.$payout->user->id) }}" class="btn btn-sm btn-primary mb-3"> User Info Page </a>
+
 
 
         <div class="block block-rounded">
