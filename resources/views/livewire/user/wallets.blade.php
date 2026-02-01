@@ -169,10 +169,16 @@
                                 <div class="ms-2 me-auto">
                                     <div class="fw-bold">Payout on Engagement</div>
 
+                                    @if(auth()->user()->email == 'solotobby@gail.com')
+                                        {{ number_format(@$payouts->amount) ?? 'Pending' }}
+                                    @else
+
                                     {{-- {{ number_format(@$payouts->amount) ?? 'Pending' }} --}}
 
                                     <i>Payment will be updated on the
                                        <b> {{ Carbon\Carbon::now()->addMonth()->day(1)->format('F j, Y') }}</b></i>
+
+                                       @endif
 
                                     {{-- {{ getCurrencyCode() }}{{ $subscription->pay_out_amount }} --}}
                                 </div>
