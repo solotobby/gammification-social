@@ -170,7 +170,7 @@
                                     <div class="fw-bold">Payout on Engagement</div>
 
                                     @if(auth()->user()->email == 'solotobby@gmail.com')
-                                        {{ number_format(@$payouts->amount) ?? 'Pending' }}
+                                        {{ number_format(@$payouts->amount) ?? 'Processing' }}
                                     @else
 
                                     {{-- {{ number_format(@$payouts->amount) ?? 'Pending' }} --}}
