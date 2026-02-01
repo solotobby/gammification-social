@@ -212,8 +212,10 @@
 
                                     {{ number_format($wallets->balance + @$payouts->amount ?? 0, 2) }}
 
+                                    <br>
+
                                     <i>Payment will be sent to you local bank latest on
-                                       <b> {{ Carbon\Carbon::now()->addMonth()->day(1)->format('F j, Y') }}</b></i>
+                                       <b> {{ Carbon\Carbon::now()->addMonth()->day(2)->format('F j, Y') }}</b></i>
 
                                     {{-- {{ getCurrencyCode() }}{{ $subscription->pay_out_amount }} --}}
                                 </div>
