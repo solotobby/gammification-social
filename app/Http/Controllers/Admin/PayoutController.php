@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\GeneralMail;
 use App\Models\EngagementMonthlyStat;
 use App\Models\Payout;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class PayoutController extends Controller
 {
@@ -62,6 +64,9 @@ class PayoutController extends Controller
     {
         $engagementStat = EngagementMonthlyStat::find($id);
 
+        //email
+
+
         $payout = Payout::create([
             'engagement_monthly_stats_id' => $id,
             'user_id' => $engagementStat->user_id,
@@ -74,15 +79,58 @@ class PayoutController extends Controller
             'type' => 'Premium'
         ]);
 
-        $engagementStat->update(['status' => 'Queued']);
+
+
+        if ($payout) {
+
+            $engagementStat->update(['status' => 'Queued']);
+
+            $userEmail =  $engagementStat->user->email;
+            $userName =  $engagementStat->user->name;
+            $amount = number_format($payout->amount, 2);
+            $duration = \Carbon\Carbon::createFromFormat('Y-m', $payout->month)->format('F Y');
+
+            $subject = '🎉 Your Payhankey payout has been processed!';
+
+            $content = "
+                Hi {$userName}, 💜
+
+                Great news! We’re excited to let you know that your Payhankey payout has been successfully processed!.
+
+                💰 **Payout Amount:** {$amount}  
+                📅 **Period Covered:** {$duration}  
+
+                This payout reflects your engagement and performance on Payhankey during the selected period. Thank you for creating, engaging, and being an important part of our community — your efforts truly matter.
+
+                If you have any questions about your payout or need assistance, our support team is always here for you.
+
+                Keep creating. Keep growing.  
+                We’re rooting for you 🚀
+
+                With love,  
+                **The Payhankey Team** 💜
+        ";
+
+
+            Mail::to($userEmail)
+                ->send(new GeneralMail(
+                    (object)[
+                        'name' => $userName,
+                        'email' => $userEmail
+                    ],
+                    $subject,
+                    $content
+                ));
+        }
 
         return back();
     }
 
-    public function viewPayoutInformation($engagementStatId){
+    public function viewPayoutInformation($engagementStatId)
+    {
 
-       $payoutInformation = Payout::where('engagement_monthly_stats_id', $engagementStatId)->first();
-       return view('admin.payouts.show', ['payout' => $payoutInformation]);
+        $payoutInformation = Payout::where('engagement_monthly_stats_id', $engagementStatId)->first();
+        return view('admin.payouts.show', ['payout' => $payoutInformation]);
     }
 
     private function processPremium(string $level, string $lastMonth): array
