@@ -161,6 +161,7 @@
                         Account Name: {{ @$withdrawals->account_name }} <br>
                         Bank Name: {{ @$withdrawals->bank_name }}<br>
                         Account Number: {{ @$withdrawals->account_number }}
+                        Recipient Code: {{ @$withdrawals->recipient_code }} <br>
                     @endif
                     <br>
                     <hr>
@@ -239,17 +240,7 @@
                             </div>
                         </div>
                     </form>
-
-
-
-
-
-
-
-
                 </div>
-
-
 
             </div>
         </div>
