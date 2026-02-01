@@ -127,7 +127,7 @@ class PayoutController extends Controller
                 (new GeneralNotification([
                     'title'   => '🚀 Payhankey Payout Processed!!',
                     'message' => 'Great news! We’re excited to let you know that your Payhankey payout has been successfully processed!',
-                    'icon'    => 'fa-usd text-danger',
+                    'icon'    => '🚀',
                     'url'     => url('wallets'),
                 ]))->delay(now()->addSeconds(1))
             );
