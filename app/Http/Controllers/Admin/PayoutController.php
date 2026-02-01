@@ -208,7 +208,76 @@ class PayoutController extends Controller
 
         // 5️⃣ Perform transfer
         try {
+
             $transferData = $this->transferFund($payoutInfo->amount, $withdrawal->recipient_code);
+
+            $payoutInfo->update(['status' => 'Paid']);
+
+            $updatengagment = EngagementMonthlyStat::where('id', $payoutInfo->engagement_monthly_stats_id)->update(['status' => 'Paid']);
+
+
+            $payoutInfo->user->notify(
+                (new GeneralNotification([
+                    'title'   => '🚀 Payhankey Payout Sent!!',
+                    'message' => 'Great news! Your Payment has been sent to your account!',
+                    'icon'    => 'fa-heart text-danger',
+                    'url'     => url('wallets'),
+                ]))->delay(now()->addSeconds(1))
+            );
+
+
+           $userName = $payoutInfo->user->name;
+           $userEmail = $payoutInfo->user->email;
+
+            $amount = number_format($payoutInfo->amount, 2);
+            $duration = \Carbon\Carbon::createFromFormat('Y-m', $payoutInfo->month)->format('F Y');
+            $currency = $payoutInfo->currency ?? 'NGN';
+
+            $subject = '🎉 Your Payhankey payout has been sent!';
+
+            $content = "
+    
+
+                    <p>
+                        Fantastic news! Your <strong>Payhankey payout has been successfully processed and sent to your account</strong>.
+                    </p>
+
+                    <p>
+                        💰 <strong>Payout Amount:</strong> NGN {$amount} <br>
+                        📅 <strong>Period Covered:</strong> {$duration}
+                    </p>
+
+                    <p>
+                        This payout reflects your engagement and performance on Payhankey during the selected period.
+                        Thank you for creating, engaging, and being an important part of our community —
+                        <strong>your efforts truly matter</strong>.
+                    </p>
+
+                    <p>
+                        If you have any questions about your payout or need assistance, our support team is always here for you.
+                    </p>
+
+                    <p>
+                        Keep creating. Keep growing.<br>
+                        We’re rooting for you 🚀
+                    </p>
+
+                    <p>With love, <br><strong>The Payhankey Team 💜</strong></p>
+                ";
+
+
+
+            Mail::to($userEmail)
+                ->send(new GeneralMail(
+                    (object)[
+                        'name' => $userName,
+                        'email' => $userEmail
+                    ],
+                    $subject,
+                    $content
+                ));
+
+
             return response()->json([
                 'status' => 'success',
                 'message' => 'Fund transfer initiated',
