@@ -94,7 +94,7 @@
                                            class="btn btn-sm btn-primary">
                                             Queue Payout
                                         </a>
-                                    @elseif(($user['status'] ?? '') !== 'Paid')
+                                    @elseif(($user['status'] ?? '') == 'Paid')
                                         <span class="text-muted">Processed</span>
                                     @else
                                     <a href="{{ url('view/payout/info/' . $user['id']) }}"
