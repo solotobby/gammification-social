@@ -174,9 +174,9 @@ if (!function_exists('processPayment')) {
 if (!function_exists('calculateUniqueEarningPerView')) {
     function calculateUniqueEarningPerView()
     {
-        if(userLevel() == 'Basic' || userLevel() == 'Creator'){
+        if (userLevel() == 'Basic' || userLevel() == 'Creator') {
             return 0.00002;
-        }else{
+        } else {
             return 0.0008;
         }
     }
@@ -185,9 +185,9 @@ if (!function_exists('calculateUniqueEarningPerView')) {
 if (!function_exists('calculateUniqueEarningPerLike')) {
     function calculateUniqueEarningPerLike()
     {
-        if(userLevel() == 'Basic' || userLevel() == 'Creator'){
+        if (userLevel() == 'Basic' || userLevel() == 'Creator') {
             return 0.00002;
-        }else{
+        } else {
             return 0.0004;
         }
     }
@@ -196,9 +196,9 @@ if (!function_exists('calculateUniqueEarningPerLike')) {
 if (!function_exists('calculateUniqueEarningPerComment')) {
     function calculateUniqueEarningPerComment()
     {
-        if(userLevel() == 'Basic' || userLevel() == 'Creator'){
+        if (userLevel() == 'Basic' || userLevel() == 'Creator') {
             return 0.00002;
-        }else{
+        } else {
             return 0.0004;
         }
     }
@@ -498,7 +498,7 @@ if (!function_exists('securityVerification')) {
 
         $countryIsContained = in_array($myCountry, $countryList);
 
-    //    return [$ipIsContained, $countryIsContained];
+        //    return [$ipIsContained, $countryIsContained];
 
         if ($ipIsContained == true || $countryIsContained == true) {
             return 'OK';
@@ -832,13 +832,14 @@ if (!function_exists('upgradeLevel')) {
         if ($level) {
 
             if ($userCurrency == 'NGN' || $userCurrency == 'USD' || $userCurrency == 'EUR' || $userCurrency == 'GBP') {
-                return createSubscriptionNGN($convertedAmount, $level);
+                return initializeKorayPay($convertedAmount, $level);
             }
         }
     }
 }
 
-if (!function_exists('createSubscriptionNGN')) {
+//for pay stack integration
+if (!function_exists('createSubscriptionNGN')) { 
 
     function createSubscriptionNGN($amount, $level)
     {
@@ -903,5 +904,78 @@ if (!function_exists('engagementEarnings')) {
     function engagementEarnings(int $total): float
     {
         return round($total / 1000, 2);
+    }
+}
+
+
+if (!function_exists('initializeKorayPay')) {
+    function initializeKorayPay($amount, $level)
+    {
+
+        $user = Auth::user();
+
+        $payloadNGN = [
+            "amount" => $amount,
+            "redirect_url" => route('verify.subscription'), //url('wallet/fund/redirect'),
+            "currency" => "NGN",
+            "reference" => generateTransactionRef(),
+            "narration" => $level->name . " Upgrade",
+            "channels" => [
+                "card",
+                "bank_transfer"
+            ],
+            // "default_channel"=> "card",
+            "customer" => [
+                "name" => $user->name,
+                "email" => $user->email
+            ],
+            "notification_url" => "https://webhook.site/eb6e001a-efd8-471d-81c2-866170abd550",
+            "metadata" => [
+                'user_id' => $user->id,
+                'level' => $level->name,
+                'level_id' => $level->id,
+                'name' => $user->name
+
+                // "key0" => "test0",
+                // "key1" => "test1",
+                // "key2" => "test2",
+                // "key3" => "test3",
+                // "key4" => "test4"
+            ]
+        ];
+
+        $res = Http::withHeaders([
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer ' . config('services.env.kora_sec')
+        ])->post('https://api.korapay.com/merchant/api/v1/charges/initialize', $payloadNGN)->throw();
+
+        if (!$res->successful()) {
+            session()->flash('error', 'Unable to initialize payment.');
+            return;
+        }
+
+
+        return json_decode($res->getBody()->getContents(), true)['data']['checkout_url'];
+    }
+}
+
+if (!function_exists('verifyKorayPay')) {
+    function verifyKorayPay($referee)
+    {
+        $res = Http::withHeaders([
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer ' . config('services.env.kora_sec')
+        ])->get('https://api.korapay.com/merchant/api/v1/charges/' . $referee)->throw();
+
+        return json_decode($res->getBody()->getContents(), true);
+    }
+}
+
+if (!function_exists('generateTransactionRef')) {
+    function generateTransactionRef(): string
+    {
+        return 'PKY-' . now()->format('YmdHis') . '-' . random_int(1000, 99999999);
     }
 }

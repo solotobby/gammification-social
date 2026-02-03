@@ -12,6 +12,7 @@ use App\Models\Transaction;
 use App\Models\User;
 use App\Models\UserLevel;
 use App\Models\Wallet;
+use App\Services\SubscriptionService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -25,7 +26,7 @@ class HomeController extends Controller
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(SubscriptionService $subscriptionService)
     {
         $this->middleware('auth');
     }
@@ -166,7 +167,6 @@ class HomeController extends Controller
                     'action'     => 'Credit',
                     'description' => "{$user->name} upgraded to {$level->name}",
                 ]);
-
             } else {
 
                 $regBonus = convertToBaseCurrency(
@@ -199,7 +199,7 @@ class HomeController extends Controller
                     'description' => "Upgrade bonus for {$level->name}",
                 ]);
             }
-            
+
             SubscriptionStat::create([
                 'user_id'   => $user->id,
                 'level_id'  => $level->id,
@@ -324,9 +324,22 @@ class HomeController extends Controller
 
     //    }
 
+    public function verifySubscriptionPayment(SubscriptionService $subscriptionService)
+    {
+        $reference = request()->query('reference');
+        //verify Reference
+       $verifyReference = $subscriptionService->verifyPayment($reference);
+       
+      
+        // return $verifyReference;
+    }
+
     public function createSubscription($levelId)
     {
-        return upgradeLevel($levelId);
+
+        $authUrl = app(SubscriptionService::class)->processSubscriptionPayment($levelId);
+
+        return redirect($authUrl);
     }
 
 

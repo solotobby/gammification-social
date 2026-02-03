@@ -65,7 +65,7 @@
                             </div>
 
                         </li>
-                         <li class="list-group-item d-flex justify-content-between align-items-start">
+                        <li class="list-group-item d-flex justify-content-between align-items-start">
                             <div class="ms-2 me-auto">
                                 <div class="fw-bold">Original Currency</div>
 
@@ -82,7 +82,7 @@
                             </div>
 
                         </li>
-                         <li class="list-group-item d-flex justify-content-between align-items-start">
+                        <li class="list-group-item d-flex justify-content-between align-items-start">
                             <div class="ms-2 me-auto">
                                 <div class="fw-bold">Pay Out Status</div>
 
@@ -90,7 +90,7 @@
                             </div>
 
                         </li>
-                         <li class="list-group-item d-flex justify-content-between align-items-start">
+                        <li class="list-group-item d-flex justify-content-between align-items-start">
                             <div class="ms-2 me-auto">
                                 <div class="fw-bold">Wallet Balance</div>
 
@@ -119,27 +119,27 @@
                             </div>
 
                         </li>
-                         <li class="list-group-item d-flex justify-content-between align-items-start">
+                        <li class="list-group-item d-flex justify-content-between align-items-start">
                             <div class="ms-2 me-auto">
                                 <div class="fw-bold">Total PayOut</div>
 
-                             {{ $payout->amount +  $wallet->balance}}
+                                {{ $payout->amount + $wallet->balance }}
                             </div>
 
                         </li>
 
-                       
+
 
                     </ol>
-                   
+
 
                 </div>
 
-                
+
             </div>
-             
+
         </div>
-        <a href="{{ url('user/info/'.$payout->user->id) }}" class="btn btn-sm btn-primary mb-3"> User Info Page </a>
+        <a href="{{ url('user/info/' . $payout->user->id) }}" class="btn btn-sm btn-primary mb-3"> User Info Page </a>
 
 
 
@@ -231,7 +231,7 @@
                                     </div>
                                 </div>
                                 <input type="hidden" value="{{ $payout->user->id }}" name="user_id">
-                                 <input type="hidden" value="{{ $payout->id }}" name="payout_id">
+                                <input type="hidden" value="{{ $payout->id }}" name="payout_id">
 
                                 <div class="mb-4">
                                     <button type="submit" class="btn btn-sm btn-primary">Process Transfer</button>
@@ -243,6 +243,34 @@
                 </div>
 
             </div>
+        </div>
+
+        <div class="block block-rounded">
+            <div class="block-header block-header-default">
+                <h3 class="block-title">Communication</h3>
+            </div>
+            <div class="row">
+                <div class="col-lg-4">
+                    <p class="text-muted">
+                        You can change a user Currency here
+                    </p>
+                </div>
+                <div class="col-lg-8 col-xl-5">
+
+                    <div class="mb-4">
+                        <select class="form-control mt-2" name="msaage" required>
+                            <option value="">Select Currency</option>
+                            <option > Kindly Update Your Account Details </option>
+                            {{-- <option value="EUR">Ch</option>
+                            <option value="GBP">GBP – British Pound</option>
+                            <option value="NGN">NGN – Nigerian Naira</option> --}}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            {{-- <input type="hidden" value="{{ $user->id }}" name="user_id"> --}}
+
+
         </div>
 
 
@@ -264,10 +292,10 @@
                     $.post(url, data)
                         .done(function(response) {
                             let alertType = response.status === 'success' ? 'alert-success' :
-                            'alert-danger';
+                                'alert-danger';
                             $('#transfer-response').html(
                                 `<div class="alert ${alertType}" role="alert">${response.message}</div>`
-                                );
+                            );
                         })
                         .fail(function(xhr) {
                             let message = xhr.responseJSON?.message ?? 'Something went wrong';

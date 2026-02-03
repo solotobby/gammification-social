@@ -142,8 +142,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('access/code/verification', [\App\Http\Controllers\HomeController::class, 'accessCodeVerification'])->name('access.code.verification');
 
         Route::get('validate/api', [\App\Http\Controllers\HomeController::class, 'validateApi']);
-        Route::get('upgrade/api', [\App\Http\Controllers\HomeController::class, 'upgradeApi'])->name('upgrade.api');
-        Route::get('subscribe/{levelId}', [\App\Http\Controllers\HomeController::class, 'createSubscription'])->name('subscribe');
+        // Route::get('upgrade/api', [\App\Http\Controllers\HomeController::class, 'upgradeApi'])->name('upgrade.api');
+        Route::get('verify/subscription/payment/', [\App\Http\Controllers\PaymentController::class, 'verifyKoraSubscriptionPayment'])->name('verify.subscription');
+        Route::get('subscribe/{levelId}', [\App\Http\Controllers\PaymentController::class, 'createSubscription'])->name('subscribe');
 
         // Route::get('timeline', Timeline::class);
 
