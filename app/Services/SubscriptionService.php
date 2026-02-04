@@ -76,7 +76,8 @@ class SubscriptionService
             "narration" => $level->name . " Upgrade",
             "channels" => [
                 "card",
-                "bank_transfer"
+                "bank_transfer",
+                "pay_with_bank"
             ],
             // "default_channel"=> "card",
             "customer" => [
