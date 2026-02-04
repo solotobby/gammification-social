@@ -8,6 +8,7 @@ use App\Models\AccessCode;
 use App\Models\Level;
 use App\Models\Payout;
 use App\Models\Post;
+use App\Models\SubscriptionStat;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Models\UserLevel;
@@ -82,16 +83,16 @@ class UserController extends Controller
             //     ->get();
 
             // $latestPayout = $payouts->first(); 
-           
+
 
             return view('admin.user.user_info', [
-                'user' => $user, 
-                'withdrawals' => $withrawals, 
-                'withdrawalMethod' => $withdrawalMethod, 
-                'posts' => $posts,  
-                'level' => $level, 
-                'levels' => $levels, 
-                'access' => $access, 
+                'user' => $user,
+                'withdrawals' => $withrawals,
+                'withdrawalMethod' => $withdrawalMethod,
+                'posts' => $posts,
+                'level' => $level,
+                'levels' => $levels,
+                'access' => $access,
                 'userLevel' => $userLevel,
                 'payouts'          => $payouts,
                 // 'latestPayout'     => $latestPayout,
@@ -99,16 +100,16 @@ class UserController extends Controller
         }
     }
 
-    public function updateCurrency(Request $request){
+    public function updateCurrency(Request $request)
+    {
 
         $wall = Wallet::where('user_id', $request->user_id)->first();
         $wall->currency = $request->currency;
         $wall->save();
-        
+
         WithdrawalMethod::where('user_id', $request->user_id)->delete();
 
         return back()->with('success', 'Account Currency Changed to : ' . $wall->currency);
-
     }
 
     public function upgradeProcess(Request $request)
@@ -146,7 +147,7 @@ class UserController extends Controller
                 $wl->balance = $convertedAmount;
                 $wl->save();
 
-                $reference = time() . rand(999, 9999);
+                $reference = generateTransactionRef();
 
                 Transaction::create([
                     'user_id' => $user->id,
@@ -161,18 +162,18 @@ class UserController extends Controller
                     'customer' => null
                 ]);
 
-                Transaction::create([
-                    'user_id' => $user->id,
-                    'ref' => $reference,
-                    'amount' => $convertedAmount,
-                    'currency' => $user->wallet->currency,
-                    'status' =>  'successful',
-                    'type' => 'reg_bonus_admin_assisted',
-                    'action' => 'Credit',
-                    'description' => 'Upgrade Bonus by admin for ' . $level->name,
-                    'meta' => null,
-                    'customer' => null
+
+
+                SubscriptionStat::create([
+                    'user_id'   => $user->id,
+                    'level_id'  => $level->id,
+                    'plan_name' => $level->name,
+                    'amount'    => $convertedAmount,
+                    'currency'  => $currency,
+                    'start_date' => now(),
+                    'end_date'  => $nextPaymentDate,
                 ]);
+
                 return back()->with('success', 'Upgrade Successful: ' . $level->name);
             }
         }
@@ -181,17 +182,17 @@ class UserController extends Controller
     public function creditBonus($userId, $level)
     {
 
-        
+
         if ($level == 'Creator' || $level == 'Influencer') {
 
-            
-        //  $exists = Transaction::where('user_id', $userId)
-        //             ->whereIn('type', ['reg_bonus', 'reg_bonus_admin_assisted'])
-        //             ->exists();
 
-        //         if ($exists) {
-        //             return back()->with('error', 'Bonus already exists for thr user');
-        //         }
+            //  $exists = Transaction::where('user_id', $userId)
+            //             ->whereIn('type', ['reg_bonus', 'reg_bonus_admin_assisted'])
+            //             ->exists();
+
+            //         if ($exists) {
+            //             return back()->with('error', 'Bonus already exists for thr user');
+            //         }
 
 
 
@@ -216,7 +217,8 @@ class UserController extends Controller
                 'meta' => null,
                 'customer' => null
             ]);
-            return back()->with('success', 'Upgrade Bonus added for ' . $levelInfo->name . ' at ' .$wl->currency.  $convertedAmount);
+
+            return back()->with('success', 'Upgrade Bonus added for ' . $levelInfo->name . ' at ' . $wl->currency .  $convertedAmount);
         } else {
             return back()->with('error', 'Upgrade bonus is allowed for only Creator and Influencer ');
         }
@@ -269,7 +271,8 @@ class UserController extends Controller
         return view('admin.user.transactions', ['transactions' => $transactions, 'user' => $user]);
     }
 
-    public function bankInformation(){
+    public function bankInformation()
+    {
         $withdrawals = WithdrawalMethod::orderBy('created_at', 'desc')->paginate(50);
         return view('admin.user.bank_info', ['withdrawals' => $withdrawals]);
     }

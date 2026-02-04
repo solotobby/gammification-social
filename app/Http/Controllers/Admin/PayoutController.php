@@ -82,11 +82,6 @@ class PayoutController extends Controller
             'type' => 'Premium'
         ]);
 
-       
-
-
-
-
         if ($payout) {
 
             $engagementStat->update(['status' => 'Queued']);
