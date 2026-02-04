@@ -23,8 +23,6 @@ class CommentService
 
         DB::transaction(function () use ($authUserId, $postId, $message, $user) {
 
-          
-
             // 1️⃣ Create the raw comment
             Comment::create([
                 'user_id' => $authUserId,
@@ -82,6 +80,8 @@ class CommentService
                     'comment_external' => DB::raw('COALESCE(comment_external, 0) + 1'),
                 ]);
             }
+
+            userActivity('comment');
         });
     }
 }

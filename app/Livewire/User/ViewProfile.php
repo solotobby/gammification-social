@@ -61,6 +61,7 @@ class ViewProfile extends Component
                 ? 'profile_views'
                 : 'profile_views_external'
         );
+        userActivity('profile_view');
 
         if ($created->wasRecentlyCreated) {
             $this->user->notify(new GeneralNotification([

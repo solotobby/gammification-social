@@ -233,6 +233,8 @@ class SubscriptionService
                 'start_date' => now(),
                 'end_date'  => $nextPaymentDate,
             ]);
+
+            userActivity('subscribed');
         });
 
         return [

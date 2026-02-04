@@ -22,18 +22,7 @@
     <div class="content">
         <div class="row">
             <!-- Quick Stats -->
-            <div class="col-6 col-md-3">
-                <a class="block block-rounded block-link-pop text-center" href="{{ url('user/list/all') }}">
-                    <div class="block-content block-content-full ratio ratio-16x9">
-                        <div class="d-flex justify-content-center align-items-center">
-                            <div>
-                                <div class="fs-2 mb-1">{{ $userCount }}</div>
-                                <div class="text-muted">Users</div>
-                            </div>
-                        </div>
-                    </div>
-                </a>
-            </div>
+            
             <div class="col-6 col-md-3">
                 <a class="block block-rounded block-link-pop text-center" href="javascript:void(0)">
                     <div class="block-content block-content-full ratio ratio-16x9">
@@ -70,8 +59,32 @@
                     </div>
                 </a>
             </div>
+            <div class="col-6 col-md-3">
+                <a class="block block-rounded block-link-pop text-center" href="javascript:void(0)">
+                    <div class="block-content block-content-full ratio ratio-16x9">
+                        <div class="d-flex justify-content-center align-items-center">
+                            <div>
+                                <div class="fs-2 mb-1">{345}</div>
+                                <div class="text-muted">Active Last 30 days</div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
 
 
+            <div class="col-6 col-md-3">
+                <a class="block block-rounded block-link-pop text-center" href="{{ url('user/list/all') }}">
+                    <div class="block-content block-content-full ratio ratio-16x9">
+                        <div class="d-flex justify-content-center align-items-center">
+                            <div>
+                                <div class="fs-2 mb-1">{{ $userCount }}</div>
+                                <div class="text-muted">Users</div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
             @foreach ($levelCounts as $level)
                 <div class="col-6 col-md-3">
                     <a class="block block-rounded block-link-pop text-center"

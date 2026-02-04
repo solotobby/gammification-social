@@ -7,6 +7,7 @@ use App\Models\LevelPlanId;
 use App\Models\Partner;
 use App\Models\Post;
 use App\Models\User;
+use App\Models\UserActivity;
 use App\Models\UserComment;
 use App\Models\UserLike;
 use App\Models\UserView;
@@ -977,5 +978,15 @@ if (!function_exists('generateTransactionRef')) {
     function generateTransactionRef(): string
     {
         return 'PKY-' . now()->format('YmdHis') . '-' . random_int(1000, 99999999);
+    }
+}
+
+if (!function_exists('userActivity')) {
+    function userActivity($event)
+    {
+        UserActivity::create([
+            'user_id' => auth()->user()->id,
+            'event' => $event
+        ]);
     }
 }

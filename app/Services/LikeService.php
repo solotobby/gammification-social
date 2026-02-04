@@ -31,6 +31,8 @@ class LikeService
                 // 👎 Unlike
                 $existingLike->delete();
                 $post->decrement('likes');
+                
+                userActivity('unlike');
 
                 return;
             }
@@ -58,6 +60,8 @@ class LikeService
                     ]))->delay(now()->addSeconds(1))
                 );
             }
+
+            userActivity('like');
         });
     }
 

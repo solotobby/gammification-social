@@ -31,6 +31,8 @@ class ViewService
                 ]
             );
 
+            userActivity('views');
+
             if ($view->wasRecentlyCreated) {
                 $post->increment('views');
             } else {
