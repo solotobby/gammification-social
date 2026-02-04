@@ -146,11 +146,11 @@ class SubscriptionService
 
         $data = $response['data'];
 
-        if (!$data || $data['status'] !== 'success') {
+        if (!$data || $data['status'] !== 'success' || $data['status'] !== 'pending') {
             $this->transactionService->markFailed($transaction, $data);
 
             throw new \Exception('Payment verification failed or was not successful.');
-            // return false;
+
         }
 
         // 🔐 Security checks

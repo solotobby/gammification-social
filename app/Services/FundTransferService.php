@@ -10,7 +10,6 @@ class FundTransferService{
     
     public function transfer(){
 
-
     }
 
 }
