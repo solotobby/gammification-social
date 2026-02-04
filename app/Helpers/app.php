@@ -568,11 +568,11 @@ if (!function_exists('maskCode')) {
 if (!function_exists('bankList')) {
     function bankList()
     {
-        $url = 'https://api.paystack.co/bank?country=nigeria';
+        $url = 'https://api.korapay.com/merchant/api/v1/misc/banks?countryCode=NG'; //'https://api.paystack.co/bank?country=nigeria';
         $res = Http::withHeaders([
             'Accept' => 'application/json',
             'Content-Type' => 'application/json',
-            'Authorization' => 'Bearer ' . env('PAYSTACK_SECRET_KEY')
+            'Authorization' => 'Bearer ' . config('services.env.kora_pub')
         ])->get($url)->throw();
 
         return json_decode($res->getBody()->getContents(), true)['data'];

@@ -31,7 +31,8 @@ return [
         'region' => env('AWS_DEFAULT_REGION'),
     ],
     'env'=>[
-        'kora_sec' => env('KORA_SEC')
+        'kora_sec' => env('KORA_SEC'),
+        'kora_pub' => env('KORA_PUB')
     ]
 
 ];
