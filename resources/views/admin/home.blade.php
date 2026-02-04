@@ -40,7 +40,7 @@
                     <div class="block-content block-content-full ratio ratio-16x9">
                         <div class="d-flex justify-content-center align-items-center">
                             <div>
-                                <div class="fs-2 mb-1">{456}</div>
+                                <div class="fs-2 mb-1">{{ fetchActive() }}</div>
                                 <div class="text-muted">Active Today</div>
                             </div>
                         </div>
@@ -52,7 +52,7 @@
                     <div class="block-content block-content-full ratio ratio-16x9">
                         <div class="d-flex justify-content-center align-items-center">
                             <div>
-                                <div class="fs-2 mb-1">{345}</div>
+                                <div class="fs-2 mb-1">{{ fetchActive(7) }} </div>
                                 <div class="text-muted">Active Last 7 days</div>
                             </div>
                         </div>
@@ -64,7 +64,7 @@
                     <div class="block-content block-content-full ratio ratio-16x9">
                         <div class="d-flex justify-content-center align-items-center">
                             <div>
-                                <div class="fs-2 mb-1">{345}</div>
+                                <div class="fs-2 mb-1">{{ fetchActive(30) }}</div>
                                 <div class="text-muted">Active Last 30 days</div>
                             </div>
                         </div>

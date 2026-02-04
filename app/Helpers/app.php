@@ -840,7 +840,7 @@ if (!function_exists('upgradeLevel')) {
 }
 
 //for pay stack integration
-if (!function_exists('createSubscriptionNGN')) { 
+if (!function_exists('createSubscriptionNGN')) {
 
     function createSubscriptionNGN($amount, $level)
     {
@@ -988,5 +988,21 @@ if (!function_exists('userActivity')) {
             'user_id' => auth()->user()->id,
             'event' => $event
         ]);
+    }
+}
+
+if (!function_exists('fetchActive')) {
+    function fetchActive(?int $days = null): int
+    {
+
+        $query = UserActivity::query()->distinct('user_id')->select('user_id');
+
+        if ($days === null) {
+            $query->whereDate('created_at', today());
+        } else {
+            $query->where('created_at', '>=', now()->subDays($days));
+        }
+
+        return $query->count('user_id');
     }
 }
