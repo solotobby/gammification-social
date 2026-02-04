@@ -61,9 +61,9 @@ Route::group(['namespace' => 'auth'], function () {
     Route::get('reg', [\App\Http\Controllers\Auth\RegisterController::class, 'reg']);
 
     Route::post('process/reg', [\App\Http\Controllers\Auth\RegisterController::class, 'regUser'])->name('reg.user');
-    
+
     Route::post('user/login', [\App\Http\Controllers\Auth\RegisterController::class, 'loginUser'])
-    ->middleware('throttle:5,1')->name('login.user');
+        ->middleware('throttle:5,1')->name('login.user');
 
 
     Route::get('access/code/{level}', [\App\Http\Controllers\GeneralController::class, 'accessCode']);
@@ -131,7 +131,7 @@ Auth::routes();
 
 
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'track.online'])->group(function () {
 
     Route::get('/home', [\App\Http\Controllers\HomeController::class, 'index'])->name('home');
     Route::get('user/home', [\App\Http\Controllers\HomeController::class, 'userHome'])->name('user.home');
