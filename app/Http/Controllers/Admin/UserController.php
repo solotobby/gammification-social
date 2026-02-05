@@ -112,7 +112,8 @@ class UserController extends Controller
         return back()->with('success', 'Account Currency Changed to : ' . $wall->currency);
     }
 
-    public function changeStatus(Request $request){
+    public function changeStatus(Request $request)
+    {
         $fetchUser = User::find($request->user_id);
         $fetchUser->status = $request->status;
         $fetchUser->save();
@@ -157,30 +158,36 @@ class UserController extends Controller
 
                 $reference = generateTransactionRef();
 
-                Transaction::create([
-                    'user_id' => $user->id,
-                    'ref' => $reference,
-                    'amount' => $convertedAmount,
-                    'currency' => $user->wallet->currency,
-                    'status' =>  'successful',
-                    'type' => 'upgrade_purchase_admin_assisted',
-                    'action' => 'Credit',
-                    'description' => $user->name . ' upgraded to ' . $level->name . ' by admin',
-                    'meta' => null,
-                    'customer' => null
-                ]);
 
 
 
-                SubscriptionStat::create([
-                    'user_id'   => $user->id,
-                    'level_id'  => $level->id,
-                    'plan_name' => $level->name,
-                    'amount'    => $convertedAmount,
-                    'currency'  => $currency,
-                    'start_date' => now(),
-                    'end_date'  => $nextPaymentDate,
-                ]);
+                if ($level->name != 'Basic') {
+
+                    Transaction::create([
+                        'user_id' => $user->id,
+                        'ref' => $reference,
+                        'amount' => $convertedAmount,
+                        'currency' => $user->wallet->currency,
+                        'status' =>  'successful',
+                        'type' => 'upgrade_purchase_admin_assisted',
+                        'action' => 'Credit',
+                        'description' => $user->name . ' upgraded to ' . $level->name . ' by admin',
+                        'meta' => null,
+                        'customer' => null
+                    ]);
+
+
+                    SubscriptionStat::create([
+                        'user_id'   => $user->id,
+                        'level_id'  => $level->id,
+                        'plan_name' => $level->name,
+                        'amount'    => convertToBaseCurrency($level->amount, $currency), //$convertedAmount,
+                        'currency'  => $currency,
+                        'start_date' => now(),
+                        'end_date'  => $nextPaymentDate,
+                    ]);
+                }
+
 
                 return back()->with('success', 'Upgrade Successful: ' . $level->name);
             }
