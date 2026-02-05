@@ -35,7 +35,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'access_code_id',
         'level_id',
-        'last_seen_at'
+        'status'
     ];
 
     /**
@@ -56,6 +56,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'status' => 'string',
     ];
 
     public function withdrawalMethod(){

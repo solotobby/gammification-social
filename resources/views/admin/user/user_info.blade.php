@@ -104,9 +104,10 @@
                 Base Currency: {{ $currency }} <br>
                 Access Code: {{ $access->code }} <br>
                 Access Email: {{ $access->email }} <br>
-                Access Activated: {{ $access->is_active == 1 ? 'Yes' : 'Not yet' }} <br>
+                Access Activated: {{ $user->email_verified_at != null ? 'Yes' : 'Not yet' }} <br>
                 Access Created On: {{ $access->created_at }} <br>
                 Access Updated On: {{ $access->updated_at }} <br>
+                Status: {{ $user->status }} <br>
 
 
 
@@ -186,17 +187,7 @@
                             </p>
                         </div>
                         <div class="col-lg-8 col-xl-5">
-                            {{-- @if (session('success'))
-                                <div class="alert alert-success" role="alert">
-                                    {{ session('success') }}
-                                </div>
-                            @endif
-
-                            @if (session('error'))
-                                <div class="alert alert-danger" role="alert">
-                                    {{ session('error') }}
-                                </div>
-                            @endif --}}
+                           
                             <div class="mb-4">
                                 <select class="form-control mt-2" name="currency" {{-- wire:model.defer="currency" --}} required>
 
@@ -338,6 +329,50 @@
                 </form>
             </div>
         </div>
+
+        <div class="block block-rounded">
+            <div class="block-header block-header-default">
+                <h3 class="block-title">Change User Status</h3>
+            </div>
+            <div class="block-content">
+                <form method="POST" action="{{ route('change.status') }}">
+                    @csrf
+                    <div class="row">
+                        <div class="col-lg-4">
+                            <p class="text-muted">
+                                Chnage User Status
+                            </p>
+                        </div>
+                        <div class="col-lg-8 col-xl-5">
+                           
+                            <div class="mb-4">
+                                <select class="form-control mt-2" name="status" {{-- wire:model.defer="currency" --}} required>
+
+                                    <option value="">Select One</option>
+                                    <option value="ACTIVE">Active</option>
+                                    <option value="SHADOW_BANNED">Shadow Ban</option>
+                                    <option value="BLOCKED">Block</option>
+                                    
+                                </select>
+
+                            </div>
+                            <input type="hidden" value="{{ $user->id }}" name="user_id">
+
+
+                            <div class="mb-4">
+                                <button type="submit" class="btn btn-sm btn-primary">Change Status</button>
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- END Text -->
+
+
+                </form>
+            </div>
+        </div>
+
+
 
 
 

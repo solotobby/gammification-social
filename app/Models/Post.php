@@ -10,25 +10,38 @@ class Post extends Model
 {
     use HasFactory, UuidTrait;
 
-    protected $fillable = ['user_id', 'content', 'views', 'clicks',
-                             'likes', 'likes_external', 'views_external', 
-                             'comments', 'comment_external', 'status', 'unicode'
-                            ];
+    protected $fillable = [
+        'user_id',
+        'content',
+        'views',
+        'clicks',
+        'likes',
+        'likes_external',
+        'views_external',
+        'comments',
+        'comment_external',
+        'status',
+        'unicode'
+    ];
 
-    public function user(){
+    public function user()
+    {
         return $this->belongsTo(User::class);
     }
 
-    public function images(){
+    public function images()
+    {
         return $this->hasMany(PostImages::class);
     }
 
-    public function likes(){
-        
+    public function likes()
+    {
+
         return $this->hasMany(UserLike::class);
     }
 
-    public function unpaidLikes(){
+    public function unpaidLikes()
+    {
         return $this->likes()->where('is_paid', false)->count();
     }
 
@@ -38,65 +51,89 @@ class Post extends Model
         return $this->likes()->where('user_id', $user->id)->exists();
     }
 
-    public function userLikes(){
+    public function userLikes()
+    {
         return $this->belongsToMany(User::class, 'user_likes', 'post_id');
     }
 
 
-    public function views(){
-        
+    public function views()
+    {
+
         return $this->hasMany(UserView::class);
     }
 
-    public function unpaidViews(){
+    public function unpaidViews()
+    {
         return $this->views()->where('is_paid', false)->count();
     }
 
-    public function userViews(){
+    public function userViews()
+    {
         return $this->belongsToMany(User::class, 'user_views', 'post_id');
     }
 
-    public function postComments(){
+    public function postComments()
+    {
         return $this->hasMany(Comment::class)->orderBy('created_at', 'desc');
     }
 
-    public function postCommentsExternal(){
+    public function postCommentsExternal()
+    {
         return $this->hasMany(CommentExternalMessage::class)->orderBy('created_at', 'desc');
     }
 
-    public function comments(){
-        
+    public function comments()
+    {
+
         return $this->hasMany(UserComment::class);
     }
 
-    public function unpaidComments(){
+    public function unpaidComments()
+    {
         return $this->comments()->where('is_paid', false)->count();
     }
 
-    public function externalComments(){
+    public function externalComments()
+    {
         return $this->hasMany(CommentExternal::class);
     }
 
-    public function unpaidExternalComments(){
+    public function unpaidExternalComments()
+    {
         return $this->externalComments()->where('is_paid', false)->count();
     }
 
-    public function paidExternalComments(){
+    public function paidExternalComments()
+    {
         return $this->externalComments()->where('is_paid', true)->count();
     }
 
-    public function externalViews(){
+    public function externalViews()
+    {
         return $this->hasMany(ViewsExternal::class);
     }
 
-    public function unpaidExternalViews(){
+    public function unpaidExternalViews()
+    {
         return $this->externalViews()->where('is_paid', false)->count();
     }
 
-    public function paidExternalViews(){
+    public function paidExternalViews()
+    {
         return $this->externalViews()->where('is_paid', true)->count();
     }
 
 
+    public function scopeVisibleToViewer($query, User $profileOwner, ?User $viewer)
+    {
+        if (
+            $profileOwner->status === 'SHADOW_BANNED' &&
+            (! $viewer || $viewer->id !== $profileOwner->id)
+        ) {
+            $query->where('status', 'LIVE');
+        }
 
+        return $query;
+    }
 }

@@ -1006,3 +1006,69 @@ if (!function_exists('fetchActive')) {
         return $query->count('user_id');
     }
 }
+
+
+// if (!function_exists('autoShadowBanIfSpam')) {
+//     function autoShadowBanIfSpam($text)
+//     {
+//          if (!auth()->check()) {
+//             return;
+//         }
+
+//         $user = auth()->user();
+
+//         // Never shadow-ban admins
+//         if (method_exists($user, 'is_admin') && $user->is_admin) {
+//             return;
+//         }
+
+//         // Already shadow banned or blocked
+//         if (in_array($user->status, ['SHADOW_BANNED', 'BLOCKED'])) {
+//             return;
+//         }
+
+//         // Detect rubbish / spam
+//         if (isSpam($text)) {
+//             $user->update([
+//                 'status' => 'SHADOW_BANNED',
+//             ]);
+//         }
+//     }
+// }
+
+
+if (!function_exists('isSpam')) {
+    function isSpam($text)
+    {
+
+        $score = 0;
+        $text = trim($text);
+
+        // Too short
+        if (strlen($text) < 5) {
+            $score += 2;
+        }
+
+        // Repeated characters (aaaaaa, !!!!!)
+        if (preg_match('/(.)\1{4,}/', $text)) {
+            $score += 3;
+        }
+
+        // Keyboard smash (low vowel ratio)
+        $vowels = preg_match_all('/[aeiou]/i', $text);
+        $letters = preg_match_all('/[a-z]/i', $text);
+
+        if ($letters > 0 && ($vowels / $letters) < 0.25) {
+            $score += 3;
+        }
+
+        // Excessive symbols
+        if (preg_match('/[^\w\s]{5,}/', $text)) {
+            $score += 2;
+        }
+
+        return $score >= 2;
+
+
+    }
+}

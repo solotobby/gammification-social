@@ -252,10 +252,10 @@ class Timeline extends Component
             ]);
         }
 
-
+        $user = Auth::user();
 
         $content = $this->convertUrlsToLinks($this->content);
-        $getContent = Post::where(['user_id' => auth()->user()->id])->pluck('content')->toArray();
+        $getContent = Post::where(['user_id' => $user->id])->pluck('content')->toArray();
 
         // dd($content);
 
@@ -264,8 +264,21 @@ class Timeline extends Component
             $this->reset('content');
             return;
         }
+
+        $status = 'LIVE';
+        if($user->status != 'ACTIVE'){
+            $status = 'SHADOW_BANNED';
+        }
+
+        // $check = isSpam($content);
+        // if($check){
+        //     $status = 'SHADOW_BANNED';
+        // }
+
+        // dd($status);
+
         $uniqueCode = rand(1000, 9999) . time();
-        $timelines = Post::create(['user_id' => auth()->user()->id, 'content' => $content, 'unicode' => $uniqueCode, 'comment_external' => 0, 'status' => 'LIVE']);
+        $timelines = Post::create(['user_id' => $user->id, 'content' => $content, 'unicode' => $uniqueCode, 'comment_external' => 0, 'status' => $status]);
 
         if (!empty($this->images)) {
             foreach ($this->images as $image) {
@@ -288,6 +301,10 @@ class Timeline extends Component
 
         // Refresh feed
         // $this->resetPage();
+    }
+
+    private function checkWriteUp(){
+
     }
 
     private function convertUrlsToLinks($text)

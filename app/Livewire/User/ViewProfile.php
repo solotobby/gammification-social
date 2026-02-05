@@ -277,7 +277,13 @@ class ViewProfile extends Component
     {
         // $timelines = $this->timeline($this->id);
 
-        $timelines = $this->user->posts()->where(['status' => 'LIVE', 'user_id' =>  $this->user->id])->orderBy('created_at', 'desc')->take($this->perpage)->get(); //$this->timelines();
+
+        $timelines = $this->user->posts()
+            ->visibleToViewer($this->user, auth()->user())
+            ->latest()
+            ->take($this->perpage)
+            ->get();
+        //$timelines = $this->user->posts()->where(['status' => 'LIVE', 'user_id' =>  $this->user->id])->orderBy('created_at', 'desc')->take($this->perpage)->get(); //$this->timelines();
 
         return view('livewire.user.view-profile', ['posts' => $timelines]);
     }

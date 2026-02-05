@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Post;
+use App\Models\User;
 use App\Models\UserView;
 use Illuminate\Support\Facades\DB;
 
@@ -16,7 +17,16 @@ class ViewService
     
         DB::transaction(function () use ($post, $userId) {
 
+            $user = User::find($userId);
+
             $isSelfView = $userId === $post->user_id;
+
+            //manage account monetization 
+            $type = match (true) {
+                $isSelfView => 'self-view',
+                $user->status === 'SHADOW_BANNED' => 'self-view',
+                default => 'view',
+            };
 
             $view = UserView::firstOrCreate(
                 [
@@ -27,7 +37,7 @@ class ViewService
                     'is_paid' => false,
                     'amount' => calculateUniqueEarningPerView(),
                     'poster_user_id' => $post->user_id,
-                    'type' => $isSelfView ? 'self-view' : 'view',
+                    'type' => $type, //$isSelfView ? 'self-view' : 'view',
                 ]
             );
 

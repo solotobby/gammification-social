@@ -38,6 +38,12 @@ class CommentService
 
             $isSelfComment = $authUserId === $post->user_id;
 
+            $type = match (true) {
+                $isSelfComment => 'self-comment',
+                $user->status === 'SHADOW_BANNED' => 'shadow_banned',
+                default => 'comment',
+            };
+
             // 3️⃣ Check if this is the user's first comment
             $isFirstComment = ! UserComment::where([
                 'user_id' => $authUserId,
@@ -53,7 +59,7 @@ class CommentService
                     'is_paid'        => false,
                     'amount'         => calculateUniqueEarningPerComment(),
                     'poster_user_id' => $post->user_id,
-                    'type'           => $isSelfComment ? 'self-comment' : 'comment',
+                    'type'           => $type, //$isSelfComment ? 'self-comment' : 'comment',
                 ]);
 
                 // 5️⃣ Atomic increment

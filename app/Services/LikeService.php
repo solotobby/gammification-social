@@ -36,6 +36,13 @@ class LikeService
 
                 return;
             }
+            //manage account monetization 
+            $type = match (true) {
+                $isSelfLike => 'self-like',
+                $user->status === 'SHADOW_BANNED' => 'self-like',
+                default => 'like',
+            };
+
 
             // ❤️ Like
             $post->likes()->create([
@@ -43,7 +50,7 @@ class LikeService
                 'poster_user_id' => $post->user_id,
                 'is_paid'        => false,
                 'amount'         => calculateUniqueEarningPerLike(),
-                'type'           => $isSelfLike ? 'self-like' : 'like',
+                'type'           => $type, //$isSelfLike ? 'self-like' : 'like',
             ]);
 
             $post->increment('likes');

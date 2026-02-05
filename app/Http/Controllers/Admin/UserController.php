@@ -112,6 +112,14 @@ class UserController extends Controller
         return back()->with('success', 'Account Currency Changed to : ' . $wall->currency);
     }
 
+    public function changeStatus(Request $request){
+        $fetchUser = User::find($request->user_id);
+        $fetchUser->status = $request->status;
+        $fetchUser->save();
+
+        return back()->with('success', 'Account Status Changed to : ' . $fetchUser->status);
+    }
+
     public function upgradeProcess(Request $request)
     {
         $res = securityVerification();
