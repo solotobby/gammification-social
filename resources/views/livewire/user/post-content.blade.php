@@ -8,6 +8,63 @@
         .fa-heart:active {
             transform: scale(1.2);
         }
+
+        .link-preview-card {
+            display: block;
+            margin-top: 8px;
+            border: 1px solid #e1e8ed;
+            border-radius: 12px;
+            padding: 12px;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .link-preview-host {
+            font-weight: 600;
+            color: #1d9bf0;
+        }
+
+        .link-preview-url {
+            font-size: 14px;
+            color: #536471;
+            word-break: break-all;
+        }
+
+        .og-card {
+            display: block;
+            border: 1px solid #e1e8ed;
+            border-radius: 12px;
+            overflow: hidden;
+            text-decoration: none;
+            color: inherit;
+            margin-top: 8px;
+        }
+
+        .og-image {
+            width: 100%;
+            max-height: 220px;
+            object-fit: cover;
+        }
+
+        .og-body {
+            padding: 12px;
+        }
+
+        .og-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .og-desc {
+            font-size: 14px;
+            color: #536471;
+        }
+
+        .og-host {
+            font-size: 13px;
+            color: #8899a6;
+            margin-top: 6px;
+        }
     </style>
     {{-- <div wire:ignore.self class="block block-rounded block-bordered" id="posts"> --}}
     <div wire:poll.visible.430s class="block block-rounded block-bordered" id="posts">
@@ -141,31 +198,28 @@
 
         </div>
 
-
+        @php
+            $url = extractFirstUrl($post->content);
+        @endphp
 
         <div class="block-content">
-            <a href="{{ url('timeline/' . $post->id) }}" style="color: dimgrey">
-                <p style="color: dimgrey">
-                    {{-- {!! $post->content !!} --}}
 
-                    {{-- {!! nl2br(e($post->content)) !!} --}}
+            <div class="post-content" data-full="{{ e(strip_tags($post->content)) }}"
+                data-short="{{ e(Str::limit(strip_tags($post->content), 130)) }}" data-expanded="false">
 
-                    {!! nl2br(e(\Illuminate\Support\Str::limit($post->content, 160))) !!}
+                {{ Str::limit(strip_tags($post->content), 130) }}
 
-                    @if (strlen($post->content) > 160)
-                        <a href="{{ url('timeline/' . $post->id) }}" class="text-primary fw-semibold">
-                            Read more
-                        </a>
-                    @endif
+                @if (Str::length(strip_tags($post->content)) > 130)
+                    <a href="#" class="see-more">See more</a>
+                @endif
+            </div>
 
-                </p>
-            </a>
-
-            @php
+             @php
                 $count = $post->images->count();
             @endphp
 
             @if ($count)
+                <hr>
                 <div class="row g-sm js-gallery img-fluid-100">
 
                     @php
@@ -191,6 +245,125 @@
 
                 </div>
             @endif
+
+
+            {{-- <a href="{{ url('timeline/' . $post->id) }}" style="color: dimgrey">
+                <p style="color: dimgrey">
+
+                    {!! renderPostText($post->content, 130) !!}
+
+                    {{-- {!! nl2br(e(\Illuminate\Support\Str::limit($post->content, 160))) !!}  --}}
+
+            {{-- @if (strlen($post->content) > 160)
+                        <a href="{{ url('timeline/' . $post->id) }}" class="text-primary fw-semibold">
+                            Read more
+                        </a>
+                    @endif --
+
+                </p>
+            </a> --}}
+
+
+            @php
+                $url = extractFirstUrl($post->content);
+                $preview = $url ? getLinkPreview($url) : null;
+            @endphp
+
+            @if ($preview)
+                <a href="{{ $preview['url'] }}" target="_blank" class="og-card">
+                    @if ($preview['image'])
+                        <img src="{{ $preview['image'] }}" class="og-image">
+                    @endif
+
+                    <div class="og-body">
+                        <div class="og-title">{{ $preview['title'] }}</div>
+                        <div class="og-desc">{{ $preview['description'] }}</div>
+                        <div class="og-host">{{ @$preview['host'] }}</div>
+                    </div>
+                </a>
+            @endif
+
+            {{-- @if ($url && ($embed = youtubeEmbed($url)))
+                    <iframe width="100%" height="315"
+                            src="{{ $embed }}"
+                            frameborder="0"
+                            allowfullscreen></iframe>
+                @endif --}}
+
+            @php
+                $url = extractFirstUrl($post->content);
+                $preview = $url ? getLinkPreview($url) : null;
+            @endphp
+
+            @if ($preview && !isEmbeddablePlatform($url))
+                <a href="{{ $preview['url'] }}" target="_blank" rel="noopener" class="og-card">
+
+                    @if (!empty($preview['image']))
+                        <div class="og-image-wrapper">
+                            <img src="{{ $preview['image'] }}" alt="{{ $preview['title'] ?? 'Link preview image' }}"
+                                loading="lazy">
+                        </div>
+                    @endif
+
+                    <div class="og-body">
+                        @if (!empty($preview['title']))
+                            <div class="og-title">
+                                {{ Str::limit($preview['title'], 80) }}
+                            </div>
+                        @endif
+
+                        @if (!empty($preview['description']))
+                            <div class="og-description">
+                                {{ Str::limit($preview['description'], 140) }}
+                            </div>
+                        @endif
+
+                        <div class="og-host">
+                            {{ @$preview['host'] }}
+                        </div>
+                    </div>
+                </a>
+            @endif
+
+
+
+
+            {{-- @if ($url && ($embed = youtubeEmbed($url)))
+                <div class="youtube-embed">
+                    <iframe width="100%" height="315" src="{{ $embed }}" frameborder="0"
+                        allow="accelerometer; allow="autoplay; clipboard-write; encrypted-media; gyroscope;
+                        picture-in-picture; web-share" allowfullscreen>
+                    </iframe>
+                </div>
+            @endif
+
+            @if ($url && isInstagramUrl($url))
+                <blockquote class="instagram-media" data-instgrm-permalink="{{ $url }}"
+                    data-instgrm-version="14" style="width:100%; margin: 0 auto;">
+                </blockquote>
+            @endif --}}
+
+
+
+
+
+
+            {{-- @if ($url)
+                @php $preview = buildLinkPreview($url); @endphp
+
+                <a href="{{ $preview['url'] }}" target="_blank" class="link-preview-card">
+
+                    <div class="link-preview-host">
+                        {{ @$preview['host'] }}
+                    </div>
+
+                    <div class="link-preview-url">
+                        {{ $preview['url'] }}
+                    </div>
+                </a>
+            @endif --}}
+
+           
 
             <ul class="nav nav-pills fs-sm push align-items-center">
 
@@ -337,6 +510,20 @@
         </div>
     </div>
     <!-- END From Right Block Modal -->
+
+
+    <script>
+        document.addEventListener('click', function(e) {
+            if (!e.target.classList.contains('see-more')) return;
+
+            e.preventDefault();
+
+            const container = e.target.closest('.post-content');
+            if (!container) return;
+
+            container.innerText = container.dataset.full;
+        });
+    </script>
 
 
 

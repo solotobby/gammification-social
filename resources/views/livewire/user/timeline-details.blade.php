@@ -1,6 +1,67 @@
 <div>
     {{-- The whole world belongs to you. --}}
 
+    <style>
+        .link-preview-card {
+            display: block;
+            margin-top: 8px;
+            border: 1px solid #e1e8ed;
+            border-radius: 12px;
+            padding: 12px;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .link-preview-host {
+            font-weight: 600;
+            color: #1d9bf0;
+        }
+
+        .link-preview-url {
+            font-size: 14px;
+            color: #536471;
+            word-break: break-all;
+        }
+
+        .og-card {
+            display: block;
+            border: 1px solid #e1e8ed;
+            border-radius: 12px;
+            overflow: hidden;
+            text-decoration: none;
+            color: inherit;
+            margin-top: 8px;
+        }
+
+        .og-image {
+            width: 100%;
+            max-height: 220px;
+            object-fit: cover;
+        }
+
+        .og-body {
+            padding: 12px;
+        }
+
+        .og-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .og-desc {
+            font-size: 14px;
+            color: #536471;
+        }
+
+        .og-host {
+            font-size: 13px;
+            color: #8899a6;
+            margin-top: 6px;
+        }
+    </style>
+
+    </style>
+
     <div class="row">
         <div class="col-md-8">
             <div class="block block-rounded block-bordered" id="timelines">
@@ -71,12 +132,26 @@
                 </div>
 
 
+                @php
+                    $url = extractFirstUrl($post->content);
+                @endphp
+
                 <div class="block-content">
 
-                    <p style="color: dimgrey">
-                        {{-- {!! $timeline->content !!} --}}
+                    {{-- <p style="color: dimgrey">
+                       
                         {!! nl2br(e($post->content)) !!}
-                    </p>
+                    </p> --}}
+
+                    <div class="post-content" data-full="{{ e(strip_tags($post->content)) }}"
+                        data-short="{{ e(Str::limit(strip_tags($post->content), 130)) }}" data-expanded="false">
+
+                        {{ Str::limit(strip_tags($post->content), 130) }}
+
+                        @if (Str::length(strip_tags($post->content)) > 130)
+                            <a href="#" class="see-more">See more</a>
+                        @endif
+                    </div>
 
 
                     @php
@@ -110,6 +185,61 @@
                     @endif
                     <hr>
 
+                    @php
+                        $url = extractFirstUrl($post->content);
+                        $preview = $url ? getLinkPreview($url) : null;
+                    @endphp
+
+                    @if ($preview)
+                        <a href="{{ $preview['url'] }}" target="_blank" class="og-card">
+                            @if ($preview['image'])
+                                <img src="{{ $preview['image'] }}" class="og-image">
+                            @endif
+
+                            <div class="og-body">
+                                <div class="og-title">{{ $preview['title'] }}</div>
+                                <div class="og-desc">{{ $preview['description'] }}</div>
+                                <div class="og-host">{{ @$preview['host'] }}</div>
+                            </div>
+                        </a>
+                    @endif
+
+
+                    @php
+                        $url = extractFirstUrl($post->content);
+                        $preview = $url ? getLinkPreview($url) : null;
+                    @endphp
+
+                    @if ($preview && !isEmbeddablePlatform($url))
+                        <a href="{{ $preview['url'] }}" target="_blank" rel="noopener" class="og-card">
+
+                            @if (!empty($preview['image']))
+                                <div class="og-image-wrapper">
+                                    <img src="{{ $preview['image'] }}"
+                                        alt="{{ $preview['title'] ?? 'Link preview image' }}" loading="lazy">
+                                </div>
+                            @endif
+
+                            <div class="og-body">
+                                @if (!empty($preview['title']))
+                                    <div class="og-title">
+                                        {{ Str::limit($preview['title'], 80) }}
+                                    </div>
+                                @endif
+
+                                @if (!empty($preview['description']))
+                                    <div class="og-description">
+                                        {{ Str::limit($preview['description'], 140) }}
+                                    </div>
+                                @endif
+
+                                <div class="og-host">
+                                    {{ @$preview['host'] }}
+                                </div>
+                            </div>
+                        </a>
+                    @endif
+
 
 
                     {{-- Reactions --}}
@@ -128,7 +258,6 @@
         </div>
 
         @include('layouts.engagement')
-
 
     </div>
 
@@ -217,6 +346,20 @@
         </div>
     </div>
     <!-- END From Right Block Modal -->
+
+    <script>
+        document.addEventListener('click', function(e) {
+            if (!e.target.classList.contains('see-more')) return;
+
+            e.preventDefault();
+
+            const container = e.target.closest('.post-content');
+            if (!container) return;
+
+            container.innerText = container.dataset.full;
+        });
+    </script>
+
 
 
     @include('layouts.onboarding')

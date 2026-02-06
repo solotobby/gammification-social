@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Http;
 use Stevebauman\Location\Facades\Location;
 use Illuminate\Support\Facades\DB;
 use Symfony\Polyfill\Uuid\Uuid;
+use Illuminate\Support\Facades\Cache;
 
 if (!function_exists('engagement')) {
     function engagement()
@@ -1068,7 +1069,133 @@ if (!function_exists('isSpam')) {
         }
 
         return $score >= 2;
+    }
+}
 
 
+if (!function_exists('extractFirstUrl')) {
+    function extractFirstUrl(string $content): ?string
+    {
+        preg_match('~https?://[^\s<]+~i', $content, $match);
+        return $match[0] ?? null;
+    }
+}
+
+
+if (!function_exists('renderPostText')) {
+    function renderPostText(string $content, int $limit = 30): string
+    {
+        $url = extractFirstUrl($content);
+
+        // Remove URL from text
+        $text = $url ? trim(str_replace($url, '', $content)) : $content;
+
+        $escaped = e($text);
+        $isTruncated = Str::length($escaped) > $limit;
+
+        $short = Str::limit($escaped, $limit, '…');
+
+        $html = nl2br($short);
+
+        if ($isTruncated) {
+            $html .= ' <a href="#" class="see-more" data-full="' . e($text) . '">See more</a>';
+        }
+
+        return $html;
+    }
+}
+
+if (!function_exists('buildLinkPreview')) {
+    function buildLinkPreview(string $url): array
+    {
+        return [
+            'url'  => $url,
+            'host' => parse_url($url, PHP_URL_HOST),
+        ];
+    }
+}
+
+
+if (!function_exists('getLinkPreview')) {
+    function getLinkPreview(string $url): ?array
+    {
+        return Cache::remember(
+            'link_preview_' . md5($url),
+            now()->addHours(24),
+            function () use ($url) {
+
+                try {
+                    $html = Http::timeout(5)->get($url)->body();
+
+                    preg_match('/property="og:title" content="(.*?)"/i', $html, $title);
+                    preg_match('/property="og:description" content="(.*?)"/i', $html, $desc);
+                    preg_match('/property="og:image" content="(.*?)"/i', $html, $image);
+
+                    return [
+                        'url'         => $url,
+                        'host'        => parse_url($url, PHP_URL_HOST),
+                        'title'       => $title[1] ?? null,
+                        'description' => $desc[1] ?? null,
+                        'image'       => $image[1] ?? null,
+                    ];
+                } catch (\Throwable $e) {
+                    return null;
+                }
+            }
+        );
+    }
+}
+
+if (!function_exists('youtubeEmbed')) {
+    function youtubeEmbed(string $url): ?string
+    {
+        preg_match(
+            '%(?:youtube(?:-nocookie)?\.com/(?:[^/]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=)|youtu\.be/)([^"&?/ ]{11})%i',
+            $url,
+            $match
+        );
+
+        return isset($match[1])
+            ? "https://www.youtube.com/embed/{$match[1]}?rel=0"
+            : null;
+    }
+}
+
+if (!function_exists('isInstagramUrl')) {
+    function isInstagramUrl(string $url): bool
+    {
+        return str_contains($url, 'instagram.com');
+    }
+}
+
+if (!function_exists('isXUrl')) {
+    function isXUrl(string $url): bool
+    {
+        return str_contains($url, 'twitter.com') || str_contains($url, 'x.com');
+    }
+}
+
+if (!function_exists('isFacebookUrl')) {
+    function isFacebookUrl(string $url): bool
+    {
+        return str_contains($url, 'facebook.com') || str_contains($url, 'fb.watch');
+    }
+}
+
+if (!function_exists('isEmbeddablePlatform')) {
+    function isEmbeddablePlatform(string $url): bool
+    {
+        // return isInstagramUrl($url)
+        //     || isXUrl($url)
+        //     || youtubeEmbed($url);
+        // return youtubeEmbed($url)
+        //     || str_contains($url, 'instagram.com')
+        //     || str_contains($url, 'twitter.com')
+        //     || str_contains($url, 'x.com');
+
+         return youtubeEmbed($url)
+            || isInstagramUrl($url)
+            || isXUrl($url)
+            || isFacebookUrl($url);
     }
 }
