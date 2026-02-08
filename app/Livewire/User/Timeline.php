@@ -78,7 +78,7 @@ class Timeline extends Component
     public Collection $posts;
     public Collection $buffer;
 
-    public int $perPage = 10;          // batch size
+    public int $perPage = 20;          // batch size
     public ?string $cursor = null;    // cursor for pagination
     public bool $loadingNext = false;
 
@@ -107,8 +107,7 @@ class Timeline extends Component
             ->latest('created_at');
 
         // Fetch more than perPage to allow interleaving
-        $allPosts = $query->take($this->perPage * $this->page * 2)
-                          ->get();
+        $allPosts = $query->take($this->perPage * $this->page * 2)->get();
 
         // Step 2: group by user
         $grouped = $allPosts->groupBy('user_id');

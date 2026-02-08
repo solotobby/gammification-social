@@ -66,7 +66,7 @@
         <div class="col-md-8">
             <div class="block block-rounded block-bordered" id="timelines">
                 <div class="block-header block-header-default">
-                    <div>
+                    {{-- <div>
                         <a class="img-link me-1" href="javascript:void(0)">
                             <img class="img-avatar img-avatar32 img-avatar-thumb"
                                 src="{{ $post->user->avatar ?? asset('src/assets/media/avatars/avatar13.jpg') }}"
@@ -75,8 +75,94 @@
                         <a class="fw-semibold" href="{{ url('profile/' . $post->user->username) }}"
                             style="color: #5A4FDC">{{ displayName($post->user->name) }}</a>
                         <span class="fs-sm text-muted">{{ $post->created_at?->shortAbsoluteDiffForHumans() }}
-                            ago</span>
+                            </span>
+                    </div> --}}
+
+                    <div class="d-flex align-items-center">
+                @if (userLevel($post->user->id) == 'Basic')
+                    <a class="img-link me-1" href="{{ url('profile/' . $post->user->username) }}">
+                        <img class="img-avatar img-avatar32 img-avatar-thumb"
+                            src="{{ $post->user->avatar ?? asset('src/assets/media/avatars/avatar13.jpg') }}"
+                            alt="Avatar">
+                    </a>
+
+                    <a class="fw-semibold" href="{{ url('profile/' . $post->user->username) }}"
+                        style="color: #5A4FDC">{{ displayName($post->user->name) }}</a>
+
+                    <a href="{{ url('profile/', $post->user->username) }}" class="fs-sm text-muted mx-1" title="{{ $post->user->username }}">
+                         @<span>{{ Str::limit($post->user->username, 10, '') }}</span>
+                    </a>
+                    <span class="mx-1 text-muted">&middot;</span>
+
+                    <span class="fs-sm text-muted ms-2">{{ $post->created_at?->shortAbsoluteDiffForHumans() }}
+                    </span>
+                @elseif (userLevel($post->user->id) == 'Creator')
+                    <a class="img-link me-1" href="{{ url('profile/' . $post->user->username) }}">
+                        <img class="img-avatar img-avatar32 img-avatar-thumb"
+                            src="{{ $post->user->avatar ?? asset('src/assets/media/avatars/avatar13.jpg') }}"
+                            alt="Avatar">
+                    </a>
+                    {{-- Username + Verified Tick --}}
+                    <div class="d-flex align-items-center">
+                        <a class="fw-semibold me-1" href="{{ url('profile/' . $post->user->username) }}"
+                            style="color: #5A4FDC">
+                            {{ displayName($post->user->name) }}
+                        </a>
+
+                        {{-- @if ($post->user->is_verified) --}}
+                        <!-- Twitter-style blue tick SVG -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                            fill="#1DA1F2" class="ms-1">
+                            <path d="M22.5 5.5l-12 12-5.5-5.5 1.5-1.5 4 4 10.5-10.5z" />
+                        </svg>
+                        {{-- @endif --}}
                     </div>
+
+                    <a href="{{ url('profile/', $post->user->username) }}" class="fs-sm text-muted mx-1" title="{{ $post->user->username }}">
+                         @<span>{{ Str::limit($post->user->username, 10, '') }}</span>
+                    </a>
+                    <span class="mx-1 text-muted">&middot;</span>
+
+                    {{-- Timestamp --}}
+                    <span class="fs-sm text-muted ms-2">
+                        {{ $post->created_at?->shortAbsoluteDiffForHumans() }}
+                    </span>
+                @else
+                    {{-- Avatar --}}
+                    <a class="img-link me-2" href="{{ url('profile/' . $post->user->username) }}">
+                        <img class="img-avatar img-avatar32 img-avatar-thumb rounded-circle border border-primary border-2"
+                            src="{{ $post->user->avatar ?? asset('src/assets/media/avatars/avatar13.jpg') }}"
+                            alt="Avatar">
+                    </a>
+
+                    {{-- Username + Verified Tick --}}
+                    <div class="d-flex align-items-center">
+                        <a class="fw-semibold me-1" href="{{ url('profile/' . $post->user->username) }}"
+                            style="color: #5A4FDC">
+                            {{ displayName($post->user->name) }}
+                        </a>
+
+                        {{-- @if ($post->user->is_verified) --}}
+                        <!-- Twitter-style blue tick SVG -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                            fill="#1DA1F2">
+                            <path d="M22.5 5.5l-12 12-5.5-5.5 1.5-1.5 4 4 10.5-10.5z" />
+                        </svg>
+                        {{-- @endif --}}
+                    </div>
+
+                    <a href="{{ url('profile/', $post->user->username) }}" class="fs-sm text-muted mx-1" title="{{ $post->user->username }}">
+                        {{-- @<span>{{ $post->user->username }}</span> --}}
+                        @<span>{{ Str::limit($post->user->username, 10, '') }}</span>
+                    </a>
+                    <span class="mx-1 text-muted">&middot;</span>
+                    
+                    {{-- Timestamp --}}
+                    <span class="fs-sm text-muted">
+                        {{ $post->created_at?->shortAbsoluteDiffForHumans() }}
+                    </span>
+                @endif
+            </div>
 
 
                     <div class="block-options">

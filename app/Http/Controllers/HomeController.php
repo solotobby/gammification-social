@@ -76,6 +76,11 @@ class HomeController extends Controller
         }
     }
 
+
+    public function searchUser(Request $request){
+        return $request;
+    }
+
     // public function accessCodeVerification(Request $request){
     //     access_code
     // }

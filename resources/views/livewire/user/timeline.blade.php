@@ -43,6 +43,8 @@
     <div class="row">
         <div class="col-md-8">
 
+            {{-- <livewire:user.search /> --}}
+
             <div class="block block-bordered block-rounded">
                 <div class="block-content block-content-full">
                     <div class="alert alert-info">

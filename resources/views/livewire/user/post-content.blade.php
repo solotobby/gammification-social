@@ -82,6 +82,10 @@
                     <a class="fw-semibold" href="{{ url('profile/' . $post->user->username) }}"
                         style="color: #5A4FDC">{{ displayName($post->user->name) }}</a>
 
+                    <a href="{{ url('profile/', $post->user->username) }}" class="fs-sm text-muted mx-1" title="{{ $post->user->username }}">
+                         @<span>{{ Str::limit($post->user->username, 10, '') }}</span>
+                    </a>
+                    <span class="mx-1 text-muted">&middot;</span>
 
                     <span class="fs-sm text-muted ms-2">{{ $post->created_at?->shortAbsoluteDiffForHumans() }}
                     </span>
@@ -107,6 +111,11 @@
                         {{-- @endif --}}
                     </div>
 
+                    <a href="{{ url('profile/', $post->user->username) }}" class="fs-sm text-muted mx-1" title="{{ $post->user->username }}">
+                         @<span>{{ Str::limit($post->user->username, 10, '') }}</span>
+                    </a>
+                    <span class="mx-1 text-muted">&middot;</span>
+
                     {{-- Timestamp --}}
                     <span class="fs-sm text-muted ms-2">
                         {{ $post->created_at?->shortAbsoluteDiffForHumans() }}
@@ -129,14 +138,20 @@
                         {{-- @if ($post->user->is_verified) --}}
                         <!-- Twitter-style blue tick SVG -->
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                            fill="#1DA1F2" class="ms-1">
+                            fill="#1DA1F2">
                             <path d="M22.5 5.5l-12 12-5.5-5.5 1.5-1.5 4 4 10.5-10.5z" />
                         </svg>
                         {{-- @endif --}}
                     </div>
 
+                    <a href="{{ url('profile/', $post->user->username) }}" class="fs-sm text-muted mx-1" title="{{ $post->user->username }}">
+                        {{-- @<span>{{ $post->user->username }}</span> --}}
+                        @<span>{{ Str::limit($post->user->username, 10, '') }}</span>
+                    </a>
+                    <span class="mx-1 text-muted">&middot;</span>
+                    
                     {{-- Timestamp --}}
-                    <span class="fs-sm text-muted ms-2">
+                    <span class="fs-sm text-muted">
                         {{ $post->created_at?->shortAbsoluteDiffForHumans() }}
                     </span>
                 @endif
@@ -214,7 +229,7 @@
                 @endif
             </div>
 
-             @php
+            @php
                 $count = $post->images->count();
             @endphp
 
@@ -363,7 +378,7 @@
                 </a>
             @endif --}}
 
-           
+
 
             <ul class="nav nav-pills fs-sm push align-items-center">
 

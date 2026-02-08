@@ -689,9 +689,9 @@
 
             <!-- Open Search Section -->
             <!-- Layout API, functionality initialized in Template._uiApiLayout() -->
-            {{-- <button type="button" class="btn btn-alt-secondary" data-toggle="layout" data-action="header_search_on">
-              <i class="fa fa-fw opacity-50 fa-search"></i> <span class="ms-1 d-none d-sm-inline-block">Search</span>
-            </button> --}}
+            <a href="{{url('search/user')}}" class="btn btn-alt-secondary" data-toggle="layout" data-action="header_search_on">
+              <i class="fa fa-fw opacity-50 fa-search"></i> <span class="ms-1 d-none d-sm-inline-block">Search People</span>
+            </a>
             <!-- END Open Search Section -->
           </div>
           <!-- END Left Section -->
@@ -839,21 +839,22 @@
         <!-- END Header Content -->
 
         <!-- Header Search -->
+        
         {{-- <div id="page-header-search" class="overlay-header bg-header-dark">
           <div class="bg-white-10">
             <div class="content-header">
-              <form class="w-100" action="be_pages_generic_search.html" method="POST">
+              <form class="w-100" action="{{ url('search/user') }}" method="GET">
                 <div class="input-group">
-                  <!-- Layout API, functionality initialized in Template._uiApiLayout() -->
                   <button type="button" class="btn btn-alt-primary" data-toggle="layout" data-action="header_search_off">
                     <i class="fa fa-fw fa-times-circle"></i>
                   </button>
-                  <input type="text" class="form-control border-0" placeholder="Search or hit ESC.." id="page-header-search-input" name="page-header-search-input">
+                  <input type="text" class="form-control border-0" placeholder="Search or hit ESC.." id="page-header-search-input" name="query">
                 </div>
               </form>
             </div>
           </div>
         </div> --}}
+    
         <!-- END Header Search -->
 
         <!-- Header Loader -->

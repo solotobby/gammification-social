@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\MonthlyPayoutController;
 use App\Http\Controllers\Admin\PayoutController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\UserEngagementController;
+use App\Http\Controllers\HomeController;
 use App\Livewire\CreateProduct;
 use App\Livewire\Level;
 use App\Livewire\User\Analytics;
@@ -19,6 +20,7 @@ use App\Livewire\User\Profile;
 use App\Livewire\User\ProfileConnections;
 use App\Livewire\User\PromotionalContent;
 use App\Livewire\User\ReferralList;
+use App\Livewire\User\Search;
 use App\Livewire\User\Settings;
 use App\Livewire\User\ShowNewPosts;
 use App\Livewire\User\ShowPost;
@@ -145,10 +147,8 @@ Route::middleware(['auth', 'verified', 'track.online'])->group(function () {
         // Route::get('upgrade/api', [\App\Http\Controllers\HomeController::class, 'upgradeApi'])->name('upgrade.api');
         Route::get('verify/subscription/payment/', [\App\Http\Controllers\PaymentController::class, 'verifyKoraSubscriptionPayment'])->name('verify.subscription');
         Route::get('subscribe/{levelId}', [\App\Http\Controllers\PaymentController::class, 'createSubscription'])->name('subscribe');
+        // Route::get('search/user', [HomeController::class, 'searchUser']);
 
-        // Route::get('timeline', Timeline::class);
-
-        // Route::get('timeline', Posts::class);
         Route::get('timeline', Timeline::class);
         Route::get('timeline/{post}', TimelineDetails::class);
 
@@ -168,6 +168,7 @@ Route::middleware(['auth', 'verified', 'track.online'])->group(function () {
         Route::get('referral/list', ReferralList::class);
         Route::get('bank/information', BankInformation::class);
         Route::get('how/it/works', HowItWorks::class);
+        Route::get('search/user', Search::class);
     });
 
 
