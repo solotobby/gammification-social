@@ -165,7 +165,7 @@
             </div>
 
 
-                    <div class="block-options">
+                    {{-- <div class="block-options">
 
                         @if ($user->id == $post->user_id)
                             <div class="dropdown">
@@ -181,7 +181,7 @@
                                         <i class="far fa-fw fa-eye text-success me-1"></i> View Posts Earnings
                                     </a>
 
-                                    {{-- @if (userLevel(auth()->user()->id) == 'Creator' || userLevel(auth()->user()->id) == 'Influencer')
+                                     @if (userLevel(auth()->user()->id) == 'Creator' || userLevel(auth()->user()->id) == 'Influencer')
                                         <a class="dropdown-item" href="javascript:void(0)">
                                             <i class="far fa-fw fa-edit text-primary me-1"></i> Edit Post
                                         </a>
@@ -190,10 +190,10 @@
                                             wire:click="deletePost({{ $post->unicode }})">
                                             <i class="far fa-fw fa-trash-alt text-danger me-1"></i> Delete Post
                                         </a>
-                                    @endif --}}
+                                    @endif 
 
 
-                                    {{-- <a class="dropdown-item" href="javascript:void(0)">
+                                   <a class="dropdown-item" href="javascript:void(0)">
                                                 <i class="far fa-fw fa-thumbs-down text-warning me-1"></i> Stop following this user
                                                 </a>
                                                 <div role="separator" class="dropdown-divider"></div>
@@ -202,7 +202,7 @@
                                                 </a>
                                                 <a class="dropdown-item" href="javascript:void(0)">
                                                 <i class="fa fa-fw fa-bookmark me-1"></i> Bookmark this post
-                                                </a> --}}
+                                                </a> 
                                 </div>
                             </div>
                         @else
@@ -214,7 +214,8 @@
                             </div>
                         @endif
 
-                    </div>
+                    </div> --}}
+                    
                 </div>
 
 

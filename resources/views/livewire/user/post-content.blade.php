@@ -82,8 +82,9 @@
                     <a class="fw-semibold" href="{{ url('profile/' . $post->user->username) }}"
                         style="color: #5A4FDC">{{ displayName($post->user->name) }}</a>
 
-                    <a href="{{ url('profile/', $post->user->username) }}" class="fs-sm text-muted mx-1" title="{{ $post->user->username }}">
-                         @<span>{{ Str::limit($post->user->username, 10, '') }}</span>
+                    <a href="{{ url('profile/', $post->user->username) }}" class="fs-sm text-muted mx-1"
+                        title="{{ $post->user->username }}">
+                        @<span>{{ Str::limit($post->user->username, 10, '') }}</span>
                     </a>
                     <span class="mx-1 text-muted">&middot;</span>
 
@@ -111,8 +112,9 @@
                         {{-- @endif --}}
                     </div>
 
-                    <a href="{{ url('profile/', $post->user->username) }}" class="fs-sm text-muted mx-1" title="{{ $post->user->username }}">
-                         @<span>{{ Str::limit($post->user->username, 10, '') }}</span>
+                    <a href="{{ url('profile/', $post->user->username) }}" class="fs-sm text-muted mx-1"
+                        title="{{ $post->user->username }}">
+                        @<span>{{ Str::limit($post->user->username, 10, '') }}</span>
                     </a>
                     <span class="mx-1 text-muted">&middot;</span>
 
@@ -144,12 +146,13 @@
                         {{-- @endif --}}
                     </div>
 
-                    <a href="{{ url('profile/', $post->user->username) }}" class="fs-sm text-muted mx-1" title="{{ $post->user->username }}">
+                    <a href="{{ url('profile/', $post->user->username) }}" class="fs-sm text-muted mx-1"
+                        title="{{ $post->user->username }}">
                         {{-- @<span>{{ $post->user->username }}</span> --}}
                         @<span>{{ Str::limit($post->user->username, 10, '') }}</span>
                     </a>
                     <span class="mx-1 text-muted">&middot;</span>
-                    
+
                     {{-- Timestamp --}}
                     <span class="fs-sm text-muted">
                         {{ $post->created_at?->shortAbsoluteDiffForHumans() }}
@@ -159,7 +162,7 @@
 
 
 
-            <div class="block-options">
+            {{-- <div class="block-options">
 
                 @if (auth()->user()->id == $post->user_id)
                     <div class="dropdown">
@@ -174,29 +177,27 @@
                                 <i class="far fa-fw fa-eye text-success me-1"></i>Posts Est. Earnings
                             </a>
                             @if (userLevel(auth()->user()->id) == 'Creator' || userLevel(auth()->user()->id) == 'Influencer')
-                                {{-- <a class="dropdown-item"
-                                    href="javascript:void(0)"
-                                    wire:click="openEditModal({{ $post->unicode }})"
-                                    data-bs-toggle="modal"
+                                <a class="dropdown-item" href="javascript:void(0)"
+                                    wire:click="openEditModal({{ $post->unicode }})" data-bs-toggle="modal"
                                     data-bs-target="#modal-block-from-edit">
-                                        <i class="far fa-fw fa-edit text-primary me-1"></i> Edit Post
+                                    <i class="far fa-fw fa-edit text-primary me-1"></i> Edit Post
                                 </a>
 
-                                <a class="dropdown-item" href="javascript:void(0)" wire:click="deletePost({{ $post->unicode }})">
+                                <a class="dropdown-item" href="javascript:void(0)"
+                                    wire:click="deletePost({{ $post->unicode }})">
                                     <i class="far fa-fw fa-trash-alt text-danger me-1"></i> Delete Post
-                                </a> --}}
+                                </a>
                             @endif
-
-                            {{-- <a class="dropdown-item" href="javascript:void(0)">
+                            <a class="dropdown-item" href="javascript:void(0)">
                                 <i class="far fa-fw fa-thumbs-down text-warning me-1"></i> Stop following this user
-                                </a>
-                                <div role="separator" class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="javascript:void(0)">
+                            </a>
+                            <div role="separator" class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="javascript:void(0)">
                                 <i class="fa fa-fw fa-exclamation-triangle me-1"></i> Report this post
-                                </a>
-                                <a class="dropdown-item" href="javascript:void(0)">
+                            </a>
+                            <a class="dropdown-item" href="javascript:void(0)">
                                 <i class="fa fa-fw fa-bookmark me-1"></i> Bookmark this post
-                                </a> --}}
+                            </a>
                         </div>
                     </div>
                 @else
@@ -208,7 +209,7 @@
                     </div>
                 @endif
 
-            </div>
+            </div> --}}
 
 
         </div>
@@ -424,7 +425,15 @@
                 @if (auth()->id() === $post->user_id)
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url('post/timeline/' . $post->id . '/analytics') }}">
-                            <i class="si si-bar-chart opacity-50"></i>
+                            <i class="si si-bar-chart opacity-50"></i>  {{ getCurrencyCode() }}{{ estimatedEarnings($post->id) }}
+                        </a>
+                    </li>
+
+                    @else
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="javascript:void(0)">
+                            <i class="si si-bar-chart opacity-50"></i>   {{ getCurrencyCode() }}{{ estimatedEarnings($post->id) }}
                         </a>
                     </li>
                 @endif

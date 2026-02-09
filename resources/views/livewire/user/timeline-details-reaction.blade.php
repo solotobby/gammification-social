@@ -41,6 +41,21 @@
                 <i class="fa fa-share opacity-50 me-1"></i>
             </a>
         </li>
+        {{-- 📊 Analytics (owner only) --}}
+        @if (auth()->id() === $post->user_id)
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url('post/timeline/' . $post->id . '/analytics') }}">
+                    <i class="si si-bar-chart opacity-50"></i> {{ getCurrencyCode() }}{{ estimatedEarnings($post->id) }}
+                </a>
+            </li>
+        @else
+            <li class="nav-item">
+                <a class="nav-link" href="javascript:void(0)">
+                    <i class="si si-bar-chart opacity-50"></i>
+                    {{ getCurrencyCode() }}{{ estimatedEarnings($post->id) }}
+                </a>
+            </li>
+        @endif
         {{-- @if ($user->id == $post->user_id)
             <li class="nav-item">
                 <a class="nav-link" href="{{ url('post/timeline/' . $post->id . '/analytics') }}">
