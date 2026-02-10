@@ -80,7 +80,7 @@ class Settings extends Component
             'date_of_birth' => [
             'nullable',
             'date',
-            'before_or_equal:' . Carbon::now()->subYears(13)->toDateString(),
+            // 'before_or_equal:' . Carbon::now()->subYears(13)->toDateString(),
         ],
             'gender' => 'nullable|in:male,female,non_binary,prefer_not_to_say',
             'location' => 'nullable|string|max:50',
@@ -109,7 +109,7 @@ class Settings extends Component
             return;
         }
 
-        dd($this->date_of_birth);
+      
 
          $this->validate();
 
@@ -119,7 +119,7 @@ class Settings extends Component
         $userInfor = User::find($user->id);
         $userInfor->username = $this->username;
         $userInfor->save();
-
+  dd($this->date_of_birth);
          
 
         Profile::updateOrCreate(
