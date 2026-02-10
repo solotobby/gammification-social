@@ -59,6 +59,10 @@ class User extends Authenticatable implements MustVerifyEmail
         'status' => 'string',
     ];
 
+    public function profile(){
+        return $this->hasOne(Profile::class, 'user_id');
+    }
+
     public function withdrawalMethod(){
         return $this->hasOne(WithdrawalMethod::class, 'user_id');
     }

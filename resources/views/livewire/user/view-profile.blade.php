@@ -33,6 +33,9 @@
         .camera-overlay i.fa-camera {
             font-size: 16px;
         }
+        .profile-meta span {
+    white-space: nowrap;
+}
     </style>
 
 
@@ -45,8 +48,8 @@
             {{-- Avatar + Camera Overlay --}}
             <div class="d-block position-relative mt-n5">
                 <a href="javascript:void(0)">
-                <img src="{{ $user->avatar ?? asset('src/assets/media/avatars/avatar13.jpg') }}" alt="User Avatar"
-                    class="img-avatar img-avatar128 img-avatar-thumb rounded-circle border shadow-sm
+                    <img src="{{ $user->avatar ?? asset('src/assets/media/avatars/avatar13.jpg') }}" alt="User Avatar"
+                        class="img-avatar img-avatar128 img-avatar-thumb rounded-circle border shadow-sm
 
                     @if (in_array(userLevel($user->id), ['Influencer'])) border-primary border-3 @endif">
                 </a>
@@ -82,12 +85,42 @@
                     <a href="javascript:void(0)"
                         class="text-muted">{{ sumCounter($user->total_likes, $user->total_likes_external) }} Likes</a>
                 </h2>
+                
+                {{-- Bio / Meta Info --}}
+                <div class="mt-2 text-muted fs-sm d-flex flex-wrap gap-3 justify-content-center justify-content-md-start">
 
+                    {{-- About --}}
+                    @if ($user->profile->about)
+                        <span class="d-flex align-items-center">
+                            <i class="fa fa-user me-1 opacity-50"></i>
+                            {{ $user->profile->about ?? 'Not set'}}
+                        </span>
+                    @endif
+
+                    {{-- Date of Birth (Month + Year only) --}}
+                    @if ($user->profile->date_of_birth)
+                        <span class="d-flex align-items-center">
+                            <i class="fa fa-calendar-alt me-1 opacity-50"></i>
+                            {{ \Carbon\Carbon::parse($user->profile->date_of_birth)->format('F Y') ?? 'Not set'}}
+                        </span>
+                    @endif
+
+                    {{-- Location --}}
+                    @if ($user->profile->location)
+                        <span class="d-flex align-items-center">
+                            <i class="fa fa-map-marker-alt me-1 opacity-50"></i>
+                            {{ $user->profile->location ?? ' Not Set ' }}
+                        </span>
+                    @endif
+
+                </div>
+                
                 @if (auth()->user()->id == $user->id)
                     <h2 class="fs-sm fw-medium text-muted mt-2">
-                        Referral Link: {{ url('/reg?referral_code=' . auth()->user()->referral_code) }}
+                        <i class="fa fa-share me-1 opacity-50"></i> {{ url('/reg?referral_code=' . auth()->user()->referral_code) }}
                     </h2>
                 @endif
+
             </div>
 
             {{-- Action Buttons --}}
@@ -108,19 +141,19 @@
 
         </div>
     </div>
-<!-- END Hero -->
+    <!-- END Hero -->
 
-<div class="row">
-    <div class="col-md-8">
-        <!-- Post Update -->
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Post Update -->
 
-        @if (session()->has('success'))
-            <div class="alert alert-success" role="alert">
-                {{ session('success') }}
-            </div>
-        @endif
-        <!-- Post Update -->
-        {{-- <div class="block block-bordered block-rounded">
+            @if (session()->has('success'))
+                <div class="alert alert-success" role="alert">
+                    {{ session('success') }}
+                </div>
+            @endif
+            <!-- Post Update -->
+            {{-- <div class="block block-bordered block-rounded">
         <div class="block-content block-content-full">
         <form wire:submit.prevent="post">
         
@@ -135,26 +168,26 @@
         </form>
         </div>
     </div> --}}
-        <!-- END Post Update -->
+            <!-- END Post Update -->
 
 
-        <!-- Update #2 -->
-        @include('layouts.feeds', $timelines)
+            <!-- Update #2 -->
+            @include('layouts.feeds', $timelines)
 
 
 
-        <!-- END Update #2 -->
+            <!-- END Update #2 -->
+
+        </div>
+
+        @include('layouts.engagement')
+
 
     </div>
 
-    @include('layouts.engagement')
-
-
-</div>
-
-@if (auth()->user()->email_verified_at == null)
-    @include('layouts.accesscode_verification')
-@else
-    @include('layouts.onboarding')
-@endif
+    @if (auth()->user()->email_verified_at == null)
+        @include('layouts.accesscode_verification')
+    @else
+        @include('layouts.onboarding')
+    @endif
 </div>
