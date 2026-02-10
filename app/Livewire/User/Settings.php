@@ -109,6 +109,8 @@ class Settings extends Component
             return;
         }
 
+        dd($user);
+
          $this->validate();
 
         if ($this->username !== $user->username) {
@@ -118,7 +120,7 @@ class Settings extends Component
         $userInfor->username = $this->username;
         $userInfor->save();
 
-         dd($user);
+         
 
         Profile::updateOrCreate(
             ['user_id' => $user->id],
