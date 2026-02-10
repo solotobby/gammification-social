@@ -169,7 +169,7 @@ class PayoutController extends Controller
                 'engagement_monthly_stats_id' => $payoutInfo->engagement_monthly_stats_id,
                 'user_id' => $payoutInfo->user_id,
                 'level' => $payoutInfo->level,
-                'amount' => $$wallet->balance,
+                'amount' => $wallet->balance,
                 'total_engagement' => 0.00,
                 'month' => $payoutInfo->month,
                 'currency' => $fetchWallet->currency ?? 'NGN',
@@ -180,7 +180,7 @@ class PayoutController extends Controller
             $wallet->balance = 0.00;
             $wallet->save();
         }
-        
+
          $payoutInfo->user->notify(
                 (new GeneralNotification([
                     'title'   => '🚀 Payhankey Payout Sent!!',
