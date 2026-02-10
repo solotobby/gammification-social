@@ -124,6 +124,118 @@ class SubscriptionService
 
     public function verifySubscriptionPayment(string $reference): array
     {
+        $transaction = Transaction::where('ref', $reference)->first();
+
+        if (!$transaction) {
+            throw new \Exception('Transaction not found');
+        }
+
+        // 🔁 Idempotency: if transaction already verified
+        if ($transaction->status === 'success') {
+            $nextPaymentDate = UserLevel::where('user_id', $transaction->user_id)
+                ->value('next_payment_date');
+
+            return [
+                'level_name' => null,
+                'next_payment_date' => \Carbon\Carbon::parse($nextPaymentDate),
+            ];
+        }
+
+        $attempts = 0;
+        $maxAttempts = 2;
+
+        do {
+            $response = $this->verifyWithKoraPay($reference);
+            $data = $response['data'] ?? null;
+
+            $attempts++;
+
+            // If payment is still pending, wait 2 seconds before retrying
+            if ($data && $data['status'] === 'pending' && $attempts < $maxAttempts) {
+                sleep(2);
+            }
+        } while ($data && $data['status'] === 'pending' && $attempts < $maxAttempts);
+
+        // After retries, still not successful?
+        if (!$data || $data['status'] !== 'success') {
+            $this->transactionService->markFailed($transaction, $data);
+            throw new \Exception('Payment verification failed or is still pending after retries.');
+        }
+
+        // 🔐 Security checks: amount & currency
+        if ($data['amount'] != $transaction->amount || $data['currency'] !== $transaction->currency) {
+            $this->transactionService->markFailed($transaction, [
+                'reason' => 'Amount or currency mismatch',
+            ]);
+            throw new \Exception('Payment validation failed');
+        }
+
+        $planName = $data['metadata']['level'];
+        $planCode = $data['metadata']['level_id'];
+        $level = Level::where('name', $planName)->firstOrFail();
+        $nextPaymentDate = now()->addMonth();
+
+        DB::transaction(function () use ($transaction, $data, $planName, $planCode, $level, $nextPaymentDate) {
+            $this->transactionService->markSuccessful($transaction, $data);
+
+            $user = User::with('wallet')->findOrFail($transaction->user_id);
+            $currency = $user->wallet->currency;
+
+            $upgradeAmount = convertToBaseCurrency($level->amount, $currency);
+
+            // Subscription update
+            UserLevel::updateOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'level_id'          => $level->id,
+                    'plan_name'         => $level->name,
+                    'plan_code'         => $planCode,
+                    'subscription_code' => $planCode,
+                    'email_token'       => $planCode,
+                    'start_date'        => now(),
+                    'status'            => 'active',
+                    'next_payment_date' => $nextPaymentDate,
+                ]
+            );
+
+            // Check subscription bonus
+            if (!SubscriptionStat::where('user_id', $user->id)->exists()) {
+                $regBonus = convertToBaseCurrency($level->reg_bonus, $currency);
+                $user->wallet->increment('balance', $regBonus);
+
+                Transaction::create([
+                    'user_id'     => $user->id,
+                    'ref'         => $transaction->ref . '-bonus',
+                    'amount'      => $regBonus,
+                    'currency'    => $currency,
+                    'status'      => 'successful',
+                    'type'        => 'reg_bonus',
+                    'action'      => 'Credit',
+                    'description' => "Upgrade bonus for {$level->name}",
+                ]);
+            }
+
+            SubscriptionStat::create([
+                'user_id'    => $user->id,
+                'level_id'   => $level->id,
+                'plan_name'  => $level->name,
+                'amount'     => $upgradeAmount,
+                'currency'   => $currency,
+                'start_date' => now(),
+                'end_date'   => $nextPaymentDate,
+            ]);
+
+            userActivity('subscribed');
+        });
+
+        return [
+            'level_name' => $level->name,
+            'next_payment_date' => $nextPaymentDate,
+        ];
+    }
+
+    public function verifySubscriptionPaymentDepreciated(string $reference): array
+    {
 
         $transaction = Transaction::where('ref', $reference)->first();
 
@@ -142,15 +254,33 @@ class SubscriptionService
             ];
         }
 
+
+
+
+
         $response = $this->verifyWithKoraPay($reference);
 
         $data = $response['data'];
 
-        if (!$data || $data['status'] !== 'success' || $data['status'] !== 'pending') {
+        if (!$data || $data['status'] == 'pending') {
+            /// retry after 2 seconds before retrying
+            sleep(2);
+
+            // Retry verification once
+            $response = $this->verifyWithKoraPay($reference);
+            $data = $response['data'] ?? null;
+
+            if (!$data || $data['status'] !== 'success') {
+                $this->transactionService->markFailed($transaction, $data);
+                throw new \Exception('Payment still pending or failed after retry.');
+            }
+        }
+
+
+        if (!$data || $data['status'] !== 'success') {
             $this->transactionService->markFailed($transaction, $data);
 
             throw new \Exception('Payment verification failed or was not successful.');
-
         }
 
         // 🔐 Security checks
@@ -165,7 +295,7 @@ class SubscriptionService
             throw new \Exception('Payment validation failed');
         }
 
-        
+
         $planName = $data['metadata']['level'];
         $planCode = $data['metadata']['level_id'];
         $level = Level::where('name', $planName)->firstOrFail();
@@ -242,4 +372,6 @@ class SubscriptionService
             'next_payment_date' => $nextPaymentDate,
         ];
     }
+
+   
 }

@@ -36,15 +36,16 @@ class Settings extends Component
     public $canEditUsername = false;
     public $usernameNextEditDate;
 
-     protected $messages = [
-                'date_of_birth.before_or_equal' => 'You must be at least 13 years old to use Payhankey.',
-            ];
+    protected $messages = [
+        'date_of_birth.before_or_equal' => 'You must be at least 13 years old to use Payhankey.',
+    ];
 
 
-    public function mount(){
+    public function mount()
+    {
 
         $user = Auth::user();
-        
+
         $this->facebook = @$user->social->facebook;
         $this->twitter = @$user->social->twitter;
         $this->instagram = @$user->social->instagram;
@@ -66,14 +67,11 @@ class Settings extends Component
         $this->usernameNextEditDate = @$user->profile->username_updated_at
             ? @$user->profile->username_updated_at->addMonths(6)->toFormattedDateString()
             : null;
-
-       
-
     }
 
     protected function rules()
     {
-        
+
         // return [
         //     'username' => 'required|string|min:3|max:20|alpha_dash|unique:users,username,' . auth()->id(),
         //     'about' => 'nullable|string|max:40',
@@ -87,24 +85,25 @@ class Settings extends Component
         // ];
 
         return [
-                'username' => 'required|string|min:3|max:20|alpha_dash|unique:users,username,' . auth()->id(),
-                'about'    => 'nullable|string|max:40',
-                'gender'   => 'nullable|in:male,female',
-                'location' => 'nullable|string|max:50',
-                'date_of_birth' => 'nullable|date'
-            ];
-
+            'username' => 'required|string|min:3|max:20|alpha_dash|unique:users,username,' . auth()->id(),
+            'about'    => 'nullable|string|max:40',
+            'gender'   => 'nullable|in:male,female',
+            'location' => 'nullable|string|max:50',
+            'date_of_birth' => 'nullable|date'
+        ];
     }
-  
-    public function updateSocial(){
-        
+
+    public function updateSocial()
+    {
+
         Social::updateOrCreate(
-                ['user_id'=> auth()->user()->id], 
-                ['facebook' => $this->facebook, 'instagram' => $this->instagram, 'twitter' => $this->twitter, 'tiktok' => $this->tiktok, 'linkedin' => $this->linkedin, 'pinterest' => $this->pinterest]);
-                // $this->reset(['facebook', 'twitter', 'tiktok', 'instagram', 'linkedin', 'pinterest']);
-                 session()->flash('success', 'Socials Updated Successfully');
-                // $this->timelines->push($timelines);
-                // $this->dispatch()
+            ['user_id' => auth()->user()->id],
+            ['facebook' => $this->facebook, 'instagram' => $this->instagram, 'twitter' => $this->twitter, 'tiktok' => $this->tiktok, 'linkedin' => $this->linkedin, 'pinterest' => $this->pinterest]
+        );
+        // $this->reset(['facebook', 'twitter', 'tiktok', 'instagram', 'linkedin', 'pinterest']);
+        session()->flash('success', 'Socials Updated Successfully');
+        // $this->timelines->push($timelines);
+        // $this->dispatch()
 
     }
 
@@ -125,26 +124,25 @@ class Settings extends Component
         $userInfor = User::find($user->id);
         $userInfor->username = $this->username;
         $userInfor->save();
-  
-         
+
+
 
         Profile::updateOrCreate(
             ['user_id' => $user->id],
             [
-            'about' => $this->about,
-            'date_of_birth' => $this->date_of_birth,
-            'gender' => $this->gender,
-            'location' => $this->location,
-            'username_updated_at' => now() //$this->username_updated_at
-        ]);
+                'about' => $this->about,
+                'date_of_birth' => $this->date_of_birth,
+                'gender' => $this->gender,
+                'location' => $this->location,
+                'username_updated_at' => now() //$this->username_updated_at
+            ]
+        );
 
         session()->flash('success', 'Profile updated successfully.');
-
-
-
     }
 
-    public function upgradeAccount(){
+    public function upgradeAccount()
+    {
         $upgrade = $this->upgrade;
         $currency = $this->currency;
         $currentLevel = auth()->user()->activeLevel->plan_name;
@@ -154,12 +152,12 @@ class Settings extends Component
         switch ($upgrade) {
 
             case "Creator":
-                
-                if($currency == 'USD'){
+
+                if ($currency == 'USD') {
                     $link = upgradePayment($price, $currency, $upgrade);
                     return redirect($link);
-                }else{
-                    $link = upgradePayment($price*1500, 'NGN', $upgrade);
+                } else {
+                    $link = upgradePayment($price * 1500, 'NGN', $upgrade);
                     return redirect($link);
                 }
 
@@ -167,11 +165,11 @@ class Settings extends Component
 
             case "Influencer":
 
-                if($currency == 'USD'){
+                if ($currency == 'USD') {
                     $link = upgradePayment($price, $currency, $upgrade);
                     return redirect($link);
-                }else{
-                    $link = upgradePayment($price*1500, 'NGN', $upgrade);
+                } else {
+                    $link = upgradePayment($price * 1500, 'NGN', $upgrade);
                     return redirect($link);
                 }
 
@@ -179,7 +177,6 @@ class Settings extends Component
 
             default:
                 dd("invalid");
-
         }
 
 
@@ -197,20 +194,21 @@ class Settings extends Component
     }
 
 
-    private function pricingList($level, $upgrade){
+    private function pricingList($level, $upgrade)
+    {
 
         $price = '';
         $newLevel = $upgrade;
 
-        if($level == 'Beginner'){
-            if($newLevel == 'Creator'){
+        if ($level == 'Beginner') {
+            if ($newLevel == 'Creator') {
                 $price = 5;
-            }elseif($newLevel == 'Influencer'){
+            } elseif ($newLevel == 'Influencer') {
                 $price = 15;
             }
-        }else{
+        } else {
 
-            if($newLevel == 'Influencer'){
+            if ($newLevel == 'Influencer') {
                 $price = 10;
             }
         }
