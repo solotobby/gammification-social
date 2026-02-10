@@ -157,6 +157,35 @@ class PayoutController extends Controller
             return view('admin.payouts.show', ['payout' => $payoutInformation, 'withdrawals' => $withdrawal, 'wallet' => $wallet]);
         }
     }
+    public function updatePayoutStatus($id){
+        $payoutInfo = Payout::find($id);
+         $payoutInfo->update(['status' => 'Paid']);
+         $updatengagment = EngagementMonthlyStat::where('id', $payoutInfo->engagement_monthly_stats_id)->update(['status' => 'Paid']);
+
+         $payoutInfo->user->notify(
+                (new GeneralNotification([
+                    'title'   => '🚀 Payhankey Payout Sent!!',
+                    'message' => 'Great news! Your Payment has been sent to your account!',
+                    'icon'    => 'fa-heart text-danger',
+                    'url'     => url('wallets'),
+                ]))->delay(now()->addSeconds(1))
+            );
+
+             Transaction::create([
+                'user_id'    => $payoutInfo->user_id,
+                'ref'        => generateTransactionRef(),
+                'amount'     => $payoutInfo->amount,
+                'currency'   => $payoutInfo->currency,
+                'status'     => 'successful',
+                'type'       => 'payhankey_payout_and_bonus',
+                'action'     => 'Credit',
+                'description' => "Payhankey Payout for : " . $payoutInfo->month,
+            ]);
+
+
+            return back()->with('success', 'Payment Updated!');
+
+    }
 
 
 
@@ -180,8 +209,8 @@ class PayoutController extends Controller
 
         $payoutInfo = Payout::find($request->payout_id);
 
-        if($payoutInfo->status == 'Paid'){
-             return response()->json(['status' => 'error', 'message' => 'Payment Already Processed'], 422);
+        if ($payoutInfo->status == 'Paid') {
+            return response()->json(['status' => 'error', 'message' => 'Payment Already Processed'], 422);
         }
 
 
@@ -191,7 +220,7 @@ class PayoutController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Withdrawal method not found'], 404);
         }
 
-         //check Wallet balance
+        //check Wallet balance
         $fetchWallet = Wallet::where('user_id', $request->user_id)->first();
         $walletBalance = $fetchWallet->balance; //convertToBaseCurrency($fetchWallet->balance, $fetchWallet->currency);
         if ($fetchWallet->balance > 0) {
@@ -220,20 +249,20 @@ class PayoutController extends Controller
 
             $payoutInfo->update(['status' => 'Paid']);
 
-            // $updatengagment = EngagementMonthlyStat::where('id', $payoutInfo->engagement_monthly_stats_id)->update(['status' => 'Paid']);
+            $updatengagment = EngagementMonthlyStat::where('id', $payoutInfo->engagement_monthly_stats_id)->update(['status' => 'Paid']);
 
-            
+
 
             Transaction::create([
-                    'user_id'    => $request->user_id,
-                    'ref'        => time(). '-payouts',
-                    'amount'     => $amount,
-                    'currency'   => $fetchWallet->currency,
-                    'status'     => 'successful',
-                    'type'       => 'payhankey_payout_and_bonus',
-                    'action'     => 'Credit',
-                    'description' => "Payhankey Payout for : ".$payoutInfo->month,
-                ]);
+                'user_id'    => $request->user_id,
+                'ref'        => time() . '-payouts',
+                'amount'     => $amount,
+                'currency'   => $fetchWallet->currency,
+                'status'     => 'successful',
+                'type'       => 'payhankey_payout_and_bonus',
+                'action'     => 'Credit',
+                'description' => "Payhankey Payout for : " . $payoutInfo->month,
+            ]);
 
 
 

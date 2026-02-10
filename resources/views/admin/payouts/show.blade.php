@@ -7,6 +7,13 @@
         <div class="col-md-12">
 
             <div class="block block-rounded">
+
+                @if (session('success'))
+                    <div class="alert alert-success" role="alert">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
                 <div class="block-header block-header-default block-header">
                     <h3 class="block-title">Subscription and Pay Out Information</h3>
                     <div class="block-options">
@@ -132,6 +139,10 @@
 
                     </ol>
 
+                    @if ($payout->status != 'Paid')
+                        <a href=" {{ url('update/payout/fund/' . $payout->id) }} " class="btn btn-info mt-2">Temporarily
+                            Update Payment</a>
+                    @endif
 
                 </div>
 
@@ -244,37 +255,6 @@
 
             </div>
         </div>
-
-        <div class="block block-rounded">
-            <div class="block-header block-header-default">
-                <h3 class="block-title">Communication</h3>
-            </div>
-            <div class="row">
-                <div class="col-lg-4">
-                    <p class="text-muted">
-                        You can change a user Currency here
-                    </p>
-                </div>
-                <div class="col-lg-8 col-xl-5">
-
-                    <div class="mb-4">
-                        <select class="form-control mt-2" name="msaage" required>
-                            <option value="">Select Currency</option>
-                            <option > Kindly Update Your Account Details </option>
-                            {{-- <option value="EUR">Ch</option>
-                            <option value="GBP">GBP – British Pound</option>
-                            <option value="NGN">NGN – Nigerian Naira</option> --}}
-                        </select>
-                    </div>
-                </div>
-            </div>
-            {{-- <input type="hidden" value="{{ $user->id }}" name="user_id"> --}}
-
-
-        </div>
-
-
-
 
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script>

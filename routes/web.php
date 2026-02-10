@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\PayoutController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\UserEngagementController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\PaymentController;
 use App\Livewire\CreateProduct;
 use App\Livewire\Level;
 use App\Livewire\User\Analytics;
@@ -210,5 +211,6 @@ Route::middleware(['auth', 'verified', 'track.online'])->group(function () {
         Route::get('user/queue/payout/{id}', [PayoutController::class, 'queuePayout']);
         Route::get('view/payout/info/{id}', [PayoutController::class, 'viewPayoutInformation']);
         Route::post('fund/transfer', [PayoutController::class, 'fundTransfer'])->name('fund.transfer');
+        Route::get('update/payout/fund/{id}', [PayoutController::class, 'updatePayoutStatus']);
     });
 });
