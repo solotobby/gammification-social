@@ -116,10 +116,8 @@ class Settings extends Component
             $this->addError('username', 'Username can only be changed once every 6 months.');
             return;
         }
-
-      
-
-        //  $this->validate();
+        
+         $this->validate();
 
         if ($this->username !== $user->username) {
             $user->username_updated_at = now();
