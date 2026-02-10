@@ -82,7 +82,7 @@ class Settings extends Component
             'date',
             // 'before_or_equal:' . Carbon::now()->subYears(13)->toDateString(),
         ],
-            'gender' => 'nullable|in:male,female,non_binary,prefer_not_to_say',
+            'gender' => 'nullable|in:male,female',
             'location' => 'nullable|string|max:50',
         ];
 
