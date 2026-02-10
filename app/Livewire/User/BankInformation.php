@@ -3,10 +3,12 @@
 namespace App\Livewire\User;
 
 use App\Models\User;
+use App\Models\Wallet;
 use App\Models\WithdrawalMethod;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Livewire\Component;
+use Carbon\Carbon;
 
 class BankInformation extends Component
 {
@@ -44,15 +46,45 @@ class BankInformation extends Component
     public $currency;
     public $paidWithdrawals;
 
+
+    public $canUpdateCurrency = true;
+
     public function mount()
     {
         $user = Auth::user();
         $this->baseCurrency = $user->wallet->currency;
         $this->withdrawals = WithdrawalMethod::where(['user_id' => $user->id])->first();
+
+        if ($user->wallet->currency_updated_at) {
+        $this->canUpdateCurrency =
+            Carbon::parse($user->wallet->currency_updated_at)
+                ->addMonths(6)
+                ->isPast();
+    }
     }
 
+    public function updateCurrency()
+    {
+        $this->validate([
+            'currency' => 'required|string|size:3',
+        ]);
 
+        $user = auth()->user();
+        $wallet = Wallet::where('user_id', $user->id)->first();
 
+        $wallet->update([
+            'currency' => $this->currency,
+            'currency_updated_at' => now(),
+        ]);
+
+        WithdrawalMethod::where(['user_id' => $user->id])->delete();
+
+        $this->canUpdateCurrency = false;
+
+        $this->dispatch('refreshPage');
+
+        session()->flash('success', 'Currency updated successfully.');
+    }
 
     public function createWithdrawalMethod()
     {
@@ -158,24 +190,24 @@ class BankInformation extends Component
         return json_decode($res->getBody()->getContents(), true)['data'];
     }
 
-    private function transferRecipient($account_name, $account_number, $bank_code)
-    {
+    // private function transferRecipient($account_name, $account_number, $bank_code)
+    // {
 
-        $data = [
-            "type" => "nuban",
-            "name" => $account_name,
-            "account_number" => $account_number,
-            "bank_code" => $bank_code,
-            "currency" => "NGN"
-        ];
-        $res = Http::withHeaders([
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-            'Authorization' => 'Bearer ' . env('PAYSTACK_SECRET_KEY')
-        ])->post('https://api.paystack.co/transferrecipient', $data);
+    //     $data = [
+    //         "type" => "nuban",
+    //         "name" => $account_name,
+    //         "account_number" => $account_number,
+    //         "bank_code" => $bank_code,
+    //         "currency" => "NGN"
+    //     ];
+    //     $res = Http::withHeaders([
+    //         'Accept' => 'application/json',
+    //         'Content-Type' => 'application/json',
+    //         'Authorization' => 'Bearer ' . env('PAYSTACK_SECRET_KEY')
+    //     ])->post('https://api.paystack.co/transferrecipient', $data);
 
-        return json_decode($res->getBody()->getContents(), true)['data'];
-    }
+    //     return json_decode($res->getBody()->getContents(), true)['data'];
+    // }
 
 
 
@@ -213,14 +245,14 @@ class BankInformation extends Component
 
         // 🔐 Base validation (ignore current record for unique checks)
         $rules = [
-            'account_number' => 'nullable|numeric',//|unique:withdrawal_methods,account_number,' . $this->withdrawals->id,
+            'account_number' => 'nullable|numeric', //|unique:withdrawal_methods,account_number,' . $this->withdrawals->id,
             'bank_code'      => 'nullable|string',
             // 'payment_method' => 'nullable|string|in:paypal,usdt',
-            'paypal_email'   => 'nullable|email',//|unique:withdrawal_methods,paypal_email,' . $this->withdrawals->id,
-            'usdt_wallet'    => 'nullable|string',//|unique:withdrawal_methods,usdt_wallet,' . $this->withdrawals->id,
+            'paypal_email'   => 'nullable|email', //|unique:withdrawal_methods,paypal_email,' . $this->withdrawals->id,
+            'usdt_wallet'    => 'nullable|string', //|unique:withdrawal_methods,usdt_wallet,' . $this->withdrawals->id,
         ];
 
-       
+
         // 🔁 Currency-based validation
         if ($this->baseCurrency === 'NGN') {
             $rules['bank_code'] = 'required';
@@ -231,22 +263,16 @@ class BankInformation extends Component
             $rules['usdt_wallet'] = 'required_if:payment_method,usdt';
         }
 
-       
-
-   
-
         $validated = $this->validate($rules);
 
         $validated['bank_code'];
-
-            
 
         // 🔁 Determine payment method
         $paymentMethod = $this->baseCurrency === 'NGN'
             ? 'bank_transfer'
             : $validated['payment_method'];
 
-        // 🧱 Base update payload
+
         $data = [
             'currency'        => $this->baseCurrency,
             'payment_method' => $paymentMethod,
@@ -285,7 +311,7 @@ class BankInformation extends Component
         }
 
 
-        
+
         // 💾 Update
         $this->withdrawals->update($data);
 
@@ -297,13 +323,6 @@ class BankInformation extends Component
 
         session()->flash('success', 'Payout information updated successfully.');
     }
-
-
-
-
-
-
-
 
 
 

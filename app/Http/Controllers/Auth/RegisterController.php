@@ -205,8 +205,8 @@ class RegisterController extends Controller
 
             if ($referrer) {
                 Referral::create([
-                    'user_id' => $user->id,
-                    'referral_id' => $referrer->id
+                    'user_id' => $user->id, //person referred
+                    'referral_id' => $referrer->id //referrer_id
                 ]);
             }
 

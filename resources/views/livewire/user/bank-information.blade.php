@@ -94,6 +94,7 @@
                     </div>
                 </div>
 
+
                 <div class="block-content">
                     <div class="row justify-content-center py-sm-3 py-md-5">
                         <div class="col-sm-10 col-md-6">
@@ -102,7 +103,7 @@
                                 @if ($baseCurrency == 'NGN')
 
                                     <div class="card-header">
-                                        <h5 class="mb-0">
+                                        <h5 class="mb-3">
                                             <i class="fa fa-bank me-2"></i> Bank Payout Details
                                         </h5>
                                     </div>
@@ -130,13 +131,9 @@
                                             </div>
                                         </div>
 
-                                        {{-- <button wire:click="editWithdrawal" class="btn btn-outline-primary btn-sm">
-                                            <i class="fa fa-edit me-1"></i> Update Payout Details
-                                        </button> --}}
-
                                         <button wire:click="openEditModal" class="btn btn-sm btn-outline-primary">
-                                                <i class="fa fa-edit"></i> Update Payout Details
-                                            </button>
+                                            <i class="fa fa-edit"></i> Update Payout Details
+                                        </button>
                                     </div>
                                 @else
                                     <p><strong>Payment Method:</strong> {{ ucfirst($withdrawals->payment_method) }}
@@ -150,9 +147,9 @@
                                         <p><strong>USDT Wallet:</strong> {{ $withdrawals->usdt_wallet }}</p>
                                     @endif
 
-                                     <button wire:click="openEditModal" class="btn btn-sm btn-outline-primary">
-                                                <i class="fa fa-edit"></i> Update Payout Details
-                                            </button>
+                                    <button wire:click="openEditModal" class="btn btn-sm btn-outline-primary">
+                                        <i class="fa fa-edit"></i> Update Payout Details
+                                    </button>
                                 @endif
                             @else
                                 <form action="" method="POST" wire:submit.prevent="createWithdrawalMethod">
@@ -187,7 +184,7 @@
                                             <input type="text" class="form-control" id="accountNumber"
                                                 wire:model="account_number" placeholder="Enter Account Number">
                                         </div>
-                                        
+
                                         <button class="btn btn-primary mt-2" type="submit"> Enter Pay Out Information
                                         </button>
                                         <div style="color: brown" class="mt-2">
@@ -256,8 +253,52 @@
 
                         @endif
 
+
+
+                        <div class="col-sm-10 col-md-6 mt-3">
+                            <hr>
+
+                            @if (session()->has('success'))
+                                <div class="alert alert-success alert-dismissible fade show mt-2" role="alert">
+                                    {{ session('success') }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            @endif
+                            <form class="form-inline" method="POST" wire:submit.prevent="updateCurrency">
+                                <label class="my-1 mr-2" for="inlineFormCustomSelectPref">
+                                    <strong> <i class="fa fa-usd me-2"></i> Update Currency </strong>
+                                </label>
+                                <label class="my-1 mr-2 mb-2" for="inlineFormCustomSelectPref">
+                                    - Current Base Currency: {{ $baseCurrency }}
+                                </label>
+                                <select class="form-control my-1" wire:model="currency"
+                                    {{ !$canUpdateCurrency ? 'disabled' : '' }} required>
+                                    <option value="">Select Currency</option>
+                                    <option value="USD">USD – US Dollar</option>
+                                    <option value="EUR">EUR – Euro</option>
+                                    <option value="GBP">GBP – British Pound</option>
+                                    <option value="NGN">NGN – Nigerian Naira</option>
+                                </select>
+
+                                @if (!$canUpdateCurrency)
+                                    <small class="text-muted d-block mt-2">
+                                        You can update your currency once every 6 months.
+                                    </small>
+                                @endif
+
+
+                                <button type="submit" class="btn btn-primary my-1"
+                                    {{ !$canUpdateCurrency ? 'disabled' : '' }}>
+                                    Update Currency
+                                </button>
+                            </form>
+                        </div>
+
                     </div>
+
+
                 </div>
+
             </div>
 
         </div>
@@ -266,94 +307,103 @@
 
 
     @if ($showEditModal)
-<div class="modal fade show d-block" style="background: rgba(0,0,0,.6)">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
+        <div class="modal fade show d-block" style="background: rgba(0,0,0,.6)">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
 
-            <div class="modal-header">
-                <h5 class="modal-title">Update Payout Information</h5>
-                <button class="btn-close" wire:click="$set('showEditModal', false)"></button>
+                    <div class="modal-header">
+                        <h5 class="modal-title">Update Payout Information</h5>
+                        <button class="btn-close" wire:click="$set('showEditModal', false)"></button>
+                    </div>
+
+
+
+                    <form wire:submit.prevent="updateWithdrawalMethod">
+                        <div class="modal-body">
+
+                            @if ($errors->any())
+                                <div class="alert alert-danger">
+                                    <strong>There were some errors:</strong>
+                                    <ul class="mb-0">
+                                        @foreach ($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+
+                            {{-- NGN --}}
+                            @if ($baseCurrency === 'NGN')
+                                <div class="form-group">
+                                    <label>Bank</label>
+                                    <select class="form-control" wire:model="bank_code">
+                                        <option value="">Select Bank</option>
+                                        @foreach (bankList() as $list)
+                                            <option value="{{ $list['code'] }}, {{ $list['name'] }}">
+                                                {{ $list['name'] }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div class="form-group mt-2">
+                                    <label>Account Number</label>
+                                    <input class="form-control" wire:model="account_number">
+                                </div>
+                            @else
+                                {{-- Non-NGN --}}
+                                <div class="form-group">
+                                    <label>Payment Method</label>
+                                    <select class="form-control" wire:model="payment_method">
+                                        <option value="paypal">PayPal</option>
+                                        <option value="usdt">USDT</option>
+                                    </select>
+                                </div>
+
+                                @if ($payment_method === 'paypal')
+                                    <div class="form-group mt-2">
+                                        <label>PayPal Email</label>
+                                        <input type="email" class="form-control" wire:model="paypal_email">
+                                    </div>
+                                @endif
+
+                                @if ($payment_method === 'usdt')
+                                    <div class="form-group mt-2">
+                                        <label>USDT Wallet</label>
+                                        <input class="form-control" wire:model="usdt_wallet">
+                                    </div>
+                                @endif
+                            @endif
+
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary"
+                                wire:click="$set('showEditModal', false)">
+                                Cancel
+                            </button>
+                            <button class="btn btn-primary">
+                                Update
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
             </div>
-
-
-
-            <form wire:submit.prevent="updateWithdrawalMethod">
-                <div class="modal-body">
-
-                    @if ($errors->any())
-                        <div class="alert alert-danger">
-                            <strong>There were some errors:</strong>
-                            <ul class="mb-0">
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
-
-                    {{-- NGN --}}
-                    @if ($baseCurrency === 'NGN')
-                        <div class="form-group">
-                            <label>Bank</label>
-                            <select class="form-control" wire:model="bank_code">
-                                <option value="">Select Bank</option>
-                                @foreach (bankList() as $list)
-                                    <option value="{{ $list['code'] }}, {{ $list['name'] }}">
-                                        {{ $list['name'] }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="form-group mt-2">
-                            <label>Account Number</label>
-                            <input class="form-control" wire:model="account_number">
-                        </div>
-                    @else
-                        {{-- Non-NGN --}}
-                        <div class="form-group">
-                            <label>Payment Method</label>
-                            <select class="form-control" wire:model="payment_method">
-                                <option value="paypal">PayPal</option>
-                                <option value="usdt">USDT</option>
-                            </select>
-                        </div>
-
-                        @if ($payment_method === 'paypal')
-                            <div class="form-group mt-2">
-                                <label>PayPal Email</label>
-                                <input type="email" class="form-control" wire:model="paypal_email">
-                            </div>
-                        @endif
-
-                        @if ($payment_method === 'usdt')
-                            <div class="form-group mt-2">
-                                <label>USDT Wallet</label>
-                                <input class="form-control" wire:model="usdt_wallet">
-                            </div>
-                        @endif
-                    @endif
-
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary"
-                        wire:click="$set('showEditModal', false)">
-                        Cancel
-                    </button>
-                    <button class="btn btn-primary">
-                        Update
-                    </button>
-                </div>
-            </form>
-
         </div>
-    </div>
-</div>
-@endif
+    @endif
 
 
 </div>
+
+
+<script>
+    document.addEventListener('livewire:init', () => {
+        Livewire.on('refreshPage', () => {
+            window.location.reload();
+        });
+    });
+</script>
 
 
 
