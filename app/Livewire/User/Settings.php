@@ -104,8 +104,6 @@ class Settings extends Component
     {
         $user = auth()->user();
 
-        dd($user);
-
         if (!$this->canEditUsername && $this->username !== $user->username) {
             $this->addError('username', 'Username can only be changed once every 6 months.');
             return;
@@ -119,6 +117,8 @@ class Settings extends Component
         $userInfor = User::find($user->id);
         $userInfor->username = $this->username;
         $userInfor->save();
+
+         dd($user);
 
         Profile::updateOrCreate(
             ['user_id' => $user->id],
