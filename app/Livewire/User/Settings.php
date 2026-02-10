@@ -55,16 +55,16 @@ class Settings extends Component
         //profile
 
         $this->username = $user->username;
-        $this->about = $user->profile->about;
-        $this->date_of_birth = $user->profile->date_of_birth;
-        $this->gender = $user->profile->gender;
-        $this->location = $user->profile->location;
+        $this->about = @$user->profile->about;
+        $this->date_of_birth = @$user->profile->date_of_birth;
+        $this->gender = @$user->profile->gender;
+        $this->location = @$user->profile->location;
 
-        $this->canEditUsername = !$user->username_updated_at
-            || $user->username_updated_at->addMonths(6)->isPast();
+        $this->canEditUsername = !@$user->profile->username_updated_at
+            || @$user->profile->username_updated_at->addMonths(6)->isPast();
 
-        $this->usernameNextEditDate = $user->username_updated_at
-            ? $user->username_updated_at->addMonths(6)->toFormattedDateString()
+        $this->usernameNextEditDate = @$user->profile->username_updated_at
+            ? @$user->profile->username_updated_at->addMonths(6)->toFormattedDateString()
             : null;
 
        
