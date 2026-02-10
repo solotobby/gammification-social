@@ -77,11 +77,11 @@ class Settings extends Component
         return [
             'username' => 'required|string|min:3|max:20|alpha_dash|unique:users,username,' . auth()->id(),
             'about' => 'nullable|string|max:40',
-            'date_of_birth' => [
-            'nullable',
-            'date',
-            // 'before_or_equal:' . Carbon::now()->subYears(13)->toDateString(),
-        ],
+        //     'date_of_birth' => [
+        //     'nullable',
+        //     'date',
+        //     // 'before_or_equal:' . Carbon::now()->subYears(13)->toDateString(),
+        // ],
             'gender' => 'nullable|in:male,female',
             'location' => 'nullable|string|max:50',
         ];
