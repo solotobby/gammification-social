@@ -111,7 +111,7 @@ class Settings extends Component
 
       
 
-         $this->validate();
+        //  $this->validate();
 
         if ($this->username !== $user->username) {
             $user->username_updated_at = now();
@@ -119,13 +119,12 @@ class Settings extends Component
         $userInfor = User::find($user->id);
         $userInfor->username = $this->username;
         $userInfor->save();
-  dd($this->date_of_birth);
+  
          
 
         Profile::updateOrCreate(
             ['user_id' => $user->id],
             [
-            //'username' => $this->username,
             'about' => $this->about,
             'date_of_birth' => $this->date_of_birth,
             'gender' => $this->gender,
