@@ -90,31 +90,31 @@
                 <div class="mt-2 text-muted fs-sm d-flex flex-wrap gap-3 justify-content-center justify-content-md-start">
 
                     {{-- About --}}
-                    @if ($user->profile->about)
+                    @if (@$user->profile->about)
                         <span class="d-flex align-items-center">
                             <i class="fa fa-user me-1 opacity-50"></i>
-                            {{ $user->profile->about ?? 'Not set'}}
+                            {{ @$user->profile->about ?? 'Not set'}}
                         </span>
                     @endif
 
                     {{-- Date of Birth (Month + Year only) --}}
-                    @if ($user->profile->date_of_birth)
+                    @if (@$user->profile->date_of_birth)
                         <span class="d-flex align-items-center">
                             <i class="fa fa-calendar-alt me-1 opacity-50"></i>
-                            {{ \Carbon\Carbon::parse($user->profile->date_of_birth)->format('F Y') ?? 'Not set'}}
+                            {{ \Carbon\Carbon::parse(@$user->profile->date_of_birth)->format('F Y') ?? 'Not set'}}
                         </span>
                     @endif
 
                     {{-- Location --}}
-                    @if ($user->profile->location)
+                    @if (@$user->profile->location)
                         <span class="d-flex align-items-center">
                             <i class="fa fa-map-marker-alt me-1 opacity-50"></i>
-                            {{ $user->profile->location ?? ' Not Set ' }}
+                            {{ @$user->profile->location ?? ' Not Set ' }}
                         </span>
                     @endif
 
                 </div>
-                
+
                 @if (auth()->user()->id == $user->id)
                     <h2 class="fs-sm fw-medium text-muted mt-2">
                         <i class="fa fa-share me-1 opacity-50"></i> {{ url('/reg?referral_code=' . auth()->user()->referral_code) }}
