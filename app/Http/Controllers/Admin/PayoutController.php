@@ -162,6 +162,25 @@ class PayoutController extends Controller
          $payoutInfo->update(['status' => 'Paid']);
          $updatengagment = EngagementMonthlyStat::where('id', $payoutInfo->engagement_monthly_stats_id)->update(['status' => 'Paid']);
 
+         $wallet = Wallet::where('user_id', $payoutInfo->user_id)->first();
+        
+         if ($wallet->balance > 0) {
+            Payout::create([
+                'engagement_monthly_stats_id' => $payoutInfo->engagement_monthly_stats_id,
+                'user_id' => $payoutInfo->user_id,
+                'level' => $payoutInfo->level,
+                'amount' => $$wallet->balance,
+                'total_engagement' => 0.00,
+                'month' => $payoutInfo->month,
+                'currency' => $fetchWallet->currency ?? 'NGN',
+                'status' => 'Queued',
+                'type' => 'Bonus'
+            ]);
+
+            $wallet->balance = 0.00;
+            $wallet->save();
+        }
+        
          $payoutInfo->user->notify(
                 (new GeneralNotification([
                     'title'   => '🚀 Payhankey Payout Sent!!',
