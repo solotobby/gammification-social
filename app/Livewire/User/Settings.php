@@ -74,17 +74,25 @@ class Settings extends Component
     protected function rules()
     {
         
+        // return [
+        //     'username' => 'required|string|min:3|max:20|alpha_dash|unique:users,username,' . auth()->id(),
+        //     'about' => 'nullable|string|max:40',
+        // //     'date_of_birth' => [
+        // //     'nullable',
+        // //     'date',
+        // //     // 'before_or_equal:' . Carbon::now()->subYears(13)->toDateString(),
+        // // ],
+        //     'gender' => 'nullable|in:male,female',
+        //     'location' => 'nullable|string|max:50',
+        // ];
+
         return [
-            'username' => 'required|string|min:3|max:20|alpha_dash|unique:users,username,' . auth()->id(),
-            'about' => 'nullable|string|max:40',
-        //     'date_of_birth' => [
-        //     'nullable',
-        //     'date',
-        //     // 'before_or_equal:' . Carbon::now()->subYears(13)->toDateString(),
-        // ],
-            'gender' => 'nullable|in:male,female',
-            'location' => 'nullable|string|max:50',
-        ];
+                'username' => 'required|string|min:3|max:20|alpha_dash|unique:users,username,' . auth()->id(),
+                'about'    => 'nullable|string|max:40',
+                'gender'   => 'nullable|in:male,female',
+                'location' => 'nullable|string|max:50',
+                'date_of_birth' => 'nullable|date'
+            ];
 
     }
   
