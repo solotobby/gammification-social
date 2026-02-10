@@ -109,7 +109,7 @@ class Settings extends Component
             return;
         }
 
-        dd($user);
+        dd($this->date_of_birth);
 
          $this->validate();
 
