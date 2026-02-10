@@ -96,20 +96,20 @@
                             <div class="mb-4">
                                 <label class="form-label" for="dm-profile-edit-username">
                                     Username
-                                    @unless ($canEditUsername)
+                                    @unless (@$canEditUsername)
                                         <small class="text-muted">(Changeable every 6 months)</small>
                                     @endunless
                                 </label>
                                 <input type="text" class="form-control" wire:model.defer="username"
-                                    {{ $canEditUsername ? '' : 'readonly' }} placeholder="Enter your username..">
+                                    {{ @$canEditUsername ? '' : 'readonly' }} placeholder="Enter your username..">
 
                                 @error('username')
                                     <small class="text-danger">{{ $message }}</small>
                                 @enderror
 
-                                @unless ($canEditUsername)
+                                @unless (@$canEditUsername)
                                     <small class="text-muted">
-                                        You can update again on {{ $usernameNextEditDate }}
+                                        You can update again on {{ @$usernameNextEditDate }}
                                     </small>
                                 @endunless
 
@@ -123,7 +123,7 @@
                                 <textarea class="form-control" wire:model.live="about" maxlength="40" rows="2"></textarea>
 
                                 <small class="text-muted">
-                                    {{ strlen($about ?? '') }}/40
+                                    {{ strlen(@$about ?? '') }}/40
                                 </small>
 
                                 @error('about')
