@@ -101,7 +101,7 @@
                     @if (@$user->profile->date_of_birth)
                         <span class="d-flex align-items-center">
                             <i class="fa fa-calendar-alt me-1 opacity-50"></i>
-                            {{ \Carbon\Carbon::parse(@$user->profile->date_of_birth)->format('F Y') ?? 'Not set'}}
+                            {{ \Carbon\Carbon::parse(@$user->profile->date_of_birth)->format('d F') ?? 'Not set'}}
                         </span>
                     @endif
 
