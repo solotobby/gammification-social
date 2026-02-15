@@ -10,7 +10,7 @@ class PostImages extends Model
 {
     use HasFactory, UuidTrait;
 
-    protected $fillable = [ 'user_id', 'post_id', 'path'];
+    protected $fillable = [ 'user_id', 'post_id', 'path', 'type'];
 
 
     public function post(){

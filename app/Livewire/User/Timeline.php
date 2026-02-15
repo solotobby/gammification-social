@@ -38,6 +38,7 @@ class Timeline extends Component
     public $content = '';
 
     public $images = [];
+    public $videos = [];
     public $imagePreviews = [];
 
     protected $rules = [
@@ -142,7 +143,7 @@ class Timeline extends Component
         $this->loadPosts();
     }
 
-     // Core batch query using cursor
+    // Core batch query using cursor
     // protected function fetchBatch(?string $cursor = null)
     // {
     //     return Post::with('user')
@@ -196,6 +197,96 @@ class Timeline extends Component
     // }
 
 
+    public function createPosts()
+    {
+        $user  = Auth::user();
+        $level = userLevel();
+
+
+        $tiers = [
+            'Creator' => [
+                'max_text'   => null,
+                'images'     => 1,
+                'videos'     => 1,
+            ],
+            'Influencer' => [
+                'max_text'   => null,
+                'images'     => 4,
+                'videos'     => 2,
+            ],
+            'default' => [
+                'max_text'   => 160,
+                'images'     => 0,
+                'videos'     => 0,
+            ],
+        ];
+
+        $config = $tiers[$level] ?? $tiers['default'];
+
+
+        $rules = [
+            'content' => ['required', 'string'],
+            'images'  => ['array', 'max:' . $config['images']],
+            'images.*' => ['image', 'max:102400'], // 100MB
+            'videos'  => ['array', 'max:' . $config['videos']],
+            'videos.*' => ['file', 'max:1024000', 'mimetypes:video/mp4,video/quicktime'],
+        ];
+
+        if ($config['max_text']) {
+            $rules['content'][] = 'max:' . $config['max_text'];
+        }
+
+        if ($config['images'] === 0) $rules['images'][] = 'prohibited';
+        if ($config['videos'] === 0) $rules['videos'][] = 'prohibited';
+
+        $this->validate($rules);
+
+        $content = $this->convertUrlsToLinks(trim($this->content));
+        $previous = Post::where('user_id', $user->id)->pluck('content')->toArray();
+
+        if (isSimilar($content, $previous, 4)) {
+            session()->flash('info', 'This post is too similar to your previous content.');
+            return;
+        }
+
+
+
+        $status = $user->status === 'ACTIVE'
+            ? 'PROCESSING'
+            : 'SHADOW_BANNED';
+
+
+
+        $post = Post::create([
+            'user_id' => $user->id,
+            'content' => $content,
+            'unicode' => uniqid('', true),
+            'status'  => $status,
+        ]);
+
+
+         foreach ($this->images as $image) {
+            ProcessMediaUpload::dispatch(
+                $post->id,
+                $image->getRealPath(),
+                'image'
+            );
+        }
+
+        foreach ($this->videos as $video) {
+            ProcessMediaUpload::dispatch(
+                $post->id,
+                $video->getRealPath(),
+                'video'
+            );
+        }
+
+        $this->reset(['content','images','videos']);
+        session()->flash('success','Post submitted and processing.');
+
+
+
+    }
 
     public function createPost()
     {
@@ -265,7 +356,7 @@ class Timeline extends Component
         }
 
         $status = 'LIVE';
-        if($user->status != 'ACTIVE'){
+        if ($user->status != 'ACTIVE') {
             $status = 'SHADOW_BANNED';
         }
 
@@ -292,19 +383,17 @@ class Timeline extends Component
                 ]);
             }
         }
-         session()->flash('success', 'Your post was successful!');
+        session()->flash('success', 'Your post was successful!');
 
         $this->reset('content', 'images');
 
-        
+
 
         // Refresh feed
         // $this->resetPage();
     }
 
-    private function checkWriteUp(){
-
-    }
+    private function checkWriteUp() {}
 
     private function convertUrlsToLinks($text)
     {

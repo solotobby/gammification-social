@@ -1,20 +1,18 @@
 <div class="content-side">
 
-  
+    @if (auth()->user()->hasRole('admin'))
+        <ul class="nav-main">
+            <li class="nav-main-item">
+                <a class="nav-main-link" href="{{ url('admin/home') }}">
+                    <i class="nav-main-link-icon fa fa-home"></i>
+                    <span class="nav-main-link-name">Dashboard</span>
+                </a>
+                <a class="nav-main-link" href="{{ url('user/list/all') }}">
+                    <i class="nav-main-link-icon fa fa-list"></i>
+                    <span class="nav-main-link-name">User List</span>
+                </a>
 
-    @if(auth()->user()->hasRole('admin'))
-    <ul class="nav-main">
-      <li class="nav-main-item">
-        <a class="nav-main-link" href="{{ url('admin/home') }}">
-          <i class="nav-main-link-icon fa fa-home"></i>
-          <span class="nav-main-link-name">Dashboard</span>
-        </a>
-        <a class="nav-main-link" href="{{ url('user/list/all') }}">
-          <i class="nav-main-link-icon fa fa-list"></i>
-          <span class="nav-main-link-name">User List</span>
-        </a>
-        
-        {{-- <a class="nav-main-link" href="{{ route('list.accesscode') }}">
+                {{-- <a class="nav-main-link" href="{{ route('list.accesscode') }}">
           <i class="nav-main-link-icon fa fa-list"></i>
           <span class="nav-main-link-name">List Access Codes</span>
         </a>
@@ -23,125 +21,146 @@
           <i class="nav-main-link-icon fa fa-list"></i>
           <span class="nav-main-link-name">Send Access Codes</span>
         </a> --}}
-        <a class="nav-main-link" href="{{ url('withdrawal/list') }}">
-          <i class="nav-main-link-icon fa fa-list"></i>
-          <span class="nav-main-link-name">Withdrawals</span>
-        </a>
-        <a class="nav-main-link" href="{{ url('level/management') }}">
-          <i class="nav-main-link-icon fa fa-list"></i>
-          <span class="nav-main-link-name">Level Management</span>
-        </a>
+                <a class="nav-main-link" href="{{ url('withdrawal/list') }}">
+                    <i class="nav-main-link-icon fa fa-list"></i>
+                    <span class="nav-main-link-name">Withdrawals</span>
+                </a>
+                <a class="nav-main-link" href="{{ url('level/management') }}">
+                    <i class="nav-main-link-icon fa fa-list"></i>
+                    <span class="nav-main-link-name">Level Management</span>
+                </a>
 
-        <a class="nav-main-link" href="{{ url('payouts') }}">
-          <i class="nav-main-link-icon fa fa-list"></i>
-          <span class="nav-main-link-name">Pro-Rata</span>
-        </a> 
-        <a class="nav-main-link" href="{{ url('current/payouts') }}">
-          <i class="nav-main-link-icon fa fa-list"></i>
-          <span class="nav-main-link-name">Current Payout</span>
-        </a>
+                <a class="nav-main-link" href="{{ url('payouts') }}">
+                    <i class="nav-main-link-icon fa fa-list"></i>
+                    <span class="nav-main-link-name">Pro-Rata</span>
+                </a>
+                <a class="nav-main-link" href="{{ url('current/payouts') }}">
+                    <i class="nav-main-link-icon fa fa-list"></i>
+                    <span class="nav-main-link-name">Current Payout</span>
+                </a>
 
-         <li class="nav-main-item">
-          <a class="nav-main-link nav-main-link-submenu" data-toggle="submenu" aria-haspopup="true" aria-expanded="false" href="#">
-            <i class="nav-main-link-icon fa fa-usd"></i>
-            <span class="nav-main-link-name">Payouts</span>
-          </a>
-          <ul class="nav-main-submenu">
             <li class="nav-main-item">
-              <a class="nav-main-link" href="{{ url('monthly/payout/Influencer') }}">
-                <span class="nav-main-link-name">Influncers</span>
-              </a>
+                <a class="nav-main-link nav-main-link-submenu" data-toggle="submenu" aria-haspopup="true"
+                    aria-expanded="false" href="#">
+                    <i class="nav-main-link-icon fa fa-usd"></i>
+                    <span class="nav-main-link-name">Payouts</span>
+                </a>
+                <ul class="nav-main-submenu">
+                    <li class="nav-main-item">
+                        <a class="nav-main-link" href="{{ url('monthly/payout/Influencer') }}">
+                            <span class="nav-main-link-name">Influncers</span>
+                        </a>
+                    </li>
+                    <li class="nav-main-item">
+                        <a class="nav-main-link" href="{{ url('monthly/payout/Creator') }}">
+                            <span class="nav-main-link-name">Creators</span>
+                        </a>
+                    </li>
+                    <li class="nav-main-item">
+                        <a class="nav-main-link" href="{{ url('monthly/payout/Basic') }}">
+                            <span class="nav-main-link-name">Basic</span>
+                        </a>
+                    </li>
+                </ul>
             </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="{{ url('monthly/payout/Creator') }}">
-                <span class="nav-main-link-name">Creators</span>
-              </a>
+
+             <li class="nav-main-item">
+                <a class="nav-main-link nav-main-link-submenu" data-toggle="submenu" aria-haspopup="true"
+                    aria-expanded="false" href="#">
+                    <i class="nav-main-link-icon fa fa-usd"></i>
+                    <span class="nav-main-link-name">Blog</span>
+                </a>
+                <ul class="nav-main-submenu">
+                    <li class="nav-main-item">
+                        <a class="nav-main-link" href="{{ url('create/blog/post') }}">
+                            <span class="nav-main-link-name">Create</span>
+                        </a>
+                    </li>
+                    <li class="nav-main-item">
+                        <a class="nav-main-link" href="{{ url('view/blog/list') }}">
+                            <span class="nav-main-link-name">View</span>
+                        </a>
+                    </li>
+                    
+                </ul>
             </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="{{ url('monthly/payout/Basic') }}">
-                <span class="nav-main-link-name">Basic</span>
-              </a>
-            </li>
-          </ul>
-        </li>
-        
-        <a class="nav-main-link" href="{{ url('user/bank/information') }}">
-          <i class="nav-main-link-icon fa fa-list"></i>
-          <span class="nav-main-link-name">Bank Account</span>
-        </a> 
-       
-      </li>
-    </ul>
-      @else
-      <ul class="nav-main">
-        <li class="nav-main-item">
-          <a class="nav-main-link" href="{{ url('home') }}">
-            <i class="nav-main-link-icon fa fa-home"></i>
-            <span class="nav-main-link-name">Dashboard</span>
-         
-          </a>
-          @if(Auth::user())
-          <a class="nav-main-link" href="{{ url('profile/'.auth()->user()->username) }}">
-              <i class="nav-main-link-icon fa fa-user"></i>
-              <span class="nav-main-link-name">Profile</span>
-          </a>
-          @else
-  
-            <a class="nav-main-link" href="{{ url('register') }}">
-              <i class="nav-main-link-icon fa fa-user"></i>
-              <span class="nav-main-link-name">Profile</span>
+
+            <a class="nav-main-link" href="{{ url('user/bank/information') }}">
+                <i class="nav-main-link-icon fa fa-list"></i>
+                <span class="nav-main-link-name">Bank Account</span>
             </a>
-          @endif
-          <a class="nav-main-link" href="{{ url('analytics') }}">
-            <i class="nav-main-link-icon si si-bar-chart"></i>
-            <span class="nav-main-link-name">Analytics</span>
-        </a>
-          <a class="nav-main-link" href="{{ url('settings') }}">
-              <i class="nav-main-link-icon si si-settings"></i>
-              <span class="nav-main-link-name">Settings</span>
-          </a>
-          
-          <a class="nav-main-link" href="{{ url('wallets') }}">
-            <i class="nav-main-link-icon fa fa-wallet"></i>
-            <span class="nav-main-link-name">Wallets</span>
-          </a>
 
-          <a class="nav-main-link" href="{{ url('upgrade') }}">
-            <i class="nav-main-link-icon fa fa-level-up-alt"></i>
-            <span class="nav-main-link-name">Upgrade Level</span>
-          </a>
+            </li>
+        </ul>
+    @else
+        <ul class="nav-main">
+            <li class="nav-main-item">
+                <a class="nav-main-link" href="{{ url('home') }}">
+                    <i class="nav-main-link-icon fa fa-home"></i>
+                    <span class="nav-main-link-name">Dashboard</span>
 
-          <a class="nav-main-link" href="{{ url('transaction/list') }}">
-            <i class="nav-main-link-icon fa fa-table"></i>
-            <span class="nav-main-link-name">Transaction</span>
-          </a>
-         
+                </a>
+                @if (Auth::user())
+                    <a class="nav-main-link" href="{{ url('profile/' . auth()->user()->username) }}">
+                        <i class="nav-main-link-icon fa fa-user"></i>
+                        <span class="nav-main-link-name">Profile</span>
+                    </a>
+                @else
+                    <a class="nav-main-link" href="{{ url('register') }}">
+                        <i class="nav-main-link-icon fa fa-user"></i>
+                        <span class="nav-main-link-name">Profile</span>
+                    </a>
+                @endif
+                <a class="nav-main-link" href="{{ url('analytics') }}">
+                    <i class="nav-main-link-icon si si-bar-chart"></i>
+                    <span class="nav-main-link-name">Analytics</span>
+                </a>
+                <a class="nav-main-link" href="{{ url('settings') }}">
+                    <i class="nav-main-link-icon si si-settings"></i>
+                    <span class="nav-main-link-name">Settings</span>
+                </a>
 
-          {{-- <a class="nav-main-link" href="{{ url('referral/list') }}">
+                <a class="nav-main-link" href="{{ url('wallets') }}">
+                    <i class="nav-main-link-icon fa fa-wallet"></i>
+                    <span class="nav-main-link-name">Wallets</span>
+                </a>
+
+                <a class="nav-main-link" href="{{ url('upgrade') }}">
+                    <i class="nav-main-link-icon fa fa-level-up-alt"></i>
+                    <span class="nav-main-link-name">Upgrade Level</span>
+                </a>
+
+                <a class="nav-main-link" href="{{ url('transaction/list') }}">
+                    <i class="nav-main-link-icon fa fa-table"></i>
+                    <span class="nav-main-link-name">Transaction</span>
+                </a>
+
+
+                {{-- <a class="nav-main-link" href="{{ url('referral/list') }}">
             <i class="nav-main-link-icon fa fa-users"></i>
             <span class="nav-main-link-name">My Referrals</span>
           </a> --}}
-  
-          <a class="nav-main-link" href="{{ url('bank/information') }}">
-            <i class="nav-main-link-icon fa fa-usd"></i>
-            <span class="nav-main-link-name">Bank Information</span>
-          </a>
 
-          <a class="nav-main-link" href="{{ url('how/it/works') }}">
-            <i class="nav-main-link-icon fa fa-table"></i>
-            <span class="nav-main-link-name">How It Works</span>
-          </a>
+                <a class="nav-main-link" href="{{ url('bank/information') }}">
+                    <i class="nav-main-link-icon fa fa-usd"></i>
+                    <span class="nav-main-link-name">Bank Information</span>
+                </a>
 
-          {{-- <a class="nav-main-link" href="{{ url('how/to/earn') }}">
+                <a class="nav-main-link" href="{{ url('how/it/works') }}">
+                    <i class="nav-main-link-icon fa fa-table"></i>
+                    <span class="nav-main-link-name">How It Works</span>
+                </a>
+
+                {{-- <a class="nav-main-link" href="{{ url('how/to/earn') }}">
             <i class="nav-main-link-icon fa fa-usd"></i>
             <span class="nav-main-link-name">How to Earn</span>
           </a> --}}
 
-          
-  
-        </li>
-        
-        {{-- <li class="nav-main-heading">Pages</li>
+
+
+            </li>
+
+            {{-- <li class="nav-main-heading">Pages</li>
         <li class="nav-main-item">
           <a class="nav-main-link nav-main-link-submenu" data-toggle="submenu" aria-haspopup="true" aria-expanded="false" href="#">
             <i class="nav-main-link-icon fa fa-rocket"></i>
@@ -429,6 +448,6 @@
             </li>
           </ul>
         </li> --}}
-      </ul>
+        </ul>
     @endif
-  </div>
+</div>

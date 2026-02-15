@@ -1,11 +1,13 @@
 <?php
 
+use App\Http\Controllers\Admin\BlogController as AdminBlogController;
 use App\Http\Controllers\Admin\EngagementPayoutController;
 use App\Http\Controllers\Admin\LevelManagementController;
 use App\Http\Controllers\Admin\MonthlyPayoutController;
 use App\Http\Controllers\Admin\PayoutController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\UserEngagementController;
+use App\Http\Controllers\BlogController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PaymentController;
 use App\Livewire\CreateProduct;
@@ -103,6 +105,9 @@ Route::group(['namespace' => 'auth'], function () {
 
     Route::get('registration/{code}', [\App\Http\Controllers\AdminLoginController::class, 'login']);
     Route::post('registration', [\App\Http\Controllers\AdminLoginController::class, 'proAdminLogin'])->name('dinky.reg');
+
+    Route::get('blog', [BlogController::class, 'index'])->name('blog');
+    Route::get('blog/{slug}', [BlogController::class, 'show']);
 
 
     // Route::post('post/comment', [\App\Http\Controllers\GeneralController::class, 'comment']);
@@ -212,5 +217,10 @@ Route::middleware(['auth', 'verified', 'track.online'])->group(function () {
         Route::get('view/payout/info/{id}', [PayoutController::class, 'viewPayoutInformation']);
         Route::post('fund/transfer', [PayoutController::class, 'fundTransfer'])->name('fund.transfer');
         Route::get('update/payout/fund/{id}', [PayoutController::class, 'updatePayoutStatus']);
+
+        Route::get('create/blog/post', [AdminBlogController::class, 'create'])->name('create');
+        Route::get('view/blog/list', [AdminBlogController::class, 'list'])->name('list');
+        Route::post('create/blog/post', [AdminBlogController::class, 'store'])->name('store.blog');
+        Route::get('delete/blog/{slug}', [AdminBlogController::class, 'deletePost']);
     });
 });
