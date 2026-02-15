@@ -135,11 +135,10 @@
                     <span class="nav-main-link-name">Transaction</span>
                 </a>
 
-
-                {{-- <a class="nav-main-link" href="{{ url('referral/list') }}">
-            <i class="nav-main-link-icon fa fa-users"></i>
-            <span class="nav-main-link-name">My Referrals</span>
-          </a> --}}
+                <a class="nav-main-link" href="{{ url('referral/list') }}">
+                  <i class="nav-main-link-icon fa fa-users"></i>
+                  <span class="nav-main-link-name">My Referrals</span>
+                </a>
 
                 <a class="nav-main-link" href="{{ url('bank/information') }}">
                     <i class="nav-main-link-icon fa fa-usd"></i>

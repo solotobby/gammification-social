@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
@@ -30,77 +31,82 @@
     <link rel="stylesheet" href="{{ asset('src/assets/js/plugins/highlightjs/styles/atom-one-dark.css') }}">
     <link rel="stylesheet" href="{{ asset('src/assets/js/plugins/magnific-popup/magnific-popup.css') }}">
 
-    <link rel="stylesheet" href="{{ asset('src/assets/js/plugins/slick-carousel/slick.css')}}">
-    <link rel="stylesheet" href="{{ asset('src/assets/js/plugins/slick-carousel/slick-theme.css')}}">
+    <link rel="stylesheet" href="{{ asset('src/assets/js/plugins/slick-carousel/slick.css') }}">
+    <link rel="stylesheet" href="{{ asset('src/assets/js/plugins/slick-carousel/slick-theme.css') }}">
 
 
     <!-- Dashmix framework -->
     <link rel="stylesheet" id="css-main" href="{{ asset('src/assets/css/dashmix.css') }}">
     {{-- <link rel="stylesheet" id="css-theme" href="{{ asset('src/assets/css/themes/xmodern.min.css') }}"> --}}
 
-    
+
     <script type="text/javascript">
-  var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-  (function(){
-  var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-  s1.async=true;
-  s1.src='https://embed.tawk.to/661c41d4a0c6737bd12bb507/1hrf629ii';
-  s1.charset='UTF-8';
-  s1.setAttribute('crossorigin','*');
-  s0.parentNode.insertBefore(s1,s0);
-  })();
-  </script>
-  <!--End of Tawk.to Script-->
+        var Tawk_API = Tawk_API || {},
+            Tawk_LoadStart = new Date();
+        (function() {
+            var s1 = document.createElement("script"),
+                s0 = document.getElementsByTagName("script")[0];
+            s1.async = true;
+            s1.src = 'https://embed.tawk.to/661c41d4a0c6737bd12bb507/1hrf629ii';
+            s1.charset = 'UTF-8';
+            s1.setAttribute('crossorigin', '*');
+            s0.parentNode.insertBefore(s1, s0);
+        })();
+    </script>
+    <!--End of Tawk.to Script-->
 
-  {{-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css"> --}}
+    {{-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css"> --}}
 
-  <style>
-    .float{
-	position:fixed;
-	width:60px;
-	height:60px;
-	bottom:40px;
-	right:40px;
-	background-color:lightblue;
-	color:#FFF;
-	border-radius:50px;
-	text-align:center;
-  font-size:30px;
-	box-shadow: 2px 2px 3px #999;
-  z-index:100;
-}
+    <style>
+        .float {
+            position: fixed;
+            width: 60px;
+            height: 60px;
+            bottom: 40px;
+            right: 40px;
+            background-color: lightblue;
+            color: #FFF;
+            border-radius: 50px;
+            text-align: center;
+            font-size: 30px;
+            box-shadow: 2px 2px 3px #999;
+            z-index: 100;
+        }
 
-.my-float{
-	margin-top:16px;
-}
-  </style>
-  
+        .my-float {
+            margin-top: 16px;
+        }
+    </style>
+
 
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7484162262282358"
-    crossorigin="anonymous"></script>
+        crossorigin="anonymous"></script>
 
     <script async src="https://www.googletagmanager.com/gtag/js?id=AW-10842521152"></script>
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
+        window.dataLayer = window.dataLayer || [];
 
-      gtag('config', 'AW-10842521152');
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+        gtag('js', new Date());
+
+        gtag('config', 'AW-10842521152');
     </script>
 
 
     @vite([
-      // 'resources/sass/app.scss', 
-      // 'resources/js/app.js'
-      ])
-    @livewireStyles 
+        // 'resources/sass/app.scss',
+        // 'resources/js/app.js'
+    ])
+    @livewireStyles
 
     <!-- You can include a specific file from css/themes/ folder to alter the default color theme of the template. eg: -->
     <!-- <link rel="stylesheet" id="css-theme" href="assets/css/themes/xwork.min.css"> -->
     <!-- END Stylesheets -->
-  </head>
+</head>
 
-  <body>
+<body>
     <!-- Page Container -->
     <!--
       Available classes for #page-container:
@@ -157,9 +163,10 @@
 
         'sidebar-dark page-header-dark dark-mode'   Enable dark mode (light sidebar/header is not supported with dark mode)
     -->
-    <div id="page-container" class="sidebar-o sidebar-dark enable-page-overlay side-scroll page-header-fixed main-content-narrow">
-      <!-- Side Overlay-->
-      {{-- <aside id="side-overlay">
+    <div id="page-container"
+        class="sidebar-o sidebar-dark enable-page-overlay side-scroll page-header-fixed main-content-narrow">
+        <!-- Side Overlay-->
+        {{-- <aside id="side-overlay">
         <!-- Side Header -->
         <div class="bg-image" style="background-image: url('assets/media/various/bg_side_overlay_header.jpg');">
           <div class="bg-primary-op">
@@ -604,10 +611,10 @@
         </div>
         <!-- END Side Content -->
       </aside> --}}
-      <!-- END Side Overlay -->
+        <!-- END Side Overlay -->
 
-      <!-- Sidebar -->
-      <!--
+        <!-- Sidebar -->
+        <!--
         Sidebar Mini Mode - Display Helper classes
 
         Adding 'smini-hide' class to an element will make it invisible (opacity: 0) when the sidebar is in mini mode
@@ -618,144 +625,150 @@
         Adding 'smini-visible' to an element will show it (display: inline-block) only when the sidebar is in mini mode
         Adding 'smini-visible-block' to an element will show it (display: block) only when the sidebar is in mini mode
       -->
-      <nav id="sidebar" aria-label="Main Navigation">
-        <!-- Side Header -->
-        <div class="bg-header-dark">
-          <div class="content-header bg-white-5">
-            <!-- Logo -->
-            <a class="fw-semibold text-white tracking-wide" href="{{ url('home') }}">
-              <span class="smini-visible">
-                P<span class="opacity-75">H</span>
-              </span>
-              <span class="smini-hidden"> 
-                
-                <img src="{{asset('logo.png')}}" alt="" class="logo-light" height="34" />
-                {{-- Pay<span class="opacity-75">Hankey</span> --}}
-              </span>
-            </a>
-            <!-- END Logo -->
+        <nav id="sidebar" aria-label="Main Navigation">
+            <!-- Side Header -->
+            <div class="bg-header-dark">
+                <div class="content-header bg-white-5">
+                    <!-- Logo -->
+                    <a class="fw-semibold text-white tracking-wide" href="{{ url('home') }}">
+                        <span class="smini-visible">
+                            P<span class="opacity-75">H</span>
+                        </span>
+                        <span class="smini-hidden">
 
-            <!-- Options -->
-            <div>
-              <!-- Toggle Sidebar Style -->
-              <!-- Layout API, functionality initialized in Template._uiApiLayout() -->
-              <!-- Class Toggle, functionality initialized in Helpers.dmToggleClass() -->
-              {{-- <button type="button" class="btn btn-sm btn-alt-secondary" data-toggle="class-toggle" data-target="#sidebar-style-toggler" data-class="fa-toggle-off fa-toggle-on" onclick="Dashmix.layout('sidebar_style_toggle');Dashmix.layout('header_style_toggle');">
+                            <img src="{{ asset('logo.png') }}" alt="" class="logo-light" height="34" />
+                            {{-- Pay<span class="opacity-75">Hankey</span> --}}
+                        </span>
+                    </a>
+                    <!-- END Logo -->
+
+                    <!-- Options -->
+                    <div>
+                        <!-- Toggle Sidebar Style -->
+                        <!-- Layout API, functionality initialized in Template._uiApiLayout() -->
+                        <!-- Class Toggle, functionality initialized in Helpers.dmToggleClass() -->
+                        {{-- <button type="button" class="btn btn-sm btn-alt-secondary" data-toggle="class-toggle" data-target="#sidebar-style-toggler" data-class="fa-toggle-off fa-toggle-on" onclick="Dashmix.layout('sidebar_style_toggle');Dashmix.layout('header_style_toggle');">
                 <i class="fa fa-toggle-off" id="sidebar-style-toggler"></i>
               </button> --}}
-              <!-- END Toggle Sidebar Style -->
+                        <!-- END Toggle Sidebar Style -->
 
-              <!-- Dark Mode -->
-              <!-- Layout API, functionality initialized in Template._uiApiLayout() -->
-              {{-- <button type="button" class="btn btn-sm btn-alt-secondary" data-toggle="class-toggle" data-target="#dark-mode-toggler" data-class="far fa" onclick="Dashmix.layout('dark_mode_toggle');">
+                        <!-- Dark Mode -->
+                        <!-- Layout API, functionality initialized in Template._uiApiLayout() -->
+                        {{-- <button type="button" class="btn btn-sm btn-alt-secondary" data-toggle="class-toggle" data-target="#dark-mode-toggler" data-class="far fa" onclick="Dashmix.layout('dark_mode_toggle');">
                 <i class="far fa-moon" id="dark-mode-toggler"></i>
               </button> --}}
-              <!-- END Dark Mode -->
+                        <!-- END Dark Mode -->
 
-              <!-- Close Sidebar, Visible only on mobile screens -->
-              <!-- Layout API, functionality initialized in Template._uiApiLayout() -->
-              <button type="button" class="btn btn-sm btn-alt-secondary d-lg-none" data-toggle="layout" data-action="sidebar_close">
-                <i class="fa fa-times-circle"></i>
-              </button>
-              <!-- END Close Sidebar -->
-            </div>
-            <!-- END Options -->
-          </div>
-        </div>
-        <!-- END Side Header -->
-
-        <!-- Sidebar Scrolling -->
-        <div class="js-sidebar-scroll">
-          <!-- Side Navigation -->
-          @include('layouts.sidebar')
-          <!-- END Side Navigation -->
-        </div>
-        <!-- END Sidebar Scrolling -->
-      </nav>
-      <!-- END Sidebar -->
-
-      <!-- Header -->
-      <header id="page-header">
-        <!-- Header Content -->
-        <div class="content-header">
-          <!-- Left Section -->
-          <div class="space-x-1">
-            <!-- Toggle Sidebar -->
-            <!-- Layout API, functionality initialized in Template._uiApiLayout()-->
-            <button type="button" class="btn btn-alt-secondary" data-toggle="layout" data-action="sidebar_toggle">
-              <i class="fa fa-fw fa-bars"></i>
-            </button>
-            <!-- END Toggle Sidebar -->
-
-            <!-- Open Search Section -->
-            <!-- Layout API, functionality initialized in Template._uiApiLayout() -->
-            <a href="{{url('search/user')}}" class="btn btn-alt-secondary" data-toggle="layout" data-action="header_search_on">
-              <i class="fa fa-fw opacity-50 fa-search"></i> <span class="ms-1 d-none d-sm-inline-block">Search People</span>
-            </a>
-            <!-- END Open Search Section -->
-          </div>
-          <!-- END Left Section -->
-
-          <!-- Right Section -->
-          <div class="space-x-1">
-            <!-- User Dropdown -->
-            <div class="dropdown d-inline-block">
-              <button type="button" class="btn btn-alt-secondary" id="page-header-user-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <i class="fa fa-fw fa-user d-sm-none"></i>
-                <span class="d-none d-sm-inline-block">
-                  {{ auth()->user()->name }}
-                </span>
-                <i class="fa fa-fw fa-angle-down opacity-50 ms-1 d-none d-sm-inline-block"></i>
-              </button>
-              <div class="dropdown-menu dropdown-menu-end p-0" aria-labelledby="page-header-user-dropdown">
-                <div class="bg-primary-dark rounded-top fw-semibold text-white text-center p-3">
-                 {{-- Level: {{ auth()->user()->activeLevel->plan_name }} --}}
-                 Level: {{ userLevel() }}
+                        <!-- Close Sidebar, Visible only on mobile screens -->
+                        <!-- Layout API, functionality initialized in Template._uiApiLayout() -->
+                        <button type="button" class="btn btn-sm btn-alt-secondary d-lg-none" data-toggle="layout"
+                            data-action="sidebar_close">
+                            <i class="fa fa-times-circle"></i>
+                        </button>
+                        <!-- END Close Sidebar -->
+                    </div>
+                    <!-- END Options -->
                 </div>
-                <div class="p-2">
-                  <a class="dropdown-item" href="{{ url('profile/'.auth()->user()->username) }}">
-                    <i class="far fa-fw fa-user me-1"></i> Profile
-                  </a>
-                  {{-- <a class="dropdown-item d-flex align-items-center justify-content-between" href="be_pages_generic_inbox.html">
+            </div>
+            <!-- END Side Header -->
+
+            <!-- Sidebar Scrolling -->
+            <div class="js-sidebar-scroll">
+                <!-- Side Navigation -->
+                @include('layouts.sidebar')
+                <!-- END Side Navigation -->
+            </div>
+            <!-- END Sidebar Scrolling -->
+        </nav>
+        <!-- END Sidebar -->
+
+        <!-- Header -->
+        <header id="page-header">
+            <!-- Header Content -->
+            <div class="content-header">
+                <!-- Left Section -->
+                <div class="space-x-1">
+                    <!-- Toggle Sidebar -->
+                    <!-- Layout API, functionality initialized in Template._uiApiLayout()-->
+                    <button type="button" class="btn btn-alt-secondary" data-toggle="layout"
+                        data-action="sidebar_toggle">
+                        <i class="fa fa-fw fa-bars"></i>
+                    </button>
+                    <!-- END Toggle Sidebar -->
+
+                    <!-- Open Search Section -->
+                    <!-- Layout API, functionality initialized in Template._uiApiLayout() -->
+                    <a href="{{ url('search/user') }}" class="btn btn-alt-secondary" data-toggle="layout"
+                        data-action="header_search_on">
+                        <i class="fa fa-fw opacity-50 fa-search"></i> <span class="ms-1 d-none d-sm-inline-block">Search
+                            People</span>
+                    </a>
+                    <!-- END Open Search Section -->
+                </div>
+                <!-- END Left Section -->
+
+                <!-- Right Section -->
+                <div class="space-x-1">
+                    <!-- User Dropdown -->
+                    <div class="dropdown d-inline-block">
+                        <button type="button" class="btn btn-alt-secondary" id="page-header-user-dropdown"
+                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fa fa-fw fa-user d-sm-none"></i>
+                            <span class="d-none d-sm-inline-block">
+                                {{ auth()->user()->name }}
+                            </span>
+                            <i class="fa fa-fw fa-angle-down opacity-50 ms-1 d-none d-sm-inline-block"></i>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end p-0" aria-labelledby="page-header-user-dropdown">
+                            <div class="bg-primary-dark rounded-top fw-semibold text-white text-center p-3">
+                                {{-- Level: {{ auth()->user()->activeLevel->plan_name }} --}}
+                                Level: {{ userLevel() }}
+                            </div>
+                            <div class="p-2">
+                                <a class="dropdown-item" href="{{ url('profile/' . auth()->user()->username) }}">
+                                    <i class="far fa-fw fa-user me-1"></i> Profile
+                                </a>
+                                {{-- <a class="dropdown-item d-flex align-items-center justify-content-between" href="be_pages_generic_inbox.html">
                     <span><i class="far fa-fw fa-envelope me-1"></i> Inbox</span>
                     <span class="badge bg-primary rounded-pill">3</span>
                   </a> --}}
-                  <a class="dropdown-item" href="{{ url('analytics') }}">
-                    <i class="si si-bar-chart me-1"></i> Analytics
-                  </a>
-                  <div role="separator" class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="{{ url('analytics') }}">
+                                    <i class="si si-bar-chart me-1"></i> Analytics
+                                </a>
+                                <div role="separator" class="dropdown-divider"></div>
 
-                  <!-- Toggle Side Overlay -->
-                  <!-- Layout API, functionality initialized in Template._uiApiLayout() -->
-                  <a class="dropdown-item" href="{{ url('settings') }}">
-                    <i class="si si-settings me-1"></i> Settings
-                  </a>
-                  <!-- END Side Overlay -->
+                                <!-- Toggle Side Overlay -->
+                                <!-- Layout API, functionality initialized in Template._uiApiLayout() -->
+                                <a class="dropdown-item" href="{{ url('settings') }}">
+                                    <i class="si si-settings me-1"></i> Settings
+                                </a>
+                                <!-- END Side Overlay -->
 
-                  <div role="separator" class="dropdown-divider"></div>
+                                <div role="separator" class="dropdown-divider"></div>
 
-                    <a class="dropdown-item" href="{{ route('logout') }}"
-                       onclick="event.preventDefault();
+                                <a class="dropdown-item" href="{{ route('logout') }}"
+                                    onclick="event.preventDefault();
                                      document.getElementById('logout-form').submit();">
-                        <i class="far fa-fw fa-arrow-alt-circle-left me-1"></i> Sign Out
-                    </a>
-                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                        @csrf
-                    </form>
-               
-                </div>
-              </div>
-            </div>
-            <!-- END User Dropdown -->
+                                    <i class="far fa-fw fa-arrow-alt-circle-left me-1"></i> Sign Out
+                                </a>
+                                <form id="logout-form" action="{{ route('logout') }}" method="POST"
+                                    class="d-none">
+                                    @csrf
+                                </form>
 
-            <!-- Notifications Dropdown -->
-            <div class="dropdown d-inline-block">
-            @auth
-                <livewire:user.navbar-notifications />
-            @endauth
-            </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- END User Dropdown -->
 
-            {{-- <div class="dropdown d-inline-block">
+                    <!-- Notifications Dropdown -->
+                    <div class="dropdown d-inline-block">
+                        @auth
+                            <livewire:user.navbar-notifications />
+                        @endauth
+                    </div>
+
+                    {{-- <div class="dropdown d-inline-block">
               <button type="button" class="btn btn-alt-secondary" id="page-header-notifications-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="fa fa-fw fa-bell"></i>
               </button>
@@ -827,20 +840,20 @@
                 </div>
               </div>
             </div> --}}
-            <!-- END Notifications Dropdown -->
+                    <!-- END Notifications Dropdown -->
 
-            <!-- Toggle Side Overlay -->
-            <!-- Layout API, functionality initialized in Template._uiApiLayout() -->
-           
-            <!-- END Toggle Side Overlay -->
-          </div>
-          <!-- END Right Section -->
-        </div>
-        <!-- END Header Content -->
+                    <!-- Toggle Side Overlay -->
+                    <!-- Layout API, functionality initialized in Template._uiApiLayout() -->
 
-        <!-- Header Search -->
-        
-        {{-- <div id="page-header-search" class="overlay-header bg-header-dark">
+                    <!-- END Toggle Side Overlay -->
+                </div>
+                <!-- END Right Section -->
+            </div>
+            <!-- END Header Content -->
+
+            <!-- Header Search -->
+
+            {{-- <div id="page-header-search" class="overlay-header bg-header-dark">
           <div class="bg-white-10">
             <div class="content-header">
               <form class="w-100" action="{{ url('search/user') }}" method="GET">
@@ -854,12 +867,12 @@
             </div>
           </div>
         </div> --}}
-    
-        <!-- END Header Search -->
 
-        <!-- Header Loader -->
-        <!-- Please check out the Loaders page under Components category to see examples of showing/hiding it -->
-        {{-- <div id="page-header-loader" class="overlay-header bg-header-dark">
+            <!-- END Header Search -->
+
+            <!-- Header Loader -->
+            <!-- Please check out the Loaders page under Components category to see examples of showing/hiding it -->
+            {{-- <div id="page-header-loader" class="overlay-header bg-header-dark">
           <div class="bg-white-10">
             <div class="content-header">
               <div class="w-100 text-center">
@@ -868,42 +881,43 @@
             </div>
           </div>
         </div> --}}
-        <!-- END Header Loader -->
-      </header>
-      <!-- END Header -->
+            <!-- END Header Loader -->
+        </header>
+        <!-- END Header -->
 
-      <!-- Main Container -->
-      <main id="main-container">
+        <!-- Main Container -->
+        <main id="main-container">
 
-        <!-- Page Content -->
-        <div class="content content-full content-boxed">
-         
-              <!-- Timeline -->
-              {{ $slot }}
+            <!-- Page Content -->
+            <div class="content content-full content-boxed">
 
-              @yield('content')
+                <!-- Timeline -->
+                {{ $slot }}
 
-        </div>
+                @yield('content')
 
-        </div>
-        <!-- END Page Content -->
-      </main>
-      <!-- END Main Container -->
+            </div>
 
-      <!-- Footer -->
-      <footer id="page-footer" class="bg-body-light">
+    </div>
+    <!-- END Page Content -->
+    </main>
+    <!-- END Main Container -->
+
+    <!-- Footer -->
+    <footer id="page-footer" class="bg-body-light">
         <div class="content py-0">
-          <div class="row fs-sm">
-            <div class="col-sm-6 order-sm-2 mb-1 mb-sm-0 text-center text-sm-end">
-              Built with <i class="fa fa-heart text-danger"></i> by <a class="fw-semibold" target="_blank">Payhankey</a>
+            <div class="row fs-sm">
+                <div class="col-sm-6 order-sm-2 mb-1 mb-sm-0 text-center text-sm-end">
+                    Built with <i class="fa fa-heart text-danger"></i> by <a class="fw-semibold"
+                        target="_blank">Payhankey</a>
+                </div>
+                <div class="col-sm-6 order-sm-1 text-center text-sm-start">
+                    {{-- <a class="fw-semibold" href="https://pixelcave.com/products/dashmix" target="_blank">Dashmix 5.8</a> &copy; <span data-toggle="year-copy"></span> --}}
+                </div>
             </div>
-            <div class="col-sm-6 order-sm-1 text-center text-sm-start">
-              {{-- <a class="fw-semibold" href="https://pixelcave.com/products/dashmix" target="_blank">Dashmix 5.8</a> &copy; <span data-toggle="year-copy"></span> --}}
-            </div>
-          </div>
         </div>
-      </footer>
-      <!-- END Footer -->
+    </footer>
+    <!-- END Footer -->
     </div>
     <!-- END Page Container -->
 
@@ -913,24 +927,27 @@
       Core libraries and functionality
       webpack is putting everything together at assets/_js/main/app.js
     -->
-    <script src="{{ asset('src/assets/js/dashmix.app.min.js')}}"></script>
+    <script src="{{ asset('src/assets/js/dashmix.app.min.js') }}"></script>
 
     <!-- jQuery (required for Magnific Popup Plugin) -->
-    <script src="{{ asset('src/assets/js/lib/jquery.min.js')}}"></script>
+    <script src="{{ asset('src/assets/js/lib/jquery.min.js') }}"></script>
 
     <!-- Page JS Plugins -->
-    <script src="{{ asset('src/assets/js/plugins/highlightjs/highlight.pack.min.js')}}"></script>
-    <script src="{{ asset('src/assets/js/plugins/magnific-popup/jquery.magnific-popup.min.js')}}"></script>
+    <script src="{{ asset('src/assets/js/plugins/highlightjs/highlight.pack.min.js') }}"></script>
+    <script src="{{ asset('src/assets/js/plugins/magnific-popup/jquery.magnific-popup.min.js') }}"></script>
 
-    <script src="{{ asset('src/assets/js/plugins/slick-carousel/slick.min.js')}}"></script>
+    <script src="{{ asset('src/assets/js/plugins/slick-carousel/slick.min.js') }}"></script>
 
-    <script src="{{ asset('src/assets/js/pages/be_comp_onboarding.min.js')}}"></script>
+    <script src="{{ asset('src/assets/js/pages/be_comp_onboarding.min.js') }}"></script>
 
     <!-- Page JS Helpers (Highlight.js + Magnific Popup Plugins) -->
     {{-- <script>Dashmix.helpersOnLoad(['js-highlightjs', 'jq-magnific-popup']);</script> --}}
 
 
     <!-- Page JS Helpers (Highlight.js + Magnific Popup Plugins) -->
-    <script>Dashmix.helpersOnLoad(['js-highlightjs', 'jq-magnific-popup']);</script>
-  </body>
+    <script>
+        Dashmix.helpersOnLoad(['js-highlightjs', 'jq-magnific-popup']);
+    </script>
+</body>
+
 </html>

@@ -149,7 +149,7 @@
           </div>
 
           <!-- Pagination -->
-          <nav aria-label="Page navigation">
+          {{-- <nav aria-label="Page navigation">
             <ul class="pagination justify-content-center push">
               <li class="page-item active">
                 <a class="page-link" href="javascript:void(0)">1</a>
@@ -175,7 +175,7 @@
                 </a>
               </li>
             </ul>
-          </nav>
+          </nav> --}}
           <!-- END Pagination -->
         </div>
         <!-- END Page Content -->
