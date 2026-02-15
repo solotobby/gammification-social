@@ -21,7 +21,7 @@
                 <button class="btn btn-sm btn-primary" onclick="copyReferralLink(this)">
                     <i class="fa fa-copy me-1"></i> Copy
                 </button>
-                
+
             </div>
 
             @if (session()->has('status_refresh'))
@@ -70,68 +70,65 @@
             </div>
 
         </div>
-        {{-- <div class="alert alert-info">
-            <i class="fa fa-share me-1 opacity-50"></i> {{ url('/reg?referral_code=' . auth()->user()->referral_code) }}
-        </div> --}}
-        <!-- Dynamic Table with Export Buttons -->
-        <div class="block block-rounded">
-
-            <div class="block-content block-content-full">
 
 
-                <table class="table table-hover table-striped table-borderless table-vcenter mb-0 table-responsive">
-                    <thead>
-                        <tr>
-                            <th></th>
-                            <th>Name</th>
-                            <th>Following</th>
-                            <th>Followers</th>
-                            <th>Date Registered</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+        @if (count($referralList) > 0)
+            <!-- Dynamic Table with Export Buttons -->
+            <div class="block block-rounded">
 
-                        @foreach ($referralList as $user)
+                <div class="block-content block-content-full">
+
+
+                    <table class="table table-hover table-striped table-borderless table-vcenter mb-0 table-responsive">
+                        <thead>
                             <tr>
-                                <td class="text-center" style="width: 140px;">
-                                    <img class="img-avatar img-avatar-thumb"
-                                        src="{{ $user->avatar ?? asset('src/assets/media/avatars/avatar10.jpg') }}"
-                                        alt="">
-                                </td>
-                                <td style="min-width: 200px;">
-                                    <div class="py-4">
-                                        <p class="mb-0">
-                                            <a class="link-fx fw-bold d-inline-block"
-                                                href="{{ url('profile/' . $user->username) }}">
-                                                {{ $user->name }}</a>
-                                        </p>
-                                        <p class="mb-0">
-                                            <a class="fs-sm fw-bold text-lowercase text-muted me-3"
-                                                href="javascript:void(0)">@<span>{{ $user->username }}</span></a>
-                                        </p>
-                                    </div>
-                                </td>
-                                <td style="min-width: 200px;">
-                                    Following: {{ $user->following }}
-                                </td>
-                                <td class="text-end" style="min-width: 160px;">
-                                    Followers: {{ $user->followers }}
-                                </td>
-                                <td> {{ \Carbon\Carbon::parse($user->created_at)->format('F d, Y') }}</td>
+                                <th></th>
+                                <th>Name</th>
+                                <th>Following</th>
+                                <th>Followers</th>
+                                <th>Date Registered</th>
                             </tr>
+                        </thead>
+                        <tbody>
 
-
-                            {{-- <tr>
-                                <td><a href="{{ url('profile/' . $list->username) }}"> {{ $list->name }}</a></td>
-                                <td>@<span>{{ $list->username }}</span></td>
-
-                                <td> {{ \Carbon\Carbon::parse($list->created_at)->format('F d, Y') }}</td>
-                            </tr> --}}
-                        @endforeach
-                    </tbody>
-                </table>
+                            @foreach ($referralList as $user)
+                                <tr>
+                                    <td class="text-center" style="width: 140px;">
+                                        <img class="img-avatar img-avatar-thumb"
+                                            src="{{ $user->avatar ?? asset('src/assets/media/avatars/avatar10.jpg') }}"
+                                            alt="">
+                                    </td>
+                                    <td style="min-width: 200px;">
+                                        <div class="py-4">
+                                            <p class="mb-0">
+                                                <a class="link-fx fw-bold d-inline-block"
+                                                    href="{{ url('profile/' . $user->username) }}">
+                                                    {{ $user->name }}</a>
+                                            </p>
+                                            <p class="mb-0">
+                                                <a class="fs-sm fw-bold text-lowercase text-muted me-3"
+                                                    href="javascript:void(0)">@<span>{{ $user->username }}</span></a>
+                                            </p>
+                                        </div>
+                                    </td>
+                                    <td style="min-width: 200px;">
+                                        Following: {{ $user->following }}
+                                    </td>
+                                    <td class="text-end" style="min-width: 160px;">
+                                        Followers: {{ $user->followers }}
+                                    </td>
+                                    <td> {{ \Carbon\Carbon::parse($user->created_at)->format('F d, Y') }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
+        @else
+            <div class="alert alert-warning">
+                You don't have referrals yet
+            </div>
+        @endif
 
         <script>
             function copyReferralLink(button) {
@@ -157,32 +154,5 @@
                 }, 2000);
             }
         </script>
-
-
-        {{-- <script>
-        function copyReferralLink() {
-            const text = document.getElementById("referralLink").innerText;
-
-            navigator.clipboard.writeText(text).then(function() {
-                alert("Copied to clipboard!");
-            });
-        }
-        </script> --}}
-
-        {{-- <script>
-            function copyReferralLink() {
-                const text = document.getElementById("referralLink").innerText;
-
-                navigator.clipboard.writeText(text).then(function() {
-                    const btn = event.target.closest("button");
-                    btn.innerHTML = '<i class="fa fa-check me-1"></i> Copied';
-                    setTimeout(() => {
-                        btn.innerHTML = '<i class="fa fa-copy me-1"></i> Copy';
-                    }, 2000);
-                });
-            }
-        </script> --}}
-
-
 
     </div>
