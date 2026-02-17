@@ -21,13 +21,38 @@ class MonthlyPayoutController extends Controller
     {
 
         $currentMonth =  now()->format('Y-m');
-        // $substat = SubscriptionStat::whereMonth('created_at', $currentMonth)->get();
-        $substat = SubscriptionStat::whereBetween('created_at', [
-            now()->startOfMonth(),
-            now()->endOfMonth(),
-        ])->paginate(50);
 
-        return view('admin.pay.payout', ['stats' => $substat, 'currentMonth' => $currentMonth]);
+
+        $start = now()->startOfMonth();
+        $end   = now()->endOfMonth();
+
+        $baseQuery = SubscriptionStat::whereBetween('created_at', [$start, $end]);
+
+        // Paginated Results
+        $substat = (clone $baseQuery)
+            ->orderByDesc('created_at')
+            ->paginate(20);
+
+        // Aggregate Counts (Single Query)
+        $totals = (clone $baseQuery)
+            ->selectRaw("
+        COUNT(*) as total,
+        SUM(CASE WHEN plan_name = 'Creator' THEN 1 ELSE 0 END) as total_creator,
+        SUM(CASE WHEN plan_name = 'Influencer' THEN 1 ELSE 0 END) as total_influencer
+        ")
+            ->first();
+
+            $totalRev = ($totals->total_creator * 1500) + ($totals->total_influencer * 7500);
+
+
+        return view('admin.pay.payout', [
+            'stats' => $substat,
+            'currentMonth' => $currentMonth,
+            'count' => $totals->total,
+            'totalInfluncers' => $totals->total_influencer,
+            'totalCreator' => $totals->total_creator,
+            'totalRev' => $totalRev
+        ]);
     }
 
     public function processLevelPrayout($level)
@@ -36,7 +61,7 @@ class MonthlyPayoutController extends Controller
         // return $level;
 
 
-         $month = now()->subMonth()->format('Y-m');
+        $month = now()->subMonth()->format('Y-m');
         // $month = now()->format('Y-m');
 
 

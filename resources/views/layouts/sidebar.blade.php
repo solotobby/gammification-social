@@ -11,16 +11,6 @@
                     <i class="nav-main-link-icon fa fa-list"></i>
                     <span class="nav-main-link-name">User List</span>
                 </a>
-
-                {{-- <a class="nav-main-link" href="{{ route('list.accesscode') }}">
-          <i class="nav-main-link-icon fa fa-list"></i>
-          <span class="nav-main-link-name">List Access Codes</span>
-        </a>
-
-        <a class="nav-main-link" href="{{ url('send/access/code') }}">
-          <i class="nav-main-link-icon fa fa-list"></i>
-          <span class="nav-main-link-name">Send Access Codes</span>
-        </a> --}}
                 <a class="nav-main-link" href="{{ url('withdrawal/list') }}">
                     <i class="nav-main-link-icon fa fa-list"></i>
                     <span class="nav-main-link-name">Withdrawals</span>
@@ -64,7 +54,7 @@
                 </ul>
             </li>
 
-             <li class="nav-main-item">
+            <li class="nav-main-item">
                 <a class="nav-main-link nav-main-link-submenu" data-toggle="submenu" aria-haspopup="true"
                     aria-expanded="false" href="#">
                     <i class="nav-main-link-icon fa fa-usd"></i>
@@ -81,7 +71,7 @@
                             <span class="nav-main-link-name">View</span>
                         </a>
                     </li>
-                    
+
                 </ul>
             </li>
 
@@ -136,8 +126,8 @@
                 </a>
 
                 <a class="nav-main-link" href="{{ url('referral/list') }}">
-                  <i class="nav-main-link-icon fa fa-users"></i>
-                  <span class="nav-main-link-name">My Referrals</span>
+                    <i class="nav-main-link-icon fa fa-users"></i>
+                    <span class="nav-main-link-name">My Referrals</span>
                 </a>
 
                 <a class="nav-main-link" href="{{ url('bank/information') }}">

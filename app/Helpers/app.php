@@ -1193,9 +1193,202 @@ if (!function_exists('isEmbeddablePlatform')) {
         //     || str_contains($url, 'twitter.com')
         //     || str_contains($url, 'x.com');
 
-         return youtubeEmbed($url)
+        return youtubeEmbed($url)
             || isInstagramUrl($url)
             || isXUrl($url)
             || isFacebookUrl($url);
+    }
+}
+if (!function_exists('getNetworkStrength')) {
+    function getNetworkStrength($request = null)
+    {
+        if ($request && $request->hasHeader('X-Network-Strength')) {
+            return $request->header('X-Network-Strength');
+        }
+
+        if (session()->has('network_strength')) {
+            return session('network_strength');
+        }
+
+        return 'medium'; // Default
+    }
+}
+
+/**
+ * Store network strength in session
+ */
+if (!function_exists('networkToQuality')) {
+    function snetworkToQuality($strength)
+    {
+        session(['network_strength' => $strength]);
+    }
+}
+
+/**
+ * Map network strength to quality level
+ */
+if (!function_exists('networkToQuality')) {
+    function networkToQuality($networkStrength)
+    {
+        return match ($networkStrength) {
+            'slow', '2g', 'slow-2g' => 'low',
+            '3g' => 'medium',
+            '4g', '5g', 'fast' => 'high',
+            default => 'medium',
+        };
+    }
+}
+
+/**
+ * Get video quality settings based on network
+ */
+if (!function_exists('getVideoQualitySettings')) {
+    function getVideoQualitySettings($networkStrength)
+    {
+        $presets = config('cloudinary.video.quality_presets');
+        $quality = networkToQuality($networkStrength); //self::networkToQuality($networkStrength);
+
+        return $presets[$quality] ?? $presets['medium'];
+    }
+}
+
+/**
+ * Get image quality settings based on network
+ */
+if (!function_exists('getImageQualitySettings')) {
+    function getImageQualitySettings($networkStrength)
+    {
+        $presets = config('cloudinary.image.quality_presets');
+        $quality = networkToQuality($networkStrength); //self::networkToQuality($networkStrength);
+
+        return $presets[$quality] ?? $presets['medium'];
+    }
+}
+
+/**
+ * Format bytes to human readable
+ */
+if (!function_exists('formatBytes')) {
+    function formatBytes($bytes, $precision = 2)
+    {
+        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+
+        for ($i = 0; $bytes > 1024 && $i < count($units) - 1; $i++) {
+            $bytes /= 1024;
+        }
+
+        return round($bytes, $precision) . ' ' . $units[$i];
+    }
+}
+
+/**
+ * Format seconds to duration string
+ */
+if (!function_exists('formatDuration')) {
+    function formatDuration($seconds)
+    {
+        if ($seconds < 60) {
+            return '0:' . str_pad($seconds, 2, '0', STR_PAD_LEFT);
+        }
+
+        $minutes = floor($seconds / 60);
+        $seconds = $seconds % 60;
+
+        if ($minutes < 60) {
+            return $minutes . ':' . str_pad($seconds, 2, '0', STR_PAD_LEFT);
+        }
+
+        $hours = floor($minutes / 60);
+        $minutes = $minutes % 60;
+
+        return $hours . ':' . str_pad($minutes, 2, '0', STR_PAD_LEFT) . ':' . str_pad($seconds, 2, '0', STR_PAD_LEFT);
+    }
+}
+
+/**
+ * Validate video file
+ */
+if (!function_exists('validateVideo')) {
+    function validateVideo($file)
+    {
+        $maxSize = config('cloudinary.video.max_file_size');
+        $allowedFormats = config('cloudinary.video.allowed_formats');
+
+        if ($file->getSize() > $maxSize) {
+            return [
+                'valid' => false,
+                'error' => 'Video size exceeds ' . formatBytes($maxSize) //self::formatBytes($maxSize)
+            ];
+        }
+
+        $extension = strtolower($file->getClientOriginalExtension());
+        if (!in_array($extension, $allowedFormats)) {
+            return [
+                'valid' => false,
+                'error' => 'Video format not supported. Allowed: ' . implode(', ', $allowedFormats)
+            ];
+        }
+
+        return ['valid' => true];
+    }
+}
+
+/**
+ * Validate image file
+ */
+if (!function_exists('validateImage')) {
+    function validateImage($file)
+    {
+        $maxSize = config('cloudinary.image.max_file_size');
+        $allowedFormats = config('cloudinary.image.allowed_formats');
+
+        if ($file->getSize() > $maxSize) {
+            return [
+                'valid' => false,
+                'error' => 'Image size exceeds ' . formatBytes($maxSize)
+                // 'error' => 'Image size exceeds ' . self::formatBytes($maxSize)
+            ];
+        }
+
+        $extension = strtolower($file->getClientOriginalExtension());
+        if (!in_array($extension, $allowedFormats)) {
+            return [
+                'valid' => false,
+                'error' => 'Image format not supported. Allowed: ' . implode(', ', $allowedFormats)
+            ];
+        }
+
+        return ['valid' => true];
+    }
+}
+
+/**
+ * Get Cloudinary transformation for thumbnail
+ */
+if (!function_exists('getThumbnailTransformation')) {
+    function getThumbnailTransformation($width = 300, $height = 300)
+    {
+        return [
+            'width' => $width,
+            'height' => $height,
+            'crop' => 'fill',
+            'quality' => 'auto:low',
+            'fetch_format' => 'auto',
+        ];
+    }
+}
+
+/**
+ * Get optimal image dimensions based on network
+ */
+if (!function_exists('getOptimalImageDimensions')) {
+    function getOptimalImageDimensions($networkStrength)
+    {
+        return match (networkToQuality($networkStrength)) {
+            'high' => ['width' => 1080, 'height' => 1080],
+            'medium' => ['width' => 720, 'height' => 720],
+            'low' => ['width' => 480, 'height' => 480],
+            default => ['width' => 720, 'height' => 720],
+        };
     }
 }

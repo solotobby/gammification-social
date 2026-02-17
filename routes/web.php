@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\PayoutController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\UserEngagementController;
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\CloudinaryWebhookController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PaymentController;
 use App\Livewire\CreateProduct;
@@ -16,6 +17,7 @@ use App\Livewire\User\Analytics;
 use App\Livewire\User\BankInformation;
 use App\Livewire\User\HowItWorks;
 use App\Livewire\User\HowToEarn;
+use App\Livewire\User\NewTimeline;
 use App\Livewire\User\Partners;
 use App\Livewire\User\PostAnalytics;
 use App\Livewire\User\Posts;
@@ -157,10 +159,9 @@ Route::middleware(['auth', 'verified', 'track.online'])->group(function () {
 
         Route::get('timeline', Timeline::class);
         Route::get('timeline/{post}', TimelineDetails::class);
+        Route::get('new/timeline', NewTimeline::class);
 
         Route::get('profile/{username}', ViewProfile::class);
-        // Route::get('show/{query}', ShowPost::class)->name('show');
-        // Route::get('show/{query}', ShowNewPosts::class);
         Route::get('post/timeline/{id}/analytics', PostAnalytics::class);
         Route::get('analytics', Analytics::class);
         Route::get('settings', Settings::class);
@@ -175,6 +176,10 @@ Route::middleware(['auth', 'verified', 'track.online'])->group(function () {
         Route::get('bank/information', BankInformation::class);
         Route::get('how/it/works', HowItWorks::class);
         Route::get('search/user', Search::class);
+
+        
+        Route::post('/webhooks/cloudinary/video-processing', [CloudinaryWebhookController::class, 'handleVideoProcessing'])->name('cloudinary.webhook');
+        
     });
 
 
@@ -186,7 +191,7 @@ Route::middleware(['auth', 'verified', 'track.online'])->group(function () {
         Route::get('user/info/{id}', [\App\Http\Controllers\Admin\UserController::class, 'userInfo']);
         Route::post('user/credit/wallet', [\App\Http\Controllers\Admin\UserController::class, 'processWalletCredit'])->name('credit.wallet');
         Route::post('user/update/currency', [\App\Http\Controllers\Admin\UserController::class, 'updateCurrency'])->name('update.current');
-         Route::post('user/change/status', [\App\Http\Controllers\Admin\UserController::class, 'changeStatus'])->name('change.status');
+        Route::post('user/change/status', [\App\Http\Controllers\Admin\UserController::class, 'changeStatus'])->name('change.status');
         Route::post('process/upgrade', [UserController::class, 'upgradeProcess'])->name('upgrade.user');
         Route::get('add/bonus/{userId}/{levelid}', [UserController::class, 'creditBonus']);
 
