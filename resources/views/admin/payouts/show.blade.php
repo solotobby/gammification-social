@@ -258,32 +258,32 @@
 
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script>
-            $(function() {
-                $('#fund-transfer-form').on('submit', function(e) {
-                    e.preventDefault();
+            // $(function() {
+            //     $('#fund-transfer-form').on('submit', function(e) {
+            //         e.preventDefault();
 
-                    let form = $(this);
-                    let url = form.attr('action');
-                    let data = form.serialize();
+            //         let form = $(this);
+            //         let url = form.attr('action');
+            //         let data = form.serialize();
 
-                    // Clear previous response
-                    $('#transfer-response').html('');
+            //         // Clear previous response
+            //         $('#transfer-response').html('');
 
-                    $.post(url, data)
-                        .done(function(response) {
-                            let alertType = response.status === 'success' ? 'alert-success' :
-                                'alert-danger';
-                            $('#transfer-response').html(
-                                `<div class="alert ${alertType}" role="alert">${response.message}</div>`
-                            );
-                        })
-                        .fail(function(xhr) {
-                            let message = xhr.responseJSON?.message ?? 'Something went wrong';
-                            $('#transfer-response').html(
-                                `<div class="alert alert-danger" role="alert">${message}</div>`);
-                        });
-                });
-            });
+            //         $.post(url, data)
+            //             .done(function(response) {
+            //                 let alertType = response.status === 'success' ? 'alert-success' :
+            //                     'alert-danger';
+            //                 $('#transfer-response').html(
+            //                     `<div class="alert ${alertType}" role="alert">${response.message}</div>`
+            //                 );
+            //             })
+            //             .fail(function(xhr) {
+            //                 let message = xhr.responseJSON?.message ?? 'Something went wrong';
+            //                 $('#transfer-response').html(
+            //                     `<div class="alert alert-danger" role="alert">${message}</div>`);
+            //             });
+            //     });
+            // });
         </script>
 
 

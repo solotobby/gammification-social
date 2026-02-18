@@ -11,12 +11,22 @@ use App\Models\User;
 use App\Models\Wallet;
 use App\Models\WithdrawalMethod;
 use App\Notifications\GeneralNotification;
+use App\Services\FundTransferService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 
 class PayoutController extends Controller
 {
+
+    public $fundTransferService;
+
+    public function __construct(FundTransferService $fundTransferService)
+    {
+        $this->middleware('auth');
+        // $this->middleware('admin');
+        $this->fundTransferService = $fundTransferService;
+    }   
     public function index($level)
     {
 
@@ -206,6 +216,7 @@ class PayoutController extends Controller
 
     }
 
+    
 
 
     public function fundTransfer(Request $request)
@@ -214,6 +225,13 @@ class PayoutController extends Controller
         if (securityVerification() !== 'OK') {
             return response()->json(['status' => 'error', 'message' => 'Security verification failed'], 403);
         }
+
+
+
+        $withdrawal = WithdrawalMethod::where('user_id', $request->user_id)->first();
+        $fundTransferServiceResponse = $this->fundTransferService->transfer(1000, $withdrawal->bank_code, $withdrawal->account_number);
+
+        return $fundTransferServiceResponse;
 
         // 2️⃣ Validate request
         $request->validate([
@@ -238,6 +256,8 @@ class PayoutController extends Controller
         if (!$withdrawal) {
             return response()->json(['status' => 'error', 'message' => 'Withdrawal method not found'], 404);
         }
+
+
 
         //check Wallet balance
         $fetchWallet = Wallet::where('user_id', $request->user_id)->first();
@@ -264,7 +284,7 @@ class PayoutController extends Controller
 
             $amount =  $payoutInfo->amount + $walletBalance;
 
-            $transferData = $this->transferFund($amount, $withdrawal->recipient_code);
+           // $transferData = $this->transferFund($amount, $withdrawal->recipient_code);
 
             $payoutInfo->update(['status' => 'Paid']);
 
@@ -274,7 +294,7 @@ class PayoutController extends Controller
 
             Transaction::create([
                 'user_id'    => $request->user_id,
-                'ref'        => time() . '-payouts',
+                'ref'        => generateTransactionRef(),
                 'amount'     => $amount,
                 'currency'   => $fetchWallet->currency,
                 'status'     => 'successful',

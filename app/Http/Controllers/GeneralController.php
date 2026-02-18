@@ -23,6 +23,7 @@ use App\Models\UserLevel;
 use App\Models\UserLike;
 use App\Models\UserView;
 use App\Models\ViewsExternal;
+use App\Models\WithdrawalMethod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -54,8 +55,34 @@ class GeneralController extends Controller
 
     public function test()
     {
-        
-        return ipLocation();
+       $bankNames =  WithdrawalMethod::where('payment_method', 'bank_transfer')->get(['id', 'bank_name', 'account_number', 'account_name', 'bank_code']);
+
+       $bankList = bankList();
+
+       $bankLookup = collect($bankList)
+        ->keyBy(fn ($bank) => strtolower(trim($bank['name'])));
+
+            foreach ($bankNames as $bank) {
+
+            $name = strtolower(trim($bank->bank_name));
+
+            if ($bankLookup->has($name)) {
+                $bank->update([
+                    'bank_code' => $bankLookup[$name]['code']
+                ]);
+            }
+        }
+
+        //  foreach($bankNames as $bank){
+        //   $bankCode = $bankList->firstWhere('name', $bank->bank_name)['code'] ?? null;
+        //   if($bankCode){
+        //         $bank->bank_code = $bankCode;
+        //         $bank->save();
+        //   }
+        //  }
+        //     return 'done';
+
+       // return ipLocation();
     }
 
 
