@@ -113,21 +113,33 @@ class NewTimeline extends Component
 
         if ($this->video) {
 
+            // $this->uploadVideos($post, $user);
+
             try {
 
-                $upload = cloudinary()->uploadVideo(
-                    $this->video->getRealPath(),
-                    [
+                // $upload = cloudinary()->uploadVideo(
+                //     $this->video->getRealPath(),
+                //     [
+                //         'folder' => 'payhankey_post_videos',
+                //         'resource_type' => 'video',
+                //         'transformation' => [
+                //             'quality' => 'auto',
+                //             'fetch_format' => 'auto'
+                //         ]
+                //     ]
+                // );
+
+                // $response = $upload->getResponse();
+
+                 $uploadResult = cloudinary()->uploadVideo($this->video->getRealPath(), [
                         'folder' => 'payhankey_post_videos',
                         'resource_type' => 'video',
-                        'transformation' => [
-                            'quality' => 'auto',
-                            'fetch_format' => 'auto'
-                        ]
-                    ]
-                );
-
-                $response = $upload->getResponse();
+                        'eager' => $this->getVideoTransformations('medium'), // Default to medium for initial upload
+                        'eager_async' => true,
+                        'eager_notification_url' => route('cloudinary.webhook'),
+                    ]);
+    
+                    $response = $uploadResult->getResponse();
 
                 PostVideo::create([
                     'user_id'   => $user->id,
@@ -137,6 +149,8 @@ class NewTimeline extends Component
                     'duration'  => $response['duration'] ?? null,
                     'width'     => $response['width'] ?? null,
                     'height'    => $response['height'] ?? null,
+                    'format' => $response['format'] ?? null,
+                    'file_size' => $this->video->getSize(),
                 ]);
 
             } catch (\Exception $e) {
@@ -160,7 +174,118 @@ class NewTimeline extends Component
 
         session()->flash('success', 'Your post was successful!');
 
-        $this->reset(['content', 'images', 'videoData']);
+        $this->reset(['content', 'images', 'video', 'videoPreview', 'videoData']);
+    }
+
+    private function uploadVideos($post, $user)
+    {
+            foreach ($this->video as $video) {
+                try {
+                    $uploadResult = cloudinary()->uploadVideo($video->getRealPath(), [
+                        'folder' => 'payhankey_post_videos',
+                        'resource_type' => 'video',
+                        'eager' => $this->getVideoTransformations('medium'), // Default to medium for initial upload
+                        'eager_async' => true,
+                        'eager_notification_url' => route('cloudinary.webhook'),
+                    ]);
+    
+                    PostVideo::create([
+                        'user_id' => $user->id,
+                        'post_id' => $post->id,
+                        'path' => $uploadResult->getSecurePath(),
+                        'public_id' => $uploadResult->getPublicId(),
+                        'processing_status' => 'processing',
+                        'duration' => $uploadResult->getResponse()['duration'] ?? null,
+                        'width' => $uploadResult->getResponse()['width'] ?? null,
+                        'height' => $uploadResult->getResponse()['height'] ?? null,
+                        'format' => $uploadResult->getResponse()['format'] ?? null,
+                        'file_size' => $video->getSize(),
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('Video upload error: ' . $e->getMessage());
+                }
+            }
+    }
+
+    private function getVideoTransformations($networkStrength)
+    {
+        // Generate multiple quality versions like TikTok/Instagram
+        $transformations = [];
+
+        switch ($networkStrength) {
+            case 'slow':
+            case '2g':
+                // Low quality only for slow networks
+                $transformations[] = [
+                    'width' => 480,
+                    'height' => 854,
+                    'crop' => 'limit',
+                    'quality' => 'auto:low',
+                    'video_codec' => 'h264',
+                    'audio_codec' => 'aac',
+                    'bit_rate' => '500k',
+                ];
+                break;
+
+            case '3g':
+            case 'medium':
+                // Medium and low quality
+                $transformations[] = [
+                    'width' => 720,
+                    'height' => 1280,
+                    'crop' => 'limit',
+                    'quality' => 'auto:good',
+                    'video_codec' => 'h264',
+                    'audio_codec' => 'aac',
+                    'bit_rate' => '1500k',
+                ];
+                $transformations[] = [
+                    'width' => 480,
+                    'height' => 854,
+                    'crop' => 'limit',
+                    'quality' => 'auto:low',
+                    'video_codec' => 'h264',
+                    'audio_codec' => 'aac',
+                    'bit_rate' => '500k',
+                ];
+                break;
+
+            case '4g':
+            case '5g':
+            case 'fast':
+            default:
+                // High, medium, and low quality (adaptive streaming)
+                $transformations[] = [
+                    'width' => 1080,
+                    'height' => 1920,
+                    'crop' => 'limit',
+                    'quality' => 'auto:best',
+                    'video_codec' => 'h264',
+                    'audio_codec' => 'aac',
+                    'bit_rate' => '3000k',
+                ];
+                $transformations[] = [
+                    'width' => 720,
+                    'height' => 1280,
+                    'crop' => 'limit',
+                    'quality' => 'auto:good',
+                    'video_codec' => 'h264',
+                    'audio_codec' => 'aac',
+                    'bit_rate' => '1500k',
+                ];
+                $transformations[] = [
+                    'width' => 480,
+                    'height' => 854,
+                    'crop' => 'limit',
+                    'quality' => 'auto:low',
+                    'video_codec' => 'h264',
+                    'audio_codec' => 'aac',
+                    'bit_rate' => '500k',
+                ];
+                break;
+        }
+
+        return $transformations;
     }
 
     public function render()
