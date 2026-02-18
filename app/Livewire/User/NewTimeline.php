@@ -141,11 +141,22 @@ class NewTimeline extends Component
     
                     $response = $uploadResult->getResponse();
 
+            //         $videoUrl = $uploadResult->getSecurePath();
+            // $publicId = $uploadResult->getPublicId();
+
+                // Generate thumbnail from video
+                $thumbnailUrl = cloudinary()->video($response['public_id'])
+                ->addTransformation(['width' => 640, 'height' => 360, 'crop' => 'fill'])
+                ->delivery(['format' => 'jpg', 'quality' => 'auto'])
+                ->toUrl();
+
+            
                 PostVideo::create([
                     'user_id'   => $user->id,
                     'post_id'   => $post->id,
                     'public_id' => $response['public_id'],
                     'path'      => $response['secure_url'],
+                    'thumbnail_path' => $thumbnailUrl,
                     'duration'  => $response['duration'] ?? null,
                     'width'     => $response['width'] ?? null,
                     'height'    => $response['height'] ?? null,
@@ -158,19 +169,6 @@ class NewTimeline extends Component
                 Log::error('Cloudinary Video Upload Error: ' . $e->getMessage());
             }
         }
-        // // Save Cloudinary Video
-        // if ($this->videoData) {
-
-        //     PostVideo::create([
-        //         'user_id' => $user->id,
-        //         'post_id' => $post->id,
-        //         'public_id' => $this->videoData['public_id'],
-        //         'path' => $this->videoData['secure_url'],
-        //         'duration' => $this->videoData['duration'] ?? null,
-        //         'width' => $this->videoData['width'] ?? null,
-        //         'height' => $this->videoData['height'] ?? null,
-        //     ]);
-        // }
 
         session()->flash('success', 'Your post was successful!');
 
