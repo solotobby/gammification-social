@@ -81,25 +81,7 @@ Route::group(['namespace' => 'auth'], function () {
     Route::get('success', [\App\Http\Controllers\GeneralController::class, 'success']);
     Route::get('error', [\App\Http\Controllers\GeneralController::class, 'error']);
 
-    // Route::get('post/{id}', [\App\Http\Controllers\GeneralController::class, 'showPost']);
-    // Route::get('/post/{id}/comments', [\App\Http\Controllers\GeneralController::class, 'loadMoreComments'])->name('post.comments.load_more');
-
-    // Route::get('validate/makintosh', [\App\Http\Controllers\GeneralController::class, 'validateCode']);
-
-    // Route::post('partner', [\App\Http\Controllers\GeneralController::class, 'partner'])->name('partner');
-    // Route::get('partners/listed/lots', [\App\Http\Controllers\GeneralController::class, 'viewPartner']);
-    // Route::get('activate/{id}', [\App\Http\Controllers\GeneralController::class, 'viewPartnerActivate']);
-
-    // Route::get('view/agent/transaction', [\App\Http\Controllers\TransactionController::class, 'viewAgentTransaction']);
-    // Route::get('agent/validate/activate/transaction/{id}', [\App\Http\Controllers\TransactionController::class, 'validateAgentTransaction']);
-
-    // Route::post('validate/slot', [\App\Http\Controllers\TransactionController::class, 'validateSlot'])->name('validate.slot');
-
     Route::post('wallet/topup', [\App\Http\Controllers\WebhookController::class, 'handle']);
-
-    // Route::get('user/list', [\App\Http\Controllers\GeneralController::class, 'userList']);
-
-    // Route::get('ac/cd', [\App\Http\Controllers\GeneralController::class, 'access']);
 
     Route::get('get/ip', [\App\Http\Controllers\GeneralController::class, 'ipConfig']);
 
@@ -110,6 +92,8 @@ Route::group(['namespace' => 'auth'], function () {
 
     Route::get('blog', [BlogController::class, 'index'])->name('blog');
     Route::get('blog/{slug}', [BlogController::class, 'show']);
+
+    Route::post('/webhooks/cloudinary/video-processing', [CloudinaryWebhookController::class, 'handleVideoProcessing'])->name('cloudinary.webhook');
 
 
     // Route::post('post/comment', [\App\Http\Controllers\GeneralController::class, 'comment']);
@@ -178,8 +162,8 @@ Route::middleware(['auth', 'verified', 'track.online'])->group(function () {
         Route::get('search/user', Search::class);
 
         
-        Route::post('/webhooks/cloudinary/video-processing', [CloudinaryWebhookController::class, 'handleVideoProcessing'])->name('cloudinary.webhook');
-        
+      
+
     });
 
 
