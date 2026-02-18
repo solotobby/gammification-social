@@ -72,6 +72,7 @@ class GeneralController extends Controller
                 ]);
             }
         }
+        return 'done';
 
         //  foreach($bankNames as $bank){
         //   $bankCode = $bankList->firstWhere('name', $bank->bank_name)['code'] ?? null;
