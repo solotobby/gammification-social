@@ -56,7 +56,7 @@ return [
         'enabled'    => true,
 
         'attributes' => [
-            'prefix'     => 'log-viewer',
+            'prefix'     => 'makinde/loggs', //env('ARCANEDEV_LOGVIEWER_ROUTE_PREFIX', 'logs'),
 
             'middleware' => ['web', 'auth'], //env('ARCANEDEV_LOGVIEWER_MIDDLEWARE') ? explode(',', env('ARCANEDEV_LOGVIEWER_MIDDLEWARE')) : null,
         ],
