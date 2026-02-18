@@ -55,72 +55,29 @@ class GeneralController extends Controller
 
     public function test()
     {
-       $bankNames =  WithdrawalMethod::where('payment_method', 'bank_transfer')->get(['id', 'bank_name', 'account_number', 'account_name', 'bank_code']);
+    //    $bankNames =  WithdrawalMethod::where('payment_method', 'bank_transfer')->get(['id', 'bank_name', 'account_number', 'account_name', 'bank_code']);
 
-       $bankList = bankList();
+    //    $bankList = bankList();
 
-       $bankLookup = collect($bankList)
-        ->keyBy(fn ($bank) => strtolower(trim($bank['name'])));
+    //    $bankLookup = collect($bankList)
+    //     ->keyBy(fn ($bank) => strtolower(trim($bank['name'])));
 
-            foreach ($bankNames as $bank) {
+    //         foreach ($bankNames as $bank) {
 
-            $name = strtolower(trim($bank->bank_name));
+    //         $name = strtolower(trim($bank->bank_name));
 
-            if ($bankLookup->has($name)) {
-                $bank->update([
-                    'bank_code' => $bankLookup[$name]['code']
-                ]);
-            }
-        }
-        return 'done';
-
-        //  foreach($bankNames as $bank){
-        //   $bankCode = $bankList->firstWhere('name', $bank->bank_name)['code'] ?? null;
-        //   if($bankCode){
-        //         $bank->bank_code = $bankCode;
-        //         $bank->save();
-        //   }
-        //  }
-        //     return 'done';
-
-       // return ipLocation();
+    //         if ($bankLookup->has($name)) {
+    //             $bank->update([
+    //                 'bank_code' => $bankLookup[$name]['code']
+    //             ]);
+    //         }
+    //     }
+    //     return 'done';
+       return ipLocation();
     }
 
 
-    public function accessCode($level)
-    {
-        if ($level == 'beginner' || $level == 'creator' || $level == 'influencer') {
-
-            if ($level == 'beginner') {
-                $amountDollar = '5';
-                $amountNaira = '7,500';
-                $nairaLink = 'https://paystack.com/pay/r950fs5tu8'; //'https://flutterwave.com/pay/ohd7jfk6wgzq';
-                $dollarLink = 'https://flutterwave.com/pay/ab97dpgweldm';
-            } elseif ($level == 'creator') {
-                $amountDollar = '10';
-                $amountNaira = '15,000';
-                $nairaLink = 'https://paystack.com/pay/pzdavnj0r2';
-                $dollarLink = 'https://flutterwave.com/pay/elba42t3nw7m';
-            } else {
-                $amountDollar = '20';
-                $amountNaira = '30,000';
-                $nairaLink = 'https://paystack.com/pay/xfsjg9c51c';
-                $dollarLink = 'https://flutterwave.com/pay/4dhkdzur56fz';
-            }
-
-
-            return view('get_access_code', [
-                'level' => $level,
-                'amountDollar' => $amountDollar,
-                'amountNaira' => $amountNaira,
-                'nairalink' => $nairaLink,
-                'dollarlink' => $dollarLink
-            ]);
-        } else {
-            return redirect('/');
-        }
-    }
-
+   
     public function ipConfig()
     {
 
@@ -152,9 +109,6 @@ class GeneralController extends Controller
 
     public function processValidateCode(Request $request)
     {
-
-
-
         if ($request->validationCode == 'LONZETY') {
             $code = $this->generateCode(7);
 
@@ -175,45 +129,6 @@ class GeneralController extends Controller
             return 'no show';
         }
     }
-
-    public function processAccessCode(Request $request)
-    {
-
-        $payload = [
-            "tx_ref" => Str::random(16),
-            "amount" => "100",
-            "currency" => "USD",
-            "redirect_url" => url('validate/api'), //"https://webhook.site/9d0b00ba-9a69-44fa-a43d-a82c33c36fdc",
-            "customer" => [
-                "email" => $request->email,
-                "name" => $request->name
-            ],
-            "customizations" => [
-                "title" => "One-time Access Code Fee",
-                // "logo"=> "http://www.piedpiper.com/app/themes/joystick-v27/images/logo.png"
-            ]
-
-
-        ];
-
-        $url = $this->initiateFlutterwavePayment($payload);
-        return redirect($url);
-    }
-
-    public function initiateFlutterwavePayment($payload)
-    {
-
-        $res = Http::withHeaders([
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-            'Authorization' => 'Bearer ' . env('FL_SECRET_KEY')
-        ])->post('https://api.flutterwave.com/v3/payments', $payload)->throw();
-
-        return json_decode($res->getBody()->getContents(), true)['data']['link'];
-    }
-
-
-
 
 
     public function generateCode($number)
