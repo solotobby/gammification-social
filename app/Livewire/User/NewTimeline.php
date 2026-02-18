@@ -24,9 +24,9 @@ class NewTimeline extends Component
     public $isUploading = false;
     public $videoPreview = null;
 
-     use WithFileUploads;
+    use WithFileUploads;
 
- 
+
     public $videoData = null;
 
     protected $listeners = ['videoUploaded'];
@@ -38,7 +38,7 @@ class NewTimeline extends Component
     //     $this->videoData = $data;
     // }
 
-     public function updatedVideo()
+    public function updatedVideo()
     {
         $this->validateOnly('video', [
             'video' => 'nullable|mimes:mp4,mov,avi,webm|max:204800', // 200MB
@@ -64,7 +64,7 @@ class NewTimeline extends Component
         $this->reset('video', 'videoPreview');
     }
 
-    
+
 
     public function createPost()
     {
@@ -111,6 +111,7 @@ class NewTimeline extends Component
                     'path' => $uploadedFileUrl,
                 ]);
             }
+            $post->update(['has_images' => 1]);
         }
 
         if ($this->video) {
@@ -119,68 +120,17 @@ class NewTimeline extends Component
 
             try {
 
-                // $upload = cloudinary()->uploadVideo(
-                //     $this->video->getRealPath(),
-                //     [
-                //         'folder' => 'payhankey_post_videos',
-                //         'resource_type' => 'video',
-                //         'transformation' => [
-                //             'quality' => 'auto',
-                //             'fetch_format' => 'auto'
-                //         ]
-                //     ]
-                // );
+                $uploadResult = cloudinary()->uploadVideo($this->video->getRealPath(), [
+                    'folder' => 'payhankey_post_videos',
+                    'resource_type' => 'video',
+                    'eager' => $this->getVideoTransformations('medium'), // Default to medium for initial upload
+                    'eager_async' => true,
+                    'eager_notification_url' => route('cloudinary.webhook'),
+                ]);
 
-                // $response = $upload->getResponse();
+                $response = $uploadResult->getResponse();
 
-                 $uploadResult = cloudinary()->uploadVideo($this->video->getRealPath(), [
-                        'folder' => 'payhankey_post_videos',
-                        'resource_type' => 'video',
-                        'eager' => $this->getVideoTransformations('medium'), // Default to medium for initial upload
-                        'eager_async' => true,
-                        'eager_notification_url' => route('cloudinary.webhook'),
-                    ]);
-    
-                    $response = $uploadResult->getResponse();
-
-            //         $videoUrl = $uploadResult->getSecurePath();
-            // $publicId = $uploadResult->getPublicId();
-
-                // // Generate thumbnail from video
-                // $thumbnailUrl = cloudinary()->video($response['public_id'])
-                // ->addTransformation(['width' => 640, 'height' => 360, 'crop' => 'fill'])
-                // ->delivery(['format' => 'jpg', 'quality' => 'auto'])
-                // ->toUrl();
-
-                // $thumbnailUrl = cloudinary_url(
-                //     $response['public_id'] . '.jpg',
-                //     [
-                //         'resource_type' => 'video',
-                //         'start_offset' => 2,
-                //         'width' => 640,
-                //         'height' => 360,
-                //         'crop' => 'fill',
-                //         'quality' => 'auto'
-                //     ]
-                // );
-
-                $cloudinary = app(\Cloudinary\Cloudinary::class);
-
-                // $thumbnailUrl = $cloudinary->image($response['public_id'])
-                //     ->resize(\Cloudinary\Transformation\Resize::fill(640, 360))
-                //     ->format('jpg')
-                //     ->toUrl([
-                //         'resource_type' => 'video',
-                //         'start_offset' => 2
-                //     ]);
-
-                // $thumbnailUrl = str_replace(
-                //     '/video/upload/',
-                //     '/video/upload/so_2,c_fill,w_640,h_360,f_jpg/',
-                //     $response['secure_url']
-                // );
-
-                    //titkok style thumbnail cropping based on aspect ratio
+                //titkok style thumbnail cropping based on aspect ratio
                 $crop = $response['height'] > $response['width']
                     ? 'c_fill,w_720,h_1280'
                     : 'c_fill,w_1280,h_720';
@@ -191,7 +141,7 @@ class NewTimeline extends Component
                     $response['secure_url']
                 );
 
-            
+
                 PostVideo::create([
                     'user_id'   => $user->id,
                     'post_id'   => $post->id,
@@ -205,6 +155,7 @@ class NewTimeline extends Component
                     'file_size' => $this->video->getSize(),
                 ]);
 
+                $post->update(['has_video' => 1]);
             } catch (\Exception $e) {
 
                 Log::error('Cloudinary Video Upload Error: ' . $e->getMessage());
@@ -218,32 +169,32 @@ class NewTimeline extends Component
 
     private function uploadVideos($post, $user)
     {
-            foreach ($this->video as $video) {
-                try {
-                    $uploadResult = cloudinary()->uploadVideo($video->getRealPath(), [
-                        'folder' => 'payhankey_post_videos',
-                        'resource_type' => 'video',
-                        'eager' => $this->getVideoTransformations('medium'), // Default to medium for initial upload
-                        'eager_async' => true,
-                        'eager_notification_url' => route('cloudinary.webhook'),
-                    ]);
-    
-                    PostVideo::create([
-                        'user_id' => $user->id,
-                        'post_id' => $post->id,
-                        'path' => $uploadResult->getSecurePath(),
-                        'public_id' => $uploadResult->getPublicId(),
-                        'processing_status' => 'processing',
-                        'duration' => $uploadResult->getResponse()['duration'] ?? null,
-                        'width' => $uploadResult->getResponse()['width'] ?? null,
-                        'height' => $uploadResult->getResponse()['height'] ?? null,
-                        'format' => $uploadResult->getResponse()['format'] ?? null,
-                        'file_size' => $video->getSize(),
-                    ]);
-                } catch (\Exception $e) {
-                    Log::error('Video upload error: ' . $e->getMessage());
-                }
+        foreach ($this->video as $video) {
+            try {
+                $uploadResult = cloudinary()->uploadVideo($video->getRealPath(), [
+                    'folder' => 'payhankey_post_videos',
+                    'resource_type' => 'video',
+                    'eager' => $this->getVideoTransformations('medium'), // Default to medium for initial upload
+                    'eager_async' => true,
+                    'eager_notification_url' => route('cloudinary.webhook'),
+                ]);
+
+                PostVideo::create([
+                    'user_id' => $user->id,
+                    'post_id' => $post->id,
+                    'path' => $uploadResult->getSecurePath(),
+                    'public_id' => $uploadResult->getPublicId(),
+                    'processing_status' => 'processing',
+                    'duration' => $uploadResult->getResponse()['duration'] ?? null,
+                    'width' => $uploadResult->getResponse()['width'] ?? null,
+                    'height' => $uploadResult->getResponse()['height'] ?? null,
+                    'format' => $uploadResult->getResponse()['format'] ?? null,
+                    'file_size' => $video->getSize(),
+                ]);
+            } catch (\Exception $e) {
+                Log::error('Video upload error: ' . $e->getMessage());
             }
+        }
     }
 
     private function getVideoTransformations($networkStrength)
@@ -351,7 +302,7 @@ class NewTimeline extends Component
     // public function updatedVideos()
     // {
     //     $level = userLevel();
-        
+
     //     // Only Creators and Influencers can upload videos
     //     if (!in_array($level, ['Creator', 'Influencer'])) {
     //         $this->videos = [];
@@ -409,7 +360,7 @@ class NewTimeline extends Component
 
     //     $this->validate($rules);
 
-      
+
 
     //     // Content length check
     //     $maxLength = in_array($level, ['Creator', 'Influencer']) ? null : 160;
@@ -546,7 +497,7 @@ class NewTimeline extends Component
     //     foreach ($this->videos as $video) {
     //         // Get network strength for adaptive streaming
     //         $networkStrength = $this->getUserNetworkStrength();
-            
+
     //         // Initial upload with basic processing
     //         $uploadResult = cloudinary()->uploadVideo($video->getRealPath(), [
     //             'folder' => 'payhankey_post_videos',
@@ -587,9 +538,9 @@ class NewTimeline extends Component
     //     // This would ideally come from client-side network detection
     //     // For now, we can use user's connection type or default to medium
     //     // You can implement JavaScript Network Information API and pass to Livewire
-        
+
     //     $user = Auth::user();
-        
+
     //     // Check if user has network preference stored
     //     if (isset($user->network_preference)) {
     //         return $user->network_preference;
@@ -697,5 +648,5 @@ class NewTimeline extends Component
     // }
 
 
-   
+
 }

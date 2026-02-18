@@ -34,19 +34,19 @@ class CloudinaryWebhookController extends Controller
         //     return response()->json(['error' => 'Invalid signature'], 401);
         // }
 
-        $subject = 'Cloudinary Webhook Received';
-        $content = "Cloudinary webhook received with the following data:\n\n" . print_r($request->all(), true) . "\n\nHeaders:\n" . print_r($request->headers->all(), true);
+        // $subject = 'Cloudinary Webhook Received';
+        // $content = "Cloudinary webhook received with the following data:\n\n" . print_r($request->all(), true) . "\n\nHeaders:\n" . print_r($request->headers->all(), true);
 
 
-        Mail::to('solotob3@gmail.com')
-            ->send(new GeneralMail(
-                (object)[
-                    'name' => 'Oluwatobi Solomon',
-                    'email' => 'solotob3@gmail.com'
-                ],
-                $subject,
-                $content
-            ));
+        // Mail::to('solotob3@gmail.com')
+        //     ->send(new GeneralMail(
+        //         (object)[
+        //             'name' => 'Oluwatobi Solomon',
+        //             'email' => 'solotob3@gmail.com'
+        //         ],
+        //         $subject,
+        //         $content
+        //     ));
 
 
 
