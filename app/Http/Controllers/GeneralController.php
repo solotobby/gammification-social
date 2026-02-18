@@ -27,6 +27,7 @@ use App\Models\WithdrawalMethod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Stevebauman\Location\Facades\Location;
@@ -73,6 +74,10 @@ class GeneralController extends Controller
     //         }
     //     }
     //     return 'done';
+
+    
+
+    Log::error('Test error from Log Viewer');
        return ipLocation();
     }
 

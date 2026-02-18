@@ -9,7 +9,14 @@ return [
      | -----------------------------------------------------------------
      */
 
-    'storage-path'  => storage_path('logs'),
+    'storage-path'  => storage_path('logs/laravel.log'),
+
+    'daily' => [
+        'driver' => 'daily',
+        'path' => storage_path('logs/laravel.log'),
+        'level' => 'debug',
+        'days' => 14,
+    ],
 
     /* -----------------------------------------------------------------
      |  Log files pattern
