@@ -17,9 +17,10 @@ class NewTimeline extends Component
 
     public $content = '';
     public $images = [];
-    public $videos = [];
+    public $video;
     public $uploadProgress = 0;
     public $isUploading = false;
+    public $videoPreview = null;
 
      use WithFileUploads;
 
@@ -29,16 +30,39 @@ class NewTimeline extends Component
     protected $listeners = ['videoUploaded'];
 
     // protected $listeners = ['refreshComponent' => '$refresh'];
-    public function videoUploaded($data)
+
+    // public function videoUploaded($data)
+    // {
+    //     $this->videoData = $data;
+    // }
+
+     public function updatedVideo()
     {
-        $this->videoData = $data;
+        $this->validateOnly('video', [
+            'video' => 'nullable|mimes:mp4,mov,avi,webm|max:204800', // 200MB
+        ]);
+
+        // Clear images if video selected
+        $this->images = [];
+
+        if ($this->video) {
+            $this->videoPreview = $this->video->temporaryUrl();
+        }
     }
+
 
     public function removeImage($index)
     {
         unset($this->images[$index]);
         $this->images = array_values($this->images);
     }
+
+    public function removeVideo()
+    {
+        $this->reset('video', 'videoPreview');
+    }
+
+    
 
     public function createPost()
     {
@@ -87,24 +111,61 @@ class NewTimeline extends Component
             }
         }
 
-        // Save Cloudinary Video
-        if ($this->videoData) {
+        if ($this->video) {
 
-            PostVideo::create([
-                'id' => Str::uuid(),
-                'user_id' => $user->id,
-                'post_id' => $post->id,
-                'public_id' => $this->videoData['public_id'],
-                'path' => $this->videoData['secure_url'],
-                'duration' => $this->videoData['duration'] ?? null,
-                'width' => $this->videoData['width'] ?? null,
-                'height' => $this->videoData['height'] ?? null,
-            ]);
+            try {
+
+                $upload = cloudinary()->uploadVideo(
+                    $this->video->getRealPath(),
+                    [
+                        'folder' => 'payhankey_post_videos',
+                        'resource_type' => 'video',
+                        'transformation' => [
+                            'quality' => 'auto',
+                            'fetch_format' => 'auto'
+                        ]
+                    ]
+                );
+
+                $response = $upload->getResponse();
+
+                PostVideo::create([
+                    'user_id'   => $user->id,
+                    'post_id'   => $post->id,
+                    'public_id' => $response['public_id'],
+                    'path'      => $response['secure_url'],
+                    'duration'  => $response['duration'] ?? null,
+                    'width'     => $response['width'] ?? null,
+                    'height'    => $response['height'] ?? null,
+                ]);
+
+            } catch (\Exception $e) {
+
+                Log::error('Cloudinary Video Upload Error: ' . $e->getMessage());
+            }
         }
+        // // Save Cloudinary Video
+        // if ($this->videoData) {
+
+        //     PostVideo::create([
+        //         'user_id' => $user->id,
+        //         'post_id' => $post->id,
+        //         'public_id' => $this->videoData['public_id'],
+        //         'path' => $this->videoData['secure_url'],
+        //         'duration' => $this->videoData['duration'] ?? null,
+        //         'width' => $this->videoData['width'] ?? null,
+        //         'height' => $this->videoData['height'] ?? null,
+        //     ]);
+        // }
 
         session()->flash('success', 'Your post was successful!');
 
         $this->reset(['content', 'images', 'videoData']);
+    }
+
+    public function render()
+    {
+        return view('livewire.user.new-timeline');
     }
 
     // public function updatedImages()
@@ -472,8 +533,5 @@ class NewTimeline extends Component
     // }
 
 
-    public function render()
-    {
-        return view('livewire.user.new-timeline');
-    }
+   
 }

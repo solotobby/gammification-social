@@ -99,7 +99,7 @@ class GeneralController extends Controller
         }
     }
 
-    public function validateLogin() {}
+ 
 
     public function validateCode()
     {

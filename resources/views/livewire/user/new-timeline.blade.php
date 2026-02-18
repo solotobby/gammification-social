@@ -1,171 +1,198 @@
 <div>
 
-       <div>
+    <div>
 
-    <div class="card shadow-sm border-0 mb-4">
-        <form wire:submit.prevent="createPost">
-            <div class="card-body">
+        <div class="card shadow-sm border-0 mb-4">
+            <form wire:submit.prevent="createPost">
+                <div class="card-body">
 
-                @php $userLevel = userLevel(); @endphp
+                    @php $userLevel = userLevel(); @endphp
 
-                {{-- TEXT AREA ALWAYS VISIBLE --}}
-                <div class="mb-3">
-                    <textarea
-                        wire:model.defer="content"
-                        class="form-control border-0 shadow-none"
-                        rows="4"
-                        placeholder="What’s happening on Payhankey?"
-                        style="font-size:16px; resize:none;"
-                        @if(!in_array($userLevel,['Creator','Influencer'])) maxlength="160" @endif
-                        required
-                    ></textarea>
+                    {{-- TEXT AREA ALWAYS VISIBLE --}}
+                    <div class="mb-3">
+                        <textarea wire:model.defer="content" class="form-control border-0 shadow-none" rows="4"
+                            placeholder="What’s happening on Payhankey?" style="font-size:16px; resize:none;"
+                            @if (!in_array($userLevel, ['Creator', 'Influencer'])) maxlength="160" @endif required></textarea>
 
-                    @if(!in_array($userLevel,['Creator','Influencer']))
-                        <div class="text-end">
-                            <small class="text-muted">
-                                Max 160 characters
-                            </small>
-                        </div>
-                    @endif
-                </div>
-
-                {{-- MEDIA TABS --}}
-                @if(in_array($userLevel,['Creator','Influencer']))
-                <ul class="nav nav-pills nav-justified mb-3 small fw-semibold">
-
-                    <li class="nav-item">
-                        <button class="nav-link active"
-                                data-bs-toggle="tab"
-                                data-bs-target="#imageTab"
-                                type="button">
-                            <i class="fa fa-image me-1"></i> Images
-                        </button>
-                    </li>
-
-                    <li class="nav-item">
-                        <button class="nav-link"
-                                data-bs-toggle="tab"
-                                data-bs-target="#videoTab"
-                                type="button">
-                            <i class="fa fa-video me-1"></i> Video
-                        </button>
-                    </li>
-
-                </ul>
-
-                <div class="tab-content">
-
-                    {{-- IMAGE TAB --}}
-                    <div class="tab-pane fade show active" id="imageTab">
-
-                        <div class="mb-3">
-                            <input type="file"
-                                   wire:model="images"
-                                   multiple
-                                   accept="image/*"
-                                   class="form-control">
-
-                            <small class="text-muted d-block mt-1">
-                                {{ $userLevel === 'Creator' ? 'Max 1 image' : 'Max 4 images' }}
-                            </small>
-                        </div>
-
-                        <div class="row">
-                            @foreach($images as $index => $image)
-                                <div class="col-4 col-md-3 mb-2 position-relative">
-
-                                    <img src="{{ $image->temporaryUrl() }}"
-                                         class="img-fluid rounded shadow-sm">
-
-                                    <button type="button"
-                                            wire:click="removeImage({{ $index }})"
-                                            class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1">
-                                        &times;
-                                    </button>
-
-                                </div>
-                            @endforeach
-                        </div>
-
-                    </div>
-
-                    {{-- VIDEO TAB --}}
-                    <div class="tab-pane fade" id="videoTab" wire:ignore>
-
-                        <div class="d-grid">
-                            <button type="button"
-                                    id="video_upload_btn"
-                                    class="btn btn-outline-primary">
-                                <i class="fa fa-upload me-1"></i> Upload Video
-                            </button>
-                        </div>
-
-                        @if($videoData)
-                            <div class="mt-3">
-                                <video class="w-100 rounded shadow-sm" controls>
-                                    <source src="{{ $videoData['secure_url'] }}" type="video/mp4">
-                                </video>
+                        @if (!in_array($userLevel, ['Creator', 'Influencer']))
+                            <div class="text-end">
+                                <small class="text-muted">
+                                    Max 160 characters
+                                </small>
                             </div>
                         @endif
-
                     </div>
 
+                    {{-- MEDIA TABS --}}
+                    @if (in_array($userLevel, ['Creator', 'Influencer']))
+                        <ul class="nav nav-pills nav-justified mb-3 small fw-semibold">
+
+                            <li class="nav-item">
+                                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#imageTab"
+                                    type="button">
+                                    <i class="fa fa-image me-1"></i> Images
+                                </button>
+                            </li>
+
+                            <li class="nav-item">
+                                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#videoTab" type="button">
+                                    <i class="fa fa-video me-1"></i> Video
+                                </button>
+                            </li>
+
+                        </ul>
+
+                        <div class="tab-content">
+
+                            {{-- IMAGE TAB --}}
+                            <div class="tab-pane fade show active" id="imageTab">
+
+                                <div class="mb-3">
+                                    <input type="file" wire:model="images" multiple accept="image/*"
+                                        class="form-control">
+
+                                    <small class="text-muted d-block mt-1">
+                                        {{ $userLevel === 'Creator' ? 'Max 1 image' : 'Max 4 images' }}
+                                    </small>
+                                </div>
+
+                                <div class="row">
+                                    @foreach ($images as $index => $image)
+                                        <div class="col-4 col-md-3 mb-2 position-relative">
+
+                                            <img src="{{ $image->temporaryUrl() }}" class="img-fluid rounded shadow-sm">
+
+                                            <button type="button" wire:click="removeImage({{ $index }})"
+                                                class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1">
+                                                &times;
+                                            </button>
+
+                                        </div>
+                                    @endforeach
+                                </div>
+
+                            </div>
+
+                            {{-- VIDEO TAB --}}
+                            {{-- <div class="tab-pane fade" id="videoTab" wire:ignore>
+
+                                <div class="d-grid">
+                                    <button type="button" id="video_upload_btn" class="btn btn-outline-primary">
+                                        <i class="fa fa-upload me-1"></i> Upload Video
+                                    </button>
+                                </div>
+
+                                @if ($videoData)
+                                    <div class="mt-3">
+                                        <video class="w-100 rounded shadow-sm" controls>
+                                            <source src="{{ $videoData['secure_url'] }}" type="video/mp4">
+                                        </video>
+                                    </div>
+                                @endif
+
+                            </div> --}}
+
+                            {{-- VIDEO TAB --}}
+                            <div class="tab-pane fade" id="videoTab">
+
+                                {{-- Hidden File Input --}}
+                                <input type="file" id="videoInput" wire:model="video" accept="video/*"
+                                    class="d-none">
+
+                                <div class="d-grid">
+                                    <button type="button" class="btn btn-outline-primary"
+                                        onclick="document.getElementById('videoInput').click();">
+                                        <i class="fa fa-upload me-1"></i> Upload Video
+                                    </button>
+                                </div>
+
+                                {{-- Upload Loading Indicator --}}
+                               
+
+                                {{-- Preview Before Cloudinary --}}
+                                @if ($video)
+                                    <div class="mt-3">
+                                        <video class="w-100 rounded shadow-sm" controls>
+                                            <source src="{{ $video->temporaryUrl() }}">
+                                        </video>
+
+                                        <button type="button" wire:click="$set('video', null)"
+                                            class="btn btn-sm btn-danger mt-2">
+                                            Remove Video
+                                        </button>
+                                    </div>
+                                @endif
+
+                                 <div wire:loading wire:target="video" class="text-center mt-2">
+                                    <small class="text-muted">Uploading video...</small>
+                                </div>
+
+                                {{-- Preview After Cloudinary Upload --}}
+                                @if ($videoData)
+                                    <div class="mt-3">
+                                        <video class="w-100 rounded shadow-sm" controls>
+                                            <source src="{{ $videoData['secure_url'] }}" type="video/mp4">
+                                        </video>
+                                    </div>
+                                @endif
+
+                            </div>
+
+
+                        </div>
+                    @endif
+
                 </div>
-                @endif
 
-            </div>
+                {{-- FOOTER --}}
+                <div class="card-footer bg-white border-0">
+                    <button class="btn btn-primary w-100">
+                        <i class="fa fa-paper-plane me-1"></i> Post
+                    </button>
+                </div>
 
-            {{-- FOOTER --}}
-            <div class="card-footer bg-white border-0">
-                <button class="btn btn-primary w-100">
-                    <i class="fa fa-paper-plane me-1"></i> Post
-                </button>
-            </div>
+            </form>
+        </div>
 
-        </form>
+
+        {{-- CLOUDINARY VIDEO WIDGET --}}
+        <script src="https://widget.cloudinary.com/v2.0/global/all.js"></script>
+
+        <script>
+            document.addEventListener('livewire:load', function() {
+
+                let widget = cloudinary.createUploadWidget({
+                    cloudName: "{{ config('cloudinary.cloud_name') }}",
+                    uploadPreset: "payhankey_videos",
+                    resourceType: "video",
+                    chunk_size: 6000000,
+                    clientAllowedFormats: ["mp4", "mov", "webm"],
+                    maxFileSize: 100000000, // 100MB
+                    multiple: false
+                }, (error, result) => {
+
+                    if (!error && result && result.event === "success") {
+
+                        Livewire.emit('videoUploaded', result.info);
+
+                    }
+
+                    if (error) {
+                        console.log("Cloudinary Error:", error);
+                    }
+                });
+
+                document.addEventListener("click", function(e) {
+                    if (e.target && e.target.id === "video_upload_btn") {
+                        widget.open();
+                    }
+                });
+
+            });
+        </script>
+
+
     </div>
-
-
-    {{-- CLOUDINARY VIDEO WIDGET --}}
-    <script src="https://widget.cloudinary.com/v2.0/global/all.js"></script>
-
-<script src="https://widget.cloudinary.com/v2.0/global/all.js"></script>
-
-<script>
-document.addEventListener('livewire:load', function () {
-
-    let widget = cloudinary.createUploadWidget({
-        cloudName: "{{ config('cloudinary.cloud_name') }}",
-        uploadPreset: "payhankey_videos",
-        resourceType: "video",
-        chunk_size: 6000000,
-        clientAllowedFormats: ["mp4","mov","webm"],
-        maxFileSize: 100000000, // 100MB
-        multiple: false
-    }, (error, result) => {
-
-        if (!error && result && result.event === "success") {
-
-            Livewire.emit('videoUploaded', result.info);
-
-        }
-
-        if (error) {
-            console.log("Cloudinary Error:", error);
-        }
-    });
-
-    document.addEventListener("click", function(e) {
-        if (e.target && e.target.id === "video_upload_btn") {
-            widget.open();
-        }
-    });
-
-});
-</script>
-
-
-</div>
 
 
 </div>
