@@ -10,6 +10,8 @@ use App\Models\PostVideo;
 use App\Models\PostVideos;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Cloudinary\Cloudinary;
+use Cloudinary\Transformation\Resize;
 
 class NewTimeline extends Component
 {
@@ -144,11 +146,50 @@ class NewTimeline extends Component
             //         $videoUrl = $uploadResult->getSecurePath();
             // $publicId = $uploadResult->getPublicId();
 
-                // Generate thumbnail from video
-                $thumbnailUrl = cloudinary()->video($response['public_id'])
-                ->addTransformation(['width' => 640, 'height' => 360, 'crop' => 'fill'])
-                ->delivery(['format' => 'jpg', 'quality' => 'auto'])
-                ->toUrl();
+                // // Generate thumbnail from video
+                // $thumbnailUrl = cloudinary()->video($response['public_id'])
+                // ->addTransformation(['width' => 640, 'height' => 360, 'crop' => 'fill'])
+                // ->delivery(['format' => 'jpg', 'quality' => 'auto'])
+                // ->toUrl();
+
+                // $thumbnailUrl = cloudinary_url(
+                //     $response['public_id'] . '.jpg',
+                //     [
+                //         'resource_type' => 'video',
+                //         'start_offset' => 2,
+                //         'width' => 640,
+                //         'height' => 360,
+                //         'crop' => 'fill',
+                //         'quality' => 'auto'
+                //     ]
+                // );
+
+                $cloudinary = app(\Cloudinary\Cloudinary::class);
+
+                // $thumbnailUrl = $cloudinary->image($response['public_id'])
+                //     ->resize(\Cloudinary\Transformation\Resize::fill(640, 360))
+                //     ->format('jpg')
+                //     ->toUrl([
+                //         'resource_type' => 'video',
+                //         'start_offset' => 2
+                //     ]);
+
+                // $thumbnailUrl = str_replace(
+                //     '/video/upload/',
+                //     '/video/upload/so_2,c_fill,w_640,h_360,f_jpg/',
+                //     $response['secure_url']
+                // );
+
+                    //titkok style thumbnail cropping based on aspect ratio
+                $crop = $response['height'] > $response['width']
+                    ? 'c_fill,w_720,h_1280'
+                    : 'c_fill,w_1280,h_720';
+
+                $thumbnailUrl = str_replace(
+                    '/video/upload/',
+                    "/video/upload/so_2,{$crop},f_jpg/",
+                    $response['secure_url']
+                );
 
             
                 PostVideo::create([
