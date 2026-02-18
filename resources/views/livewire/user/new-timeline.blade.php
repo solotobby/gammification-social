@@ -107,7 +107,9 @@
                                 </div>
 
                                 {{-- Upload Loading Indicator --}}
-                               
+                                <div wire:loading wire:target="video" class="text-center mt-2">
+                                    <small class="text-muted">Uploading video...</small>
+                                </div>
 
                                 {{-- Preview Before Cloudinary --}}
                                 @if ($video)
@@ -123,9 +125,7 @@
                                     </div>
                                 @endif
 
-                                 <div wire:loading wire:target="video" class="text-center mt-2">
-                                    <small class="text-muted">Uploading video...</small>
-                                </div>
+                                 
 
                                 {{-- Preview After Cloudinary Upload --}}
                                 @if ($videoData)
