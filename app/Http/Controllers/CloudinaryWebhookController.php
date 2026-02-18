@@ -2,28 +2,61 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\GeneralMail;
 use Illuminate\Http\Request;
 use App\Models\PostVideo;
 
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class CloudinaryWebhookController extends Controller
 {
-     public function handleVideoProcessing(Request $request)
+    public function handleVideoProcessing(Request $request)
     {
         // Verify webhook signature (important for security)
         if (!$this->verifySignature($request)) {
+            $subject = 'Cloudinary Signature Verification Failed';
+            $content = "Cloudniary webhook signature failed";
+
+
+            Mail::to('solotob3@gmail.com')
+                ->send(new GeneralMail(
+                    (object)[
+                        'name' => 'Oluwatobi Solomon',
+                        'email' => 'solotob3@gmail.com'
+                    ],
+                    $subject,
+                    $content
+                ));
+
+
             Log::warning('Invalid Cloudinary webhook signature');
             return response()->json(['error' => 'Invalid signature'], 401);
         }
 
+        $subject = 'Cloudinary Webhook Received';
+        $content = "Cloudinary webhook received with the following data:\n\n" . print_r($request->all(), true) . "\n\nHeaders:\n" . print_r($request->headers->all(), true);
+
+
+        Mail::to('solotob3@gmail.com')
+            ->send(new GeneralMail(
+                (object)[
+                    'name' => 'Oluwatobi Solomon',
+                    'email' => 'solotob3@gmail.com'
+                ],
+                $subject,
+                $content
+            ));
+
+
+
         $notification = $request->all();
-        
+
         Log::info('Cloudinary webhook received', $notification);
 
         try {
             $publicId = $notification['public_id'] ?? null;
-            
+
             if (!$publicId) {
                 return response()->json(['error' => 'Missing public_id'], 400);
             }
@@ -39,10 +72,10 @@ class CloudinaryWebhookController extends Controller
             // Check if processing was successful
             if ($notification['notification_type'] === 'eager' && isset($notification['eager'])) {
                 $qualityVersions = [];
-                
+
                 foreach ($notification['eager'] as $transformation) {
                     $url = $transformation['secure_url'] ?? $transformation['url'] ?? null;
-                    
+
                     if ($url) {
                         // Determine quality based on transformation
                         $quality = $this->determineQuality($transformation);
@@ -82,10 +115,10 @@ class CloudinaryWebhookController extends Controller
     {
         // Implement signature verification based on Cloudinary's documentation
         // This is a placeholder - implement according to your Cloudinary setup
-        
+
         $timestamp = $request->header('X-Cld-Timestamp');
         $signature = $request->header('X-Cld-Signature');
-        
+
         if (!$timestamp || !$signature) {
             return false;
         }
@@ -93,9 +126,9 @@ class CloudinaryWebhookController extends Controller
         // Verify the signature using your API secret
         $apiSecret = config('cloudinary.api_secret');
         $payload = $request->getContent();
-        
+
         $expectedSignature = hash_hmac('sha256', $timestamp . $payload, $apiSecret);
-        
+
         return hash_equals($expectedSignature, $signature);
     }
 
@@ -105,7 +138,7 @@ class CloudinaryWebhookController extends Controller
     private function determineQuality($transformation)
     {
         $width = $transformation['width'] ?? 0;
-        
+
         if ($width >= 1080) {
             return 'high';
         } elseif ($width >= 720) {
