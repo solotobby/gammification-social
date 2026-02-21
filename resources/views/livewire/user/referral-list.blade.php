@@ -8,13 +8,43 @@
     <div class="content content-full content-boxed">
 
         <h2 class="content-heading">Referral List</h2>
+        
         <div class="row">
+            @if ($monthlyReferralsCount > 500)
+                <div class="alert alert-success align-items-center mb-2">
+                    <i class="fa fa-check-circle me-2"></i>
+                    <strong>Congratulations! You've qualified for content monetization this month!</strong><br>
+
+                    You have successfully invited <b>{{ $monthlyReferralsCount }}</b> friends to Payhankey this month,
+                    surpassing the requirement of 500 referrals. Enjoy your free access to content monetization and
+                    start earning from your content today!
+                    <br>
+                    <button class="btn btn-sm btn-primary mt-2"
+                        onclick="window.location.href='{{ url('/monetization') }}'">
+                        <i class="fa fa-dollar-sign me-1"></i> Claim your Monetization
+                    </button>
+                </div>
+            @endif
+
+            <div class="alert alert-success align-items-center mb-2">
+                <i class="fa fa-info-circle me-2"></i>
+                <strong>{{ __('Invite your Friends to Payhankey and enjoy Free Access to Monetization!') }}</strong><br>
+
+                You now qualify for content monetization without paying an upgrade free once you invite <b>500</b>
+                friends this
+                month. <br>
+                Copy your referral link below to get started...
+
+            </div>
+
+            <br>
             <div class="alert alert-info d-flex justify-content-between align-items-center">
+
 
                 <div class="d-flex align-items-center">
                     <i class="fa fa-link me-2"></i>
                     <span id="referralLink">
-                        {{ url('/reg?referral_code=' . auth()->user()->referral_code) }}
+                        {{ url('/reg?referral_code=' . $user->referral_code) }}
                     </span>
                 </div>
 

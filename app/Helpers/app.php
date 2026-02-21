@@ -1392,3 +1392,67 @@ if (!function_exists('getOptimalImageDimensions')) {
         };
     }
 }
+
+
+if (!function_exists('formatCount')) {
+    function formatCount($count)
+    {
+        if ($count >= 1000000) {
+            return number_format($count / 1000000, 1) . 'M';
+        } elseif ($count >= 1000) {
+            return number_format($count / 1000, 1) . 'K';
+        }
+        
+        return number_format($count);
+    }
+}
+
+
+if (!function_exists('rolls_url')) {
+    /**
+     * Generate a reels URL for a video
+     * 
+     * @param int $videoId The video ID
+     * @param string $context The context (global, user, following, trending)
+     * @param int|null $userId Optional user ID for user context
+     * @return string
+     */
+    function rolls_url($videoId, $context = 'global', $userId = null)
+    {
+        $params = [
+            'videoId' => $videoId,
+            'context' => $context,
+        ];
+
+        if ($userId) {
+            $params['userId'] = $userId;
+        }
+
+        return route('rolls.show', $params);
+    }
+}
+
+if (!function_exists('rolls_link')) {
+    /**
+     * Generate an HTML link to open a video in reels
+     * 
+     * @param int $videoId
+     * @param string $linkText
+     * @param string $context
+     * @param array $attributes
+     * @return string
+     */
+    function rolls_link($videoId, $linkText = 'Watch', $context = 'global', $attributes = [])
+    {
+        $url = rolls_url($videoId, $context);
+        
+        $attrs = '';
+        foreach ($attributes as $key => $value) {
+            $attrs .= " {$key}=\"{$value}\"";
+        }
+        
+        return "<a href=\"{$url}\"{$attrs}>{$linkText}</a>";
+    }
+}
+
+

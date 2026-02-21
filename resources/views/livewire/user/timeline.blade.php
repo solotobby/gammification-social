@@ -148,14 +148,10 @@
                 <livewire:user.post-content :post="$post" :wire:key="'post-'.$post->id" />
             @endforeach
 
-            {{-- 
-            @if ($hasMore)
-                <div class="text-center my-3">
-                    <button wire:click="loadNextPage" class="btn btn-sm btn-primary">
-                        Load More Feeds
-                    </button>
-                </div>
-            @endif --}}
+            {{-- Global Video Player --}}
+                @if ($isVideoOpen)
+                    <livewire:user.video-player :videoId="$activeVideoId" wire:key="video-player-{{ $activeVideoId }}" />
+                @endif {{-- Global Video Player --}}
 
             @if ($hasMore)
                 <div class="text-center my-3">
@@ -174,32 +170,15 @@
                 </div>
             @endif
 
-
-            {{-- <div class="text-center my-3" x-show="$wire.loadingNext">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-            </div>
-
-            Optional end-of-feed message
-            <div class="text-center my-3" x-show="! $wire.hasMore && ! $wire.loadingNext">
-                <small class="text-muted">No more posts</small>
-            </div> --}}
-
-
-
-            {{-- <div x-data x-intersect="$wire.loadNextBatch()" class="py-4 text-center text-muted">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-                {{-- <span wire:loading>Loading more feeds…</span> --
-            </div> --}}
-
         </div>
+
+
         @include('layouts.engagement')
 
     </div>
 
+   
     @include('layouts.onboarding')
+     {{-- @include('layouts.basic_information') --}}
 
 </div>

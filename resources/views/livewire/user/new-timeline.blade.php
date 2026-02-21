@@ -154,6 +154,10 @@
             </form>
         </div>
 
+         {{-- @foreach ($posts as $post)
+                <livewire:user.post-content :post="$post" :wire:key="'post-'.$post->id" />
+            @endforeach --}}
+
 
         {{-- CLOUDINARY VIDEO WIDGET --}}
         <script src="https://widget.cloudinary.com/v2.0/global/all.js"></script>

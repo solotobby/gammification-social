@@ -14,7 +14,10 @@ class PostContent extends Component
     public $likesCount;
     public $likedByMe;
 
-     public int $commentCount = 0;
+    public $showPlayer = false;
+    public $activeVideoId = null;
+
+    public int $commentCount = 0;
 
     protected $listeners = [
         'commentAdded' => 'incrementCommentCount',
@@ -26,7 +29,7 @@ class PostContent extends Component
 
         $this->post = $post;
 
-        
+
 
         $this->likedByMe = $post->isLikedBy(auth()->user());
         $this->likesCount = sumCounter(
@@ -36,7 +39,7 @@ class PostContent extends Component
 
         $this->commentCount = $post->comments + $post->comment_external;
 
-       // dd($this->commentCount);
+        // dd($this->commentCount);
 
     }
 
@@ -62,6 +65,29 @@ class PostContent extends Component
             auth()->user()
         );
     }
+
+    public function openVideoPlayer($videoId)
+    {
+        $this->activeVideoId = $videoId;
+        $this->showPlayer = true;
+        // dd("Opening video player for video ID: $videoId");
+
+        // dd("Opening video player for video ID: $videoId");
+        // Emit event to open video player with this video
+        //    $this->dispatch('openVideoPlayer', videoId: $videoId);
+
+        //    $this->dispatch('openVideoPlayer', videoId: $videoId)
+        //         ->to(\App\Livewire\User\VideoPlayer::class);
+    }
+
+    public function closeVideoPlayer()
+    {
+        $this->showPlayer = false;
+        $this->activeVideoId = null;
+    }
+
+
+
 
 
 

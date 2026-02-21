@@ -21,7 +21,9 @@ class Post extends Model
         'comments',
         'comment_external',
         'status',
-        'unicode'
+        'unicode',
+        'has_video',
+        'has_images'
     ];
 
     public function user()
@@ -32,6 +34,11 @@ class Post extends Model
     public function images()
     {
         return $this->hasMany(PostImages::class);
+    }
+
+    public function video()
+    {
+        return $this->hasOne(PostVideo::class, 'post_id', 'id');
     }
 
     public function likes()

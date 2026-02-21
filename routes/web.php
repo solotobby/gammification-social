@@ -11,6 +11,7 @@ use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CloudinaryWebhookController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\VideoAnalyticsController;
 use App\Livewire\CreateProduct;
 use App\Livewire\Level;
 use App\Livewire\User\Analytics;
@@ -33,6 +34,8 @@ use App\Livewire\User\Timeline;
 use App\Livewire\User\TimelineDetails;
 use App\Livewire\User\TransactionList;
 use App\Livewire\User\UpgradeAccount;
+use App\Livewire\User\VideoPlayer;
+use App\Livewire\User\VideoRolls;
 use App\Livewire\User\ViewProfile;
 use App\Livewire\User\Wallets;
 use App\Livewire\ViewPost;
@@ -136,10 +139,14 @@ Route::middleware(['auth', 'verified', 'track.online'])->group(function () {
         Route::post('access/code/verification', [\App\Http\Controllers\HomeController::class, 'accessCodeVerification'])->name('access.code.verification');
 
         Route::get('validate/api', [\App\Http\Controllers\HomeController::class, 'validateApi']);
-        // Route::get('upgrade/api', [\App\Http\Controllers\HomeController::class, 'upgradeApi'])->name('upgrade.api');
         Route::get('verify/subscription/payment/', [\App\Http\Controllers\PaymentController::class, 'verifyKoraSubscriptionPayment'])->name('verify.subscription');
         Route::get('subscribe/{levelId}', [\App\Http\Controllers\PaymentController::class, 'createSubscription'])->name('subscribe');
-        // Route::get('search/user', [HomeController::class, 'searchUser']);
+      
+
+        //video player analytics route
+        Route::post('api/videos/{video}/watch-time', [VideoAnalyticsController::class, 'trackWatchTime']);
+        Route::post('api/videos/{video}/record-play', [VideoAnalyticsController::class, 'recordPlay']);
+
 
         Route::get('timeline', Timeline::class);
         Route::get('timeline/{post}', TimelineDetails::class);
@@ -160,6 +167,8 @@ Route::middleware(['auth', 'verified', 'track.online'])->group(function () {
         Route::get('bank/information', BankInformation::class);
         Route::get('how/it/works', HowItWorks::class);
         Route::get('search/user', Search::class);
+        // Route::get('rolls/play/{videoId}', VideoPlayer::class);
+        Route::get('rolls/{videoId}', VideoRolls::class)->name('rolls.show');
 
         
       

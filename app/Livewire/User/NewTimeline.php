@@ -24,6 +24,8 @@ class NewTimeline extends Component
     public $isUploading = false;
     public $videoPreview = null;
 
+
+
     use WithFileUploads;
 
 
@@ -37,11 +39,10 @@ class NewTimeline extends Component
     // {
     //     $this->videoData = $data;
     // }
-
     public function updatedVideo()
     {
         $this->validateOnly('video', [
-            'video' => 'nullable|mimes:mp4,mov,avi,webm|max:204800', // 200MB
+            'video' => 'nullable|mimes:mp4,mpeg,x-msvideo,quicktime,mov,x-flv,avi,webm|max:1048576', // 1GB
         ]);
 
         // Clear images if video selected
@@ -96,6 +97,9 @@ class NewTimeline extends Component
             'status' => $status,
         ]);
 
+         $networkStrength = $this->getUserNetworkStrength();
+
+
         // Upload Images to Cloudinary
         if (!empty($this->images)) {
             foreach ($this->images as $image) {
@@ -116,14 +120,12 @@ class NewTimeline extends Component
 
         if ($this->video) {
 
-            // $this->uploadVideos($post, $user);
-
             try {
 
                 $uploadResult = cloudinary()->uploadVideo($this->video->getRealPath(), [
                     'folder' => 'payhankey_post_videos',
                     'resource_type' => 'video',
-                    'eager' => $this->getVideoTransformations('medium'), // Default to medium for initial upload
+                    'eager' => $this->getVideoTransformations($networkStrength), // Default to medium for initial upload
                     'eager_async' => true,
                     'eager_notification_url' => route('cloudinary.webhook'),
                 ]);
@@ -167,35 +169,35 @@ class NewTimeline extends Component
         $this->reset(['content', 'images', 'video', 'videoPreview', 'videoData']);
     }
 
-    private function uploadVideos($post, $user)
+    private function getUserNetworkStrength()
     {
-        foreach ($this->video as $video) {
-            try {
-                $uploadResult = cloudinary()->uploadVideo($video->getRealPath(), [
-                    'folder' => 'payhankey_post_videos',
-                    'resource_type' => 'video',
-                    'eager' => $this->getVideoTransformations('medium'), // Default to medium for initial upload
-                    'eager_async' => true,
-                    'eager_notification_url' => route('cloudinary.webhook'),
-                ]);
+        // This would ideally come from client-side network detection
+        // For now, we can use user's connection type or default to medium
+        // You can implement JavaScript Network Information API and pass to Livewire
 
-                PostVideo::create([
-                    'user_id' => $user->id,
-                    'post_id' => $post->id,
-                    'path' => $uploadResult->getSecurePath(),
-                    'public_id' => $uploadResult->getPublicId(),
-                    'processing_status' => 'processing',
-                    'duration' => $uploadResult->getResponse()['duration'] ?? null,
-                    'width' => $uploadResult->getResponse()['width'] ?? null,
-                    'height' => $uploadResult->getResponse()['height'] ?? null,
-                    'format' => $uploadResult->getResponse()['format'] ?? null,
-                    'file_size' => $video->getSize(),
-                ]);
-            } catch (\Exception $e) {
-                Log::error('Video upload error: ' . $e->getMessage());
-            }
+        $user = Auth::user();
+
+        // Check if user has network preference stored
+        if (isset($user->network_preference)) {
+            return $user->network_preference;
         }
+
+        // Default to medium
+        return 'medium';
     }
+
+    private function getImageQuality($networkStrength)
+    {
+        return match ($networkStrength) {
+            'slow', '2g' => 'auto:low',
+            '3g', 'medium' => 'auto:good',
+            '4g', '5g', 'fast' => 'auto:best',
+            default => 'auto:good',
+        };
+    }
+
+
+
 
     private function getVideoTransformations($networkStrength)
     {

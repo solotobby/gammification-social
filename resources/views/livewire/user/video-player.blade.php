@@ -1,9 +1,17 @@
-{{-- <div>
-    Nothing in the world is as soft and yielding as water.
-</div> --}}
 
 
-{{-- resources/views/components/video-player.blade.php --}}
+<div>
+    <p class="text-center text-muted">Video Player for video ID: {{ $videoId }}</p>
+    {{-- Placeholder content - replace with actual video player UI --}}
+    <div class="d-flex justify-content-center align-items-center" style="height: 300px; background-color: #f0f0f0; border-radius: 8px;">
+        <span class="text-muted">[Video Player UI goes here]</span>
+    </div>
+</div>  
+
+
+
+    
+{{-- 
 
 @props(['video', 'post'])
 
@@ -12,7 +20,7 @@
      x-init="init()">
     
     @if ($video->processing_status === 'processing')
-        {{-- Show processing state --}}
+        {{-- Show processing state --
         <div class="video-processing text-center p-5 bg-dark rounded">
             <div class="spinner-border text-light mb-3" role="status">
                 <span class="visually-hidden">Processing...</span>
@@ -20,13 +28,13 @@
             <p class="text-light mb-0">Video is processing... Check back soon!</p>
         </div>
     @elseif ($video->processing_status === 'failed')
-        {{-- Show error state --}}
+        {{-- Show error state --
         <div class="video-error text-center p-5 bg-danger rounded">
             <i class="fas fa-exclamation-triangle fa-3x text-white mb-3"></i>
             <p class="text-white mb-0">Video processing failed</p>
         </div>
     @else
-        {{-- Video player --}}
+        {{-- Video player --
         <div class="video-wrapper" @click="togglePlay()">
             <video 
                 x-ref="video"
@@ -41,7 +49,7 @@
                 @pause="onPause()">
             </video>
 
-            {{-- Play/Pause Overlay --}}
+            {{-- Play/Pause Overlay --
             <div class="video-overlay position-absolute top-50 start-50 translate-middle"
                  x-show="!isPlaying"
                  x-transition>
@@ -50,13 +58,13 @@
                 </button>
             </div>
 
-            {{-- Video Controls --}}
+            {{-- Video Controls --
             <div class="video-controls position-absolute bottom-0 start-0 end-0 p-3 bg-gradient"
                  x-show="showControls"
                  @mouseenter="showControls = true"
                  @mouseleave="showControls = false">
                 
-                {{-- Progress Bar --}}
+                {{-- Progress Bar --
                 <div class="progress mb-2" style="height: 4px; cursor: pointer;" 
                      @click="seekTo($event)">
                     <div class="progress-bar bg-primary" 
@@ -64,15 +72,15 @@
                 </div>
 
                 <div class="d-flex align-items-center justify-content-between text-white">
-                    {{-- Play/Pause --}}
+                    {{-- Play/Pause --
                     <button class="btn btn-link text-white p-0" @click.stop="togglePlay()">
                         <i class="fas" :class="isPlaying ? 'fa-pause' : 'fa-play'"></i>
                     </button>
 
-                    {{-- Time --}}
+                    {{-- Time --
                     <span class="small" x-text="currentTime + ' / ' + duration"></span>
 
-                    {{-- Quality Selector --}}
+                    {{-- Quality Selector --
                     <div class="dropdown dropup">
                         <button class="btn btn-link text-white p-0 dropdown-toggle" 
                                 type="button" 
@@ -112,12 +120,12 @@
                         </ul>
                     </div>
 
-                    {{-- Mute/Unmute --}}
+                    {{-- Mute/Unmute --
                     <button class="btn btn-link text-white p-0" @click.stop="toggleMute()">
                         <i class="fas" :class="isMuted ? 'fa-volume-mute' : 'fa-volume-up'"></i>
                     </button>
 
-                    {{-- Fullscreen --}}
+                    {{-- Fullscreen --
                     <button class="btn btn-link text-white p-0" @click.stop="toggleFullscreen()">
                         <i class="fas fa-expand"></i>
                     </button>
@@ -125,7 +133,7 @@
             </div>
         </div>
 
-        {{-- Video Info --}}
+        {{-- Video Info --
         <div class="video-info mt-2">
             <div class="d-flex justify-content-between align-items-center">
                 <small class="text-muted">
@@ -349,4 +357,4 @@
         opacity: 1;
     }
 </style>
-@endpush
+@endpush --}}

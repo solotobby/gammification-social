@@ -19,9 +19,12 @@ class ReferralList extends Component
    
     public $monthlyReferralsCount = 0;
     public $totalReferrals = 0;
+    public $referralLink = '';
+    public $user;
 
     public function mount()
     {
+        $this->user = Auth::user();
         $this->totalReferrals = $this->getTotalReferralsCount();
         $this->monthlyReferralsCount = $this->monthlyReferralsCount();
     }
@@ -44,18 +47,6 @@ class ReferralList extends Component
             ->where('referral_id', Auth::id())
             ->count();
     }
-
-
-    // public function referees()
-    // {
-    //     $user = Auth::user();
-
-    //     return DB::table('users')
-    //         ->join('referrals', 'users.id', '=', 'referrals.user_id')
-    //         ->where('referrals.referral_id', $user->id)
-    //         ->select('users.*')
-    //         ->get(); //paginate(20);
-    // }
 
     public function render()
     {

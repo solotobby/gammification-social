@@ -65,6 +65,64 @@
             color: #8899a6;
             margin-top: 6px;
         }
+
+
+        .post-video {
+            aspect-ratio: 18/29;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
+
+        .post-video:hover {
+            transform: scale(1.02);
+        }
+
+        .post-video img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .video-play-overlay {
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .post-video:hover .video-play-overlay {
+            opacity: 1;
+        }
+
+        .play-button {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #000;
+            transition: transform 0.2s;
+        }
+
+        .play-button:hover {
+            transform: scale(1.1);
+        }
+
+        .video-duration {
+            font-size: 12px;
+        }
+
+        .video-stats {
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+        }
+
+        .image-overlay {
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 8px;
+        }
     </style>
     {{-- <div wire:ignore.self class="block block-rounded block-bordered" id="posts"> --}}
     <div wire:poll.visible.430s class="block block-rounded block-bordered" id="posts">
@@ -220,10 +278,10 @@
 
         <div class="block-content">
 
-            <div class="post-content" data-full="{{ e(strip_tags($post->content)) }}"
+            <div class="post-content" data-full="{!! e(strip_tags($post->content)) !!}"
                 data-short="{{ e(Str::limit(strip_tags($post->content), 130)) }}" data-expanded="false">
 
-                {{ Str::limit(strip_tags($post->content), 130) }}
+                {!! Str::limit(strip_tags($post->content), 130) !!}
 
                 @if (Str::length(strip_tags($post->content)) > 130)
                     <a href="#" class="see-more">See more</a>
@@ -231,16 +289,57 @@
             </div>
 
             @php
-                $count = $post->images->count();
+                $imageCount = $post->images->count();
+                // $videoCount = $post->videos->count();
             @endphp
 
-            @if ($count)
+
+            {{-- @if ($post->has_video && $post->video && $post->video->processing_status === 'completed')
+               
+                <div class="post-video position-relative" style="cursor: pointer;">
+                    <a href="{{ url('rolls', $post->video->id) }}" class="stretched-link"></a>
+
+                   
+                    <img src="{{ $post->video->thumbnail_path }}" alt="Video thumbnail" class="w-100 rounded">
+
+                    
+                    <div class="video-play-overlay position-absolute top-50 start-50 translate-middle">
+                        <div class="play-button">
+                            <i class="fas fa-play"></i>
+                        </div>
+                    </div>
+
+                    
+                    <span class="video-duration position-absolute bottom-0 end-0 m-2 badge bg-dark">
+                        {{ $post->video->formatted_duration }}
+                    </span>
+
+                
+                    <div class="video-stats position-absolute bottom-0 start-0 m-2 text-white">
+                        <small>
+                            <i class="fas fa-eye"></i>
+                            {{ formatCount($post->video->view_count) }}
+                        </small>
+                    </div>
+                </div>
+            @endif
+            @if ($post->has_video && $post->video && $post->video->processing_status === 'processing')
+                <div class="alert alert-info">
+                    <i class="fas fa-spinner fa-spin me-2"></i>
+                    Video is processing... Check back soon!
+                </div>
+            @endif --}}
+
+
+            {{-- image Processsing --}}
+
+            @if ($imageCount)
                 <hr>
                 <div class="row g-sm js-gallery img-fluid-100">
 
                     @php
 
-                        $col = match ($count) {
+                        $col = match ($imageCount) {
                             1 => 'col-12',
                             2 => 'col-6',
                             3 => 'col-4',
@@ -261,24 +360,6 @@
 
                 </div>
             @endif
-
-
-            {{-- <a href="{{ url('timeline/' . $post->id) }}" style="color: dimgrey">
-                <p style="color: dimgrey">
-
-                    {!! renderPostText($post->content, 130) !!}
-
-                    {{-- {!! nl2br(e(\Illuminate\Support\Str::limit($post->content, 160))) !!}  --}}
-
-            {{-- @if (strlen($post->content) > 160)
-                        <a href="{{ url('timeline/' . $post->id) }}" class="text-primary fw-semibold">
-                            Read more
-                        </a>
-                    @endif --
-
-                </p>
-            </a> --}}
-
 
             @php
                 $url = extractFirstUrl($post->content);
@@ -425,15 +506,15 @@
                 @if (auth()->id() === $post->user_id)
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url('post/timeline/' . $post->id . '/analytics') }}">
-                            <i class="si si-bar-chart opacity-50"></i>  {{ getCurrencyCode() }}{{ estimatedEarnings($post->id) }}
+                            <i class="si si-bar-chart opacity-50"></i>
+                            {{ getCurrencyCode() }}{{ estimatedEarnings($post->id) }}
                         </a>
                     </li>
-
-                    @else
-
+                @else
                     <li class="nav-item">
                         <a class="nav-link" href="javascript:void(0)">
-                            <i class="si si-bar-chart opacity-50"></i>   {{ getCurrencyCode() }}{{ estimatedEarnings($post->id) }}
+                            <i class="si si-bar-chart opacity-50"></i>
+                            {{ getCurrencyCode() }}{{ estimatedEarnings($post->id) }}
                         </a>
                     </li>
                 @endif
@@ -447,6 +528,18 @@
 
             <livewire:user.post-comments :post="$post" :wire:key="'post-comments-'.$post->id" />
         </div>
+
+
+        {{-- @if($showPlayer)
+
+            <livewire:user.video-player 
+                :videoId="$activeVideoId"
+                wire:key="video-player-{{ $activeVideoId }}"
+            />
+
+        @endif --}}
+
+
 
 
     </div>

@@ -28,7 +28,10 @@ use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
+
 #[On('user.timeline')]
+#[On('openVideoPlayer')]
+
 class Timeline extends Component
 {
     use WithFileUploads, WithPagination;
@@ -62,19 +65,9 @@ class Timeline extends Component
     public $currentPostId;
     public $message = [];
 
-    // protected $listeners = [
-    //     'refreshFeed' => 'clearFeedCache',
-    // ];
-
     protected $listeners = [
         'loadMorePosts' => '$refresh',
     ];
-
-    // public $posts; 
-    // public $buffer = [];    // preloaded next batch
-    // public $perPage = 3;   // batch size
-    // public $page = 1;       // current page
-    // public $loadingNext = false;
 
     public Collection $posts;
     public Collection $buffer;
@@ -85,6 +78,24 @@ class Timeline extends Component
 
     public int $page = 1;
     public bool $hasMore = true;
+    public $isVideoOpen = false;
+    public $activeVideoId = null;
+
+
+    public function openVideoPlayer($videoId)
+    {
+        $this->dispatch('openVideoPlayer', videoId: $videoId)
+                ->to(\App\Livewire\User\VideoPlayer::class);
+        $this->activeVideoId = $videoId;
+        $this->isVideoOpen = true;
+        dd("Opening video player for video ID: $videoId");
+    }
+
+    public function closeVideoPlayer()
+    {
+        $this->isVideoOpen = false;
+        $this->activeVideoId = null;
+    }
 
 
     public function mount()
@@ -143,61 +154,7 @@ class Timeline extends Component
         $this->loadPosts();
     }
 
-    // Core batch query using cursor
-    // protected function fetchBatch(?string $cursor = null)
-    // {
-    //     return Post::with('user')
-    //         ->where('status', 'LIVE')
-    //         ->when($cursor, fn ($q) => $q->where('created_at', '<', $cursor))
-    //         ->orderByDesc('created_at')
-    //         ->limit($this->perPage)
-    //         ->get();
-    // }
 
-    // public function loadInitial()
-    // {
-    //     $batch = $this->fetchBatch();
-
-    //     if ($batch->isEmpty()) {
-    //         $this->hasMore = false;
-    //         return;
-    //     }
-
-    //     $this->posts = $batch;
-    //     $this->cursor = $batch->last()->created_at;
-    // }
-
-    // // Preload next batch for smooth scroll
-    // public function preloadNext()
-    // {
-    //     if (! $this->hasMore) return;
-
-    //     $this->buffer = $this->fetchBatch($this->cursor);
-
-    //     if ($this->buffer->isEmpty()) {
-    //         $this->hasMore = false;
-    //     }
-    // }
-
-    // // Load the preloaded batch
-    // public function loadNextBatch()
-    // {
-    //     if ($this->loadingNext || $this->buffer->isEmpty()) return;
-
-    //     $this->loadingNext = true;
-
-    //     $this->posts = $this->posts->concat($this->buffer);
-
-    //     $this->cursor = $this->buffer->last()->created_at;
-
-    //     $this->buffer = collect();
-    //     $this->preloadNext();
-
-    //     $this->loadingNext = false;
-    // }
-
-
-    
 
     public function createPost()
     {
@@ -271,13 +228,6 @@ class Timeline extends Component
             $status = 'SHADOW_BANNED';
         }
 
-        // $check = isSpam($content);
-        // if($check){
-        //     $status = 'SHADOW_BANNED';
-        // }
-
-        // dd($status);
-
         $uniqueCode = rand(1000, 9999) . time();
         $timelines = Post::create(['user_id' => $user->id, 'content' => $content, 'unicode' => $uniqueCode, 'comment_external' => 0, 'status' => $status]);
 
@@ -297,11 +247,6 @@ class Timeline extends Component
         session()->flash('success', 'Your post was successful!');
 
         $this->reset('content', 'images');
-
-
-
-        // Refresh feed
-        // $this->resetPage();
     }
 
 
@@ -348,6 +293,18 @@ class Timeline extends Component
             // Reindex array so Livewire stays in sync
             $this->images = array_values($this->images);
         }
+    }
+
+
+
+    public function loadMore()
+    {
+        $this->dispatch('loadMorePosts');
+    }
+
+    public function render()
+    {
+        return view('livewire.user.timeline')->layout('layouts.app');
     }
 
 
@@ -416,13 +373,5 @@ class Timeline extends Component
     // }
 
 
-    public function loadMore()
-    {
-        $this->dispatch('loadMorePosts');
-    }
 
-    public function render()
-    {
-        return view('livewire.user.timeline')->layout('layouts.app');
-    }
 }
