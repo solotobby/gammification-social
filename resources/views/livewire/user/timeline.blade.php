@@ -179,6 +179,6 @@
 
    
     @include('layouts.onboarding')
-     {{-- @include('layouts.basic_information') --}}
+     @include('layouts.basic_information')
 
 </div>
