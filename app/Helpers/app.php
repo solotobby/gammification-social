@@ -1116,35 +1116,35 @@ if (!function_exists('buildLinkPreview')) {
 }
 
 
-if (!function_exists('getLinkPreview')) {
-    function getLinkPreview(string $url): ?array
-    {
-        return Cache::remember(
-            'link_preview_' . md5($url),
-            now()->addHours(24),
-            function () use ($url) {
+// if (!function_exists('getLinkPreview')) {
+//     function getLinkPreview(string $url): ?array
+//     {
+//         return Cache::remember(
+//             'link_preview_' . md5($url),
+//             now()->addHours(24),
+//             function () use ($url) {
 
-                try {
-                    $html = Http::timeout(5)->get($url)->body();
+//                 try {
+//                     $html = Http::timeout(5)->get($url)->body();
 
-                    preg_match('/property="og:title" content="(.*?)"/i', $html, $title);
-                    preg_match('/property="og:description" content="(.*?)"/i', $html, $desc);
-                    preg_match('/property="og:image" content="(.*?)"/i', $html, $image);
+//                     preg_match('/property="og:title" content="(.*?)"/i', $html, $title);
+//                     preg_match('/property="og:description" content="(.*?)"/i', $html, $desc);
+//                     preg_match('/property="og:image" content="(.*?)"/i', $html, $image);
 
-                    return [
-                        'url'         => $url,
-                        'host'        => parse_url($url, PHP_URL_HOST),
-                        'title'       => $title[1] ?? null,
-                        'description' => $desc[1] ?? null,
-                        'image'       => $image[1] ?? null,
-                    ];
-                } catch (\Throwable $e) {
-                    return null;
-                }
-            }
-        );
-    }
-}
+//                     return [
+//                         'url'         => $url,
+//                         'host'        => parse_url($url, PHP_URL_HOST),
+//                         'title'       => $title[1] ?? null,
+//                         'description' => $desc[1] ?? null,
+//                         'image'       => $image[1] ?? null,
+//                     ];
+//                 } catch (\Throwable $e) {
+//                     return null;
+//                 }
+//             }
+//         );
+//     }
+// }
 
 if (!function_exists('youtubeEmbed')) {
     function youtubeEmbed(string $url): ?string
