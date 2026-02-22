@@ -272,7 +272,7 @@
                     @endif
                     <hr>
 
-                    @php
+                    {{-- @php
                         $url = extractFirstUrl($post->content);
                         $preview = $url ? getLinkPreview($url) : null;
                     @endphp
@@ -295,9 +295,9 @@
                     @php
                         $url = extractFirstUrl($post->content);
                         $preview = $url ? getLinkPreview($url) : null;
-                    @endphp
+                    @endphp --}}
 
-                    @if ($preview && !isEmbeddablePlatform($url))
+                    {{-- @if ($preview && !isEmbeddablePlatform($url))
                         <a href="{{ $preview['url'] }}" target="_blank" rel="noopener" class="og-card">
 
                             @if (!empty($preview['image']))
@@ -325,7 +325,7 @@
                                 </div>
                             </div>
                         </a>
-                    @endif
+                    @endif --}}
 
 
 

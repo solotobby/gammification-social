@@ -361,7 +361,7 @@
                 </div>
             @endif
 
-            @php
+            {{-- @php
                 $url = extractFirstUrl($post->content);
                 $preview = $url ? getLinkPreview($url) : null;
             @endphp
@@ -378,7 +378,7 @@
                         <div class="og-host">{{ @$preview['host'] }}</div>
                     </div>
                 </a>
-            @endif
+            @endif --}}
 
             {{-- @if ($url && ($embed = youtubeEmbed($url)))
                     <iframe width="100%" height="315"
@@ -387,7 +387,7 @@
                             allowfullscreen></iframe>
                 @endif --}}
 
-            @php
+            {{-- @php
                 $url = extractFirstUrl($post->content);
                 $preview = $url ? getLinkPreview($url) : null;
             @endphp
@@ -420,7 +420,7 @@
                         </div>
                     </div>
                 </a>
-            @endif
+            @endif --}}
 
 
 
