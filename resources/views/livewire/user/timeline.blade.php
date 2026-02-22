@@ -38,13 +38,32 @@
             width: 100%;
         }
     </style>
-
+    <?php $userLevel = userLevel(); ?>
 
     <div class="row">
         <div class="col-md-8">
+            @if ($userLevel === 'Basic')
+                <div class="alert alert-info">
+                    <h5 class="fs-5 fw-light mb-2">Invite Friend and unlock Monetization!</h5>
+                    <p class="text-muted">
+                        Invite friends, share your unique referral link, and unlock monetization features to start
+                        earning
+                        from your content!
+                    </p>
 
-            {{-- <livewire:user.search /> --}}
-
+                    <div class="input-group mb-4">
+                        <input type="text" id="referralLink" class="form-control"
+                            value="{{ url('/reg?referral_code=' . auth()->user()->referral_code) }}" readonly />
+                        <button class="btn btn-outline-primary" type="button" onclick="copyReferralLink()"
+                            title="Copy to clipboard">
+                            <i class="fa fa-copy"></i>
+                        </button>
+                    </div>
+                    <a href="{{ url('referral/list') }}" class="btn btn-primary mb-2">
+                        View Referral List<i class="fa fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            @endif
             <div class="block block-bordered block-rounded">
                 <div class="block-content block-content-full">
                     <div class="alert alert-info">
@@ -63,8 +82,6 @@
                     </div>
                 </div>
             </div>
-
-
 
             @foreach (['success' => 'success', 'info' => 'warning', 'error' => 'danger'] as $key => $type)
                 @if (session()->has($key))
@@ -93,7 +110,7 @@
 
                 <form wire:submit.prevent="createPost">
                     <div class="card-body ">
-                        <?php $userLevel = userLevel(); ?>
+
                         <div x-data="{ content: @entangle('content') }">
                             <textarea x-model="content" class="form-control" placeholder="Say something amazing" rows="4"
                                 @if (!in_array($userLevel, ['Creator', 'Influencer'])) maxlength="160" @endif required></textarea>
@@ -149,9 +166,9 @@
             @endforeach
 
             {{-- Global Video Player --}}
-                @if ($isVideoOpen)
-                    <livewire:user.video-player :videoId="$activeVideoId" wire:key="video-player-{{ $activeVideoId }}" />
-                @endif {{-- Global Video Player --}}
+            @if ($isVideoOpen)
+                <livewire:user.video-player :videoId="$activeVideoId" wire:key="video-player-{{ $activeVideoId }}" />
+            @endif {{-- Global Video Player --}}
 
             @if ($hasMore)
                 <div class="text-center my-3">
@@ -177,8 +194,8 @@
 
     </div>
 
-   
+
     @include('layouts.onboarding')
-     @include('layouts.basic_information')
+    {{-- @include('layouts.basic_information') --}}
 
 </div>
