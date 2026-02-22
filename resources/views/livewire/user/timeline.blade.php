@@ -45,7 +45,7 @@
             @if ($userLevel === 'Basic')
                 <div class="alert alert-info">
                     <h5 class="fs-5 fw-light mb-2">Invite Friend and unlock Monetization!</h5>
-                    <p class="text-muted">
+                    <p class="text-muteddd">
                         Invite friends, share your unique referral link, and unlock monetization features to start
                         earning
                         from your content!
