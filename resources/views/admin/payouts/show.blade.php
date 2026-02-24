@@ -225,12 +225,30 @@
                         <div class="row">
                             <div class="col-lg-4">
                                 <p class="text-muted">
-                                    You can change a user Currency here
+                                    Process the fund transfer to the user's bank account. Ensure you have the correct
+                                    validation code before proceeding with the transfer.
                                 </p>
                             </div>
                             <div class="col-lg-8 col-xl-5">
 
                                 <div id="transfer-response"></div> <!-- Response will appear here -->
+
+                                <div class="mb-4">
+                                    <small class="text-muted">Select the bank to transfer to</small>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            Bank Name
+                                        </span>
+                                        <select name="bank_code" id="bank_code" class="form-control" required>
+                                            <option value="">Select Bank</option>
+                                            @foreach (bankList() as $bank)
+                                                <option value="{{ $bank['code'] }}">{{ $bank['name'] }}</option>
+                                            @endforeach
+                                        </select>
+
+
+                                    </div>
+                                </div>
 
                                 <div class="mb-4">
                                     <div class="input-group">
@@ -258,32 +276,79 @@
 
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script>
-            // $(function() {
-            //     $('#fund-transfer-form').on('submit', function(e) {
-            //         e.preventDefault();
+            $(function() {
 
-            //         let form = $(this);
-            //         let url = form.attr('action');
-            //         let data = form.serialize();
+                const form = $('#fund-transfer-form');
+                const responseBox = $('#transfer-response');
+                const submitBtn = form.find('button[type="submit"]');
 
-            //         // Clear previous response
-            //         $('#transfer-response').html('');
+                form.on('submit', function(e) {
+                    e.preventDefault();
 
-            //         $.post(url, data)
-            //             .done(function(response) {
-            //                 let alertType = response.status === 'success' ? 'alert-success' :
-            //                     'alert-danger';
-            //                 $('#transfer-response').html(
-            //                     `<div class="alert ${alertType}" role="alert">${response.message}</div>`
-            //                 );
-            //             })
-            //             .fail(function(xhr) {
-            //                 let message = xhr.responseJSON?.message ?? 'Something went wrong';
-            //                 $('#transfer-response').html(
-            //                     `<div class="alert alert-danger" role="alert">${message}</div>`);
-            //             });
-            //     });
-            // });
+                    // Prevent double submission
+                    if (submitBtn.prop('disabled')) return;
+
+                    let url = form.attr('action');
+                    let data = form.serialize();
+
+                    responseBox.html('');
+
+                    // Disable button + show loader
+                    submitBtn.prop('disabled', true)
+                        .html('<span class="spinner-border spinner-border-sm"></span> Processing...');
+
+                    $.ajax({
+                        url: url,
+                        type: "POST",
+                        data: data,
+                        success: function(response) {
+
+                            let alertType = response.status === 'success' ?
+                                'alert-success' :
+                                'alert-danger';
+
+                            responseBox.html(
+                                `<div class="alert ${alertType}" role="alert">
+                        ${response.message}
+                    </div>`
+                            );
+
+                            // Optional: reset form only if success
+                            if (response.status === 'success') {
+                                form.trigger('reset');
+                            }
+                        },
+                        error: function(xhr) {
+
+                            let message = 'Something went wrong';
+
+                            // Laravel validation errors
+                            if (xhr.status === 422 && xhr.responseJSON?.errors) {
+
+                                let errors = Object.values(xhr.responseJSON.errors)
+                                    .map(err => err[0])
+                                    .join('<br>');
+
+                                message = errors;
+
+                            } else if (xhr.responseJSON?.message) {
+                                message = xhr.responseJSON.message;
+                            }
+
+                            responseBox.html(
+                                `<div class="alert alert-danger" role="alert">
+                        ${message}
+                    </div>`
+                            );
+                        },
+                        complete: function() {
+                            // Re-enable button
+                            submitBtn.prop('disabled', false)
+                                .html('Process Transfer');
+                        }
+                    });
+                });
+            });
         </script>
 
 

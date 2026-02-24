@@ -12,21 +12,25 @@ use App\Models\Wallet;
 use App\Models\WithdrawalMethod;
 use App\Notifications\GeneralNotification;
 use App\Services\FundTransferService;
+use App\Services\TransactionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\DB;
 
 class PayoutController extends Controller
 {
 
     public $fundTransferService;
+    public $transactionService;
 
-    public function __construct(FundTransferService $fundTransferService)
+    public function __construct(FundTransferService $fundTransferService, TransactionService $transactionService)
     {
         $this->middleware('auth');
         // $this->middleware('admin');
         $this->fundTransferService = $fundTransferService;
-    }   
+        $this->transactionService = $transactionService;
+    }
     public function index($level)
     {
 
@@ -167,14 +171,18 @@ class PayoutController extends Controller
             return view('admin.payouts.show', ['payout' => $payoutInformation, 'withdrawals' => $withdrawal, 'wallet' => $wallet]);
         }
     }
-    public function updatePayoutStatus($id){
-        $payoutInfo = Payout::find($id);
-         $payoutInfo->update(['status' => 'Paid']);
-         $updatengagment = EngagementMonthlyStat::where('id', $payoutInfo->engagement_monthly_stats_id)->update(['status' => 'Paid']);
 
-         $wallet = Wallet::where('user_id', $payoutInfo->user_id)->first();
-        
-         if ($wallet->balance > 0) {
+
+
+    public function updatePayoutStatus($id)
+    {
+        $payoutInfo = Payout::find($id);
+        $payoutInfo->update(['status' => 'Paid']);
+        $updatengagment = EngagementMonthlyStat::where('id', $payoutInfo->engagement_monthly_stats_id)->update(['status' => 'Paid']);
+
+        $wallet = Wallet::where('user_id', $payoutInfo->user_id)->first();
+
+        if ($wallet->balance > 0) {
             Payout::create([
                 'engagement_monthly_stats_id' => $payoutInfo->engagement_monthly_stats_id,
                 'user_id' => $payoutInfo->user_id,
@@ -191,194 +199,315 @@ class PayoutController extends Controller
             $wallet->save();
         }
 
-         $payoutInfo->user->notify(
-                (new GeneralNotification([
-                    'title'   => '🚀 Payhankey Payout Sent!!',
-                    'message' => 'Great news! Your Payment has been sent to your account!',
-                    'icon'    => 'fa-heart text-danger',
-                    'url'     => url('wallets'),
-                ]))->delay(now()->addSeconds(1))
-            );
+        $payoutInfo->user->notify(
+            (new GeneralNotification([
+                'title'   => '🚀 Payhankey Payout Sent!!',
+                'message' => 'Great news! Your Payment has been sent to your account!',
+                'icon'    => 'fa-heart text-danger',
+                'url'     => url('wallets'),
+            ]))->delay(now()->addSeconds(1))
+        );
 
-             Transaction::create([
-                'user_id'    => $payoutInfo->user_id,
-                'ref'        => generateTransactionRef(),
-                'amount'     => $payoutInfo->amount,
-                'currency'   => $payoutInfo->currency,
-                'status'     => 'successful',
-                'type'       => 'payhankey_payout_and_bonus',
-                'action'     => 'Credit',
-                'description' => "Payhankey Payout for : " . $payoutInfo->month,
-            ]);
+        Transaction::create([
+            'user_id'    => $payoutInfo->user_id,
+            'ref'        => generateTransactionRef(),
+            'amount'     => $payoutInfo->amount,
+            'currency'   => $payoutInfo->currency,
+            'status'     => 'successful',
+            'type'       => 'payhankey_payout_and_bonus',
+            'action'     => 'Credit',
+            'description' => "Payhankey Payout for : " . $payoutInfo->month,
+        ]);
 
 
-            return back()->with('success', 'Payment Updated!');
-
+        return back()->with('success', 'Payment Updated!');
     }
 
-    
+
+
 
 
     public function fundTransfer(Request $request)
     {
-        // 1️⃣ Security check
         if (securityVerification() !== 'OK') {
             return response()->json(['status' => 'error', 'message' => 'Security verification failed'], 403);
         }
 
-
-
-        $withdrawal = WithdrawalMethod::where('user_id', $request->user_id)->first();
-        $fundTransferServiceResponse = $this->fundTransferService->transfer(1000, $withdrawal->bank_code, $withdrawal->account_number);
-
-        return $fundTransferServiceResponse;
-
-        // 2️⃣ Validate request
-        $request->validate([
+        $validated = $request->validate([
             'user_id' => 'required|uuid|exists:users,id',
+            'payout_id' => 'required|uuid|exists:payouts,id',
+            'bank_code' => 'required|numeric',
             'validationCode' => 'required|string',
         ]);
 
-        // 3️⃣ Check validation code
-        if ($request->validationCode !== env('VALIDATION_CODE')) {
+        if ($validated['validationCode'] !== config('services.env.validation_code')) {
             return response()->json(['status' => 'error', 'message' => 'Invalid validation code'], 422);
         }
 
-        $payoutInfo = Payout::find($request->payout_id);
-
-        if ($payoutInfo->status == 'Paid') {
-            return response()->json(['status' => 'error', 'message' => 'Payment Already Processed'], 422);
-        }
-
-
-        // 4️⃣ Fetch withdrawal method
-        $withdrawal = WithdrawalMethod::where('user_id', $request->user_id)->first();
-        if (!$withdrawal) {
-            return response()->json(['status' => 'error', 'message' => 'Withdrawal method not found'], 404);
-        }
-
-
-
-        //check Wallet balance
-        $fetchWallet = Wallet::where('user_id', $request->user_id)->first();
-        $walletBalance = $fetchWallet->balance; //convertToBaseCurrency($fetchWallet->balance, $fetchWallet->currency);
-        if ($fetchWallet->balance > 0) {
-            Payout::create([
-                'engagement_monthly_stats_id' => $payoutInfo->engagement_monthly_stats_id,
-                'user_id' => $request->user_id,
-                'level' => $payoutInfo->level,
-                'amount' => $walletBalance,
-                'total_engagement' => 0.00,
-                'month' => $payoutInfo->month,
-                'currency' => $fetchWallet->currency ?? 'NGN',
-                'status' => 'Queued',
-                'type' => 'Bonus'
-            ]);
-
-            $fetchWallet->balance = 0.00;
-            $fetchWallet->save();
-        }
-
-        // 5️⃣ Perform transfer
         try {
 
-            $amount =  $payoutInfo->amount + $walletBalance;
+            DB::beginTransaction();
 
-           // $transferData = $this->transferFund($amount, $withdrawal->recipient_code);
+            // 🔒 Lock payout row to prevent double payment
+            $payoutInfo = Payout::where('id', $validated['payout_id'])
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if ($payoutInfo->status === 'Paid') {
+                DB::rollBack();
+                return response()->json(['status' => 'error', 'message' => 'Payment already processed'], 422);
+            }
+
+            $user = User::findOrFail($validated['user_id']);
+
+            $withdrawal = WithdrawalMethod::where('user_id', $validated['user_id'])
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $wallet = Wallet::where('user_id', $validated['user_id'])
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $walletBalance = $wallet->balance ?? 0;
+            $transferAmount = $payoutInfo->amount + $walletBalance;
+
+            if ($transferAmount <= 0) {
+                DB::rollBack();
+                return response()->json(['status' => 'error', 'message' => 'No funds available'], 422);
+            }
+
+            // 🚀 Perform external transfer FIRST
+            $fundTransferResponse = $this->fundTransferService->transfer(
+                $user,
+                $transferAmount,
+                $validated['bank_code'],
+                $withdrawal->account_number
+            );
+
+            // ✅ Only update DB AFTER successful transfer
 
             $payoutInfo->update(['status' => 'Paid']);
 
-            $updatengagment = EngagementMonthlyStat::where('id', $payoutInfo->engagement_monthly_stats_id)->update(['status' => 'Paid']);
+            EngagementMonthlyStat::where('id', $payoutInfo->engagement_monthly_stats_id)
+                ->update(['status' => 'Paid']);
 
+            if ($walletBalance > 0) {
+                $wallet->update(['balance' => 0]);
 
+                Payout::create([
+                    'engagement_monthly_stats_id' => $payoutInfo->engagement_monthly_stats_id,
+                    'user_id' => $user->id,
+                    'level' => $payoutInfo->level,
+                    'amount' => $walletBalance,
+                    'total_engagement' => 0.00,
+                    'month' => $payoutInfo->month,
+                    'currency' => $wallet->currency ?? 'NGN',
+                    'status' => 'Paid',
+                    'type' => 'Bonus'
+                ]);
+            }
 
-            Transaction::create([
-                'user_id'    => $request->user_id,
-                'ref'        => generateTransactionRef(),
-                'amount'     => $amount,
-                'currency'   => $fetchWallet->currency,
-                'status'     => 'successful',
-                'type'       => 'payhankey_payout_and_bonus',
-                'action'     => 'Credit',
-                'description' => "Payhankey Payout for : " . $payoutInfo->month,
-            ]);
-
-
-
-            $payoutInfo->user->notify(
-                (new GeneralNotification([
-                    'title'   => '🚀 Payhankey Payout Sent!!',
-                    'message' => 'Great news! Your Payment has been sent to your account!',
-                    'icon'    => 'fa-heart text-danger',
-                    'url'     => url('wallets'),
-                ]))->delay(now()->addSeconds(1))
-            );
-
-
-            $userName = $payoutInfo->user->name;
-            $userEmail = $payoutInfo->user->email;
-
-            $amount = number_format($payoutInfo->amount, 2);
-            $duration = \Carbon\Carbon::createFromFormat('Y-m', $payoutInfo->month)->format('F Y');
             $currency = $payoutInfo->currency ?? 'NGN';
 
-            $subject = '🎉 Your Payhankey payout has been sent!';
+            $this->transactionService->createTransaction(
+                $user,
+                generateTransactionRef(),
+                $transferAmount,
+                $currency,
+                'successful',
+                'Credit',
+                'payhankey_payout_and_bonus',
+                "Payhankey Payout for : " . $payoutInfo->month
+            );
 
-            $content = "
-    
-
-                    <p>
-                        Fantastic news! Your <strong>Payhankey payout has been successfully processed and sent to your account</strong>.
-                    </p>
-
-                    <p>
-                        💰 <strong>Payout Amount:</strong> NGN {$amount} <br>
-                        📅 <strong>Period Covered:</strong> {$duration}
-                    </p>
-
-                    <p>
-                        This payout reflects your engagement and performance on Payhankey during the selected period.
-                        Thank you for creating, engaging, and being an important part of our community —
-                        <strong>your efforts truly matter</strong>.
-                    </p>
-
-                    <p>
-                        If you have any questions about your payout or need assistance, our support team is always here for you.
-                    </p>
-
-                    <p>
-                        Keep creating. Keep growing.<br>
-                        We’re rooting for you 🚀
-                    </p>
-
-                    <p>With love, <br><strong>The Payhankey Team 💜</strong></p>
-                ";
-
-
-
-            Mail::to($userEmail)
-                ->send(new GeneralMail(
-                    (object)[
-                        'name' => $userName,
-                        'email' => $userEmail
-                    ],
-                    $subject,
-                    $content
-                ));
-
+            DB::commit();
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Fund transfer initiated',
-                'data' => $transferData
+                'message' => 'Fund transfer successful',
+                'data' => $fundTransferResponse
             ]);
         } catch (\Throwable $e) {
+            DB::rollBack();
+
             return response()->json([
                 'status' => 'error',
-                'message' => 'Transfer failed: ' . $e->getMessage()
+                'message' => 'Transfer failed',
+                'error' => $e->getMessage()
             ], 500);
         }
     }
+
+
+    // public function fundTransfer(Request $request)
+    // {
+    //     // 1️⃣ Security check
+    //     if (securityVerification() !== 'OK') {
+    //         return response()->json(['status' => 'error', 'message' => 'Security verification failed'], 403);
+    //     }
+
+
+
+    //     // 2️⃣ Validate request
+    //     $validated = request()->validate([
+    //         'user_id' => 'required|uuid|exists:users,id',
+    //         'payout_id' => 'required|uuid|exists:payouts,id',
+    //         'bank_code' => 'required|numeric',
+    //         'validationCode' => 'required|string',
+    //     ]);
+
+
+    //     $user = User::find($validated['user_id']);
+
+    //     if (!$user) {
+    //         return response()->json(['status' => 'error', 'message' => 'User not found'], 404);
+    //     }
+
+    //     // 3️⃣ Check validation code
+    //     if ($request->validationCode !== config('services.env.validation_code')) { 
+    //         return response()->json(['status' => 'error', 'message' => 'Invalid validation code'], 422);
+    //     }
+
+    //     $payoutInfo = Payout::find($request->payout_id);
+
+    //     if ($payoutInfo->status == 'Paid') {
+    //         return response()->json(['status' => 'error', 'message' => 'Payment Already Processed for this period'], 422);
+    //     }
+
+
+    //     // 4️⃣ Fetch withdrawal method
+    //     $withdrawal = WithdrawalMethod::where('user_id', $validated['user_id'])->first();
+    //     if (!$withdrawal) {
+    //         return response()->json(['status' => 'error', 'message' => 'Withdrawal method not found'], 404);
+    //     }
+
+
+
+    //     //check Wallet balance
+    //     $fetchWallet = Wallet::where('user_id', $validated['user_id'])->first();
+    //     $walletBalance = $fetchWallet->balance; //convertToBaseCurrency($fetchWallet->balance, $fetchWallet->currency);
+    //     if ($fetchWallet->balance > 0) {
+    //         Payout::create([
+    //             'engagement_monthly_stats_id' => $payoutInfo->engagement_monthly_stats_id,
+    //             'user_id' => $validated['user_id'],
+    //             'level' => $payoutInfo->level,
+    //             'amount' => $walletBalance,
+    //             'total_engagement' => 0.00,
+    //             'month' => $payoutInfo->month,
+    //             'currency' => $fetchWallet->currency ?? 'NGN',
+    //             'status' => 'Queued',
+    //             'type' => 'Bonus'
+    //         ]);
+
+    //         $fetchWallet->balance = 0.00;
+    //         $fetchWallet->save();
+    //     }
+
+    //     // 5️⃣ Perform transfer
+    //     try {
+
+    //         $amount =  $payoutInfo->amount + $walletBalance;
+
+    //         $withdrawal = WithdrawalMethod::where('user_id', $request->user_id)->first();
+    //         $fundTransferServiceResponse = $this->fundTransferService->transfer($user, $amount, $request->bank_code, $withdrawal->account_number);
+
+    //         // return $fundTransferServiceResponse;
+
+    //         // $transferData = $this->transferFund($amount, $withdrawal->recipient_code);
+
+    //         $payoutInfo->update(['status' => 'Paid']);
+
+    //         EngagementMonthlyStat::where('id', $payoutInfo->engagement_monthly_stats_id)->update(['status' => 'Paid']);
+
+    //         $currency = $payoutInfo->currency ?? 'NGN';
+
+    //         $this->transactionService->createTransaction(
+    //             $payoutInfo->user,
+    //             generateTransactionRef(),
+    //             $amount,
+    //             $currency,
+    //             'successful',
+    //             'Credit',
+    //             'payhankey_payout_and_bonus',
+    //             "Payhankey Payout for : " . $payoutInfo->month
+    //         );
+
+
+
+    //         $payoutInfo->user->notify(
+    //             (new GeneralNotification([
+    //                 'title'   => '🚀 Payhankey Payout Sent!!',
+    //                 'message' => 'Great news! Your Payment has been sent to your account!',
+    //                 'icon'    => 'fa-heart text-danger',
+    //                 'url'     => url('wallets'),
+    //             ]))->delay(now()->addSeconds(1))
+    //         );
+
+
+    //         $userName = $payoutInfo->user->name;
+    //         $userEmail = $payoutInfo->user->email;
+
+    //         $amount = number_format($payoutInfo->amount, 2);
+    //         $duration = \Carbon\Carbon::createFromFormat('Y-m', $payoutInfo->month)->format('F Y');
+
+
+    //         $subject = '🎉 Your Payhankey payout has been sent!';
+
+    //         $content = "
+
+
+    //                 <p>
+    //                     Fantastic news! Your <strong>Payhankey payout has been successfully processed and sent to your account</strong>.
+    //                 </p>
+
+    //                 <p>
+    //                     💰 <strong>Payout Amount:</strong> NGN {$amount} <br>
+    //                     📅 <strong>Period Covered:</strong> {$duration}
+    //                 </p>
+
+    //                 <p>
+    //                     This payout reflects your engagement and performance on Payhankey during the selected period.
+    //                     Thank you for creating, engaging, and being an important part of our community —
+    //                     <strong>your efforts truly matter</strong>.
+    //                 </p>
+
+    //                 <p>
+    //                     If you have any questions about your payout or need assistance, our support team is always here for you.
+    //                 </p>
+
+    //                 <p>
+    //                     Keep creating. Keep growing.<br>
+    //                     We’re rooting for you 🚀
+    //                 </p>
+
+    //                 <p>With love, <br><strong>The Payhankey Team 💜</strong></p>
+    //             ";
+
+
+
+    //         Mail::to($userEmail)
+    //             ->send(new GeneralMail(
+    //                 (object)[
+    //                     'name' => $userName,
+    //                     'email' => $userEmail
+    //                 ],
+    //                 $subject,
+    //                 $content
+    //             ));
+
+
+    //         return response()->json([
+    //             'status' => 'success',
+    //             'message' => 'Fund transfer initiated',
+    //             'data' => $fundTransferServiceResponse
+    //         ]);
+    //     } catch (\Throwable $e) {
+    //         return response()->json([
+    //             'status' => 'error',
+    //             'message' => 'Transfer failed: ' . $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
 
 
     // private function transferFund($amount, $recipientCode)
