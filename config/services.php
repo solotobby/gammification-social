@@ -32,7 +32,9 @@ return [
     ],
     'env'=>[
         'kora_sec' => env('KORA_SEC'),
-        'kora_pub' => env('KORA_PUB')
+        'kora_pub' => env('KORA_PUB'),
+        'country' => env('COUNTRY'),
+        'ip' => env('IP'),
     ]
 
 ];

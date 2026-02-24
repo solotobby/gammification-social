@@ -487,9 +487,9 @@ if (!function_exists('securityVerification')) {
 
         $myLocation = ipLocation();
 
-        $countryList = explode(',', env('COUNTRY'));
+        $countryList = explode(',', config('services.env.country')) ; //explode(',', env('COUNTRY'));
 
-        $ipList = explode(',', env('IP'));
+        $ipList = explode(',', config('services.env.ip')); //explode(',', env('IP'));
 
         $myIp =  $myLocation['ip'];
         $myCountry =  $myLocation['country'];

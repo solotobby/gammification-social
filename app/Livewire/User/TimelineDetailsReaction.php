@@ -2,9 +2,11 @@
 
 namespace App\Livewire\User;
 
+use App\Jobs\ProcessLikeJob;
 use App\Models\Post;
 use App\Services\LikeService;
 use Livewire\Component;
+use Symfony\Component\Process\Process;
 
 class TimelineDetailsReaction extends Component
 {
@@ -42,11 +44,17 @@ class TimelineDetailsReaction extends Component
         $this->likedByMe = ! $this->likedByMe;
         $this->likesCount += $this->likedByMe ? 1 : -1;
 
-        //passed to the LikeService + Job
-        app(LikeService::class)->toggle(
+        // Call the service to toggle like in the database
+        ProcessLikeJob::dispatch(
             $this->post->unicode,
-            auth()->user()
+            auth()->id()
         );
+
+        //passed to the LikeService + Job
+        // app(LikeService::class)->toggle(
+        //     $this->post->unicode,
+        //     auth()->user()
+        // );
 
     }
 
