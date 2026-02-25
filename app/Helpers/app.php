@@ -27,19 +27,63 @@ if (!function_exists('engagement')) {
     function engagement()
     {
 
-        return Post::with(['user:id,name,username'])->select('user_id', \DB::raw('SUM(views + views_external + likes + likes_external + comments) as total'))
+        $hours = 6;
+        $limit = 5;
+        $since = now()->subHours($hours);
+
+        $users = Post::with(['user:id,name,username'])
+            ->where('created_at', '>=', $since)
+            ->select(
+                'user_id',
+                DB::raw('SUM(likes) as total_likes'),
+                DB::raw('SUM(comments + comment_external) as total_comments'),
+                DB::raw('SUM(views + views_external) as total_views'),
+                DB::raw('COUNT(id) as total_posts')
+            )
             ->groupBy('user_id')
-            ->orderByDesc('total')
-            ->limit(5)
-            ->get();
+            ->get()
+            ->map(function ($user) {
+                // Engagement weighting
+                $score =
+                    ($user->total_likes * 1.0) +
+                    ($user->total_comments * 5.0) +
+                    ($user->total_views * 0.2) +
+                    ($user->total_posts * 3);
+
+                $user->score = $score;
+                $user->total_engagement =
+                    $user->total_likes +
+                    $user->total_comments +
+                    $user->total_posts +
+                    $user->total_views;
+
+                return [
+                    'name' => $user->user->name,
+                    'username' => $user->user->username,
+                    'total_engagement' => $user->total_engagement
+                ];
+            })
+            ->sortByDesc('score')
+            ->take($limit)
+            ->values(); // reindex array
+
+        return $users;
+
+
+
+        // return Post::with(['user:id,name,username'])->select('user_id', \DB::raw('SUM(views + views_external + likes + likes_external + comments) as total'))
+        //     ->groupBy('user_id')
+        //     ->orderByDesc('total')
+        //     ->limit(5)
+        //     ->get();
     }
 }
 
 if (!function_exists('trendingTopics')) {
     function trendingTopics()
     {
-      return TrendingTopic::orderBy('score', 'desc')->limit(5)->get();
-    }   
+        return TrendingTopic::orderBy('score', 'desc')->limit(5)->get();
+    }
 }
 
 
@@ -496,7 +540,7 @@ if (!function_exists('securityVerification')) {
 
         $myLocation = ipLocation();
 
-        $countryList = explode(',', config('services.env.country')) ; //explode(',', env('COUNTRY'));
+        $countryList = explode(',', config('services.env.country')); //explode(',', env('COUNTRY'));
 
         $ipList = explode(',', config('services.env.ip')); //explode(',', env('IP'));
 
@@ -1411,7 +1455,7 @@ if (!function_exists('formatCount')) {
         } elseif ($count >= 1000) {
             return number_format($count / 1000, 1) . 'K';
         }
-        
+
         return number_format($count);
     }
 }
@@ -1454,14 +1498,12 @@ if (!function_exists('rolls_link')) {
     function rolls_link($videoId, $linkText = 'Watch', $context = 'global', $attributes = [])
     {
         $url = rolls_url($videoId, $context);
-        
+
         $attrs = '';
         foreach ($attributes as $key => $value) {
             $attrs .= " {$key}=\"{$value}\"";
         }
-        
+
         return "<a href=\"{$url}\"{$attrs}>{$linkText}</a>";
     }
 }
-
-

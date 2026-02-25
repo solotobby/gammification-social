@@ -85,7 +85,7 @@
             </div>
         </div>
 
-        <h4 class="mt-4">Trending Members</h4>
+        <h4 class="mt-4">Trending Members <small class="text-muted"> (Last 6 hours) </small></h4> 
 
         @foreach (engagement() as $high)
             <div class="block block-rounded bg-body-dark">
@@ -93,17 +93,17 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <a class="fw-semibold"
-                               href="{{ url('profile/' . $high->user->username) }}"
+                               href="{{ url('profile/' . $high['username']) }}"
                                style="color: #5A4FDC">
-                                {{ displayName($high->user->name) }}
+                                {{ displayName($high['name']) }}
                             </a>
                             <div class="fs-sm text-muted">
-                                {{ $high->total }} Engagements
+                                {{ $high['total_engagement'] }} Engagements
                             </div>
                         </div>
 
                         <a class="btn btn-sm btn-alt-secondary d-inline-block"
-                           href="{{ url('profile/' . $high->user->username) }}">
+                           href="{{ url('profile/' . $high['username']) }}">
                             <i class="fa fa-fw fa-plus-circle"></i>
                         </a>
                     </div>
