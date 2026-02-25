@@ -63,7 +63,7 @@ if (!function_exists('engagement')) {
                     'total_engagement' => $user->total_engagement
                 ];
             })
-            ->sortByDesc('score')
+            ->sortByDesc('total_engagement')
             ->take($limit)
             ->values(); // reindex array
 
