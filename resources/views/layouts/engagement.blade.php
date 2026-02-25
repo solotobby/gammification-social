@@ -14,7 +14,7 @@
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     {{-- <a class="fw-semibold" href="" style="color: #5A4FDC">{{ $high->phrases }}</a> --}}
-                    {{-- <div class="fs-sm text-muted"> 5786 Engagements</div> --}
+{{-- <div class="fs-sm text-muted"> 5786 Engagements</div> --}
                 </div>
                 {{-- <a class="btn btn-sm btn-alt-secondary d-inline-block" href="{{url('profile/'.$high->user->username)}}">
                 <i class="fa fa-fw fa-plus-circle"></i>
@@ -59,59 +59,55 @@
  --}}
 
 
- {{-- <div> 👈 Single Root Wrapper Required by Livewire --}}
+{{-- <div> 👈 Single Root Wrapper Required by Livewire --}}
 
-    <div class="col-md-4 mt-3">
-        <h4>Trending Topics</h4>
-
+<div class="col-md-4 mt-3">
+    <h4>Trending Topics</h4>
+    @foreach (trendingTopics() as $high)
         <div class="block block-rounded bg-body-dark">
             <div class="block-content block-content-full">
 
-                @foreach (trendingTopics() as $high)
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <div>
-                            <a class="fw-semibold"
-                               href=""
-                               {{-- {{ $high->url }} --}}
-                               style="color: #5A4FDC">
-                                {{ $high->phrase }}
-                            </a>
-                            {{-- <div class="fs-sm text-muted">
+
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                        <a class="fw-semibold" href="" {{-- {{ $high->url }} --}} style="color: #5A4FDC">
+                            {{ $high->phrase }}
+                        </a>
+                        {{-- <div class="fs-sm text-muted">
                                 Score: {{ number_format($high->score) }}
                             </div> --}}
-                        </div>
                     </div>
-                @endforeach
+                </div>
+
 
             </div>
         </div>
+    @endforeach
 
-        <h4 class="mt-4">Trending Members <small class="text-muted"> (Last 6 hours) </small></h4> 
+    <h4 class="mt-4">Trending Members <small class="text-muted"> (Last 6 hours) </small></h4>
 
-        @foreach (engagement() as $high)
-            <div class="block block-rounded bg-body-dark">
-                <div class="block-content block-content-full">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <a class="fw-semibold"
-                               href="{{ url('profile/' . $high['username']) }}"
-                               style="color: #5A4FDC">
-                                {{ displayName($high['name']) }}
-                            </a>
-                            <div class="fs-sm text-muted">
-                                {{ formatNumber($high['total_engagement']) }} Engagements
-                            </div>
-                        </div>
-
-                        <a class="btn btn-sm btn-alt-secondary d-inline-block"
-                           href="{{ url('profile/' . $high['username']) }}">
-                            <i class="fa fa-fw fa-plus-circle"></i>
+    @foreach (engagement() as $high)
+        <div class="block block-rounded bg-body-dark">
+            <div class="block-content block-content-full">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <a class="fw-semibold" href="{{ url('profile/' . $high['username']) }}" style="color: #5A4FDC">
+                            {{ displayName($high['name']) }}
                         </a>
+                        <div class="fs-sm text-muted">
+                            {{ formatNumber($high['total_engagement']) }} Engagements
+                        </div>
                     </div>
+
+                    <a class="btn btn-sm btn-alt-secondary d-inline-block"
+                        href="{{ url('profile/' . $high['username']) }}">
+                        <i class="fa fa-fw fa-plus-circle"></i>
+                    </a>
                 </div>
             </div>
-        @endforeach
+        </div>
+    @endforeach
 
-    </div>
+</div>
 
 {{-- </div> 👈 END Single Root --}}
