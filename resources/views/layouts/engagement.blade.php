@@ -54,8 +54,6 @@
     @endforeach
     <!-- END Group Suggestions -->
 </div>
-
-
  --}}
 
 
