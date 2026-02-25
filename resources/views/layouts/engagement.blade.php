@@ -71,7 +71,8 @@
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <div>
                             <a class="fw-semibold"
-                               href="{{ $high->url }}"
+                               href=""
+                               {{-- {{ $high->url }} --}}
                                style="color: #5A4FDC">
                                 {{ $high->phrase }}
                             </a>
