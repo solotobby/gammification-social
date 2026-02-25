@@ -53,9 +53,9 @@ if (!function_exists('engagement')) {
                 $user->score = $score;
                 $user->total_engagement =
                     ($user->total_likes +
-                    $user->total_comments +
-                    $user->total_posts +
-                    $user->total_views) * 8;
+                        $user->total_comments +
+                        $user->total_posts +
+                        $user->total_views) * 8;
 
                 return [
                     'name' => $user->user->name,
@@ -83,6 +83,22 @@ if (!function_exists('trendingTopics')) {
     function trendingTopics()
     {
         return TrendingTopic::orderBy('score', 'desc')->limit(5)->get();
+    }
+}
+
+
+if (!function_exists('formatNumber')) {
+    function formatNumber($number)
+    {
+        if ($number >= 1_000_000_000) {
+            return round($number / 1_000_000_000, 1) . 'B';
+        } elseif ($number >= 1_000_000) {
+            return round($number / 1_000_000, 1) . 'M';
+        } elseif ($number >= 1_000) {
+            return round($number / 1_000, 1) . 'K';
+        }
+
+        return (string)$number;
     }
 }
 

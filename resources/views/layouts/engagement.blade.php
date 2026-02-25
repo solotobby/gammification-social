@@ -98,7 +98,7 @@
                                 {{ displayName($high['name']) }}
                             </a>
                             <div class="fs-sm text-muted">
-                                {{ $high['total_engagement'] }} Engagements
+                                {{ formatNumber($high['total_engagement']) }} Engagements
                             </div>
                         </div>
 
