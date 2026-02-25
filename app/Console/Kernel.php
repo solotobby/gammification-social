@@ -11,6 +11,7 @@ use App\Models\UserComment;
 use App\Models\UserLevel;
 use App\Models\UserLike;
 use App\Models\UserView;
+use App\Services\TrendingTopicService;
 use Carbon\Carbon;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
@@ -274,6 +275,10 @@ class Kernel extends ConsoleKernel
                     $content
                 ));
         })->dailyAt('00:40');
+
+        $schedule->call(function () {
+           app(TrendingTopicService::class)->genenrateTrendingTopics();
+        })->everyThirtyMinutes();
 
         // $schedule->call(function () {
         //     $subject = 'Daily Engagement Registered - updated';

@@ -176,49 +176,6 @@
                     @endif
                     <br>
                     <hr>
-                    {{-- <form method="POST" action="{{ route('fund.transfer') }}">
-                        @csrf
-                        <div class="row">
-                            <div class="col-lg-4">
-                                <p class="text-muted">
-                                    You can change a user Currency here
-                                </p>
-                            </div>
-                            <div class="col-lg-8 col-xl-5">
-                                @if (session('success'))
-                                    <div class="alert alert-success" role="alert">
-                                        {{ session('success') }}
-                                    </div>
-                                @endif
-
-                                @if (session('error'))
-                                    <div class="alert alert-danger" role="alert">
-                                        {{ session('error') }}
-                                    </div>
-                                @endif
-
-                                <div class="mb-4">
-                                    <div class="input-group">
-                                        <span class="input-group-text">
-                                            Validate
-                                        </span>
-                                        <input type="text" class="form-control" name="validationCode" id="validationCode"
-                                            placeholder="Enter validation code" required>
-                                    </div>
-                                </div>
-                                <input type="hidden" value="{{ $payout->user->id }}" name="user_id">
-
-
-                                <div class="mb-4">
-                                    <button type="submit" class="btn btn-sm btn-primary">Process Transfer</button>
-                                </div>
-
-                            </div>
-                        </div>
-                        <!-- END Text -->
-
-
-                    </form> --}}
 
                     <form id="fund-transfer-form" method="POST" action="{{ route('fund.transfer') }}">
                         @csrf

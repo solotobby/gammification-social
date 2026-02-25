@@ -6,6 +6,7 @@ use App\Models\Level;
 use App\Models\LevelPlanId;
 use App\Models\Partner;
 use App\Models\Post;
+use App\Models\TrendingTopic;
 use App\Models\User;
 use App\Models\UserActivity;
 use App\Models\UserComment;
@@ -33,6 +34,14 @@ if (!function_exists('engagement')) {
             ->get();
     }
 }
+
+if (!function_exists('trendingTopics')) {
+    function trendingTopics()
+    {
+      return TrendingTopic::orderBy('score', 'desc')->limit(5)->get();
+    }   
+}
+
 
 if (!function_exists('generateCode')) {
     function generateCode($number)
