@@ -278,7 +278,7 @@ class Kernel extends ConsoleKernel
 
         $schedule->call(function () {
            app(TrendingTopicService::class)->genenrateTrendingTopics();
-        })->everyMinute();
+        })->everyThirtyMinutes();
 
         // $schedule->call(function () {
         //     $subject = 'Daily Engagement Registered - updated';
