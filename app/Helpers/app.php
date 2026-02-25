@@ -52,10 +52,10 @@ if (!function_exists('engagement')) {
 
                 $user->score = $score;
                 $user->total_engagement =
-                    $user->total_likes +
+                    ($user->total_likes +
                     $user->total_comments +
                     $user->total_posts +
-                    $user->total_views;
+                    $user->total_views) * 8;
 
                 return [
                     'name' => $user->user->name,
