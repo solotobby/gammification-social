@@ -46,8 +46,7 @@
                 <div class="alert alert-info">
                     <h5 class="fs-5 fw-light mb-2">Invite Friend and unlock Monetization!</h5>
                     <p class="text-muteddd">
-                        Invite friends, share your unique referral link, and unlock monetization features to start
-                        earning from your content!
+                    Let your friends join Payhankey! Your friends will vibe easily with your content & help you increase your engagement. <a href="{{ url('referral/list') }}">Learn More</a>
                     </p>
 
                     <div class="input-group mb-4">

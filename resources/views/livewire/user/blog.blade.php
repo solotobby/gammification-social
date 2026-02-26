@@ -8,7 +8,7 @@
                 <h1 class="fw-bold text-white mt-5 mb-2">
                     Check out our latest stories
                 </h1>
-                <h3 class="fw-normal text-white-75 mb-5">Follow our Progress and be Inspired!</h3>
+                <h3 class="fw-normal text-white-75 mb-5">Follow Our Progress and be Inspired!</h3>
             </div>
         </div>
     </div>

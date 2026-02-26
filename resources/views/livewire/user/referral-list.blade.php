@@ -8,7 +8,7 @@
     <div class="content content-full content-boxed">
 
         <h2 class="content-heading">Referral List</h2>
-        
+
         <div class="row">
             @if ($monthlyReferralsCount > 500)
                 <div class="alert alert-success align-items-center mb-2">
@@ -30,9 +30,11 @@
                 <i class="fa fa-info-circle me-2"></i>
                 <strong>{{ __('Invite your Friends to Payhankey and enjoy Free Access to Monetization!') }}</strong><br>
 
-                You now qualify for content monetization without paying an upgrade free once you invite <b>500</b>
-                friends this
-                month. <br>
+                You now qualify for content monetization without paying an upgrade free once you invite 500 friends this
+                month.
+                <br>
+                <strong>Earn rewards:</strong> Get 2 free months if 10 of your friends upgrade to Creator, plus $1 for
+                every influencer you refer.<br>
                 Copy your referral link below to get started...
 
             </div>
