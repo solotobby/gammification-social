@@ -56,28 +56,9 @@ class GeneralController extends Controller
 
     public function test()
     {
-        //    $bankNames =  WithdrawalMethod::where('payment_method', 'bank_transfer')->get(['id', 'bank_name', 'account_number', 'account_name', 'bank_code']);
-
-        //    $bankList = bankList();
-
-        //    $bankLookup = collect($bankList)
-        //     ->keyBy(fn ($bank) => strtolower(trim($bank['name'])));
-
-        //         foreach ($bankNames as $bank) {
-
-        //         $name = strtolower(trim($bank->bank_name));
-
-        //         if ($bankLookup->has($name)) {
-        //             $bank->update([
-        //                 'bank_code' => $bankLookup[$name]['code']
-        //             ]);
-        //         }
-        //     }
-        //     return 'done';
 
 
 
-        Log::error('Test error from Log Viewer');
         return ipLocation();
     }
 

@@ -277,8 +277,27 @@ class Kernel extends ConsoleKernel
         })->dailyAt('00:40');
 
         $schedule->call(function () {
-           app(TrendingTopicService::class)->genenrateTrendingTopics();
+            app(TrendingTopicService::class)->genenrateTrendingTopics();
         })->everyThirtyMinutes();
+
+        $schedule->call(function () {
+
+            DB::transaction(function () {
+
+                $userIds = DB::table('users')
+                    ->whereNull('email_verified_at')
+                    ->where('created_at', '<=', now()->subDays(30))
+                    ->pluck('id');
+
+                DB::table('wallets')
+                    ->whereIn('user_id', $userIds)
+                    ->delete();
+
+                DB::table('users')
+                    ->whereIn('id', $userIds)
+                    ->delete();
+            });
+        })->dailyAt('23:00');
 
         // $schedule->call(function () {
         //     $subject = 'Daily Engagement Registered - updated';
