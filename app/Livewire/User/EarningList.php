@@ -34,7 +34,7 @@ class EarningList extends Component
             ORDER BY SUM(payouts.amount) DESC
         ) as rank_position
     ")
-            ->where('payouts.status', 'Paid')
+            ->where('payouts.status', 'Queued')
             ->groupBy('payouts.month', 'users.id', 'users.username');
 
         return $topEarners = DB::query()
