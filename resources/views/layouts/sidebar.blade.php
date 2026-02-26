@@ -95,34 +95,35 @@
                         <i class="nav-main-link-icon fa fa-user"></i>
                         <span class="nav-main-link-name">Profile</span>
                     </a>
-                @else
-                    <a class="nav-main-link" href="{{ url('register') }}">
-                        <i class="nav-main-link-icon fa fa-user"></i>
-                        <span class="nav-main-link-name">Profile</span>
-                    </a>
                 @endif
-                <a class="nav-main-link" href="{{ url('analytics') }}">
-                    <i class="nav-main-link-icon si si-bar-chart"></i>
-                    <span class="nav-main-link-name">Analytics</span>
-                </a>
-                <a class="nav-main-link" href="{{ url('settings') }}">
-                    <i class="nav-main-link-icon si si-settings"></i>
-                    <span class="nav-main-link-name">Settings</span>
-                </a>
-
-                <a class="nav-main-link" href="{{ url('wallets') }}">
-                    <i class="nav-main-link-icon fa fa-wallet"></i>
-                    <span class="nav-main-link-name">Wallets</span>
-                </a>
 
                 <a class="nav-main-link" href="{{ url('upgrade') }}">
                     <i class="nav-main-link-icon fa fa-level-up-alt"></i>
                     <span class="nav-main-link-name">Upgrade Level</span>
                 </a>
 
+                <a class="nav-main-link" href="{{ url('analytics') }}">
+                    <i class="nav-main-link-icon si si-bar-chart"></i>
+                    <span class="nav-main-link-name">Analytics</span>
+                </a>
+               
+
+                <a class="nav-main-link" href="{{ url('wallets') }}">
+                    <i class="nav-main-link-icon fa fa-wallet"></i>
+                    <span class="nav-main-link-name">Wallets</span>
+                </a>
+                 <a class="nav-main-link" href="{{ url('bank/information') }}">
+                    <i class="nav-main-link-icon fa fa-usd"></i>
+                    <span class="nav-main-link-name">Bank Information</span>
+                </a>
+
                 <a class="nav-main-link" href="{{ url('transaction/list') }}">
                     <i class="nav-main-link-icon fa fa-table"></i>
                     <span class="nav-main-link-name">Transaction</span>
+                </a>
+                 <a class="nav-main-link" href="{{ url('earner/list') }}">
+                    <i class="nav-main-link-icon fa fa-list"></i>
+                    <span class="nav-main-link-name">Top Earners</span>
                 </a>
 
                 <a class="nav-main-link" href="{{ url('referral/list') }}">
@@ -130,13 +131,14 @@
                     <span class="nav-main-link-name">My Referrals</span>
                 </a>
 
-                <a class="nav-main-link" href="{{ url('bank/information') }}">
-                    <i class="nav-main-link-icon fa fa-usd"></i>
-                    <span class="nav-main-link-name">Bank Information</span>
+               
+                 <a class="nav-main-link" href="{{ url('settings') }}">
+                    <i class="nav-main-link-icon si si-settings"></i>
+                    <span class="nav-main-link-name">Settings</span>
                 </a>
 
                 <a class="nav-main-link" href="{{ url('how/it/works') }}">
-                    <i class="nav-main-link-icon fa fa-table"></i>
+                    <i class="nav-main-link-icon fa fa-cogs"></i>
                     <span class="nav-main-link-name">How It Works</span>
                 </a>
 

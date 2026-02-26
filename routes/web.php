@@ -16,6 +16,7 @@ use App\Livewire\CreateProduct;
 use App\Livewire\Level;
 use App\Livewire\User\Analytics;
 use App\Livewire\User\BankInformation;
+use App\Livewire\User\EarningList;
 use App\Livewire\User\HowItWorks;
 use App\Livewire\User\HowToEarn;
 use App\Livewire\User\NewTimeline;
@@ -169,6 +170,8 @@ Route::middleware(['auth', 'verified', 'track.online'])->group(function () {
         Route::get('search/user', Search::class);
         // Route::get('rolls/play/{videoId}', VideoPlayer::class);
         Route::get('rolls/{videoId}', VideoRolls::class)->name('rolls.show');
+        // Route::get('earners/list', EarningList::class);
+        Route::get('earner/list', EarningList::class);
 
         
       

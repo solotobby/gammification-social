@@ -42,13 +42,12 @@
 
     <div class="row">
         <div class="col-md-8">
-            @if ($userLevel === 'Basic')
+            {{-- @if ($userLevel === 'Basic') --}}
                 <div class="alert alert-info">
                     <h5 class="fs-5 fw-light mb-2">Invite Friend and unlock Monetization!</h5>
                     <p class="text-muteddd">
                         Invite friends, share your unique referral link, and unlock monetization features to start
-                        earning
-                        from your content!
+                        earning from your content!
                     </p>
 
                     <div class="input-group mb-4">
@@ -63,7 +62,7 @@
                         View Referral List<i class="fa fa-arrow-right ms-1"></i>
                     </a>
                 </div>
-            @endif
+            {{-- @endif --}}
             <div class="block block-bordered block-rounded">
                 <div class="block-content block-content-full">
                     <div class="alert alert-info">
