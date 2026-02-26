@@ -20,7 +20,7 @@
             @foreach ($blogs as $blog)
                  <!-- Story -->
             <div class="col-lg-4">
-                <a class="block block-rounded block-link-pop h-100 mb-0" href="{{url('blog/'.$blog->slug)}}">
+                <a class="block block-rounded block-link-pop h-100 mb-0" href="{{url('blog/'.$blog->slug)}}" target="_blank">
                     <img class="img-fluid" src="{{ $blog->cover_image }}" alt="">
                     <div class="block-content">
                         <h4 class="mb-1">{{ $blog->title }}</h4>
