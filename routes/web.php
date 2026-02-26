@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\UserEngagementController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CloudinaryWebhookController;
+use App\Http\Controllers\GeneralController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\VideoAnalyticsController;
@@ -96,6 +97,8 @@ Route::group(['namespace' => 'auth'], function () {
 
     Route::get('blog', [BlogController::class, 'index'])->name('blog');
     Route::get('blog/{slug}', [BlogController::class, 'show']);
+
+    Route::get('top/earners',  [\App\Http\Controllers\GeneralController::class, 'topEarners']);
 
     Route::post('/webhooks/cloudinary/video-processing', [CloudinaryWebhookController::class, 'handleVideoProcessing'])->name('cloudinary.webhook');
 

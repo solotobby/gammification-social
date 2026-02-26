@@ -6,9 +6,12 @@
                     <li class="nav-item">
                         <a data-scroll href="#features" class="nav-link">Features</a>
                     </li>
-                    {{-- <li class="nav-item">
+                    <li class="nav-item">
                         <a data-scroll href="{{url('blog')}}" class="nav-link">Blog</a>
-                    </li> --}}
+                    </li>
+                     <li class="nav-item">
+                        <a data-scroll href="{{url('top/earners')}}" class="nav-link">Top Earners</a>
+                    </li>
                     
                     <li class="nav-item">
                         <a data-scroll href="#about" class="nav-link">About Us</a>

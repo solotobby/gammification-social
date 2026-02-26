@@ -50,10 +50,8 @@
                                     <li class="list-group-item d-flex justify-content-between align-items-center">
 
                                         <div>
-
                                             #{{ $earner->rank_position ?? $loop->iteration }}
-
-
+                                            -
                                             <i>@<span>{{ $earner->username }}</span></i>
                                         </div>
 
