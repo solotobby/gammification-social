@@ -136,16 +136,17 @@
                     <i class="nav-main-link-icon si si-settings"></i>
                     <span class="nav-main-link-name">Settings</span>
                 </a>
+                 <a class="nav-main-link" href="{{ url('user/blog') }}">
+                  <i class="nav-main-link-icon fa fa-blog"></i>
+                  <span class="nav-main-link-name">Blog Post</span>
+                </a>
 
                 <a class="nav-main-link" href="{{ url('how/it/works') }}">
                     <i class="nav-main-link-icon fa fa-cogs"></i>
                     <span class="nav-main-link-name">How It Works</span>
                 </a>
 
-                {{-- <a class="nav-main-link" href="{{ url('how/to/earn') }}">
-            <i class="nav-main-link-icon fa fa-usd"></i>
-            <span class="nav-main-link-name">How to Earn</span>
-          </a> --}}
+               
 
 
 

@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 class BlogController extends Controller
 {
     public function index(){
-        $blogs = Blog::where('status', 'PUBLISHED')->paginate(10);
+        $blogs = Blog::where('status', 'PUBLISHED')->orderBy('created_at', 'DESC')->paginate(10);
         
         return view('blog.index', ['blogs' => $blogs]);
     }
