@@ -118,18 +118,17 @@
                 <div class="row py-sm-3 py-md-2">
                     @if ($withdrawalMethod)
                         @if ($withdrawalMethod->payment_method == 'usdt')
-                           <strong>Your preferred Payment method: USDT</strong>
+                            <strong>Your preferred Payment method: USDT</strong>
                             USDT Wallet Address: {{ maskCode($withdrawalMethod->usdt_wallet) }}
                         @elseif($withdrawalMethod->payment_method == 'paypal')
                             <strong>Your preferred Payment method : Paypal</strong>
                             PayPal Email: {{ maskCode($withdrawalMethod->paypal_email) }}
                         @else
-                             <strong>Withdrawal Information</strong>
+                            <strong>Withdrawal Information</strong>
                             Account Name: {{ $withdrawalMethod->account_name }} <br>
                             Bank Name: {{ $withdrawalMethod->bank_name }}<br>
                             Account Number: {{ $withdrawalMethod->account_number }}
                         @endif
-                        
                     @else
                         <div class="alert alert-danger text-center mt-2">
                             Withdrawal Method not Set yet
@@ -159,19 +158,7 @@
 
             </div>
 
-
-
-
-
-
         </div>
-
-        
-
-
-
-
-
 
         <div class="block block-rounded">
             <div class="block-header block-header-default">
@@ -187,7 +174,7 @@
                             </p>
                         </div>
                         <div class="col-lg-8 col-xl-5">
-                           
+
                             <div class="mb-4">
                                 <select class="form-control mt-2" name="currency" {{-- wire:model.defer="currency" --}} required>
 
@@ -216,9 +203,9 @@
         </div>
 
         <!-- Groups -->
-        {{-- <div class="block block-rounded">
+        <div class="block block-rounded">
             <div class="block-header block-header-default">
-                <h3 class="block-title">Credit Wallet</h3>
+                <h3 class="block-title">Credit Wallet (Tes tpurposes)</h3>
             </div>
             <div class="block-content">
                 <form method="POST" action="{{ route('credit.wallet') }}">
@@ -230,17 +217,24 @@
                             </p>
                         </div>
                         <div class="col-lg-8 col-xl-5">
-                            @if (session('success'))
-                                <div class="alert alert-success" role="alert">
-                                    {{ session('success') }}
-                                </div>
-                            @endif
 
-                            @if (session('error'))
-                                <div class="alert alert-danger" role="alert">
-                                    {{ session('error') }}
+                            <div class="mb-4">
+                                Account Number: {{ @$withdrawalMethod->account_number }}
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        Bank
+                                    </span>
+                                    <select name="bank_code" class="form-control" required>
+                                        <option value="">Select One</option>
+                                        @foreach (bankList() as $bank)
+                                            <option value="{{ $bank['code'] }}"> {{ $bank['name'] }} </option>
+                                        @endforeach
+                                    </select>
+                                    {{-- <input type="text" class="form-control" name="amount" id="example-group1-input1"
+                                        name="example-group1-input1" required> --}}
                                 </div>
-                            @endif
+                            </div>
+
                             <div class="mb-4">
                                 <div class="input-group">
                                     <span class="input-group-text">
@@ -250,11 +244,22 @@
                                         name="example-group1-input1" required>
                                 </div>
                             </div>
-                            <input type="hidden" value="{{ $user->id }}" name="user_id">
-                        
 
                             <div class="mb-4">
-                                <button type="submit" class="btn btn-sm btn-primary">Securely Credit User</button>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        Validation Code
+                                    </span>
+                                    <input type="text" class="form-control" name="validationCode" id="validationCode"
+                                        placeholder="Enter validation code" required>
+                                </div>
+                            </div>
+                            <input type="hidden" value="{{ $withdrawalMethod->account_number }}" name="account_number">
+                            <input type="hidden" value="{{ $user->id }}" name="user_id">
+
+
+                            <div class="mb-4">
+                                <button type="submit" class="btn btn-sm btn-primary">Securely Transfer Cash</button>
                             </div>
 
                         </div>
@@ -264,7 +269,7 @@
 
                 </form>
             </div>
-        </div> --}}
+        </div>
         <!-- END Groups -->
 
         <div class="block block-rounded">
@@ -344,7 +349,7 @@
                             </p>
                         </div>
                         <div class="col-lg-8 col-xl-5">
-                           
+
                             <div class="mb-4">
                                 <select class="form-control mt-2" name="status" {{-- wire:model.defer="currency" --}} required>
 
@@ -352,7 +357,7 @@
                                     <option value="ACTIVE">Active</option>
                                     <option value="SHADOW_BANNED">Shadow Ban</option>
                                     <option value="BLOCKED">Block</option>
-                                    
+
                                 </select>
 
                             </div>

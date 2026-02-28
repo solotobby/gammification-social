@@ -15,11 +15,27 @@ use App\Models\UserLevel;
 use App\Models\Wallet;
 use App\Models\WithdrawalMethod;
 use App\Models\Withdrawals;
+use App\Services\FundTransferService;
+use App\Services\TransactionService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
 class UserController extends Controller
 {
+
+    public $fundTransferService;
+    public $transactionService;
+
+    public function __construct(FundTransferService $fundTransferService, TransactionService $transactionService)
+    {
+        $this->middleware('auth');
+        // $this->middleware('admin');
+        $this->fundTransferService = $fundTransferService;
+        $this->transactionService = $transactionService;
+    }
+
+
     public function userList($level = null)
     {
         $res = securityVerification();
@@ -244,31 +260,82 @@ class UserController extends Controller
         $res = securityVerification();
         if ($res == 'OK') {
 
-            $wallet = Wallet::where('user_id', $request->user_id)->first();
-            $wallet->promoter_balance += $request->amount;
-            $wallet->save();
-
-            Transaction::create([
-                'user_id' => $request->user_id,
-                'ref' => time(),
-                'amount' => $request->amount,
-                'currency' => 'USD',
-                'status' =>  'succesful',
-                'type' => 'promoter_credit',
-                'action' => 'Credit',
-                'description' => 'Promoter Wallet Credited',
-                'meta' => null,
-                'customer' => null
+            $validated = $request->validate([
+                'user_id' => 'required|uuid|exists:users,id',
+                // 'payout_id' => 'required|uuid|exists:payouts,id',
+                'bank_code' => 'required|numeric',
+                'account_number' => 'required|numeric',
+                'amount' => 'required|numeric',
+                'validationCode' => 'required|string',
             ]);
 
-            $user = User::where('id', $request->user_id)->first();
-            $subject = 'Promoter Wallet Credited';
-            $content = "Your promoter wallet has been credited with $" . $request->amount;
+            if ($validated['validationCode'] !== config('services.env.validation_code')) {
+                return back()->with('error', 'Invalid validation code');
+                // return response()->json(['status' => 'error', 'message' => 'Invalid validation code'], 422);
+            }
 
-            Mail::to($user->email)->send(new GeneralMail($user, $subject, $content));
+            $user = User::find($validated['user_id']);
+
+            try {
+
+                DB::beginTransaction();
+
+                $fundTransferResponse = $this->fundTransferService->transfer(
+                    $user,
+                    $validated['amount'],
+                    $validated['bank_code'],
+                    $validated['account_number']
+                );
+
+                DB::commit();
+                 return back()->with('success', 'transfer successful' );
+
+                // return response()->json([
+                //     'status' => 'success',
+                //     'message' => 'Fund transfer successful',
+                //     'data' => $fundTransferResponse
+                // ]);
+
+            } catch (\Throwable $e) {
+
+                DB::rollBack();
+
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Transfer failed',
+                    'error' => $e->getMessage()
+                ], 500);
+            }
+
+            // if($validated['a'])
 
 
-            return back()->with('success', 'Wallet Credited');
+
+            // $wallet = Wallet::where('user_id', $request->user_id)->first();
+            // $wallet->promoter_balance += $request->amount;
+            // $wallet->save();
+
+            // Transaction::create([
+            //     'user_id' => $request->user_id,
+            //     'ref' => time(),
+            //     'amount' => $request->amount,
+            //     'currency' => 'USD',
+            //     'status' =>  'succesful',
+            //     'type' => 'promoter_credit',
+            //     'action' => 'Credit',
+            //     'description' => 'Promoter Wallet Credited',
+            //     'meta' => null,
+            //     'customer' => null
+            // ]);
+
+            // $user = User::where('id', $request->user_id)->first();
+            // $subject = 'Promoter Wallet Credited';
+            // $content = "Your promoter wallet has been credited with $" . $request->amount;
+
+            // Mail::to($user->email)->send(new GeneralMail($user, $subject, $content));
+
+
+           
         }
     }
 
