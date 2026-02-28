@@ -84,7 +84,7 @@ class FundTransferService{
                     'response' => $responseData
                 ]);
 
-                throw new Exception('Transfer was not successful.');
+                throw new Exception('Transfer was not successful. '.$responseData);
             }
 
             return [
@@ -101,7 +101,7 @@ class FundTransferService{
                 'error' => $e->getMessage()
             ]);
 
-            throw new Exception('Transfer service temporarily unavailable.');
+            throw new Exception('Transfer service temporarily unavailable.  '. $e->getMessage());
         }
     }
 
