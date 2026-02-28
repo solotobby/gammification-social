@@ -29,7 +29,7 @@ class FundTransferService{
         $reference = generateTransactionRef();
 
         // 💰 Convert to kobo (VERY IMPORTANT)
-        $amountInKobo = (int) round($amount * 100);
+        $amountInKobo = (int) round($amount);
 
         $payload = [
             "reference" => $reference,
