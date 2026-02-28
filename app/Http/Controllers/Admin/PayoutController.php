@@ -543,7 +543,7 @@ class PayoutController extends Controller
         $members = EngagementMonthlyStat::with(['user.wallet'])
             ->where('level', $level)
             ->where('month', $lastMonth)
-            // ->WHERE('status', 'Pending')
+            ->where('status', 'Queued')
             ->get();
 
         $memberCount = $members->count();
