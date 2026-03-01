@@ -332,7 +332,7 @@ class PayoutController extends Controller
 
             return response()->json([
                 'status' => 'error',
-                'message' => 'Transfer failed',
+                'message' => 'Transfer failed '. $e->getMessage(),
                 'error' => $e->getMessage()
             ], 500);
         }
