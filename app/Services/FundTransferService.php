@@ -84,7 +84,7 @@ class FundTransferService{
                     'response' => $responseData
                 ]);
 
-                throw new Exception('Transfer was not successful. '.$responseData);
+                throw new Exception('Transfer was not successful. ');
             }
 
             return [

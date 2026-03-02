@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Mail\GeneralMail;
 use App\Models\EngagementMonthlyStat;
 use App\Models\Payout;
+use App\Models\SubscriptionStat;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Models\Wallet;
@@ -84,6 +85,11 @@ class PayoutController extends Controller
         $engagementStat = EngagementMonthlyStat::find($id);
         // $fetchWallet = Wallet::where('user_id', $engagementStat->user_id)->first();
 
+        $subscriptionStat = SubscriptionStat::where('user_id', $engagementStat->user_id)->first();
+        if ($subscriptionStat) {
+            Wallet::where('user_id', $engagementStat->user_id)->update(['balance' => 0]);
+        }
+
         $payout = Payout::create([
             'engagement_monthly_stats_id' => $id,
             'user_id' => $engagementStat->user_id,
@@ -95,6 +101,8 @@ class PayoutController extends Controller
             'status' => 'Queued',
             'type' => 'Premium'
         ]);
+
+
 
         if ($payout) {
 
@@ -163,13 +171,14 @@ class PayoutController extends Controller
     public function viewPayoutInformation($engagementStatId)
     {
 
-        $res = securityVerification();
-        if ($res == 'OK') {
-            $payoutInformation = Payout::where('engagement_monthly_stats_id', $engagementStatId)->first();
-            $withdrawal = WithdrawalMethod::where('user_id', $payoutInformation->user_id)->first();
-            $wallet = Wallet::where('user_id', $payoutInformation->user_id)->first();
-            return view('admin.payouts.show', ['payout' => $payoutInformation, 'withdrawals' => $withdrawal, 'wallet' => $wallet]);
+        if (securityVerification() !== 'OK') {
+            return response()->json(['status' => 'error', 'message' => 'Security verification failed'], 403);
         }
+
+        $payoutInformation = Payout::where('engagement_monthly_stats_id', $engagementStatId)->first();
+        $withdrawal = WithdrawalMethod::where('user_id', $payoutInformation->user_id)->first();
+        $wallet = Wallet::where('user_id', $payoutInformation->user_id)->first();
+        return view('admin.payouts.show', ['payout' => $payoutInformation, 'withdrawals' => $withdrawal, 'wallet' => $wallet]);
     }
 
 
@@ -332,7 +341,7 @@ class PayoutController extends Controller
 
             return response()->json([
                 'status' => 'error',
-                'message' => 'Transfer failed '. $e->getMessage(),
+                'message' => 'Transfer failed ' . $e->getMessage(),
                 'error' => $e->getMessage()
             ], 500);
         }
