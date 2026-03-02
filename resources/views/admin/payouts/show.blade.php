@@ -139,10 +139,10 @@
 
                     </ol>
 
-                    {{-- @if ($payout->status != 'Paid')
+                    @if ($payout->status != 'Paid')
                         <a href=" {{ url('update/payout/fund/' . $payout->id) }} " class="btn btn-info mt-2">Temporarily
                             Update Payment</a>
-                    @endif --}}
+                    @endif
 
                 </div>
 
