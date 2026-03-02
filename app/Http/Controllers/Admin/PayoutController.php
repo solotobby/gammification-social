@@ -85,10 +85,10 @@ class PayoutController extends Controller
         $engagementStat = EngagementMonthlyStat::find($id);
         // $fetchWallet = Wallet::where('user_id', $engagementStat->user_id)->first();
 
-        $subscriptionStat = SubscriptionStat::where('user_id', $engagementStat->user_id)->first();
-        if ($subscriptionStat) {
-            Wallet::where('user_id', $engagementStat->user_id)->update(['balance' => 0]);
-        }
+        // $subscriptionStat = SubscriptionStat::where('user_id', $engagementStat->user_id)->first();
+        // if ($subscriptionStat) {
+        //     Wallet::where('user_id', $engagementStat->user_id)->update(['balance' => 0]);
+        // }
 
         $payout = Payout::create([
             'engagement_monthly_stats_id' => $id,
