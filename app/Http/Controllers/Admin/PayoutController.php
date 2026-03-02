@@ -165,7 +165,9 @@ class PayoutController extends Controller
                 ));
         }
 
-        return back();
+        return redirect('view/payout/info/'.$id);
+
+        // return back();
     }
 
     public function viewPayoutInformation($engagementStatId)
