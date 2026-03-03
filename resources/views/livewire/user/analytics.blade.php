@@ -251,6 +251,7 @@
                         <p class="text-muted mb-0">
                             Estimated. Earning
                         </p>
+                        <small><i>-Note that this is not your real payout. Payout is calculated at the end of the month after validation of Real engagement</i></small>
                     </div>
                 </div>
             </a>
