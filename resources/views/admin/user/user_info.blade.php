@@ -65,7 +65,6 @@
                         <div class="ms-3 text-end">
                             <p class="fs-3 fw-medium mb-0">
                                 0
-                                {{-- {{ getCurrencyCode($user->wallet->currency) }}{{ $withdrawals }} --}}
                             </p>
                             <p class="text-muted mb-0">
                                 Total Withdrawal <span><small>(Earnings withdrawn from your wallet)</small></span>
@@ -203,7 +202,7 @@
         </div>
 
         <!-- Groups -->
-        <div class="block block-rounded">
+        {{-- <div class="block block-rounded">
             <div class="block-header block-header-default">
                 <h3 class="block-title">Credit Wallet (Tes tpurposes)</h3>
             </div>
@@ -230,8 +229,7 @@
                                             <option value="{{ $bank['code'] }}"> {{ $bank['name'] }} </option>
                                         @endforeach
                                     </select>
-                                    {{-- <input type="text" class="form-control" name="amount" id="example-group1-input1"
-                                        name="example-group1-input1" required> --}}
+                                    
                                 </div>
                             </div>
 
@@ -269,7 +267,7 @@
 
                 </form>
             </div>
-        </div>
+        </div> --}}
         <!-- END Groups -->
 
         <div class="block block-rounded">
@@ -286,17 +284,7 @@
                             </p>
                         </div>
                         <div class="col-lg-8 col-xl-5">
-                            {{-- @if (session('success'))
-                                <div class="alert alert-success" role="alert">
-                                    {{ session('success') }}
-                                </div>
-                            @endif
-
-                            @if (session('error'))
-                                <div class="alert alert-danger" role="alert">
-                                    {{ session('error') }}
-                                </div>
-                            @endif --}}
+                           
                             <input type="hidden" value="{{ $user->id }}" name="user_id">
                             <div class="mb-4">
                                 <div class="input-group">
@@ -351,7 +339,7 @@
                         <div class="col-lg-8 col-xl-5">
 
                             <div class="mb-4">
-                                <select class="form-control mt-2" name="status" {{-- wire:model.defer="currency" --}} required>
+                                <select class="form-control mt-2" name="status" required>
 
                                     <option value="">Select One</option>
                                     <option value="ACTIVE">Active</option>
