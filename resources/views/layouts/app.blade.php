@@ -34,6 +34,9 @@
     <link rel="stylesheet" href="{{ asset('src/assets/js/plugins/slick-carousel/slick.css') }}">
     <link rel="stylesheet" href="{{ asset('src/assets/js/plugins/slick-carousel/slick-theme.css') }}">
 
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1535267515255754"
+     crossorigin="anonymous"></script>
+
 
     <!-- Dashmix framework -->
     <link rel="stylesheet" id="css-main" href="{{ asset('src/assets/css/dashmix.css') }}">
