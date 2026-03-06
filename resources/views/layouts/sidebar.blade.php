@@ -101,10 +101,10 @@
                     <i class="nav-main-link-icon fa fa-level-up-alt"></i>
                     <span class="nav-main-link-name">Upgrade Level</span>
                 </a>
-                  <a class="nav-main-link" href="{{ url('user/payouts') }}">
+                  {{-- <a class="nav-main-link" href="{{ url('user/payouts') }}">
                     <i class="nav-main-link-icon fa fa-usd"></i>
                     <span class="nav-main-link-name">Payouts</span>
-                </a>
+                </a> --}}
 
                 <a class="nav-main-link" href="{{ url('analytics') }}">
                     <i class="nav-main-link-icon si si-bar-chart"></i>
