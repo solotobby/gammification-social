@@ -101,6 +101,10 @@
                     <i class="nav-main-link-icon fa fa-level-up-alt"></i>
                     <span class="nav-main-link-name">Upgrade Level</span>
                 </a>
+                  <a class="nav-main-link" href="{{ url('user/payouts') }}">
+                    <i class="nav-main-link-icon fa fa-usd"></i>
+                    <span class="nav-main-link-name">Payouts</span>
+                </a>
 
                 <a class="nav-main-link" href="{{ url('analytics') }}">
                     <i class="nav-main-link-icon si si-bar-chart"></i>
@@ -113,7 +117,7 @@
                     <span class="nav-main-link-name">Wallets</span>
                 </a>
                  <a class="nav-main-link" href="{{ url('bank/information') }}">
-                    <i class="nav-main-link-icon fa fa-usd"></i>
+                    <i class="nav-main-link-icon fa fa-th"></i>
                     <span class="nav-main-link-name">Bank Information</span>
                 </a>
 

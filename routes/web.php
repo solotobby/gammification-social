@@ -23,6 +23,7 @@ use App\Livewire\User\HowItWorks;
 use App\Livewire\User\HowToEarn;
 use App\Livewire\User\NewTimeline;
 use App\Livewire\User\Partners;
+use App\Livewire\User\Payout;
 use App\Livewire\User\PostAnalytics;
 use App\Livewire\User\Posts;
 use App\Livewire\User\Profile;
@@ -177,6 +178,7 @@ Route::middleware(['auth', 'verified', 'track.online'])->group(function () {
         // Route::get('earners/list', EarningList::class);
         Route::get('earner/list', EarningList::class);
         Route::get('user/blog', Blog::class);
+        Route::get('user/payouts', Payout::class);
 
         
       

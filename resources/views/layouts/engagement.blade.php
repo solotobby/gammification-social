@@ -60,7 +60,7 @@
 {{-- <div> 👈 Single Root Wrapper Required by Livewire --}}
 
 <div class="col-md-4 mt-3">
-    <h4>Trending Topics</h4>
+    {{-- <h4>Trending Topics</h4>
     @foreach (trendingTopics() as $high)
         <div class="block block-rounded bg-body-dark">
             <div class="block-content block-content-full">
@@ -68,19 +68,17 @@
 
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <div>
-                        <a class="fw-semibold" href="" {{-- {{ $high->url }} --}} style="color: #5A4FDC">
+                        <a class="fw-semibold" href="" style="color: #5A4FDC">
                             {{ $high->phrase }}
                         </a>
-                        {{-- <div class="fs-sm text-muted">
-                                Score: {{ number_format($high->score) }}
-                            </div> --}}
+                       
                     </div>
                 </div>
 
 
             </div>
         </div>
-    @endforeach
+    @endforeach --}}
 
     <h4 class="mt-4">Trending Members <small class="text-muted"> (Last 6 hours) </small></h4>
 
