@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
     <title>Payhankey | Social Media for Content Monetization in Africa</title>
+    
 
     <meta name="description" content="Payhankey is a content monetization platform where creators earn from engagement without followers. Grow your content, earn payouts, and monetize in Africa.">
     <meta name="author" content="Payhankey">

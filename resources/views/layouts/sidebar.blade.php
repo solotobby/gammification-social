@@ -101,7 +101,7 @@
                     <i class="nav-main-link-icon fa fa-level-up-alt"></i>
                     <span class="nav-main-link-name">Upgrade Level</span>
                 </a>
-                  {{-- <a class="nav-main-link" href="{{ url('user/payouts') }}">
+                {{-- <a class="nav-main-link" href="{{ url('user/payouts') }}">
                     <i class="nav-main-link-icon fa fa-usd"></i>
                     <span class="nav-main-link-name">Payouts</span>
                 </a> --}}
@@ -110,13 +110,13 @@
                     <i class="nav-main-link-icon si si-bar-chart"></i>
                     <span class="nav-main-link-name">Analytics</span>
                 </a>
-               
+
 
                 <a class="nav-main-link" href="{{ url('wallets') }}">
                     <i class="nav-main-link-icon fa fa-wallet"></i>
                     <span class="nav-main-link-name">Wallets</span>
                 </a>
-                 <a class="nav-main-link" href="{{ url('bank/information') }}">
+                <a class="nav-main-link" href="{{ url('bank/information') }}">
                     <i class="nav-main-link-icon fa fa-th"></i>
                     <span class="nav-main-link-name">Bank Information</span>
                 </a>
@@ -125,7 +125,7 @@
                     <i class="nav-main-link-icon fa fa-table"></i>
                     <span class="nav-main-link-name">Transaction</span>
                 </a>
-                 <a class="nav-main-link" href="{{ url('earner/list') }}">
+                <a class="nav-main-link" href="{{ url('earner/list') }}">
                     <i class="nav-main-link-icon fa fa-list"></i>
                     <span class="nav-main-link-name">Top Earners</span>
                 </a>
@@ -135,14 +135,14 @@
                     <span class="nav-main-link-name">My Referrals</span>
                 </a>
 
-               
-                 <a class="nav-main-link" href="{{ url('settings') }}">
+
+                <a class="nav-main-link" href="{{ url('settings') }}">
                     <i class="nav-main-link-icon si si-settings"></i>
                     <span class="nav-main-link-name">Settings</span>
                 </a>
-                 <a class="nav-main-link" href="{{ url('user/blog') }}">
-                  <i class="nav-main-link-icon fa fa-blog"></i>
-                  <span class="nav-main-link-name">Blog Post</span>
+                <a class="nav-main-link" href="{{ url('user/blog') }}">
+                    <i class="nav-main-link-icon fa fa-blog"></i>
+                    <span class="nav-main-link-name">Blog Post</span>
                 </a>
 
                 <a class="nav-main-link" href="{{ url('how/it/works') }}">
@@ -150,7 +150,7 @@
                     <span class="nav-main-link-name">How It Works</span>
                 </a>
 
-               
+
 
 
 

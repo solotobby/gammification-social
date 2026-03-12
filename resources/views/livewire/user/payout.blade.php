@@ -1,7 +1,5 @@
 <div>
     {{-- Close your eyes. Count to one. That is how long forever feels. --}}
-
-
     <div class="content content-full content-boxed">
 
         <h2 class="content-heading">Your Payhankey Payouts</h2>

@@ -147,7 +147,7 @@ Route::middleware(['auth', 'verified', 'track.online'])->group(function () {
         Route::get('validate/api', [\App\Http\Controllers\HomeController::class, 'validateApi']);
         Route::get('verify/subscription/payment/', [\App\Http\Controllers\PaymentController::class, 'verifyKoraSubscriptionPayment'])->name('verify.subscription');
         Route::get('subscribe/{levelId}', [\App\Http\Controllers\PaymentController::class, 'createSubscription'])->name('subscribe');
-      
+
 
         //video player analytics route
         Route::post('api/videos/{video}/watch-time', [VideoAnalyticsController::class, 'trackWatchTime']);
@@ -179,10 +179,6 @@ Route::middleware(['auth', 'verified', 'track.online'])->group(function () {
         Route::get('earner/list', EarningList::class);
         Route::get('user/blog', Blog::class);
         Route::get('user/payouts', Payout::class);
-
-        
-      
-
     });
 
 
