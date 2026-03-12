@@ -139,9 +139,9 @@ class UserController extends Controller
 
     public function upgradeProcess(Request $request)
     {
-        // $res = securityVerification();
-        // if ($res == 'OK') {
-            $validation =  env('VALIDATION_CODE');
+        $res = securityVerification();
+        if ($res == 'OK') {
+            $validation =  config('services.env.validation_code');
             if ($request->validationCode == $validation) {
                 // return $request;
 
@@ -207,7 +207,7 @@ class UserController extends Controller
 
                 return back()->with('success', 'Upgrade Successful: ' . $level->name);
             }
-        // }
+        }
     }
 
     public function creditBonus($userId, $level)
