@@ -525,6 +525,10 @@
 
         {{-- Comment section --}}
         <div class="block-content block-content-full bg-body-light">
+             @if (userLevel() == 'Basic' && $timeline->user_id == auth()->user()->id)
+                <li class="fa fa-usd"> </li> <a href="{{ url('upgrade') }}" class="text-mute">Monetize This Post</a>
+            @endif
+            <hr>
 
             <livewire:user.post-comments :post="$post" :wire:key="'post-comments-'.$post->id" />
         </div>
