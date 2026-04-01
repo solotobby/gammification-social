@@ -136,7 +136,7 @@ Auth::routes();
 
 Route::middleware([
     'auth',
-    // 'verified', 
+    'verified', 
     'track.online'
 ])->group(function () {
 
