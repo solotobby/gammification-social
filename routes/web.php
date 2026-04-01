@@ -134,7 +134,11 @@ Auth::routes();
 
 
 
-Route::middleware(['auth', 'verified', 'track.online'])->group(function () {
+Route::middleware([
+    'auth',
+    // 'verified', 
+    'track.online'
+])->group(function () {
 
     Route::get('/home', [\App\Http\Controllers\HomeController::class, 'index'])->name('home');
     Route::get('user/home', [\App\Http\Controllers\HomeController::class, 'userHome'])->name('user.home');
