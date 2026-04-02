@@ -57,7 +57,7 @@
                             <table class="table table-bordered table-striped mt-3">
                                 <thead class="table-dark">
                                     <tr>
-                                        <th>ID</th>
+                                        {{-- <th>ID</th> --}}
                                         <th>Name</th>
                                         <th>Engagement</th>
                                         <th>Adj. Engagement</th>
@@ -92,7 +92,11 @@
                                         ?>
 
                                         <tr>
-                                            <td>{{ $user['user_id'] ?? 'N/A' }} | {{ $posts->count() }} </td>
+                                            {{-- <td>
+                                                {{ $user['user_id'] ?? 'N/A' }} | {{ $posts->count() }} 
+
+
+                                            </td> --}}
                                             <td>{{ $user['name'] ?? 'N/A' }}</td>
                                             <td>{{ number_format($user['engagement'] ?? 0) }}</td>
 
