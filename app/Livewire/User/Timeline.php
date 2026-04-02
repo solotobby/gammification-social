@@ -304,7 +304,7 @@ class Timeline extends Component
 
     public function render()
     {
-        return view('livewire.user.timelines')->layout('layouts.app');
+        return view('livewire.user.timeline')->layout('layouts.app');
     }
 
 
