@@ -113,8 +113,8 @@
 
                         <div x-data="{ content: @entangle('content') }">
                             <textarea x-model="content" class="form-control" placeholder="Say something amazing" rows="4"
-                                @if (!in_array($userLevel, ['Creator', 'Influencer'])) maxlength="160" @endif required></textarea>
-                            @if (!in_array($userLevel, ['Creator', 'Influencer']))
+                                @if (!in_array(@$userLevel, ['Creator', 'Influencer'])) maxlength="160" @endif required></textarea>
+                            @if (!in_array(@$userLevel, ['Creator', 'Influencer']))
                                 <small class="text-muted" x-text="content.length + '/160 characters'"></small>
                             @endif
                         </div>
@@ -125,8 +125,8 @@
                                 <label class="btn btn-light">
                                     <i class="fas fa-image"></i>
                                     <input type="file" wire:model="images" multiple accept="image/*" hidden
-                                        @if ($userLevel === 'Creator') x-bind:disabled="images.length >= 1" @endif
-                                        @if ($userLevel === 'Influencer') x-bind:disabled="images.length >= 4" @endif>
+                                        @if (@$userLevel === 'Creator') x-bind:disabled="images.length >= 1" @endif
+                                        @if (@$userLevel === 'Influencer') x-bind:disabled="images.length >= 4" @endif>
 
                                 </label>
 
@@ -166,8 +166,8 @@
             @endforeach
 
             {{-- Global Video Player --}}
-            @if ($isVideoOpen)
-                <livewire:user.video-player :videoId="$activeVideoId" wire:key="video-player-{{ $activeVideoId }}" />
+            @if (@$isVideoOpen)
+                <livewire:user.video-player :videoId="$activeVideoId" wire:key="video-player-{{ @$activeVideoId }}" />
             @endif {{-- Global Video Player --}}
 
             @if ($hasMore)
