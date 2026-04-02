@@ -59,9 +59,11 @@
                                     <tr>
                                         <th>Name</th>
                                         <th>Engagement</th>
+                                        <th>Adj. Engagement</th>
                                         <th>Engagement %</th>
                                         <th>Currency</th>
                                         <th>Payout</th>
+                                        <th>Est. Earnings</th>
                                         <th>Status</th>
                                         <th>Action</th>
                                     </tr>
@@ -72,10 +74,18 @@
                                         <tr>
                                             <td>{{ $user['name'] ?? 'N/A' }}</td>
                                             <td>{{ number_format($user['engagement'] ?? 0) }}</td>
+                                             <td>{{ number_format($user['engagement'] ?? 0 / 4) }}</td>
                                             <td>{{ $user['userPercentage'] ?? 0 }}%</td>
                                             <td>{{ $user['userWallet'] ?? 'N/A' }}</td>
                                             <td>
                                                 &#8358;{{ number_format(convertToBaseCurrency($user['userPayout'] ?? 0, 'NGN'), 2) }}
+                                            </td>
+                                            <td>
+                                                &#8358;{{ number_format(
+                                                    <?php $totalEng =  $user['engagement'] / 4; ?>
+                                                    engagementEarnings($totalEng)
+                                                    // convertToBaseCurrency($user['userPayout'] ?? 0, 'NGN'),
+                                                    2) }}
                                             </td>
                                             <td>
                                                 <span

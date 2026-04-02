@@ -978,7 +978,6 @@ if (!function_exists('engagementEarnings')) {
     }
 }
 
-
 if (!function_exists('initializeKorayPay')) {
     function initializeKorayPay($amount, $level)
     {

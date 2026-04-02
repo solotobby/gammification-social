@@ -233,6 +233,7 @@
     $totalEng = $post->sum('likes') + $post->sum('comments') + $post->sum('views');
     
     $total = $totalEng / 4;
+    
     ?>
 
     <h2 class="content-heading">Potential Earnings</h2>
