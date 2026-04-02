@@ -85,7 +85,7 @@
                                                  <?php $totalEng =  $user['engagement'] / 4; ?>
                                                 &#8358;{{ number_format(
                                                    
-                                                    engagementEarnings($totalEng)
+                                                    engagementEarnings($totalEng),
                                                     // convertToBaseCurrency($user['userPayout'] ?? 0, 'NGN'),
                                                     2) }}
                                             </td>
