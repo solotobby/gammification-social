@@ -57,6 +57,7 @@
                             <table class="table table-bordered table-striped mt-3">
                                 <thead class="table-dark">
                                     <tr>
+                                        <th>ID</th>
                                         <th>Name</th>
                                         <th>Engagement</th>
                                         <th>Adj. Engagement</th>
@@ -71,23 +72,34 @@
 
                                 <tbody>
                                     @foreach ($payouts as $user)
+                                        <?php
+                                        $month = now()->subMonth()->format('Y-m');
+                                        $posts = \App\Models\Post::where('user_id', $user['id'])
+                                            ->where('created_at', 'like', $month . '%')
+                                            ->get();
+                                        
+                                        $totalEng = $posts->sum('likes') + $posts->sum('comments') + $posts->sum('views');
+                                        
+                                        $engValue = $totalEng / 4;
+                                        ?>
+
                                         <tr>
+                                            <td>{{ $user['id'] ?? 'N/A' }}</td>
                                             <td>{{ $user['name'] ?? 'N/A' }}</td>
                                             <td>{{ number_format($user['engagement'] ?? 0) }}</td>
-                                            <?php $engValue = $user['engagement'] / 4; ?>
-                                             <td>{{ number_format($engValue) }}</td>
+
+                                            <td>{{ number_format($engValue) }}</td>
                                             <td>{{ $user['userPercentage'] ?? 0 }}%</td>
                                             <td>{{ $user['userWallet'] ?? 'N/A' }}</td>
                                             <td>
                                                 &#8358;{{ number_format(convertToBaseCurrency($user['userPayout'] ?? 0, 'NGN'), 2) }}
                                             </td>
                                             <td>
-                                                 <?php $totalEng =  $user['engagement'] / 4; ?>
+
                                                 &#8358;{{ number_format(
-                                                   
-                                                    engagementEarnings($totalEng),
-                                                    // convertToBaseCurrency($user['userPayout'] ?? 0, 'NGN'),
-                                                    2) }}
+                                                    engagementEarnings($engValue) ?? 0,
+                                                    2,
+                                                ) }}
                                             </td>
                                             <td>
                                                 <span
