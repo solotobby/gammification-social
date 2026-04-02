@@ -104,10 +104,11 @@
                                             </td>
                                             <td>
 
-                                                &#8358;{{ number_format(
+                                                 &#8358;{{ number_format(convertToBaseCurrency(engagementEarnings($engValue), 'NGN'), 2) }}
+                                                {{-- &#8358;{{ number_format(
                                                     engagementEarnings($engValue),
                                                     2,
-                                                ) }}
+                                                ) }} --}}
                                             </td>
                                             <td>
                                                 <span

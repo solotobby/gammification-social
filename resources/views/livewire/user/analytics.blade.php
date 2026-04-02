@@ -233,7 +233,7 @@
     $totalEng = $post->sum('likes') + $post->sum('comments') + $post->sum('views');
     
     $total = $totalEng / 4;
-    
+
     ?>
 
     <h2 class="content-heading">Potential Earnings</h2>
@@ -247,7 +247,7 @@
                     <?php $amountUSD = engagementEarnings($total); ?>
                     <div class="ms-3 text-end">
                         <p class="fs-3 fw-medium mb-0">
-                            {{ getCurrencyCode() }}{{ convertToBaseCurrency($amountUSD, auth()->user()->wallet->currency) }}
+                            {{ getCurrencyCode() }} {{ convertToBaseCurrency($amountUSD, auth()->user()->wallet->currency) }}
                         </p>
                         <p class="text-muted mb-0">
                             Estimated. Earning
