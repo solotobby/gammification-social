@@ -84,6 +84,83 @@
             </div>
 
 
-            
+             @foreach (['success' => 'success', 'info' => 'warning', 'error' => 'danger'] as $key => $type)
+                @if (session()->has($key))
+                    <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 3000)" x-show="show" x-transition.opacity
+                        class="alert alert-{{ $type }} mb-2" role="alert">
+                        {{ session($key) }}
+                    </div>
+                @endif
+            @endforeach
+
+            @error('content')
+                <div class="alert alert-danger mb-2" role="alert">{{ $message }}</div>
+            @enderror
+
+            @error('images')
+                <div class="alert alert-danger mb-2" role="alert">{{ $message }}</div>
+            @enderror
+
+            @error('images.*')
+                <div class="alert alert-danger mb-2" role="alert">{{ $message }}</div>
+            @enderror
+
+
+
+            <div class="card mb-4">
+
+                <form wire:submit.prevent="createPost">
+                    <div class="card-body ">
+
+                        <div x-data="{ content: @entangle('content') }">
+                            <textarea x-model="content" class="form-control" placeholder="Say something amazing" rows="4"
+                                @if (!in_array(@$userLevel, ['Creator', 'Influencer'])) maxlength="160" @endif required></textarea>
+                            @if (!in_array(@$userLevel, ['Creator', 'Influencer']))
+                                <small class="text-muted" x-text="content.length + '/160 characters'"></small>
+                            @endif
+                        </div>
+
+                        @if (in_array($userLevel, ['Creator', 'Influencer']))
+                            <div class="mt-3" x-data="{ images: @entangle('images') }">
+
+                                <label class="btn btn-light">
+                                    <i class="fas fa-image"></i>
+                                    <input type="file" wire:model="images" multiple accept="image/*" hidden
+                                        @if (@$userLevel === 'Creator') x-bind:disabled="images.length >= 1" @endif
+                                        @if (@$userLevel === 'Influencer') x-bind:disabled="images.length >= 4" @endif>
+
+                                </label>
+
+                                <small class="text-muted d-block mt-1">
+                                    {{ $userLevel === 'Creator' ? 'Max 1 image' : 'Max 4 images' }}
+                                </small>
+
+                                {{-- Preview + Remove --}}
+                                <div class="row mt-3">
+                                    @foreach ($images as $index => $image)
+                                        <div class="col-3 position-relative mb-2">
+
+                                            <img src="{{ $image->temporaryUrl() }}" class="img-fluid rounded">
+
+                                            <button type="button" wire:click="removeImage({{ $index }})"
+                                                class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1">
+                                                &times;
+                                            </button>
+
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-primary btn-block"> <i class="fa fa-pencil-alt opacity-50 me-1"></i>
+                            Post</button>
+                    </div>
+
+                </form>
+            </div>
+
 
 </div>
