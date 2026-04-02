@@ -12,7 +12,8 @@ class Analytics extends Component
     public $dailyEngagement;
     public $month;
     public function mount(){
-        $month = now()->format('Y-m');
+        // $month = now()->format('Y-m');
+        $month = now()->subMonth()->format('Y-m');
         $this->post = Post::where('user_id', auth()->user()->id)->where('created_at', 'like', $month . '%')->get();
         //this month
        
@@ -31,7 +32,7 @@ class Analytics extends Component
             // dd($totalViews, $totalLikes);
 
 
-        $this->month = now()->translatedFormat('F Y');
+        $this->month = now()->subMonth()->translatedFormat('F Y'); //now()->translatedFormat('F Y');
     }
     public function render()
     {
