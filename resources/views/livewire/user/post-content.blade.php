@@ -530,7 +530,7 @@
             @endif
             <hr>
 
-            {{-- <livewire:user.post-comments :post="$post" :wire:key="'post-comments-'.$post->id" /> --}}
+            <livewire:user.post-comments :post="@$post" :wire:key="'post-comments-'.$post->id" />
         </div>
 
 
