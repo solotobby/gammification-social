@@ -73,10 +73,18 @@
                                 <tbody>
                                     @foreach ($payouts as $user)
                                         <?php
+                                    //    $date = now()->subMonth();
                                         $month = now()->subMonth()->format('Y-m');
-                                        $posts = \App\Models\Post::where('user_id', $user['id'])
+                                        $posts = \App\Models\Post::where('user_id', $user['user_id'])
                                             ->where('created_at', 'like', $month . '%')
                                             ->get();
+
+                                        // Post::where('user_id', $user['user_id'])
+                                        //     ->whereYear('created_at', $date->year)
+                                        //     ->whereMonth('created_at', $date->month)
+                                        //     ->get();
+                                        
+                                        
                                         
                                         $totalEng = $posts->sum('likes') + $posts->sum('comments') + $posts->sum('views');
                                         
@@ -84,7 +92,7 @@
                                         ?>
 
                                         <tr>
-                                            <td>{{ $user['id'] ?? 'N/A' }}</td>
+                                            <td>{{ $user['user_id'] ?? 'N/A' }} | {{ $posts->count() }} </td>
                                             <td>{{ $user['name'] ?? 'N/A' }}</td>
                                             <td>{{ number_format($user['engagement'] ?? 0) }}</td>
 
@@ -97,7 +105,7 @@
                                             <td>
 
                                                 &#8358;{{ number_format(
-                                                    engagementEarnings($engValue) ?? 0,
+                                                    engagementEarnings($engValue),
                                                     2,
                                                 ) }}
                                             </td>
