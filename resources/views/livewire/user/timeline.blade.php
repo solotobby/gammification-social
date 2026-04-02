@@ -162,10 +162,10 @@
                 </form>
             </div>
 
-             @foreach ($posts as $post)
-                <livewire:user.post-content :post="$post" :wire:key="'post-'.$post->id" />
+             @foreach (@$posts as $post)
+                <livewire:user.post-content :post="@$post" :wire:key="'post-'.$post->id" />
             @endforeach
 
-            
+
 
 </div>
