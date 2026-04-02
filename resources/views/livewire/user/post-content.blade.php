@@ -130,35 +130,35 @@
         <div class="block-header block-header-default">
 
             <div class="d-flex align-items-center">
-                @if (userLevel($post->user->id) == 'Basic')
-                    <a class="img-link me-1" href="{{ url('profile/' . $post->user->username) }}">
+                @if (userLevel(@$post->user->id) == 'Basic')
+                    <a class="img-link me-1" href="{{ url('profile/' . @$post->user->username) }}">
                         <img class="img-avatar img-avatar32 img-avatar-thumb"
-                            src="{{ $post->user->avatar ?? asset('src/assets/media/avatars/avatar13.jpg') }}"
+                            src="{{ @$post->user->avatar ?? asset('src/assets/media/avatars/avatar13.jpg') }}"
                             alt="Avatar">
                     </a>
 
-                    <a class="fw-semibold" href="{{ url('profile/' . $post->user->username) }}"
-                        style="color: #5A4FDC">{{ displayName($post->user->name) }}</a>
+                    <a class="fw-semibold" href="{{ url('profile/' . @$post->user->username) }}"
+                        style="color: #5A4FDC">{{ displayName(@$post->user->name) }}</a>
 
-                    <a href="{{ url('profile/', $post->user->username) }}" class="fs-sm text-muted mx-1"
-                        title="{{ $post->user->username }}">
-                        @<span>{{ Str::limit($post->user->username, 10, '') }}</span>
+                    <a href="{{ url('profile/', @$post->user->username) }}" class="fs-sm text-muted mx-1"
+                        title="{{ @$post->user->username }}">
+                        @<span>{{ Str::limit(@$post->user->username, 10, '') }}</span>
                     </a>
                     <span class="mx-1 text-muted">&middot;</span>
 
-                    <span class="fs-sm text-muted ms-2">{{ $post->created_at?->shortAbsoluteDiffForHumans() }}
+                    <span class="fs-sm text-muted ms-2">{{ @$post->created_at?->shortAbsoluteDiffForHumans() }}
                     </span>
-                @elseif (userLevel($post->user->id) == 'Creator')
-                    <a class="img-link me-1" href="{{ url('profile/' . $post->user->username) }}">
+                @elseif (userLevel(@$post->user->id) == 'Creator')
+                    <a class="img-link me-1" href="{{ url('profile/' . @$post->user->username) }}">
                         <img class="img-avatar img-avatar32 img-avatar-thumb"
                             src="{{ $post->user->avatar ?? asset('src/assets/media/avatars/avatar13.jpg') }}"
                             alt="Avatar">
                     </a>
                     {{-- Username + Verified Tick --}}
                     <div class="d-flex align-items-center">
-                        <a class="fw-semibold me-1" href="{{ url('profile/' . $post->user->username) }}"
+                        <a class="fw-semibold me-1" href="{{ url('profile/' . @$post->user->username) }}"
                             style="color: #5A4FDC">
-                            {{ displayName($post->user->name) }}
+                            {{ displayName(@$post->user->name) }}
                         </a>
 
                         {{-- @if ($post->user->is_verified) --}}
@@ -170,29 +170,29 @@
                         {{-- @endif --}}
                     </div>
 
-                    <a href="{{ url('profile/', $post->user->username) }}" class="fs-sm text-muted mx-1"
-                        title="{{ $post->user->username }}">
-                        @<span>{{ Str::limit($post->user->username, 10, '') }}</span>
+                    <a href="{{ url('profile/', @$post->user->username) }}" class="fs-sm text-muted mx-1"
+                        title="{{ @$post->user->username }}">
+                        @<span>{{ Str::limit(@$post->user->username, 10, '') }}</span>
                     </a>
                     <span class="mx-1 text-muted">&middot;</span>
 
                     {{-- Timestamp --}}
                     <span class="fs-sm text-muted ms-2">
-                        {{ $post->created_at?->shortAbsoluteDiffForHumans() }}
+                        {{ @$post->created_at?->shortAbsoluteDiffForHumans() }}
                     </span>
                 @else
                     {{-- Avatar --}}
-                    <a class="img-link me-2" href="{{ url('profile/' . $post->user->username) }}">
+                    <a class="img-link me-2" href="{{ url('profile/' . @$post->user->username) }}">
                         <img class="img-avatar img-avatar32 img-avatar-thumb rounded-circle border border-primary border-2"
-                            src="{{ $post->user->avatar ?? asset('src/assets/media/avatars/avatar13.jpg') }}"
+                            src="{{ @$post->user->avatar ?? asset('src/assets/media/avatars/avatar13.jpg') }}"
                             alt="Avatar">
                     </a>
 
                     {{-- Username + Verified Tick --}}
                     <div class="d-flex align-items-center">
-                        <a class="fw-semibold me-1" href="{{ url('profile/' . $post->user->username) }}"
+                        <a class="fw-semibold me-1" href="{{ url('profile/' . @$post->user->username) }}"
                             style="color: #5A4FDC">
-                            {{ displayName($post->user->name) }}
+                            {{ displayName(@$post->user->name) }}
                         </a>
 
                         {{-- @if ($post->user->is_verified) --}}
@@ -204,16 +204,16 @@
                         {{-- @endif --}}
                     </div>
 
-                    <a href="{{ url('profile/', $post->user->username) }}" class="fs-sm text-muted mx-1"
-                        title="{{ $post->user->username }}">
+                    <a href="{{ url('profile/', @$post->user->username) }}" class="fs-sm text-muted mx-1"
+                        title="{{ @$post->user->username }}">
                         {{-- @<span>{{ $post->user->username }}</span> --}}
-                        @<span>{{ Str::limit($post->user->username, 10, '') }}</span>
+                        @<span>{{ Str::limit(@$post->user->username, 10, '') }}</span>
                     </a>
                     <span class="mx-1 text-muted">&middot;</span>
 
                     {{-- Timestamp --}}
                     <span class="fs-sm text-muted">
-                        {{ $post->created_at?->shortAbsoluteDiffForHumans() }}
+                        {{ @$post->created_at?->shortAbsoluteDiffForHumans() }}
                     </span>
                 @endif
             </div>
@@ -273,23 +273,23 @@
         </div>
 
         @php
-            $url = extractFirstUrl($post->content);
+            $url = extractFirstUrl(@$post->content);
         @endphp
 
         <div class="block-content">
 
-            <div class="post-content" data-full="{!! e(strip_tags($post->content)) !!}"
-                data-short="{{ e(Str::limit(strip_tags($post->content), 130)) }}" data-expanded="false">
+            <div class="post-content" data-full="{!! e(strip_tags(@$post->content)) !!}"
+                data-short="{{ e(Str::limit(strip_tags(@$post->content), 130)) }}" data-expanded="false">
 
-                {!! Str::limit(strip_tags($post->content), 130) !!}
+                {!! Str::limit(strip_tags(@$post->content), 130) !!}
 
-                @if (Str::length(strip_tags($post->content)) > 130)
+                @if (Str::length(strip_tags(@$post->content)) > 130)
                     <a href="#" class="see-more">See more</a>
                 @endif
             </div>
 
             @php
-                $imageCount = $post->images->count();
+                $imageCount = @$post->images->count();
                 // $videoCount = $post->videos->count();
             @endphp
 
@@ -333,13 +333,13 @@
 
             {{-- image Processsing --}}
 
-            @if ($imageCount)
+            @if (@$imageCount)
                 <hr>
                 <div class="row g-sm js-gallery img-fluid-100">
 
                     @php
 
-                        $col = match ($imageCount) {
+                        $col = match (@$imageCount) {
                             1 => 'col-12',
                             2 => 'col-6',
                             3 => 'col-4',
@@ -348,7 +348,7 @@
                     @endphp
 
 
-                    @foreach ($post->images as $image)
+                    @foreach (@$post->images as $image)
                         <div class="{{ $col }} mb-2">
                             <a class="img-link img-link-simple img-link-zoom-in img-lightbox"
                                 href="{{ asset($image->path) }}">
@@ -490,7 +490,7 @@
                 <li class="nav-item me-2">
                     <a class="nav-link" href="javascript:void(0)">
                         <i class="fa fa-eye opacity-50 me-1"></i>
-                        {{ sumCounter($post->views, $post->views_external) }}
+                        {{ sumCounter(@$post->views, @$post->views_external) }}
                     </a>
                 </li>
 
@@ -503,18 +503,18 @@
                 </li>
 
                 {{-- 📊 Analytics (owner only) --}}
-                @if (auth()->id() === $post->user_id)
+                @if (auth()->id() === @$post->user_id)
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url('post/timeline/' . $post->id . '/analytics') }}">
+                        <a class="nav-link" href="{{ url('post/timeline/' . @$post->id . '/analytics') }}">
                             <i class="si si-bar-chart opacity-50"></i>
-                            {{ getCurrencyCode() }}{{ estimatedEarnings($post->id) }}
+                            {{ getCurrencyCode() }}{{ estimatedEarnings(@$post->id) }}
                         </a>
                     </li>
                 @else
                     <li class="nav-item">
                         <a class="nav-link" href="javascript:void(0)">
                             <i class="si si-bar-chart opacity-50"></i>
-                            {{ getCurrencyCode() }}{{ estimatedEarnings($post->id) }}
+                            {{ getCurrencyCode() }}{{ estimatedEarnings(@$post->id) }}
                         </a>
                     </li>
                 @endif
@@ -525,12 +525,12 @@
 
         {{-- Comment section --}}
         <div class="block-content block-content-full bg-body-light">
-             @if (userLevel() == 'Basic' && $post->user_id == auth()->user()->id)
+             @if (userLevel() == 'Basic' && @$post->user_id == auth()->user()->id)
                 <li class="fa fa-usd"> </li> <a href="{{ url('upgrade') }}" class="text-mute">Monetize This Post</a>
             @endif
             <hr>
 
-            <livewire:user.post-comments :post="$post" :wire:key="'post-comments-'.$post->id" />
+            {{-- <livewire:user.post-comments :post="$post" :wire:key="'post-comments-'.$post->id" /> --}}
         </div>
 
 
@@ -550,7 +550,7 @@
 
 
     <!-- From Right Block Modal -->
-    <div class="modal fade" id="modal-block-fromright-{{ $post->id }}" tabindex="-1" role="dialog"
+    <div class="modal fade" id="modal-block-fromright-{{ @$post->id }}" tabindex="-1" role="dialog"
         aria-labelledby="modal-block-fromright" aria-hidden="true">
         <div class="modal-dialog modal-dialog-fromright" role="document">
             <div class="modal-content">
@@ -570,11 +570,11 @@
                             post
                         </p>
                         <p>
-                            {{ url('timeline/' . $post->id) }}
+                            {{ url('timeline/' . @$post->id) }}
                         </p>
 
                         <?php
-                        $url = url('timeline/' . $post->id);
+                        $url = url('timeline/' . @$post->id);
                         ?>
 
 
