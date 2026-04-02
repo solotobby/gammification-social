@@ -167,5 +167,37 @@
             @endforeach
 
 
+             @if (@$isVideoOpen)
+                <livewire:user.video-player :videoId="$activeVideoId" wire:key="video-player-{{ @$activeVideoId }}" />
+            @endif {{-- Global Video Player --}}
+
+            @if ($hasMore)
+                <div class="text-center my-3">
+                    <button wire:click="loadNextPage" wire:loading.attr="disabled" class="btn btn-sm btn-primary">
+                        {{-- Normal state --}}
+                        <span wire:loading.remove>
+                            Load More Feeds
+                        </span>
+
+                        {{-- Loading state --}}
+                        <span wire:loading>
+                            <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                            Loading feeds...
+                        </span>
+                    </button>
+                </div>
+            @endif
+
+        </div>
+
+
+        @include('layouts.engagement')
+
+    </div>
+
+
+
+  @include('layouts.onboarding')
+
 
 </div>
