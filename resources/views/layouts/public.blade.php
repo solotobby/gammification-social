@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
-
+    <meta name="google-adsense-account" content="ca-pub-1535267515255754">
     <title>Payhankey | Monetize your posts, comments and views to earn daily</title>
 
     <meta name="description" content="Monetize your posts, comments and views to earn daily">

@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
     <title>Payhankey | Social Media for Content Monetization in Africa</title>
+    <meta name="google-adsense-account" content="ca-pub-1535267515255754">
     
 
     <meta name="description" content="Payhankey is a content monetization platform where creators earn from engagement without followers. Grow your content, earn payouts, and monetize in Africa.">
@@ -82,9 +83,6 @@
         }
     </style>
 
-
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7484162262282358"
-        crossorigin="anonymous"></script>
 
     <script async src="https://www.googletagmanager.com/gtag/js?id=AW-10842521152"></script>
     <script>

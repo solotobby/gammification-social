@@ -74,21 +74,21 @@
                                     @foreach ($payouts as $user)
                                         <?php
                                     //    $date = now()->subMonth();
-                                        $month = now()->subMonth()->format('Y-m');
-                                        $posts = \App\Models\Post::where('user_id', $user['user_id'])
-                                            ->where('created_at', 'like', $month . '%')
-                                            ->get();
-
-                                        // Post::where('user_id', $user['user_id'])
-                                        //     ->whereYear('created_at', $date->year)
-                                        //     ->whereMonth('created_at', $date->month)
+                                        // $month = now()->subMonth()->format('Y-m');
+                                        // $posts = \App\Models\Post::where('user_id', $user['user_id'])
+                                        //     ->where('created_at', 'like', $month . '%')
                                         //     ->get();
+
+                                        // // Post::where('user_id', $user['user_id'])
+                                        // //     ->whereYear('created_at', $date->year)
+                                        // //     ->whereMonth('created_at', $date->month)
+                                        // //     ->get();
                                         
                                         
                                         
-                                        $totalEng = $posts->sum('likes') + $posts->sum('comments') + $posts->sum('views');
+                                        // $totalEng = $posts->sum('likes') + $posts->sum('comments') + $posts->sum('views');
                                         
-                                        $engValue = $totalEng / 4;
+                                        $engValue = $user['engagement'] / 4;
                                         ?>
 
                                         <tr>

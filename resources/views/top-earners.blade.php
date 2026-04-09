@@ -6,7 +6,8 @@
     <title>Payhankey | How Payhankey Works</title>
     <meta name="description"
         content="Payhankey is a content monetization platform where creators earn from engagement without followers. Grow your content, earn payouts, and monetize in Africa.">
-    <meta name="author" content="Payhankey">
+    <meta name="google-adsense-account" content="ca-pub-1535267515255754">
+        <meta name="author" content="Payhankey">
     <meta name="robots"
         content="index, follow, money, post, posts, comments, comment, views, view, videos, video, content, monetize, monetization, payout, payouts, earn, earnings, africa, nigerian content monetization, social media, content creator, influencer, digital creator, online earnings, content engagement, payhankey platform, content growth, content promotion, content sharing, content discovery, content analytics, content performance, content strategy, content marketing, content tips, content trends, content ideas, content creation, content management, content optimization, content monetization strategies, content monetization tips, content monetization platforms in Africa, content monetization for creators, content monetization for influencers, content monetization for digital creators, content monetization for social media, content monetization for online earnings, content monetization for engagement, content monetization for growth, content monetization for promotion, content monetization for sharing, content monetization for discovery, content monetization for analytics, content monetization for performance, content monetization for strategy, content monetization for marketing, content monetization trends, content monetization ideas, content monetization tips and strategies">
 
