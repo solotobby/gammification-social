@@ -12,7 +12,14 @@ class Transaction extends Model
 
     protected $fillable = ['user_id', 'ref', 'amount', 'currency', 'status', 'type', 'action', 'description', 'meta', 'customer'];
 
-    public function user(){
+    protected $casts = [
+        'meta' => 'array',
+        'customer' => 'array',
+    ];
+
+
+    public function user()
+    {
         return $this->belongsTo(User::class);
     }
 }

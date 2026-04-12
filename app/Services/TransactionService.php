@@ -16,8 +16,8 @@ class TransactionService
         string $action,
         string $type,
         string $description,
-        array $meta = null,
-        array $customer = null
+        array $meta = [],
+        ?array $customer = null
 
     ): Transaction {
 
