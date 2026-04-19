@@ -4,6 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <title>Payhankey | Monetize your posts, comments and views to earn daily</title>
+    <meta name="google-adsense-account" content="ca-pub-1535267515255754">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Payhankey | Monetize your posts, comments and views to earn daily" />
     <meta name="keywords" content="money, facebook. twitter, instagram premium, marketing, multipurpose" />
@@ -185,8 +186,9 @@
       </main>
       <!-- END Main Container -->
 
+       @include('layouts.rsc.footer')
 
- <div class="footer-alt py-3">
+ {{-- <div class="footer-alt py-3">
         <div class="container">
             <div class="row">
                 <div class="col-lg-12">
@@ -200,7 +202,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> --}}
 
       <!-- javascript -->
     <script src="{{ asset('asset/js/bootstrap.bundle.min.js') }}"></script>

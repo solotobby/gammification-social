@@ -830,8 +830,10 @@
       </main>
       <!-- END Main Container -->
 
+       @include('layouts.rsc.footer')
+
       <!-- Footer -->
-      <footer id="page-footer" class="bg-body-light">
+      {{-- <footer id="page-footer" class="bg-body-light">
         <div class="content py-0">
           <div class="row fs-sm">
             <div class="col-sm-6 order-sm-2 mb-1 mb-sm-0 text-center text-sm-end">
@@ -842,7 +844,7 @@
             </div>
           </div>
         </div>
-      </footer>
+      </footer> --}}
       <!-- END Footer -->
     </div>
     <!-- END Page Container -->

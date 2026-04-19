@@ -5,18 +5,22 @@
     <meta charset="utf-8" />
     <title>Payhankey | Monetize your posts, comments and views to earn daily</title>
     <meta name="google-adsense-account" content="ca-pub-1535267515255754">
-    <meta name="description" content="Payhankey is a content monetization platform where creators earn from engagement without followers. Grow your content, earn payouts, and monetize in Africa.">
+    <meta name="description"
+        content="Payhankey is a content monetization platform where creators earn from engagement without followers. Grow your content, earn payouts, and monetize in Africa.">
     <meta name="author" content="Payhankey">
-    <meta name="robots" content="index, follow, money, post, posts, comments, comment, views, view, videos, video, content, monetize, monetization, payout, payouts, earn, earnings, africa, nigerian content monetization, social media, content creator, influencer, digital creator, online earnings, content engagement, payhankey platform, content growth, content promotion, content sharing, content discovery, content analytics, content performance, content strategy, content marketing, content tips, content trends, content ideas, content creation, content management, content optimization, content monetization strategies, content monetization tips, content monetization platforms in Africa, content monetization for creators, content monetization for influencers, content monetization for digital creators, content monetization for social media, content monetization for online earnings, content monetization for engagement, content monetization for growth, content monetization for promotion, content monetization for sharing, content monetization for discovery, content monetization for analytics, content monetization for performance, content monetization for strategy, content monetization for marketing, content monetization trends, content monetization ideas, content monetization tips and strategies">
+    <meta name="robots"
+        content="index, follow, money, post, posts, comments, comment, views, view, videos, video, content, monetize, monetization, payout, payouts, earn, earnings, africa, nigerian content monetization, social media, content creator, influencer, digital creator, online earnings, content engagement, payhankey platform, content growth, content promotion, content sharing, content discovery, content analytics, content performance, content strategy, content marketing, content tips, content trends, content ideas, content creation, content management, content optimization, content monetization strategies, content monetization tips, content monetization platforms in Africa, content monetization for creators, content monetization for influencers, content monetization for digital creators, content monetization for social media, content monetization for online earnings, content monetization for engagement, content monetization for growth, content monetization for promotion, content monetization for sharing, content monetization for discovery, content monetization for analytics, content monetization for performance, content monetization for strategy, content monetization for marketing, content monetization trends, content monetization ideas, content monetization tips and strategies">
 
     <!-- Open Graph Meta -->
-    <meta property="og:title" content="Payhankey is a content monetization platform where creators earn from engagement without followers. Grow your content, earn payouts, and monetize in Africa.">
+    <meta property="og:title"
+        content="Payhankey is a content monetization platform where creators earn from engagement without followers. Grow your content, earn payouts, and monetize in Africa.">
     <meta property="og:site_name" content="Payhankey">
-    <meta property="og:description" content="Payhankey is a content monetization platform where creators earn from engagement without followers. Grow your content, earn payouts, and monetize in Africa.">
+    <meta property="og:description"
+        content="Payhankey is a content monetization platform where creators earn from engagement without followers. Grow your content, earn payouts, and monetize in Africa.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://payhankey.com">
     <meta property="og:image" content="">
-    
+
     <!-- favicon -->
     <link rel="shortcut icon" href="{{ asset('favicon.png') }}">
     <!-- css -->
@@ -34,7 +38,6 @@
         integrity="sha512-DJLNx+VLY4aEiEQFjiawXaiceujj5GA7lIY8CHCIGQCBPfsEG0nGz1edb4Jvw1LR7q031zS5PpPqFuPA8ihlRA=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-        
 
     <script async src="https://www.googletagmanager.com/gtag/js?id=AW-10842521152"></script>
 
@@ -120,7 +123,8 @@
                     <div class="w-75 mb-5 mb-lg-0">
                         <p class="text-muted mb-5 pb-5 font-size-17">The social media that pays you for every posts,
                             views, comments and likes. Minimum payout is $1 or its equivalent in your local currency.
-                            <br>Payouts are processed on the 2nd of every month via Paypal, USDT or your Local Bank. Signup is <b>100%</b> free.
+                            <br>Payouts are processed on the 2nd of every month via Paypal, USDT or your Local Bank.
+                            Signup is <b>100%</b> free.
                         </p>
                         {{-- <p><span class="font-size-20 me-2">🥳️</span>Join our mailing list to receive updates before creating an account.</p>
                         <div class="subscribe-form">
@@ -501,7 +505,7 @@
     </section> --}}
     <!-- Blog End -->
 
-     <!-- About Us Start -->
+    <!-- About Us Start -->
     <section class="section bg-light" id="about">
         <div class="container">
             <div class="row justify-content-center">
@@ -519,7 +523,7 @@
                     </div>
                 </div>
             </div>
-            
+
         </div>
     </section>
 
@@ -683,7 +687,8 @@
                             <div id="collapseThree-3" class="accordion-collapse collapse"
                                 aria-labelledby="headingThree-3" data-bs-parent="#accordionExample">
                                 <div class="accordion-body">
-                                    Payhankey pays into your local bank, Paypal Account or USDT on the 2nd of everymonth. Minimum payout is $1 and its equivalent in your local currency.
+                                    Payhankey pays into your local bank, Paypal Account or USDT on the 2nd of
+                                    everymonth. Minimum payout is $1 and its equivalent in your local currency.
                                     {{-- Payhankey allows all users to withdraw anytime once they have a minimum of $20 (or
                                     its equivalent in your local currency).
                                     To withdraw, Login to your dashboard to provide your withdrawal information.You can
@@ -706,7 +711,7 @@
 
         </div>
     </section>
-    
+
     <!-- Contact Us Start -->
     <section class="section bg-light" id="contact">
         <div class="container">
@@ -741,122 +746,7 @@
     </section>
     <!-- Contact Us End -->
 
-    <!-- Footer Start -->
-    <section class="footer" style="background-image: url(images/footer-bg.png)">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="mb-5">
-                        <img src="images/logo-light.png" alt="" class="" height="24">
-                        <p class="text-white-50 my-4 font-size-15">
-                            Payhankey allows you to make short posts, facts, quizzes and teasers. Earn signup bonus and
-                            referral bonuses when you refer your friends.
-                        </p>
-                        <ul class="list-inline footer-social-icon-content">
-                            <li class="list-inline-item me-4">
-                                <a href="https://www.tiktok.com/@payhankeyofficial?_t=8nKWNLIq65o&_r=1"
-                                    class="footer-social-icon" target="_blank">
-                                    <i class="fab fa-tiktok"></i>
-                                </a>
-                            </li>
-                            <li class="list-inline-item me-4">
-                                <a href="https://www.instagram.com/payhankey_official?utm_source=qr&igsh=M3ZzdjN3MHUxOXZk"
-                                    class="footer-social-icon" target="_blank">
-                                    <i class="fab fa-instagram"></i>
-                                </a>
-                            </li>
-                            <li class="list-inline-item me-4">
-                                <a href="https://www.facebook.com/profile.php?id=61561454191408&mibextid=ZbWKwL"
-                                    class="footer-social-icon" target="_blank">
-                                    <i class="fab fa-facebook"></i>
-                                </a>
-                            </li>
-                            {{-- <li class="list-inline-item me-4"><a href="#" class="footer-social-icon"><i class=""
-                                        data-feather="twitter"></i></a></li>
-                            <li class="list-inline-item me-4"><a href="https://www.instagram.com/payhankey_official?utm_source=qr&igsh=M3ZzdjN3MHUxOXZk" class="footer-social-icon" target="_blank"><i class=""
-                                        data-feather="instagram"></i></a></li>
-                            <li class="list-inline-item"><a href="#" class="footer-social-icon"><i class=""
-                                        data-feather="linkedin"></i></a></li> --}}
-                        </ul>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </section>
-    <div class="footer-alt py-3">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="text-center">
-                        <p class="text-white-50 font-size-15 mb-0">
-                            <script>
-                                document.write(new Date().getFullYear())
-                            </script> © Payhankey.com
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Footer End -->
-
-    <!-- login Modal Start -->
-    {{-- <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content login-page">
-                <div class="modal-body">
-                    <div class="text-center">
-                        <h3 class="title mb-4">Welcome To Lezir</h3>
-                        <h4 class="text-uppercase text-primary"><b>Login</b></h4>
-                    </div>
-                    <div class="login-form mt-4">
-                        <form>
-                            <div class="form-group">
-                                <label for="exampleInputEmail1">Username / Email</label>
-                                <input type="email" class="form-control" id="exampleInputEmail1"
-                                    placeholder="Youremail@gmail.com">
-                            </div>
-                            <div class="form-group">
-                                <label for="exampleInputPassword1">Password</label>
-                                <input type="password" class="form-control" id="exampleInputPassword1"
-                                    placeholder="Password">
-                            </div>
-                            <a href="#" class="float-end text-muted font-size-15">Forgot Password.?</a>
-                            <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" id="customCheck1">
-                                <label class="custom-control-label font-size-15" for="customCheck1">Remember Me</label>
-                            </div>
-                            <div class="text-center mt-4">
-                                <button type="submit" class="btn btn-primary">Login <i class="icon-size-15 icon ms-1"
-                                        data-feather="arrow-right-circle"></i></button>
-                            </div>
-                        </form>
-                        <div class="position-relative text-center mt-4">
-                            <span class="login-border"></span>
-                            <p class="social-login text-muted font-size-17">Social Login</p>
-                        </div>
-                        <div class="text-center">
-                            <ul class="list-inline mt-2 mb-3">
-                                <li class="list-inline-item me-3"><a href="#" class="login-social-icon icon-primary"><i
-                                            class="icon-xs" data-feather="facebook"></i></a></li>
-                                <li class="list-inline-item me-3"><a href="#" class="login-social-icon icon-info"><i
-                                            class="icon-xs" data-feather="twitter"></i></a></li>
-                                <li class="list-inline-item me-3"><a href="#" class="login-social-icon icon-danger"><i
-                                            class="icon-xs" data-feather="instagram"></i></a></li>
-                                <li class="list-inline-item"><a href="#" class="login-social-icon icon-success"><i
-                                            class="icon-xs" data-feather="linkedin"></i></a></li>
-                            </ul>
-                            <p class="text-muted mb-0">New User? <a href="#" class="text-primary">Signup</a></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div> --}}
-    <!-- login Modal End -->
-
-
+    @include('layouts.rsc.footer')
 
     <!-- javascript -->
     <script src="{{ asset('asset/js/bootstrap.bundle.min.js') }}"></script>

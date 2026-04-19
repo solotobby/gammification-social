@@ -4,6 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <title>Payhankey | Monetize your posts, comments and views to earn daily</title>
+    <meta name="google-adsense-account" content="ca-pub-1535267515255754">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Payhankey | Monetize your posts, comments and views to earn daily" />
     <meta name="keywords" content="money, facebook. twitter, instagram premium, marketing, multipurpose" />
@@ -295,6 +296,8 @@
         <!-- END Page Content -->
     </main>
     <!-- END Main Container -->
+
+     @include('layouts.rsc.footer')
 
 
     <!-- javascript -->
