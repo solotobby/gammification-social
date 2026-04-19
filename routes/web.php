@@ -70,6 +70,8 @@ Route::group(['namespace' => 'auth'], function () {
     Route::get('test', [\App\Http\Controllers\GeneralController::class, 'test']);
     Route::get('fix', [\App\Http\Controllers\GeneralController::class, 'devy']);
     Route::get('privacy/policy', [\App\Http\Controllers\GeneralController::class, 'privacyPolicy']);
+    Route::get('terms/conditions', [\App\Http\Controllers\GeneralController::class, 'terms']);
+
 
     Route::get('admin', [\App\Http\Controllers\GeneralController::class, 'admin']);
     Route::get('reg', [\App\Http\Controllers\Auth\RegisterController::class, 'reg']);
@@ -136,7 +138,7 @@ Auth::routes();
 
 Route::middleware([
     'auth',
-    'verified', 
+    'verified',
     'track.online'
 ])->group(function () {
 
