@@ -47,13 +47,6 @@ class CurrencyController extends Controller
 
             DB::commit();
 
-            // Log::info('Currency base rate updated', [
-            //     'currency_id' => $currency->id,
-            //     'currency_code' => $currency->code,
-            //     'base_rate' => $currency->base_rate,
-            //     'updated_by' => auth()->id(),
-            // ]);
-
             return redirect()
                 ->back()
                 ->with('success', $currency->code . ' base rate updated successfully.');

@@ -626,10 +626,7 @@ class FlutterwavePaymentService
                 ];
             }
 
-
-
-
-            $amount = 200; //convertToBaseCurrency($level->amount, $userCurrency);
+            $amount = 100; //convertToBaseCurrency($level->amount, $userCurrency);
 
             $reference = generateTransactionRef();
 
