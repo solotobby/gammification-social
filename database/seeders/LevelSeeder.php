@@ -24,19 +24,12 @@ class LevelSeeder extends Seeder
 
         foreach($levels as $level){
             Level::create($level);
-
-            
         }
+        
         $level = Level::where('name', 'Influencer')->first();
         AccessCode::create(['tx_id' => time(),'name' =>'Influencer', 'email' => 'mark@gmail.com', 'amount' => 20, 'code' => 12345, 'level_id' => $level->id]);
         AccessCode::create(['tx_id' => time().'1','name' =>'Influencer', 'email' => 'marsk@gmail.com', 'amount' => 20, 'code' => 12345, 'level_id' => $level->id]);
         AccessCode::create(['tx_id' => time().'10','name' =>'Influencer', 'email' => 'marsk@gmail.com', 'amount' => 20, 'code' => 12345, 'level_id' => $level->id]);
-            
-
-            
-        
-
-
 
     }
 }

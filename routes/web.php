@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\BlogController as AdminBlogController;
+use App\Http\Controllers\Admin\CurrencyController;
 use App\Http\Controllers\Admin\EngagementPayoutController;
 use App\Http\Controllers\Admin\LevelManagementController;
 use App\Http\Controllers\Admin\MonthlyPayoutController;
@@ -13,11 +15,13 @@ use App\Http\Controllers\GeneralController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\VideoAnalyticsController;
+use App\Http\Controllers\WebhookController;
 use App\Livewire\CreateProduct;
 use App\Livewire\Level;
 use App\Livewire\User\Analytics;
 use App\Livewire\User\BankInformation;
 use App\Livewire\User\Blog;
+use App\Livewire\User\DashboardTimeline;
 use App\Livewire\User\EarningList;
 use App\Livewire\User\HowItWorks;
 use App\Livewire\User\HowToEarn;
@@ -105,6 +109,7 @@ Route::group(['namespace' => 'auth'], function () {
     Route::get('top/earners',  [\App\Http\Controllers\GeneralController::class, 'topEarners']);
 
     Route::post('/webhooks/cloudinary/video-processing', [CloudinaryWebhookController::class, 'handleVideoProcessing'])->name('cloudinary.webhook');
+    Route::post('flutterwave/webhook', [WebhookController::class, 'flutterwave'])->name('flutterwave.webhook');
 
 
     // Route::post('post/comment', [\App\Http\Controllers\GeneralController::class, 'comment']);
@@ -152,7 +157,9 @@ Route::middleware([
 
         Route::get('validate/api', [\App\Http\Controllers\HomeController::class, 'validateApi']);
         Route::get('verify/subscription/payment/', [\App\Http\Controllers\PaymentController::class, 'verifyKoraSubscriptionPayment'])->name('verify.subscription');
+        Route::get('verify/fluterwave/charge', [PaymentController::class, 'verifyFlutterwaveCharge'])->name('verify.flutterwave.charge');
         Route::get('subscribe/{levelId}', [\App\Http\Controllers\PaymentController::class, 'createSubscription'])->name('subscribe');
+
 
 
         //video player analytics route
@@ -162,7 +169,8 @@ Route::middleware([
 
         Route::get('timeline', Timeline::class);
         Route::get('timeline/{post}', TimelineDetails::class);
-        Route::get('new/timeline', NewTimeline::class);
+        Route::get('new-timeline', NewTimeline::class);
+        Route::get('dashboard-timeline', DashboardTimeline::class);
 
         Route::get('profile/{username}', ViewProfile::class);
         Route::get('post/timeline/{id}/analytics', PostAnalytics::class);
@@ -232,5 +240,14 @@ Route::middleware([
         Route::get('view/blog/list', [AdminBlogController::class, 'list'])->name('list');
         Route::post('create/blog/post', [AdminBlogController::class, 'store'])->name('store.blog');
         Route::get('delete/blog/{slug}', [AdminBlogController::class, 'deletePost']);
+
+        Route::get('currency/list', [CurrencyController::class, 'index'])->name('currency.list');
+        Route::get('currency/status/{id}', [CurrencyController::class, 'changeStatus'])->name('currency.status');
+
+
+         Route::get('admin/subscribe/test/{levelId}', [AdminController::class, 'testSubscription'])->name('test.subscribe');
+         Route::get('admin/verify/flutterwave/charge/admin', [AdminController::class, 'verifyFlutterwaveAdminCharge'])->name('verify.flutterwave.charge.admin'); 
+
+            
     });
 });

@@ -2,6 +2,7 @@
 
 use App\Livewire\User\Posts;
 use App\Models\CommentExternal;
+use App\Models\Currency;
 use App\Models\Level;
 use App\Models\LevelPlanId;
 use App\Models\Partner;
@@ -103,6 +104,14 @@ if (!function_exists('formatNumber')) {
 }
 
 
+if (!function_exists('countryList')) {
+    function countryList()
+    {
+        $currencies = Currency::where('is_active', true)->orderBy('country')->get();
+        return $currencies;
+    }
+}   
+
 if (!function_exists('generateCode')) {
     function generateCode($number)
     {
@@ -118,12 +127,14 @@ if (!function_exists('generateCode')) {
 if (!function_exists('getCurrencyCode')) {
     function getCurrencyCode($currency = null)
     {
-        $codes = [
-            'USD' => '$',
-            'NGN' => '₦',
-            'EUR' => '€',
-            'GBP' => '£',
-        ];
+        // $codes = [
+        //     'USD' => '$',
+        //     'NGN' => '₦',
+        //     'EUR' => '€',
+        //     'GBP' => '£',
+        // ];
+
+        $codes = Currency::where('is_active', true)->pluck('symbol', 'code')->toArray();
 
         if ($currency == null) {
             $userCurrency = Wallet::where('user_id', auth()->user()->id)->first();
@@ -444,12 +455,14 @@ if (!function_exists('convertToBaseCurrency')) {
     function convertToBaseCurrency($amount, $currency)
     {
 
-        $rates = [
-            'USD' => 1,
-            'NGN' => 1500,
-            'EUR' => 0.91,
-            'GBP' => 0.81,
-        ];
+        // $rates = [
+        //     'USD' => 1,
+        //     'NGN' => 1500,
+        //     'EUR' => 0.91,
+        //     'GBP' => 0.81,
+        // ];
+
+        $rates = Currency::where('is_active', true)->pluck('base_rate', 'code')->toArray();
 
         $rate = $rates[$currency] ?? 1;
         $convertedAmount = $amount * $rate;

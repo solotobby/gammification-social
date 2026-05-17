@@ -10,7 +10,7 @@ class Transaction extends Model
 {
     use HasFactory, UuidTrait;
 
-    protected $fillable = ['user_id', 'ref', 'amount', 'currency', 'status', 'type', 'action', 'description', 'meta', 'customer'];
+    protected $fillable = ['user_id', 'ref', 'idempotency_key', 'provider', 'amount', 'currency', 'status', 'type', 'action', 'description', 'meta', 'customer'];
 
     protected $casts = [
         'meta' => 'array',

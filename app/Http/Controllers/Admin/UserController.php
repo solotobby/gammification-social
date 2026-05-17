@@ -41,8 +41,9 @@ class UserController extends Controller
         $res = securityVerification();
         if ($res == 'OK') {
 
-            $users = User::with('activeLevel')
-                ->role('user')
+            $users = User::
+                with('activeLevel')
+                // ->role('user')
                 ->byLevel($level)
                 ->latest()
                 ->paginate(100);

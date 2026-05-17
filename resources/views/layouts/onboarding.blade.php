@@ -100,10 +100,14 @@
                                         @csrf
                                         <select class="form-control mt-2" name="currency" required>
                                             <option value="">Select Currency</option>
-                                            <option value="USD">USD – US Dollar</option>
+                                            @foreach (countryList() as $currency)
+                                                <option value="{{ $currency['code'] }}">{{ $currency['code'] }} –
+                                                    {{ $currency['name'] }}</option>
+                                            @endforeach
+                                            {{-- <option value="USD">USD – US Dollar</option>
                                             <option value="EUR">EUR – Euro</option>
                                             <option value="GBP">GBP – British Pound</option>
-                                            <option value="NGN">NGN – Nigerian Naira</option>
+                                            <option value="NGN">NGN – Nigerian Naira</option> --}}
                                         </select>
 
 

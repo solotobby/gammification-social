@@ -37,6 +37,10 @@ return [
         'country' => env('COUNTRY'),
         'ip' => env('IP'),
         'validation_code' => env('VALIDATION_CODE'),
+        'flutterwave_secret_key' => env('FLUTTERWAVE_SECRET_KEY'),
+        'flutterwave_public_key' => env('FLUTTERWAVE_PUBLIC_KEY'),
+        'flutterwave_base_url' => env('FLUTTERWAVE_BASE_URL', 'https://api.flutterwave.com/v3'),
+        'flutterwave_webhook_hash' => env('FLUTTERWAVE_WEBHOOK_SECRET_HASH'),
     ]
 
 ];

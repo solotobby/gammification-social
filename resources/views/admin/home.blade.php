@@ -18,6 +18,31 @@
 
     <!-- Page Content -->
     <div class="content">
+
+       @if (session()->has('success'))
+        <div class="alert alert-success mb-2" role="alert">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if (session()->has('error'))
+        <div class="alert alert-danger mb-2" role="alert">
+            {{ session('error') }}
+        </div>
+    @endif
+
+    
+        <div class="row mb-4">
+            <!-- Quick Stats -->
+            
+            <div class="col-6 col-md-3">
+
+                <a href="{{ url('admin/subscribe/test/' . $levelId) }}" class="btn btn-primary">Test Payment for Creator</a>
+
+            </div>
+         </div>
+
+
         <div class="row">
             <!-- Quick Stats -->
             
@@ -309,6 +334,10 @@
         </div> --}}
             <!-- END More Stats -->
         </div>
+
+
+
+         
     </div>
     <!-- END Page Content -->
 

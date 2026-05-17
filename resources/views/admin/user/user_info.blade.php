@@ -101,11 +101,11 @@
                 Username: {{ $user->username }} <br>
                 Entry Channel: {{ $user->heard }} <br>
                 Base Currency: {{ $currency }} <br>
-                Access Code: {{ $access->code }} <br>
-                Access Email: {{ $access->email }} <br>
+                Access Code: {{ @$access->code }} <br>
+                Access Email: {{ @$user->email }} <br>
                 Access Activated: {{ $user->email_verified_at != null ? 'Yes' : 'Not yet' }} <br>
-                Access Created On: {{ $access->created_at }} <br>
-                Access Updated On: {{ $access->updated_at }} <br>
+                Access Created On: {{ @$user->created_at }} <br>
+                Access Updated On: {{ @$user->updated_at }} <br>
                 Status: {{ $user->status }} <br>
 
 
@@ -178,10 +178,14 @@
                                 <select class="form-control mt-2" name="currency" {{-- wire:model.defer="currency" --}} required>
 
                                     <option value="">Select Currency</option>
-                                    <option value="USD">USD – US Dollar</option>
+                                    @foreach (countryList() as $country)
+                                        <option value="{{ $country['code'] }}">{{ $country['code'] }} –
+                                            {{ $country['name'] }}</option>
+                                    @endforeach
+                                    {{-- <option value="USD">USD – US Dollar</option>
                                     <option value="EUR">EUR – Euro</option>
                                     <option value="GBP">GBP – British Pound</option>
-                                    <option value="NGN">NGN – Nigerian Naira</option>
+                                    <option value="NGN">NGN – Nigerian Naira</option> --}}
                                 </select>
 
                             </div>
@@ -284,7 +288,7 @@
                             </p>
                         </div>
                         <div class="col-lg-8 col-xl-5">
-                           
+
                             <input type="hidden" value="{{ $user->id }}" name="user_id">
                             <div class="mb-4">
                                 <div class="input-group">

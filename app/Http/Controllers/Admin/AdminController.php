@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\AccessCode;
+use App\Models\Level;
 use App\Models\Partner;
 use App\Models\Post;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Models\UserLevel;
+use App\Services\FlutterwavePaymentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Carbon;
@@ -16,6 +18,13 @@ use Illuminate\Support\Facades\DB;
 
 class AdminController extends Controller
 {
+    protected FlutterwavePaymentService $flutterwavePaymentService;
+
+    public function __construct(FlutterwavePaymentService $flutterwavePaymentService)
+    {
+        $this->flutterwavePaymentService = $flutterwavePaymentService;
+    }
+
     public function home()
     {
         $res = securityVerification();
@@ -42,8 +51,10 @@ class AdminController extends Controller
             $onlineUsers = collect(Cache::get('online_users', []))
                 ->filter(fn($lastSeen) => now()->diffInMinutes($lastSeen) <= 2)
                 ->count();
+                $levelId = Level::where('name', 'Creator')->first()->id;
                 
             return view('admin.home', [
+                'levelId' => $levelId,
                 'userCount' => $userCount,
                 'partnerCount' => $partnerCount,
                 'accesscodeCount' => $accesscodeCount,
@@ -53,5 +64,29 @@ class AdminController extends Controller
                 'onlineUsers' => $onlineUsers
             ]);
         }
+    }
+
+    public function testSubscription($levelId)
+    {
+        $url = $this->flutterwavePaymentService->createAdminCharge($levelId);
+        return redirect($url);
+    }
+
+    public function verifyFlutterwaveAdminCharge(Request $request)
+    {
+        $reference = $request->query('reference');
+        $status = $request->query('status');
+
+        if ($status == 'cancelled') {
+            return redirect()->route('admin.home')->with('error', 'Subscription payment was cancelled.');           
+        }
+
+        if ($status == 'successful' || $status == 'completed') {
+            return redirect()->route('admin.home')->with('success', 'Subscription payment was successful.');
+        }
+
+        return redirect()->route('admin.home')->with('error', 'Unknown payment status.');
+    
+
     }
 }

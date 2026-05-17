@@ -2,653 +2,381 @@
 
 namespace App\Livewire\User;
 
-use Livewire\WithFileUploads;
-use Livewire\Component;
 use App\Models\Post;
 use App\Models\PostImages;
 use App\Models\PostVideo;
-use App\Models\PostVideos;
+use Livewire\Attributes\On;
+use Livewire\WithFileUploads;
+use Livewire\WithPagination;
+use Livewire\Component;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
-use Cloudinary\Cloudinary;
-use Cloudinary\Transformation\Resize;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+
+#[On('user.timeline')]
+#[On('openVideoPlayer')]
 
 class NewTimeline extends Component
 {
-    use WithFileUploads;
+    use WithFileUploads, WithPagination;
 
-    public $content = '';
-    public $images = [];
-    public $video;
-    public $uploadProgress = 0;
-    public $isUploading = false;
-    public $videoPreview = null;
+    // ─── Text & Image ───────────────────────────────────────────────────────────
+    public string $content = '';
+    public array  $images  = [];
 
+    // ─── Video Upload ────────────────────────────────────────────────────────────
+    /**
+     * Temporary uploaded video file (Livewire TemporaryUploadedFile).
+     * Only used for the "select file" phase – actual upload is done via
+     * initiateVideoUpload() which calls Cloudinary directly.
+     */
+    public $video = null;
 
+    /** Progress 0-100 shown in the UI while Cloudinary is uploading */
+    public int $videoUploadProgress = 0;
 
-    use WithFileUploads;
+    /** Cloudinary secure URL after a successful upload */
+    public ?string $cloudinaryVideoUrl = null;
 
+    /** Cloudinary public_id (needed for transformations / deletion) */
+    public ?string $cloudinaryVideoPublicId = null;
 
-    public $videoData = null;
+    /** Human-readable upload status message */
+    public string $videoUploadStatus = '';
 
-    protected $listeners = ['videoUploaded'];
+    /** Whether the video upload panel is open */
+    public bool $showVideoUpload = false;
 
-    // protected $listeners = ['refreshComponent' => '$refresh'];
+    // ─── Feed pagination ─────────────────────────────────────────────────────────
+    public Collection $posts;
+    public int  $page    = 1;
+    public bool $hasMore = true;
 
-    // public function videoUploaded($data)
-    // {
-    //     $this->videoData = $data;
-    // }
-    public function updatedVideo()
+    // ─── Video player state ──────────────────────────────────────────────────────
+    public bool  $isVideoOpen   = false;
+    public ?int  $activeVideoId = null;
+
+    // ─── Validation rules ────────────────────────────────────────────────────────
+    protected function videoRules(): array
     {
-        $this->validateOnly('video', [
-            'video' => 'nullable|mimes:mp4,mpeg,x-msvideo,quicktime,mov,x-flv,avi,webm|max:1048576', // 1GB
-        ]);
+        $level   = userLevel();
+        $maxSecs = match ($level) {
+            'Creator'    => 20,
+            'Influencer' => 80,
+            default      => 0,
+        };
+        // 20 s @ ~10 Mbps ≈ 25 MB | 80 s ≈ 100 MB
+        $maxKB = $maxSecs === 20 ? 25600 : 102400;
 
-        // Clear images if video selected
-        $this->images = [];
-
-        if ($this->video) {
-            $this->videoPreview = $this->video->temporaryUrl();
-        }
+        return [
+            'video' => "required|file|mimetypes:video/mp4,video/quicktime,video/x-msvideo,video/webm|max:{$maxKB}",
+        ];
     }
 
-
-    public function removeImage($index)
+    // ─── Lifecycle ───────────────────────────────────────────────────────────────
+    public function mount(): void
     {
-        unset($this->images[$index]);
-        $this->images = array_values($this->images);
+        $this->posts = collect();
+        $this->loadPosts();
     }
 
-    public function removeVideo()
+    // ─── Feed Loading ─────────────────────────────────────────────────────────────
+    public function loadPosts(): void
     {
-        $this->reset('video', 'videoPreview');
+        $allPosts = Post::with(['user', 'images', 'video'])
+            ->where('status', 'LIVE')
+            ->latest('created_at')
+            ->take($this->perPage() * $this->page * 2)
+            ->get();
+
+        $grouped    = $allPosts->groupBy('user_id');
+        $interleaved = collect();
+        $index      = 0;
+
+        do {
+            $added = 0;
+            foreach ($grouped as $userPosts) {
+                if (isset($userPosts[$index])) {
+                    $interleaved->push($userPosts[$index]);
+                    $added++;
+                }
+            }
+            $index++;
+        } while ($added > 0 && $interleaved->count() < $this->perPage() * $this->page);
+
+        $this->posts   = $interleaved->take($this->perPage() * $this->page);
+        $this->hasMore = $allPosts->count() > $this->posts->count();
     }
 
+    protected function perPage(): int { return 20; }
 
+    public function loadNextPage(): void
+    {
+        if (! $this->hasMore) return;
+        $this->page++;
+        $this->loadPosts();
+    }
 
-    public function createPost()
+    // ─── Video Player ─────────────────────────────────────────────────────────────
+    public function openVideoPlayer(int $videoId): void
+    {
+        $this->activeVideoId = $videoId;
+        $this->isVideoOpen   = true;
+        $this->dispatch('openVideoPlayer', videoId: $videoId)
+             ->to(\App\Livewire\User\VideoPlayer::class);
+    }
+
+    public function closeVideoPlayer(): void
+    {
+        $this->isVideoOpen   = false;
+        $this->activeVideoId = null;
+    }
+
+    // ─── Text Post ───────────────────────────────────────────────────────────────
+    public function createPost(): void
     {
         $level = userLevel();
 
-        $rules = [
-            'content' => 'required|string',
-        ];
-
-        if (!in_array($level, ['Creator', 'Influencer'])) {
+        $rules = ['content' => 'required|string'];
+        if (! in_array($level, ['Creator', 'Influencer'])) {
             $rules['content'] .= '|max:160';
-            $rules['images'] = 'prohibited';
         } else {
-            $rules['images'] = 'nullable|array|max:4';
+            $rules['images']   = 'nullable|array|max:4';
             $rules['images.*'] = 'image|max:2048';
         }
 
         $this->validate($rules);
 
-        $user = Auth::user();
+        $maxImages = match ($level) {
+            'Creator'    => 1,
+            'Influencer' => 4,
+            default      => 0,
+        };
+
+        if ($maxImages === 0 && count($this->images)) {
+            session()->flash('error', 'You are not allowed to upload images.');
+            return;
+        }
+
+        if (count($this->images) > $maxImages) {
+            session()->flash('error', "You can upload a maximum of {$maxImages} image(s).");
+            return;
+        }
+
+        $user    = Auth::user();
+        $content = $this->convertUrlsToLinks($this->content);
+        $existing = Post::where('user_id', $user->id)->pluck('content')->toArray();
+
+        if (isSimilar($content, $existing, 4)) {
+            session()->flash('info', 'This content is too similar to existing content.');
+            $this->reset('content');
+            return;
+        }
 
         $status = $user->status === 'ACTIVE' ? 'LIVE' : 'SHADOW_BANNED';
 
         $post = Post::create([
-            'user_id' => $user->id,
-            'content' => $this->content,
-            'unicode' => rand(1000, 9999) . time(),
+            'user_id'          => $user->id,
+            'content'          => $content,
+            'unicode'          => rand(1000, 9999) . time(),
             'comment_external' => 0,
-            'status' => $status,
+            'status'           => $status,
         ]);
 
-         $networkStrength = $this->getUserNetworkStrength();
+        foreach ($this->images as $image) {
+            $url = cloudinary()->upload($image->getRealPath(), [
+                'folder' => 'payhankey_post_images',
+            ])->getSecurePath();
 
-
-        // Upload Images to Cloudinary
-        if (!empty($this->images)) {
-            foreach ($this->images as $image) {
-
-                $uploadedFileUrl = cloudinary()->upload(
-                    $image->getRealPath(),
-                    ['folder' => 'payhankey_post_images']
-                )->getSecurePath();
-
-                PostImages::create([
-                    'user_id' => $user->id,
-                    'post_id' => $post->id,
-                    'path' => $uploadedFileUrl,
-                ]);
-            }
-            $post->update(['has_images' => 1]);
-        }
-
-        if ($this->video) {
-
-            try {
-
-                $uploadResult = cloudinary()->uploadVideo($this->video->getRealPath(), [
-                    'folder' => 'payhankey_post_videos',
-                    'resource_type' => 'video',
-                    'eager' => $this->getVideoTransformations($networkStrength), // Default to medium for initial upload
-                    'eager_async' => true,
-                    'eager_notification_url' => route('cloudinary.webhook'),
-                ]);
-
-                $response = $uploadResult->getResponse();
-
-                //titkok style thumbnail cropping based on aspect ratio
-                $crop = $response['height'] > $response['width']
-                    ? 'c_fill,w_720,h_1280'
-                    : 'c_fill,w_1280,h_720';
-
-                $thumbnailUrl = str_replace(
-                    '/video/upload/',
-                    "/video/upload/so_2,{$crop},f_jpg/",
-                    $response['secure_url']
-                );
-
-
-                PostVideo::create([
-                    'user_id'   => $user->id,
-                    'post_id'   => $post->id,
-                    'public_id' => $response['public_id'],
-                    'path'      => $response['secure_url'],
-                    'thumbnail_path' => $thumbnailUrl,
-                    'duration'  => $response['duration'] ?? null,
-                    'width'     => $response['width'] ?? null,
-                    'height'    => $response['height'] ?? null,
-                    'format' => $response['format'] ?? null,
-                    'file_size' => $this->video->getSize(),
-                ]);
-
-                $post->update(['has_video' => 1]);
-            } catch (\Exception $e) {
-
-                Log::error('Cloudinary Video Upload Error: ' . $e->getMessage());
-            }
+            PostImages::create([
+                'user_id' => $user->id,
+                'post_id' => $post->id,
+                'path'    => $url,
+            ]);
         }
 
         session()->flash('success', 'Your post was successful!');
-
-        $this->reset(['content', 'images', 'video', 'videoPreview', 'videoData']);
+        $this->reset('content', 'images');
+        $this->loadPosts();
     }
 
-    private function getUserNetworkStrength()
+    // ─── Video Upload (Async via Cloudinary) ─────────────────────────────────────
+
+    /**
+     * Called from the blade via wire:click to toggle the video panel.
+     */
+    public function toggleVideoUpload(): void
     {
-        // This would ideally come from client-side network detection
-        // For now, we can use user's connection type or default to medium
-        // You can implement JavaScript Network Information API and pass to Livewire
+        $level = userLevel();
+        if (! in_array($level, ['Creator', 'Influencer'])) {
+            session()->flash('error', 'Only Creators and Influencers can upload videos.');
+            return;
+        }
+        $this->showVideoUpload = ! $this->showVideoUpload;
+        $this->resetVideoState();
+    }
 
-        $user = Auth::user();
+    /**
+     * Livewire calls this automatically after the user selects a file.
+     * We validate the local temp file, then kick off the Cloudinary upload.
+     */
+    public function updatedVideo(): void
+    {
+        $this->validate($this->videoRules());
 
-        // Check if user has network preference stored
-        if (isset($user->network_preference)) {
-            return $user->network_preference;
+        // Start the async upload (runs synchronously in PHP but is isolated here
+        // so the UI can show "uploading…" state and we can return early on error).
+        $this->initiateVideoUpload();
+    }
+
+    protected function initiateVideoUpload(): void
+    {
+        $level = userLevel();
+
+        if (! in_array($level, ['Creator', 'Influencer'])) {
+            $this->videoUploadStatus = 'error';
+            session()->flash('error', 'Permission denied.');
+            return;
         }
 
-        // Default to medium
-        return 'medium';
-    }
-
-    private function getImageQuality($networkStrength)
-    {
-        return match ($networkStrength) {
-            'slow', '2g' => 'auto:low',
-            '3g', 'medium' => 'auto:good',
-            '4g', '5g', 'fast' => 'auto:best',
-            default => 'auto:good',
+        $maxSeconds = match ($level) {
+            'Creator'    => 20,
+            'Influencer' => 80,
         };
+
+        $this->videoUploadStatus   = 'uploading';
+        $this->videoUploadProgress = 10;
+
+        try {
+            // Cloudinary upload with eager transformations for adaptive streaming
+            $result = cloudinary()->uploadVideo($this->video->getRealPath(), [
+                'folder'               => 'payhankey_videos',
+                'resource_type'        => 'video',
+                // Adaptive bitrate: create multiple quality versions
+                'eager'                => [
+                    // Low quality (mobile / slow network)
+                    ['format' => 'mp4', 'quality' => 'auto:low',  'width' => 480,  'crop' => 'scale'],
+                    // Medium quality
+                    ['format' => 'mp4', 'quality' => 'auto:good', 'width' => 720,  'crop' => 'scale'],
+                    // High quality (fast network / WiFi)
+                    ['format' => 'mp4', 'quality' => 'auto:best', 'width' => 1080, 'crop' => 'scale'],
+                    // Poster thumbnail
+                    ['format' => 'jpg', 'quality' => 'auto',      'width' => 480,  'crop' => 'scale'],
+                ],
+                'eager_async'          => true,   // generate eager versions in background
+                'eager_notification_url' => url('/cloudinary/webhook'), // optional webhook
+                // Hard-cap duration server-side (Cloudinary incoming transformation)
+                'transformation'       => [
+                    ['duration' => $maxSeconds],
+                ],
+                // Auto-generate a waveform thumbnail as poster
+                'notification_url'     => url('/cloudinary/webhook'),
+            ]);
+
+            $this->videoUploadProgress   = 90;
+            $this->cloudinaryVideoUrl    = $result->getSecurePath();
+            $this->cloudinaryVideoPublicId = $result->getPublicId();
+            $this->videoUploadProgress   = 100;
+            $this->videoUploadStatus     = 'done';
+
+        } catch (\Exception $e) {
+            $this->videoUploadStatus = 'error';
+            $this->videoUploadProgress = 0;
+            session()->flash('error', 'Video upload failed: ' . $e->getMessage());
+        }
     }
 
-
-
-
-    private function getVideoTransformations($networkStrength)
+    /**
+     * Publishes the video as a post once upload is confirmed.
+     */
+    public function publishVideo(): void
     {
-        // Generate multiple quality versions like TikTok/Instagram
-        $transformations = [];
+        $level = userLevel();
 
-        switch ($networkStrength) {
-            case 'slow':
-            case '2g':
-                // Low quality only for slow networks
-                $transformations[] = [
-                    'width' => 480,
-                    'height' => 854,
-                    'crop' => 'limit',
-                    'quality' => 'auto:low',
-                    'video_codec' => 'h264',
-                    'audio_codec' => 'aac',
-                    'bit_rate' => '500k',
-                ];
-                break;
-
-            case '3g':
-            case 'medium':
-                // Medium and low quality
-                $transformations[] = [
-                    'width' => 720,
-                    'height' => 1280,
-                    'crop' => 'limit',
-                    'quality' => 'auto:good',
-                    'video_codec' => 'h264',
-                    'audio_codec' => 'aac',
-                    'bit_rate' => '1500k',
-                ];
-                $transformations[] = [
-                    'width' => 480,
-                    'height' => 854,
-                    'crop' => 'limit',
-                    'quality' => 'auto:low',
-                    'video_codec' => 'h264',
-                    'audio_codec' => 'aac',
-                    'bit_rate' => '500k',
-                ];
-                break;
-
-            case '4g':
-            case '5g':
-            case 'fast':
-            default:
-                // High, medium, and low quality (adaptive streaming)
-                $transformations[] = [
-                    'width' => 1080,
-                    'height' => 1920,
-                    'crop' => 'limit',
-                    'quality' => 'auto:best',
-                    'video_codec' => 'h264',
-                    'audio_codec' => 'aac',
-                    'bit_rate' => '3000k',
-                ];
-                $transformations[] = [
-                    'width' => 720,
-                    'height' => 1280,
-                    'crop' => 'limit',
-                    'quality' => 'auto:good',
-                    'video_codec' => 'h264',
-                    'audio_codec' => 'aac',
-                    'bit_rate' => '1500k',
-                ];
-                $transformations[] = [
-                    'width' => 480,
-                    'height' => 854,
-                    'crop' => 'limit',
-                    'quality' => 'auto:low',
-                    'video_codec' => 'h264',
-                    'audio_codec' => 'aac',
-                    'bit_rate' => '500k',
-                ];
-                break;
+        if (! in_array($level, ['Creator', 'Influencer'])) {
+            session()->flash('error', 'Permission denied.');
+            return;
         }
 
-        return $transformations;
+        $this->validate([
+            'content'             => 'required|string',
+            'cloudinaryVideoUrl'  => 'required|url',
+        ]);
+
+        if ($this->videoUploadStatus !== 'done') {
+            session()->flash('error', 'Please wait for the video upload to complete.');
+            return;
+        }
+
+        $user    = Auth::user();
+        $content = $this->convertUrlsToLinks($this->content);
+        $status  = $user->status === 'ACTIVE' ? 'LIVE' : 'SHADOW_BANNED';
+
+        $post = Post::create([
+            'user_id'          => $user->id,
+            'content'          => $content,
+            'unicode'          => rand(1000, 9999) . time(),
+            'comment_external' => 0,
+            'status'           => $status,
+            'post_type'        => 'video',
+        ]);
+
+        // Store video metadata
+        PostVideo::create([
+            'user_id'   => $user->id,
+            'post_id'   => $post->id,
+            'path'      => $this->cloudinaryVideoUrl,
+            'public_id' => $this->cloudinaryVideoPublicId,
+        ]);
+
+        session()->flash('success', 'Your video was posted successfully!');
+        $this->reset('content');
+        $this->resetVideoState();
+        $this->showVideoUpload = false;
+        $this->loadPosts();
+    }
+
+    public function cancelVideoUpload(): void
+    {
+        // Optionally delete from Cloudinary if already uploaded
+        if ($this->cloudinaryVideoPublicId) {
+            try {
+                cloudinary()->destroy($this->cloudinaryVideoPublicId, ['resource_type' => 'video']);
+            } catch (\Exception) {}
+        }
+        $this->resetVideoState();
+        $this->showVideoUpload = false;
+    }
+
+    protected function resetVideoState(): void
+    {
+        $this->video                 = null;
+        $this->videoUploadProgress   = 0;
+        $this->cloudinaryVideoUrl    = null;
+        $this->cloudinaryVideoPublicId = null;
+        $this->videoUploadStatus     = '';
+    }
+
+    // ─── Helpers ─────────────────────────────────────────────────────────────────
+    public function removeImage(int $index): void
+    {
+        if (isset($this->images[$index])) {
+            unset($this->images[$index]);
+            $this->images = array_values($this->images);
+        }
+    }
+
+    private function convertUrlsToLinks(string $text): string
+    {
+        return preg_replace(
+            '/\b(?:https?:\/\/|www\.)\S+\b/',
+            '<a href="$0" target="_blank" rel="noopener noreferrer">$0</a>',
+            $text
+        );
     }
 
     public function render()
     {
-        return view('livewire.user.new-timeline');
+        return view('livewire.user.timeline')->layout('layouts.app');
     }
-
-    // public function updatedImages()
-    // {
-    //     $level = userLevel();
-    //     $maxImages = match ($level) {
-    //         'Creator' => 1,
-    //         'Influencer' => 4,
-    //         default => 0,
-    //     };
-
-    //     if (count($this->images) > $maxImages) {
-    //         $this->images = array_slice($this->images, 0, $maxImages);
-    //         session()->flash('warning', "Maximum {$maxImages} image(s) allowed.");
-    //     }
-    // }
-
-
-    // public function updatedVideos()
-    // {
-    //     $level = userLevel();
-
-    //     // Only Creators and Influencers can upload videos
-    //     if (!in_array($level, ['Creator', 'Influencer'])) {
-    //         $this->videos = [];
-    //         session()->flash('error', 'Only Creators and Influencers can upload videos.');
-    //         return;
-    //     }
-
-    //     // Limit to 1 video per post (like TikTok)
-    //     if (count($this->videos) > 1) {
-    //         $this->videos = array_slice($this->videos, 0, 1);
-    //         session()->flash('warning', "Only 1 video allowed per post.");
-    //     }
-
-    //     // Validate video size (1GB max)
-    //     foreach ($this->videos as $video) {
-    //         $sizeInMB = $video->getSize() / 1024 / 1024;
-    //         if ($sizeInMB > 1024) {
-    //             $this->videos = [];
-    //             session()->flash('error', 'Video size must not exceed 1GB.');
-    //             return;
-    //         }
-    //     }
-    // }
-
-    // public function removeImage($index)
-    // {
-    //     array_splice($this->images, $index, 1);
-    // }
-
-    // public function removeVideo($index)
-    // {
-    //     array_splice($this->videos, $index, 1);
-    // }
-
-    // public function createPost()
-    // {
-    //     $this->isUploading = true;
-    //     $level = userLevel();
-
-    //     // Validation rules
-    //     $rules = [
-    //         'content' => 'required|string',
-    //     ];
-
-    //     if (!in_array($level, ['Creator', 'Influencer'])) {
-    //         $rules['content'] .= '|max:160';
-    //         $rules['images'] = 'prohibited';
-    //         $rules['videos'] = 'prohibited';
-    //     } else {
-    //         $rules['images'] = 'nullable|array|max:4';
-    //         $rules['images.*'] = 'image|max:102400'; // 100MB
-    //         $rules['videos'] = 'nullable|array|max:1';
-    //         $rules['videos.*'] = 'mimetypes:video/mp4,video/avi,video/mpeg,video/quicktime,video/x-msvideo,video/x-flv,video/webm|max:1048576'; // 1GB
-    //     }
-
-    //     $this->validate($rules);
-
-
-
-    //     // Content length check
-    //     $maxLength = in_array($level, ['Creator', 'Influencer']) ? null : 160;
-    //     if ($maxLength && strlen($this->content) > $maxLength) {
-    //         session()->flash('error', "You cannot post more than $maxLength characters.");
-    //         $this->isUploading = false;
-    //         return;
-    //     }
-
-    //     // Image count validation
-    //     $maxImages = match ($level) {
-    //         'Creator' => 1,
-    //         'Influencer' => 4,
-    //         default => 0,
-    //     };
-
-    //     if ($maxImages === 0 && count($this->images) > 0) {
-    //         session()->flash('error', 'You are not allowed to upload images.');
-    //         $this->isUploading = false;
-    //         return;
-    //     }
-
-    //     if (count($this->images) > $maxImages) {
-    //         session()->flash('error', "You can upload a maximum of {$maxImages} image(s).");
-    //         $this->isUploading = false;
-    //         return;
-    //     }
-
-    //     // Video validation - can't post both images and videos
-    //     if (!empty($this->images) && !empty($this->videos)) {
-    //         session()->flash('error', 'You cannot upload both images and videos in the same post.');
-    //         $this->isUploading = false;
-    //         return;
-    //     }
-
-    //     // Check for video permission
-    //     if (!empty($this->videos) && !in_array($level, ['Creator', 'Influencer'])) {
-    //         session()->flash('error', 'Only Creators and Influencers can upload videos.');
-    //         $this->isUploading = false;
-    //         return;
-    //     }
-
-    //     $user = Auth::user();
-    //     $content = $this->convertUrlsToLinks($this->content);
-    //     $getContent = Post::where(['user_id' => $user->id])->pluck('content')->toArray();
-
-    //     // Check for similar content
-    //     if (isSimilar($content, $getContent, 4)) {
-    //         session()->flash('info', 'This content is too similar to existing content, therefore it will not be posted.');
-    //         $this->reset('content', 'images', 'videos');
-    //         $this->isUploading = false;
-    //         return;
-    //     }
-
-    //     // Determine post status
-    //     $status = 'LIVE';
-    //     if ($user->status != 'ACTIVE') {
-    //         $status = 'SHADOW_BANNED';
-    //     }
-
-    //     // Create post
-    //     $uniqueCode = rand(1000, 9999) . time();
-    //     $post = Post::create([
-    //         'user_id' => $user->id,
-    //         'content' => $content,
-    //         'unicode' => $uniqueCode,
-    //         'comment_external' => 0,
-    //         'status' => $status,
-    //         'has_video' => !empty($this->videos) ? 1 : 0,
-    //         'has_images' => !empty($this->images) ? 1 : 0,
-    //     ]);
-
-    //     try {
-    //         // Upload images
-    //         if (!empty($this->images)) {
-    //             $this->uploadImages($post);
-    //         }
-
-    //         // Upload videos with adaptive processing
-    //         if (!empty($this->videos)) {
-    //             dd('Uploading video with adaptive processing...');
-    //             $this->uploadVideos($post, $user);
-    //         }
-
-    //         session()->flash('success', 'Your post was successful!');
-    //         $this->reset('content', 'images', 'videos');
-    //     } catch (\Exception $e) {
-    //         Log::error('Post upload error: ' . $e->getMessage());
-    //         session()->flash('error', 'An error occurred while uploading your media. Please try again.');
-    //         $post->delete();
-    //     }
-
-    //     $this->isUploading = false;
-    // }
-
-    // private function uploadImages($post)
-    // {
-    //     foreach ($this->images as $image) {
-    //         // Determine quality based on network strength
-    //         $networkStrength = $this->getUserNetworkStrength();
-    //         $quality = $this->getImageQuality($networkStrength);
-
-    //         $uploadedFileUrl = cloudinary()->upload($image->getRealPath(), [
-    //             'folder' => 'payhankey_post_images',
-    //             'transformation' => [
-    //                 ['quality' => $quality, 'fetch_format' => 'auto'],
-    //                 ['width' => 1080, 'height' => 1080, 'crop' => 'limit'],
-    //             ],
-    //             'format' => 'jpg',
-    //         ])->getSecurePath();
-
-    //         // Generate thumbnail
-    //         $thumbnailUrl = cloudinary()->upload($image->getRealPath(), [
-    //             'folder' => 'payhankey_post_images/thumbnails',
-    //             'transformation' => [
-    //                 ['width' => 300, 'height' => 300, 'crop' => 'fill'],
-    //                 ['quality' => 'auto:low'],
-    //             ],
-    //             'format' => 'jpg',
-    //         ])->getSecurePath();
-
-    //         PostImages::create([
-    //             'user_id' => Auth::id(),
-    //             'post_id' => $post->id,
-    //             'path' => $uploadedFileUrl,
-    //             'thumbnail_path' => $thumbnailUrl,
-    //             'processing_status' => 'completed',
-    //         ]);
-    //     }
-    // }
-
-    // private function uploadVideos($post, $user)
-    // {
-    //     foreach ($this->videos as $video) {
-    //         // Get network strength for adaptive streaming
-    //         $networkStrength = $this->getUserNetworkStrength();
-
-    //         // Initial upload with basic processing
-    //         $uploadResult = cloudinary()->uploadVideo($video->getRealPath(), [
-    //             'folder' => 'payhankey_post_videos',
-    //             'resource_type' => 'video',
-    //             'eager' => $this->getVideoTransformations($networkStrength),
-    //             'eager_async' => true, // Process asynchronously like TikTok/Instagram
-    //             'eager_notification_url' => route('cloudinary.webhook'), // Webhook for completion
-    //         ]);
-
-    //         $videoUrl = $uploadResult->getSecurePath();
-    //         $publicId = $uploadResult->getPublicId();
-
-    //         // Generate thumbnail from video
-    //         $thumbnailUrl = cloudinary()->video($publicId)
-    //             ->addTransformation(['width' => 640, 'height' => 360, 'crop' => 'fill'])
-    //             ->delivery(['format' => 'jpg', 'quality' => 'auto'])
-    //             ->toUrl();
-
-    //         // Create video record with processing status
-    //         PostVideo::create([
-    //             'user_id' => Auth::id(),
-    //             'post_id' => $post->id,
-    //             'path' => $videoUrl,
-    //             'thumbnail_path' => $thumbnailUrl,
-    //             'public_id' => $publicId,
-    //             'processing_status' => 'processing', // Will be updated via webhook
-    //             'duration' => $uploadResult->getResponse()['duration'] ?? null,
-    //             'width' => $uploadResult->getResponse()['width'] ?? null,
-    //             'height' => $uploadResult->getResponse()['height'] ?? null,
-    //             'format' => $uploadResult->getResponse()['format'] ?? null,
-    //             'file_size' => $video->getSize(),
-    //         ]);
-    //     }
-    // }
-
-    // private function getUserNetworkStrength()
-    // {
-    //     // This would ideally come from client-side network detection
-    //     // For now, we can use user's connection type or default to medium
-    //     // You can implement JavaScript Network Information API and pass to Livewire
-
-    //     $user = Auth::user();
-
-    //     // Check if user has network preference stored
-    //     if (isset($user->network_preference)) {
-    //         return $user->network_preference;
-    //     }
-
-    //     // Default to medium
-    //     return 'medium';
-    // }
-
-    // private function getImageQuality($networkStrength)
-    // {
-    //     return match ($networkStrength) {
-    //         'slow', '2g' => 'auto:low',
-    //         '3g', 'medium' => 'auto:good',
-    //         '4g', '5g', 'fast' => 'auto:best',
-    //         default => 'auto:good',
-    //     };
-    // }
-
-    // private function getVideoTransformations($networkStrength)
-    // {
-    //     // Generate multiple quality versions like TikTok/Instagram
-    //     $transformations = [];
-
-    //     switch ($networkStrength) {
-    //         case 'slow':
-    //         case '2g':
-    //             // Low quality only for slow networks
-    //             $transformations[] = [
-    //                 'width' => 480,
-    //                 'height' => 854,
-    //                 'crop' => 'limit',
-    //                 'quality' => 'auto:low',
-    //                 'video_codec' => 'h264',
-    //                 'audio_codec' => 'aac',
-    //                 'bit_rate' => '500k',
-    //             ];
-    //             break;
-
-    //         case '3g':
-    //         case 'medium':
-    //             // Medium and low quality
-    //             $transformations[] = [
-    //                 'width' => 720,
-    //                 'height' => 1280,
-    //                 'crop' => 'limit',
-    //                 'quality' => 'auto:good',
-    //                 'video_codec' => 'h264',
-    //                 'audio_codec' => 'aac',
-    //                 'bit_rate' => '1500k',
-    //             ];
-    //             $transformations[] = [
-    //                 'width' => 480,
-    //                 'height' => 854,
-    //                 'crop' => 'limit',
-    //                 'quality' => 'auto:low',
-    //                 'video_codec' => 'h264',
-    //                 'audio_codec' => 'aac',
-    //                 'bit_rate' => '500k',
-    //             ];
-    //             break;
-
-    //         case '4g':
-    //         case '5g':
-    //         case 'fast':
-    //         default:
-    //             // High, medium, and low quality (adaptive streaming)
-    //             $transformations[] = [
-    //                 'width' => 1080,
-    //                 'height' => 1920,
-    //                 'crop' => 'limit',
-    //                 'quality' => 'auto:best',
-    //                 'video_codec' => 'h264',
-    //                 'audio_codec' => 'aac',
-    //                 'bit_rate' => '3000k',
-    //             ];
-    //             $transformations[] = [
-    //                 'width' => 720,
-    //                 'height' => 1280,
-    //                 'crop' => 'limit',
-    //                 'quality' => 'auto:good',
-    //                 'video_codec' => 'h264',
-    //                 'audio_codec' => 'aac',
-    //                 'bit_rate' => '1500k',
-    //             ];
-    //             $transformations[] = [
-    //                 'width' => 480,
-    //                 'height' => 854,
-    //                 'crop' => 'limit',
-    //                 'quality' => 'auto:low',
-    //                 'video_codec' => 'h264',
-    //                 'audio_codec' => 'aac',
-    //                 'bit_rate' => '500k',
-    //             ];
-    //             break;
-    //     }
-
-    //     return $transformations;
-    // }
-
-    // private function convertUrlsToLinks($text)
-    // {
-    //     $pattern = '/\b(?:(?:https?|ftp):\/\/|www\.)[-a-z0-9+&@#\/%?=~_|!:,.;]*[-a-z0-9+&@#\/%=~_|]/i';
-    //     return preg_replace($pattern, '<a href="$0" target="_blank" rel="noopener">$0</a>', $text);
-    // }
-
-
-
 }

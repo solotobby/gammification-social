@@ -11,9 +11,9 @@
                     <i class="nav-main-link-icon fa fa-list"></i>
                     <span class="nav-main-link-name">User List</span>
                 </a>
-                <a class="nav-main-link" href="{{ url('withdrawal/list') }}">
+                <a class="nav-main-link" href="{{ url('currency/list') }}">
                     <i class="nav-main-link-icon fa fa-list"></i>
-                    <span class="nav-main-link-name">Withdrawals</span>
+                    <span class="nav-main-link-name">Currency</span>
                 </a>
                 <a class="nav-main-link" href="{{ url('level/management') }}">
                     <i class="nav-main-link-icon fa fa-list"></i>

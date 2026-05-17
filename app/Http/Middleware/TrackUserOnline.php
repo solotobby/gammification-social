@@ -17,15 +17,6 @@ class TrackUserOnline
      */
     public function handle(Request $request, Closure $next): Response
     {
-        
-        // if (auth()->check()) {
-        //     Cache::put(
-        //         'user_online_' . auth()->id(),
-        //         now(),
-        //         now()->addMinutes(5)
-        //     );
-        // }
-
         if (Auth::check()) {
             // Store user ID and timestamp
             $onlineUsers = Cache::get('online_users', []);

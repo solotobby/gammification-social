@@ -1,85 +1,5 @@
 <div>
     {{-- Success is as dangerous as failure. --}}
-
-    {{-- <div class="row">
-
-        <div class="col-md-12">
-
-            <div class="block block-rounded">
-                <div class="block-header block-header-default block-header">
-                    <h3 class="block-title">Bank Information</h3>
-                    <div class="block-options">
-                        <button type="button" class="btn-block-option">
-                            <i class="si si-settings"></i>
-                        </button>
-                    </div>
-                </div>
-
-                   <div class="block-content">
-                        <div class="row justify-content-center py-sm-3 py-md-5">
-                            <div class="col-sm-10 col-md-6">
-                                <h4> Setup Bank Information For payout </h4>
-                                @if ($baseCurrency == 'NGN')
-                                    <form action="" method="POST" wire:submit.prevent="UpdateBankInformation">
-
-                                    @if (session()->has('success'))
-                                        <div class="alert alert-success" role="alert">
-                                            {{ session('success') }}
-                                        </div>
-                                    @endif
-
-                                    @if (session()->has('fail'))
-                                        <div class="alert alert-danger" role="alert">
-                                            {{ session('fail') }}
-                                        </div>
-                                    @endif
-
-
-                                  
-                                    <div id="nigeriaOptions" class="mb-0">
-                                        <hr>
-                                        <div class="form-group">
-                                            <label for="bank">Select Bank </label>
-                                            <select class="form-control" id="bank" wire:model="bank_name">
-                                                <option value="">Choose One...</option>
-                                                @foreach (bankList() as $list)
-                                                    <option value="{{ $list['name'] }}">{{ $list['name'] }}</option>
-                                                @endforeach
-                                            </select>
-                                            <div style="color: brown">
-                                                @error('bank_name')
-                                                    {{ $message }}
-                                                @enderror
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="accountNumber">Account Number</label>
-                                            <input type="text" class="form-control" id="accountNumber"
-                                                wire:model="account_number" placeholder="Enter Account Number">
-                                        </div>
-                                        <div style="color: brown">
-                                            @error('account_number')
-                                                {{ $message }}
-                                            @enderror
-                                        </div>
-
-                                    </div>
-
-
-
-                                </form>
-                                @endif
-                                
-                            </div>
-                        </div>
-                   </div>
-
-            </div>
-        </div>
-    </div> --}}
-
-
-
     <div class="row">
 
         <div class="col-md-12">
@@ -274,10 +194,15 @@
                                 <select class="form-control my-1" wire:model="currency"
                                     {{ !$canUpdateCurrency ? 'disabled' : '' }} required>
                                     <option value="">Select Currency</option>
-                                    <option value="USD">USD – US Dollar</option>
+                                    @foreach (countryList() as $country)
+                                        <option value="{{ $country['code'] }}">{{ $country['code'] }} –
+                                            {{ $country['name'] }}</option>
+                                        
+                                    @endforeach
+                                    {{-- <option value="USD">USD – US Dollar</option>
                                     <option value="EUR">EUR – Euro</option>
                                     <option value="GBP">GBP – British Pound</option>
-                                    <option value="NGN">NGN – Nigerian Naira</option>
+                                    <option value="NGN">NGN – Nigerian Naira</option> --}}
                                 </select>
 
                                 @if (!$canUpdateCurrency)
