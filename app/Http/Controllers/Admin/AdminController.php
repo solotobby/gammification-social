@@ -11,6 +11,7 @@ use App\Models\Transaction;
 use App\Models\User;
 use App\Models\UserLevel;
 use App\Services\FlutterwavePaymentService;
+use App\Services\TransactionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Carbon;
@@ -19,10 +20,12 @@ use Illuminate\Support\Facades\DB;
 class AdminController extends Controller
 {
     protected FlutterwavePaymentService $flutterwavePaymentService;
+    protected TransactionService $transactionService;
 
-    public function __construct(FlutterwavePaymentService $flutterwavePaymentService)
+    public function __construct(FlutterwavePaymentService $flutterwavePaymentService, TransactionService $transactionService)
     {
         $this->flutterwavePaymentService = $flutterwavePaymentService;
+        $this->transactionService = $transactionService;
     }
 
     public function home()
@@ -74,15 +77,21 @@ class AdminController extends Controller
 
     public function verifyFlutterwaveAdminCharge(Request $request)
     {
-        $reference = $request->query('reference');
-        $status = $request->query('status');
+        $reference = $request->query('tx_ref');
+       $status = $request->query('status');
 
         if ($status == 'cancelled') {
             return redirect()->route('admin.home')->with('error', 'Subscription payment was cancelled.');           
         }
 
         if ($status == 'successful' || $status == 'completed') {
+
+            $transaction = Transaction::where('ref', $reference)->first();
+
+            $this->transactionService->markProcessing($transaction, ['verification_attempted_at' => now()]);
+
             return redirect()->route('admin.home')->with('success', 'Subscription payment was successful.');
+            
         }
 
         return redirect()->route('admin.home')->with('error', 'Unknown payment status.');
