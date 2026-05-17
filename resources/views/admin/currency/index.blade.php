@@ -51,8 +51,8 @@
                                             {{-- @foreach ($countries as $country)
                                                 <option value="{{ $country->id }}">{{ $country->name }}</option>
                                             @endforeach --}}
-                                        </select>
-                                        {{-- <input type="text" class="form-control" name="country" id="example-group1-input1"
+        </select>
+        {{-- <input type="text" class="form-control" name="country" id="example-group1-input1"
                                             name="example-group1-input1"> --
                                     </div>
                                 </div>
@@ -124,14 +124,17 @@
                             <th> Symbol</th>
                             <th>Base Rate</th>
                             <th>Status</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    {{-- <tbody>
 
                         @foreach ($currencies as $currency)
                             <tr>
                                 <td>
+
                                     {{ $currency->country }}
+                                    </a>
                                 </td>
                                 <td>
                                     {{ $currency->name }}
@@ -150,14 +153,202 @@
                                         class="btn btn-sm {{ $currency->is_active ? 'btn-danger' : 'btn-success' }}">
                                         {{ $currency->is_active ? 'Deactivate' : 'Activate' }}
                                     </a>
-                                    {{-- {{ $currency->is_active ? 'Active' : 'Inactive' }} --}}
+                                    {{ $currency->is_active ? 'Active' : 'Inactive' }}
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-primary" data-toggle="modal"
+                                        data-target="#exampleModal-{{ $currency->id }}">
+                                        View Details
+                                    </button>
                                 </td>
                             </tr>
+
+                            
+
                         @endforeach
-                    </tbody>
+                    </tbody> --}}
+
+                    <tbody>
+
+    @foreach ($currencies as $currency)
+
+        <tr>
+
+            <td>{{ $currency->country }}</td>
+
+            <td>{{ $currency->name }}</td>
+
+            <td>
+                <span class="badge bg-primary">
+                    {{ $currency->code }}
+                </span>
+            </td>
+
+            <td>{{ $currency->symbol }}</td>
+
+            <td>{{ number_format($currency->base_rate, 2) }}</td>
+
+            <td>
+
+                @if ($currency->is_active)
+
+                    <span class="badge bg-success">
+                        Active
+                    </span>
+
+                @else
+
+                    <span class="badge bg-danger">
+                        Inactive
+                    </span>
+
+                @endif
+
+            </td>
+
+            <td>
+
+                <div class="d-flex gap-2">
+
+                    {{-- Activate / Deactivate --}}
+                    <a href="{{ url('currency/status/' . $currency->id) }}"
+                        class="btn btn-sm {{ $currency->is_active ? 'btn-danger' : 'btn-success' }}">
+
+                        {{ $currency->is_active ? 'Deactivate' : 'Activate' }}
+                    </a>
+
+                    {{-- Edit Base Rate --}}
+                    <button type="button"
+                        class="btn btn-sm btn-primary"
+                        data-bs-toggle="modal"
+                        data-bs-target="#currencyModal-{{ $currency->id }}">
+
+                        Edit Rate
+                    </button>
+
+                </div>
+
+            </td>
+
+        </tr>
+
+    @endforeach
+
+</tbody>
+</table>
+
+{{-- MODALS MUST BE OUTSIDE TABLE --}}
+@foreach ($currencies as $currency)
+
+    <div class="modal fade"
+        id="currencyModal-{{ $currency->id }}"
+        tabindex="-1"
+        aria-labelledby="currencyModalLabel-{{ $currency->id }}"
+        aria-hidden="true">
+
+        <div class="modal-dialog modal-dialog-centered">
+
+            <div class="modal-content">
+
+                <div class="modal-header">
+
+                    <h5 class="modal-title"
+                        id="currencyModalLabel-{{ $currency->id }}">
+
+                        Edit Base Rate - {{ $currency->code }}
+                    </h5>
+
+                    <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                    </button>
+
+                </div>
+
+                <form action="{{ url('currency/update/' . $currency->id) }}"
+                    method="POST">
+
+                    @csrf
+                    @method('PUT')
+
+                    <div class="modal-body">
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                Country
+                            </label>
+
+                            <input type="text"
+                                class="form-control"
+                                value="{{ $currency->country }}"
+                                readonly>
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                Currency
+                            </label>
+
+                            <input type="text"
+                                class="form-control"
+                                value="{{ $currency->name }} ({{ $currency->code }})"
+                                readonly>
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                Base Rate
+                            </label>
+
+                            <input type="number"
+                                step="0.0001"
+                                name="base_rate"
+                                class="form-control"
+                                value="{{ $currency->base_rate }}"
+                                required>
+
+                        </div>
+
+                    </div>
+
+                    <div class="modal-footer">
+
+                        <button type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+
+                            Close
+                        </button>
+
+                        <button type="submit"
+                            class="btn btn-primary">
+
+                            Update Rate
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+@endforeach
+
                 </table>
             </div>
         </div>
+
+
 
     </div>
 @endsection
@@ -178,4 +369,3 @@
     <!-- Page JS Code -->
     <script src="{{ asset('src/assets/js/pages/be_tables_datatables.min.js') }}"></script>
 @endsection
-

@@ -243,6 +243,7 @@ Route::middleware([
 
         Route::get('currency/list', [CurrencyController::class, 'index'])->name('currency.list');
         Route::get('currency/status/{id}', [CurrencyController::class, 'changeStatus'])->name('currency.status');
+        Route::put('currency/update/{id}', [CurrencyController::class, 'update'])->name('currency.update');
 
 
          Route::get('admin/subscribe/test/{levelId}', [AdminController::class, 'testSubscription'])->name('test.subscribe');
