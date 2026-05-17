@@ -2,11 +2,13 @@
 
 namespace App\Services;
 
+use App\Mail\GeneralMail;
 use App\Models\SubscriptionStat;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Models\UserLevel;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class UpgradeSubscriptionService
 {
@@ -24,6 +26,22 @@ class UpgradeSubscriptionService
     {
 
         DB::transaction(function () use ($user, $level, $transaction, $payload) {
+
+            $subject = 'Core Operation: Subscription Upgrade Initiated';
+            $content = "Your subscription has been upgraded to {$level->name} Initiated.";
+
+
+            Mail::to('solotob3@gmail.com')
+                ->send(new GeneralMail(
+                    (object)[
+                        'name' => 'Oluwatobi Solomon',
+                        'email' => 'solotob3@gmail.com'
+                    ],
+                    $subject,
+                    $content
+                ));
+
+
 
             $nextPaymentDate = now()->addMonth();
 
@@ -80,7 +98,23 @@ class UpgradeSubscriptionService
                 'end_date'   => $nextPaymentDate,
             ]);
 
-            userActivity('subscribed');
+
+            $subject = 'Core Operation: Subscription Upgrade Successful';
+            $content = "Your subscription has been upgraded to {$level->name} successfully.";
+
+
+            Mail::to('solotob3@gmail.com')
+                ->send(new GeneralMail(
+                    (object)[
+                        'name' => 'Oluwatobi Solomon',
+                        'email' => 'solotob3@gmail.com'
+                    ],
+                    $subject,
+                    $content
+                ));
+
+
+            // userActivity('subscribed');
 
             return [
                 'level_name' => $level->name,

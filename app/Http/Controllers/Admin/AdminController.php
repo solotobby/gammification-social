@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\GeneralMail;
 use App\Models\AccessCode;
 use App\Models\Level;
 use App\Models\Partner;
@@ -12,20 +13,24 @@ use App\Models\User;
 use App\Models\UserLevel;
 use App\Services\FlutterwavePaymentService;
 use App\Services\TransactionService;
+use App\Services\UpgradeSubscriptionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class AdminController extends Controller
 {
     protected FlutterwavePaymentService $flutterwavePaymentService;
     protected TransactionService $transactionService;
+    protected UpgradeSubscriptionService $upgradeSubscriptionService;
 
-    public function __construct(FlutterwavePaymentService $flutterwavePaymentService, TransactionService $transactionService)
+    public function __construct(FlutterwavePaymentService $flutterwavePaymentService, TransactionService $transactionService, UpgradeSubscriptionService $upgradeSubscriptionService)
     {
         $this->flutterwavePaymentService = $flutterwavePaymentService;
         $this->transactionService = $transactionService;
+        $this->upgradeSubscriptionService = $upgradeSubscriptionService;
     }
 
     public function home()
@@ -54,8 +59,8 @@ class AdminController extends Controller
             $onlineUsers = collect(Cache::get('online_users', []))
                 ->filter(fn($lastSeen) => now()->diffInMinutes($lastSeen) <= 2)
                 ->count();
-                $levelId = Level::where('name', 'Creator')->first()->id;
-                
+            $levelId = Level::where('name', 'Creator')->first()->id;
+
             return view('admin.home', [
                 'levelId' => $levelId,
                 'userCount' => $userCount,
@@ -78,10 +83,10 @@ class AdminController extends Controller
     public function verifyFlutterwaveAdminCharge(Request $request)
     {
         $reference = $request->query('tx_ref');
-       $status = $request->query('status');
+        $status = $request->query('status');
 
         if ($status == 'cancelled') {
-            return redirect()->route('admin.home')->with('error', 'Subscription payment was cancelled.');           
+            return redirect()->route('admin.home')->with('error', 'Subscription payment was cancelled.');
         }
 
         if ($status == 'successful' || $status == 'completed') {
@@ -89,13 +94,29 @@ class AdminController extends Controller
             $transaction = Transaction::where('ref', $reference)->first();
 
             $this->transactionService->markProcessing($transaction, ['verification_attempted_at' => now()]);
+            $level = Level::findOrFail($transaction->meta['level_id']);
+
+            $this->upgradeSubscriptionService->upgradeSubscription($transaction->user, $level, $transaction, ['verification_attempted_at' => now()]);
+
+
+            $subject = 'Core Operation: Upgrade Processed Successfully';
+            $content = "Upgrade processed successfully for event: {$request['event']}. Transaction ref: {$reference} has been marked successful and subscription upgraded.";
+
+            Mail::to('solotob3@gmail.com')
+                ->send(new GeneralMail(
+                    (object)[
+                        'name' => 'Oluwatobi Solomon',
+                        'email' => 'solotob3@gmail.com'
+                    ],
+                    $subject,
+                    $content
+                ));
+
+
 
             return redirect()->route('admin.home')->with('success', 'Subscription payment was successful.');
-            
         }
 
         return redirect()->route('admin.home')->with('error', 'Unknown payment status.');
-    
-
     }
 }

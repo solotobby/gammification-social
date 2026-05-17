@@ -43,7 +43,7 @@ class TransactionService
     public function markSuccessful(Transaction $transaction, array $data): void
     {
         $transaction->update([
-            'status' => 'success',
+            'status' => 'successful',
             'meta' => array_merge($transaction->meta ?? [], $data),
             'paid_at' => now(),
         ]);

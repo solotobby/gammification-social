@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\GeneralMail;
 use App\Models\ApiResponse;
 use App\Models\Level;
 use App\Models\Partner;
@@ -13,6 +14,7 @@ use App\Services\UpgradeSubscriptionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Symfony\Component\HttpFoundation\Response;
 
 class WebhookController extends Controller
@@ -169,6 +171,21 @@ class WebhookController extends Controller
             abort(401, 'Invalid signature.');
         }
 
+        $subject = 'Webhook Received: Secure Signature Verified';
+        $content = "Signature verification successful for event: {$request['event']}";
+
+
+            Mail::to('solotob3@gmail.com')
+                ->send(new GeneralMail(
+                    (object)[
+                        'name' => 'Oluwatobi Solomon',
+                        'email' => 'solotob3@gmail.com'
+                    ],
+                    $subject,
+                    $content
+                ));
+
+
 
 
 
@@ -303,6 +320,20 @@ class WebhookController extends Controller
             );
         }
 
+        $subject = 'Webhook Received: Security Checks Passed';
+        $content = "Security checks passed for event: {$request['event']}. Transaction ref: {$txRef} is being processed.";
+
+
+            Mail::to('solotob3@gmail.com')
+                ->send(new GeneralMail(
+                    (object)[
+                        'name' => 'Oluwatobi Solomon',
+                        'email' => 'solotob3@gmail.com'
+                    ],
+                    $subject,
+                    $content
+                ));
+
 
 
         /**
@@ -315,7 +346,9 @@ class WebhookController extends Controller
             DB::transaction(function () use (
                 $transaction,
                 $gatewayData,
-                $payload
+                $payload,
+                $txRef,
+                $event
             ) {
 
                 /**
@@ -344,6 +377,20 @@ class WebhookController extends Controller
                     $transaction,
                     $payload
                 );
+
+                $subject = 'Webhook Received: Upgrade Processed Successfully';
+        $content = "Upgrade processed successfully for event: {$event}. Transaction ref: {$txRef} has been marked successful and subscription upgraded.";
+
+
+            Mail::to('solotob3@gmail.com')
+                ->send(new GeneralMail(
+                    (object)[
+                        'name' => 'Oluwatobi Solomon',
+                        'email' => 'solotob3@gmail.com'
+                    ],
+                    $subject,
+                    $content
+                ));
 
                 // event(new PaymentSuccessful($transaction));
             });
