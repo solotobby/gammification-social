@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8" />
-    <title>Payhankey | Monetize your posts, comments and views to earn daily</title>
+    <title>Payhankey | Social Media for Content Monetization | Monetization for Creators</title>
     <meta name="google-adsense-account" content="ca-pub-1535267515255754">
     <meta name="description"
         content="Payhankey is a content monetization platform where creators earn from engagement without followers. Grow your content, earn payouts, and monetize in Africa.">
