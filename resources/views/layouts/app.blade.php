@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
-    <title>Payhankey | Social Media for Content Monetization in Africa</title>
+    <title>Payhankey | Social Media for Content Monetization | Monetization for Creators</title>
     <meta name="google-adsense-account" content="ca-pub-1535267515255754">
     
 

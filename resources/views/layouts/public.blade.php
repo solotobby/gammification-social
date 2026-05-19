@@ -4,14 +4,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <meta name="google-adsense-account" content="ca-pub-1535267515255754">
-    <title>Payhankey | Monetize your posts, comments and views to earn daily</title>
+    <title>Payhankey | Social Media for Content Monetization | Monetization for Creators</title>
 
     <meta name="description" content="Monetize your posts, comments and views to earn daily">
     <meta name="author" content="Payhankey">
     <meta name="robots" content="index, follow, money, post, posts, comments, comment, views, view">
 
     <!-- Open Graph Meta -->
-    <meta property="og:title" content="Payhankey | Monetize your posts, comments and views to earn daily">
+    <meta property="og:title" content="Payhankey | Social Media for Content Monetization | Monetization for Creators">
     <meta property="og:site_name" content="Payhankey">
     <meta property="og:description" content="Monetize your posts, comments and views to earn daily">
     <meta property="og:type" content="website">
