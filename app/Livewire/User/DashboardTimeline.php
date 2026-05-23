@@ -18,16 +18,36 @@ class DashboardTimeline extends Component
 {
     use WithFileUploads;
 
+    // ── Composer ──────────────────────────────────────────────
     public string $content = '';
     public array  $images  = [];
 
-    public $video                    = null;
-    public int $videoUploadProgress  = 0;
+    // ── Video ─────────────────────────────────────────────────
+    public $video = null;
+
+    /**
+     * Status lifecycle:
+     *   ''          → nothing selected
+     *   'ready'     → file staged in Livewire temp, validated OK, awaiting Cloudinary push
+     *   'uploading' → Cloudinary push in progress
+     *   'done'      → Cloudinary finished, URL stored
+     *   'error'     → something failed
+     */
+    public string  $videoUploadStatus       = '';
+    public int     $videoUploadProgress     = 0;
     public ?string $cloudinaryVideoUrl      = null;
     public ?string $cloudinaryVideoPublicId = null;
-    public string $videoUploadStatus = '';
-    public bool $showVideoUpload     = false;
+    public ?string $cloudinaryThumbnailUrl  = null;
 
+    // Metadata extracted from Cloudinary response
+    public ?int    $videoDuration   = null;   // seconds
+    public ?int    $videoWidth      = null;   // pixels
+    public ?int    $videoHeight     = null;   // pixels
+    public ?string $videoFormat     = null;   // e.g. "mp4"
+    public ?int    $videoFileSize   = null;   // bytes
+    public array   $videoQualityVersions = []; // adaptive URLs keyed by quality
+
+    // ── Feed ──────────────────────────────────────────────────
     public Collection $posts;
     public int  $page    = 1;
     public bool $hasMore = true;
@@ -35,14 +55,14 @@ class DashboardTimeline extends Component
     public bool  $isVideoOpen   = false;
     public ?int  $activeVideoId = null;
 
-    // ─── Boot ────────────────────────────────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────
     public function mount(): void
     {
         $this->posts = collect();
         $this->loadPosts();
     }
 
-    // ─── Feed ────────────────────────────────────────────────────────────────────
+    // ── Feed ─────────────────────────────────────────────────
     public function loadPosts(): void
     {
         $allPosts = Post::with(['user', 'images', 'video'])
@@ -74,12 +94,12 @@ class DashboardTimeline extends Component
 
     public function loadNextPage(): void
     {
-        if (! $this->hasMore) return;
+        if (!$this->hasMore) return;
         $this->page++;
         $this->loadPosts();
     }
 
-    // ─── Video Player ─────────────────────────────────────────────────────────────
+    // ── Video Player ──────────────────────────────────────────
     public function openVideoPlayer(int $videoId): void
     {
         $this->activeVideoId = $videoId;
@@ -92,14 +112,14 @@ class DashboardTimeline extends Component
         $this->activeVideoId = null;
     }
 
-    // ─── Create Post ─────────────────────────────────────────────────────────────
+    // ── Create Post ───────────────────────────────────────────
     public function createPost(): void
     {
         $level = userLevel();
 
         $rules = ['content' => 'required|string'];
 
-        if (! in_array($level, ['Creator', 'Influencer'])) {
+        if (!in_array($level, ['Creator', 'Influencer'])) {
             $rules['content'] .= '|max:160';
         } else {
             $rules['images']   = 'nullable|array|max:4';
@@ -127,7 +147,6 @@ class DashboardTimeline extends Component
         $user    = Auth::user();
         $content = $this->convertUrlsToLinks($this->content);
 
-        // Duplicate check
         $existing = Post::where('user_id', $user->id)->pluck('content')->toArray();
         if (isSimilar($content, $existing, 4)) {
             session()->flash('info', 'This content is too similar to an existing post.');
@@ -161,7 +180,7 @@ class DashboardTimeline extends Component
         $this->loadPosts();
     }
 
-    // ─── Remove image (called from Alpine via Livewire.dispatch) ─────────────────
+    // ── Image helpers ─────────────────────────────────────────
     #[On('removeImageAt')]
     public function removeImageAt(int $index): void
     {
@@ -171,48 +190,80 @@ class DashboardTimeline extends Component
         }
     }
 
-    // Also keep the direct wire:click version for backwards compat
     public function removeImage(int $index): void
     {
         $this->removeImageAt($index);
     }
 
-    // ─── Video Upload ─────────────────────────────────────────────────────────────
-    public function toggleVideoUpload(): void
-    {
-        $level = userLevel();
-        if (! in_array($level, ['Creator', 'Influencer'])) {
-            session()->flash('error', 'Only Creators and Influencers can upload videos.');
-            return;
-        }
-        $this->showVideoUpload = ! $this->showVideoUpload;
-        $this->resetVideoState();
-    }
-
+    // ─────────────────────────────────────────────────────────
+    // STEP 1 — File selected → validate only, NO Cloudinary yet
+    //
+    // wire:model uploads the file to Livewire's local temp storage
+    // (chunked, fast). updatedVideo() fires when that completes.
+    // We ONLY validate here. Cloudinary upload is triggered by a
+    // separate button so it runs in its own HTTP request with no
+    // interference from the upload request.
+    // ─────────────────────────────────────────────────────────
     public function updatedVideo(): void
     {
-        if (! $this->video) return;
+        if (!$this->video) return;
 
-        $level   = userLevel();
-        $maxKB   = $level === 'Creator' ? 25600 : 102400;
+        $level = userLevel();
+        $maxKB = match ($level) {
+            'Creator'    => 162400,   // 200 MB
+            'Influencer' => 202400,  // 200 MB
+            default      => 0,
+        };
 
-        $this->validate([
+        if ($maxKB === 0) {
+            $this->videoUploadStatus = 'error';
+            $this->addError('video', 'Your account level cannot upload videos.');
+            return;
+        }
+
+        // Validate file type and size only
+        $valid = $this->validate([
             'video' => "required|file|mimetypes:video/mp4,video/quicktime,video/x-msvideo,video/webm|max:{$maxKB}",
         ]);
 
-        $this->initiateVideoUpload();
+        if ($valid) {
+            // File is good — mark as ready, wait for user to click Upload
+            $this->videoUploadStatus = 'ready';
+            // Tell Alpine to show the Upload button
+            $this->dispatch('videoUploadStatus', status: 'ready', progress: 0);
+        }
     }
 
-    protected function initiateVideoUpload(): void
+    // ─────────────────────────────────────────────────────────
+    // STEP 2 — User clicks "Upload to Cloudinary"
+    //
+    // This runs in its own separate Livewire request.
+    // set_time_limit(0) removes the PHP execution timeout so
+    // Cloudinary has as long as it needs.
+    // ─────────────────────────────────────────────────────────
+    public function uploadToCloudinary(): void
     {
-        $level = userLevel();
-
-        if (! in_array($level, ['Creator', 'Influencer'])) {
-            $this->videoUploadStatus = 'error';
+        if (!$this->video || $this->videoUploadStatus !== 'ready') {
             return;
         }
 
-        $maxSeconds = $level === 'Creator' ? 20 : 80;
+        $level = userLevel();
+
+        if (!in_array($level, ['Creator', 'Influencer'])) {
+            $this->videoUploadStatus = 'error';
+            session()->flash('error', 'Permission denied.');
+            return;
+        }
+
+        // Remove PHP execution time limit for this request only
+        // so Cloudinary upload doesn't get killed mid-way
+        set_time_limit(0);
+
+        $maxSeconds = match ($level) {
+            'Creator'    => 60,
+            'Influencer' => 180,
+            default      => 60,
+        };
 
         $this->videoUploadStatus   = 'uploading';
         $this->videoUploadProgress = 10;
@@ -233,36 +284,70 @@ class DashboardTimeline extends Component
 
             $this->cloudinaryVideoUrl      = $result->getSecurePath();
             $this->cloudinaryVideoPublicId = $result->getPublicId();
-            $this->videoUploadProgress     = 100;
-            $this->videoUploadStatus       = 'done';
+
+            // ── Extract metadata from Cloudinary response ─────────
+            // getResponse() returns the full raw array Cloudinary sends back
+            $raw = $result->getResponse();
+
+            $this->videoDuration = isset($raw['duration'])
+                ? (int) round((float) $raw['duration'])
+                : null;
+
+            $this->videoWidth    = $raw['width']    ?? null;
+            $this->videoHeight   = $raw['height']   ?? null;
+            $this->videoFormat   = $raw['format']   ?? null;
+            $this->videoFileSize = $raw['bytes']    ?? null;
+
+            // Build quality version URLs from eager results
+            // Cloudinary returns eager[] with the transformed URLs
+            $this->videoQualityVersions = [];
+            if (!empty($raw['eager'])) {
+                $qualityLabels = ['low', 'medium', 'high'];
+                foreach ($raw['eager'] as $i => $eager) {
+                    $label = $qualityLabels[$i] ?? 'q' . $i;
+                    $this->videoQualityVersions[$label] = $eager['secure_url'] ?? null;
+                }
+            }
+
+            // ── Build thumbnail URL from public_id ─────────────────
+            $cloudName = config('cloudinary.cloud_name')
+                ?? $this->extractCloudName(config('cloudinary.cloud_url', ''));
+
+            $this->cloudinaryThumbnailUrl = $cloudName
+                ? "https://res.cloudinary.com/{$cloudName}/video/upload/so_0,f_jpg,w_640,h_360,c_fill,q_auto/{$this->cloudinaryVideoPublicId}.jpg"
+                : null;
+
+            $this->videoUploadProgress = 100;
+            $this->videoUploadStatus   = 'done';
+
             $this->dispatch('videoUploadStatus', status: 'done', progress: 100);
 
         } catch (\Exception $e) {
             $this->videoUploadStatus   = 'error';
             $this->videoUploadProgress = 0;
             $this->dispatch('videoUploadStatus', status: 'error', progress: 0);
-            session()->flash('error', 'Video upload failed: ' . $e->getMessage());
+            session()->flash('error', 'Cloudinary upload failed: ' . $e->getMessage());
         }
     }
 
+    // ─────────────────────────────────────────────────────────
+    // STEP 3 — Publish the post (video already on Cloudinary)
+    // ─────────────────────────────────────────────────────────
     public function publishVideo(): void
     {
         $level = userLevel();
 
-        if (! in_array($level, ['Creator', 'Influencer'])) {
+        if (!in_array($level, ['Creator', 'Influencer'])) {
             session()->flash('error', 'Permission denied.');
             return;
         }
 
-        $this->validate([
-            'content'            => 'required|string',
-            'cloudinaryVideoUrl' => 'required|url',
-        ]);
-
-        if ($this->videoUploadStatus !== 'done') {
-            session()->flash('error', 'Please wait for the video to finish uploading.');
+        if ($this->videoUploadStatus !== 'done' || !$this->cloudinaryVideoUrl) {
+            session()->flash('error', 'Please upload your video first.');
             return;
         }
+
+        $this->validate(['content' => 'required|string']);
 
         $user = Auth::user();
 
@@ -276,16 +361,23 @@ class DashboardTimeline extends Component
         ]);
 
         PostVideo::create([
-            'user_id'   => $user->id,
-            'post_id'   => $post->id,
-            'path'      => $this->cloudinaryVideoUrl,
-            'public_id' => $this->cloudinaryVideoPublicId,
+            'user_id'            => $user->id,
+            'post_id'            => $post->id,
+            'path'               => $this->cloudinaryVideoUrl,
+            'public_id'          => $this->cloudinaryVideoPublicId,
+            'thumbnail_path'     => $this->cloudinaryThumbnailUrl,  // correct column name
+            'duration'           => $this->videoDuration,
+            'width'              => $this->videoWidth,
+            'height'             => $this->videoHeight,
+            'format'             => $this->videoFormat,
+            'file_size'          => $this->videoFileSize,
+            'quality_versions'   => $this->videoQualityVersions ?: null,
+            'processing_status'  => 'completed',
         ]);
 
         session()->flash('success', 'Video posted!');
         $this->reset('content');
         $this->resetVideoState();
-        $this->showVideoUpload = false;
         $this->dispatch('postPublished');
         $this->loadPosts();
     }
@@ -293,13 +385,13 @@ class DashboardTimeline extends Component
     #[On('cancelVideoUpload')]
     public function cancelVideoUpload(): void
     {
+        // Delete from Cloudinary only if fully uploaded
         if ($this->cloudinaryVideoPublicId) {
             try {
                 cloudinary()->destroy($this->cloudinaryVideoPublicId, ['resource_type' => 'video']);
             } catch (\Exception) {}
         }
         $this->resetVideoState();
-        $this->showVideoUpload = false;
     }
 
     protected function resetVideoState(): void
@@ -308,7 +400,24 @@ class DashboardTimeline extends Component
         $this->videoUploadProgress     = 0;
         $this->cloudinaryVideoUrl      = null;
         $this->cloudinaryVideoPublicId = null;
+        $this->cloudinaryThumbnailUrl  = null;
+        $this->videoDuration           = null;
+        $this->videoWidth              = null;
+        $this->videoHeight             = null;
+        $this->videoFormat             = null;
+        $this->videoFileSize           = null;
+        $this->videoQualityVersions    = [];
         $this->videoUploadStatus       = '';
+    }
+
+    /**
+     * Extract cloud name from the Cloudinary DSN string.
+     * e.g. "cloudinary://key:secret@my-cloud" → "my-cloud"
+     */
+    private function extractCloudName(string $dsn): ?string
+    {
+        preg_match('/cloudinary:\/\/[^:]+:[^@]+@([^\/\s]+)/', $dsn, $m);
+        return $m[1] ?? null;
     }
 
     private function convertUrlsToLinks(string $text): string

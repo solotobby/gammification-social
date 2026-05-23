@@ -43,6 +43,8 @@ class ViewService
 
             userActivity('views');
 
+            $post->video?->increment('view_count');
+
             if ($view->wasRecentlyCreated) {
                 $post->increment('views');
             } else {

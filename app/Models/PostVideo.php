@@ -161,4 +161,64 @@ class PostVideo extends Model
 
         return round($size, 2) . ' ' . $units[$unitIndex];
     }
+
+        public function getAdaptiveUrlAttribute(): string
+    {
+        if (! $this->public_id) return $this->path;
+ 
+        $cloud = config('cloudinary.cloud_url');   // e.g. "cloudinary://..."
+        // Extract cloud name from the DSN
+        preg_match('/cloudinary:\/\/[^:]+:[^@]+@([^\/]+)/', $cloud, $m);
+        $cloudName = $m[1] ?? null;
+ 
+        if (! $cloudName) return $this->path;
+ 
+        return "https://res.cloudinary.com/{$cloudName}/video/upload/f_auto,q_auto/{$this->public_id}.mp4";
+    }
+ 
+    /**
+     * Low-quality mobile URL (480p, q_auto:low).
+     */
+    public function getLowQualityUrlAttribute(): string
+    {
+        if (! $this->public_id) return $this->path;
+ 
+        preg_match('/cloudinary:\/\/[^:]+:[^@]+@([^\/]+)/', config('cloudinary.cloud_url'), $m);
+        $cloudName = $m[1] ?? null;
+        if (! $cloudName) return $this->path;
+ 
+        return "https://res.cloudinary.com/{$cloudName}/video/upload/f_auto,q_auto:low,w_480/{$this->public_id}.mp4";
+    }
+ 
+    /**
+     * Poster frame URL — used as the video thumbnail in the feed.
+     *
+     * Priority:
+     *   1. thumbnail column — stored at upload time (fastest, no Cloudinary round-trip)
+     *   2. Built on-the-fly from public_id using Cloudinary image transformation
+     *   3. Empty string — blade will show a placeholder
+     */
+    public function getPosterUrlAttribute(): string
+    {
+        // 1. Use stored thumbnail (set during uploadToCloudinary)
+        if ($this->thumbnail_path) {
+            return $this->thumbnail_path;
+        }
+ 
+        // 2. Build from public_id on the fly
+        if (! $this->public_id) return '';
+ 
+        $cloudName = config('cloudinary.cloud_name')
+            ?? $this->resolveCloudName();
+ 
+        if (! $cloudName) return '';
+ 
+        return "https://res.cloudinary.com/{$cloudName}/video/upload/so_0,f_jpg,w_640,h_360,c_fill,q_auto/{$this->public_id}.jpg";
+    }
+ 
+    private function resolveCloudName(): ?string
+    {
+        preg_match('/cloudinary:\/\/[^:]+:[^@]+@([^\/\s]+)/', config('cloudinary.cloud_url', ''), $m);
+        return $m[1] ?? null;
+    }
 }

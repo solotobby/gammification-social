@@ -92,9 +92,10 @@ class Post extends Model
 
     public function comments()
     {
-
         return $this->hasMany(UserComment::class);
     }
+
+ 
 
     public function unpaidComments()
     {

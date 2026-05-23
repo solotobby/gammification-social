@@ -1,651 +1,530 @@
+{{--
+    livewire/user/post-content.blade.php
+
+    Renders a single post card in the feed.
+    Handles: text · images (1-4) · video (thumbnail + play → video page)
+--}}
+
 <div>
-    {{-- Care about people's approval and you will be their prisoner. --}}
-    <style>
-        .fa-heart {
-            transition: transform .15s ease, color .15s ease;
-        }
+<style>
+/* ── Post card ─────────────────────────────────────────────── */
+.post-card {
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid #e4e6eb;
+    margin-bottom: 12px;
+    overflow: hidden;
+}
 
-        .fa-heart:active {
-            transform: scale(1.2);
-        }
+/* ── Header ────────────────────────────────────────────────── */
+.post-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px 8px;
+}
+.post-avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+.post-meta { flex: 1; min-width: 0; }
+.post-author {
+    font-weight: 700;
+    font-size: 14px;
+    color: #050505;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.post-author:hover { text-decoration: underline; color: #050505; }
+.post-time {
+    font-size: 12px;
+    color: #65676b;
+    margin-top: 1px;
+}
+.badge-creator {
+    display: inline-flex; align-items: center;
+    background: #e7f3ff; color: #1877f2;
+    font-size: 10px; font-weight: 700;
+    padding: 1px 6px; border-radius: 99px;
+    letter-spacing: .04em; text-transform: uppercase;
+}
+.badge-influencer {
+    display: inline-flex; align-items: center;
+    background: #f0e6ff; color: #7c3aed;
+    font-size: 10px; font-weight: 700;
+    padding: 1px 6px; border-radius: 99px;
+    letter-spacing: .04em; text-transform: uppercase;
+}
 
-        .link-preview-card {
-            display: block;
-            margin-top: 8px;
-            border: 1px solid #e1e8ed;
-            border-radius: 12px;
-            padding: 12px;
-            text-decoration: none;
-            color: inherit;
-        }
+/* ── Post text ─────────────────────────────────────────────── */
+.post-text {
+    padding: 0 16px 10px;
+    font-size: 15px;
+    line-height: 1.5;
+    color: #050505;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+.post-text a { color: #1877f2; text-decoration: none; }
+.post-text a:hover { text-decoration: underline; }
+.see-more-btn {
+    background: none; border: none; padding: 0;
+    color: #65676b; font-size: 14px; font-weight: 600;
+    cursor: pointer; font-family: inherit;
+}
 
-        .link-preview-host {
-            font-weight: 600;
-            color: #1d9bf0;
-        }
+/* ── Image grid ────────────────────────────────────────────── */
+.post-images { padding: 0; }
 
-        .link-preview-url {
-            font-size: 14px;
-            color: #536471;
-            word-break: break-all;
-        }
+.img-grid {
+    display: grid;
+    gap: 2px;
+    max-height: 500px;
+    overflow: hidden;
+}
+/* 1 image: full width, fixed height */
+.img-grid.count-1 {
+    grid-template-columns: 1fr;
+}
+.img-grid.count-1 .img-cell { height: 380px; }
 
-        .og-card {
-            display: block;
-            border: 1px solid #e1e8ed;
-            border-radius: 12px;
-            overflow: hidden;
-            text-decoration: none;
-            color: inherit;
-            margin-top: 8px;
-        }
+/* 2 images: side by side */
+.img-grid.count-2 {
+    grid-template-columns: 1fr 1fr;
+}
+.img-grid.count-2 .img-cell { height: 300px; }
 
-        .og-image {
-            width: 100%;
-            max-height: 220px;
-            object-fit: cover;
-        }
+/* 3 images: first full width, two below */
+.img-grid.count-3 {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 250px 250px;
+}
+.img-grid.count-3 .img-cell:first-child {
+    grid-column: 1 / -1;
+    height: 250px;
+}
+.img-grid.count-3 .img-cell { height: 250px; }
 
-        .og-body {
-            padding: 12px;
-        }
+/* 4 images: 2×2 grid */
+.img-grid.count-4 {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 220px 220px;
+}
+.img-grid.count-4 .img-cell { height: 220px; }
 
-        .og-title {
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
+.img-cell {
+    position: relative;
+    overflow: hidden;
+    background: #f0f2f5;
+    cursor: pointer;
+}
+.img-cell img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform .2s;
+}
+.img-cell:hover img { transform: scale(1.02); }
 
-        .og-desc {
-            font-size: 14px;
-            color: #536471;
-        }
+/* "+N more" overlay on last image when > 4 */
+.img-more-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 28px;
+    font-weight: 700;
+}
 
-        .og-host {
-            font-size: 13px;
-            color: #8899a6;
-            margin-top: 6px;
-        }
+/* ── Video thumbnail in feed ───────────────────────────────── */
+.post-video-thumb {
+    position: relative;
+    background: #000;
+    cursor: pointer;
+    overflow: hidden;
+    max-height: 400px;
+}
+.post-video-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform .2s;
+    max-height: 400px;
+}
+.post-video-thumb:hover img { transform: scale(1.02); }
 
+/* Play button overlay */
+.video-play-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,.25);
+    transition: background .2s;
+}
+.post-video-thumb:hover .video-play-overlay {
+    background: rgba(0,0,0,.4);
+}
+.play-btn {
+    width: 64px; height: 64px;
+    background: rgba(255,255,255,.92);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform .15s;
+}
+.post-video-thumb:hover .play-btn { transform: scale(1.1); }
+.play-btn svg { margin-left: 4px; }
 
-        .post-video {
-            aspect-ratio: 18/29;
-            background: #000;
-            border-radius: 8px;
-            overflow: hidden;
-            transition: transform 0.2s;
-        }
+/* Video badge: duration / role */
+.video-badge {
+    position: absolute;
+    bottom: 10px; left: 10px;
+    background: rgba(0,0,0,.65);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    letter-spacing: .03em;
+}
+.video-type-badge {
+    position: absolute;
+    top: 10px; left: 10px;
+    background: #f02849;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+}
 
-        .post-video:hover {
-            transform: scale(1.02);
-        }
+/* ── Action bar ────────────────────────────────────────────── */
+.post-actions {
+    display: flex;
+    border-top: 1px solid #e4e6eb;
+    margin: 8px 16px 0;
+    padding: 4px 0;
+}
+.post-action-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 4px;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #65676b;
+    cursor: pointer;
+    transition: background .15s;
+    font-family: inherit;
+    text-decoration: none;
+}
+.post-action-btn:hover { background: #f0f2f5; color: #050505; }
+.post-action-btn.liked { color: #e0245e; }
+.post-action-btn svg, .post-action-btn i { flex-shrink: 0; }
 
-        .post-video img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+/* ── Comments ──────────────────────────────────────────────── */
+.post-comments {
+    padding: 10px 16px 12px;
+    border-top: 1px solid #e4e6eb;
+    background: #f7f8fa;
+}
+</style>
 
-        .video-play-overlay {
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
+<div class="post-card">
 
-        .post-video:hover .video-play-overlay {
-            opacity: 1;
-        }
+    {{-- ── Header ─────────────────────────────────────────── --}}
+    <div class="post-header">
+        <a href="{{ url('profile/' . $post->user->username) }}">
+            <img class="post-avatar"
+                 src="{{ $post->user->avatar ?? asset('src/assets/media/avatars/avatar13.jpg') }}"
+                 alt="{{ $post->user->name }}">
+        </a>
 
-        .play-button {
-            width: 60px;
-            height: 60px;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            color: #000;
-            transition: transform 0.2s;
-        }
+        <div class="post-meta">
+            <a class="post-author" href="{{ url('profile/' . $post->user->username) }}">
+                {{ displayName($post->user->name) }}
 
-        .play-button:hover {
-            transform: scale(1.1);
-        }
-
-        .video-duration {
-            font-size: 12px;
-        }
-
-        .video-stats {
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-        }
-
-        .image-overlay {
-            background: rgba(0, 0, 0, 0.6);
-            border-radius: 8px;
-        }
-    </style>
-    {{-- <div wire:ignore.self class="block block-rounded block-bordered" id="posts"> --}}
-    <div wire:poll.visible.430s class="block block-rounded block-bordered" id="posts">
-
-        <div class="block-header block-header-default">
-
-            <div class="d-flex align-items-center">
-                @if (userLevel(@$post->user->id) == 'Basic')
-                    <a class="img-link me-1" href="{{ url('profile/' . @$post->user->username) }}">
-                        <img class="img-avatar img-avatar32 img-avatar-thumb"
-                            src="{{ @$post->user->avatar ?? asset('src/assets/media/avatars/avatar13.jpg') }}"
-                            alt="Avatar">
-                    </a>
-
-                    <a class="fw-semibold" href="{{ url('profile/' . @$post->user->username) }}"
-                        style="color: #5A4FDC">{{ displayName(@$post->user->name) }}</a>
-
-                    <a href="{{ url('profile/', @$post->user->username) }}" class="fs-sm text-muted mx-1"
-                        title="{{ @$post->user->username }}">
-                        @<span>{{ Str::limit(@$post->user->username, 10, '') }}</span>
-                    </a>
-                    <span class="mx-1 text-muted">&middot;</span>
-
-                    <span class="fs-sm text-muted ms-2">{{ @$post->created_at?->shortAbsoluteDiffForHumans() }}
-                    </span>
-                @elseif (userLevel(@$post->user->id) == 'Creator')
-                    <a class="img-link me-1" href="{{ url('profile/' . @$post->user->username) }}">
-                        <img class="img-avatar img-avatar32 img-avatar-thumb"
-                            src="{{ $post->user->avatar ?? asset('src/assets/media/avatars/avatar13.jpg') }}"
-                            alt="Avatar">
-                    </a>
-                    {{-- Username + Verified Tick --}}
-                    <div class="d-flex align-items-center">
-                        <a class="fw-semibold me-1" href="{{ url('profile/' . @$post->user->username) }}"
-                            style="color: #5A4FDC">
-                            {{ displayName(@$post->user->name) }}
-                        </a>
-
-                        {{-- @if ($post->user->is_verified) --}}
-                        <!-- Twitter-style blue tick SVG -->
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                            fill="#1DA1F2" class="ms-1">
-                            <path d="M22.5 5.5l-12 12-5.5-5.5 1.5-1.5 4 4 10.5-10.5z" />
-                        </svg>
-                        {{-- @endif --}}
-                    </div>
-
-                    <a href="{{ url('profile/', @$post->user->username) }}" class="fs-sm text-muted mx-1"
-                        title="{{ @$post->user->username }}">
-                        @<span>{{ Str::limit(@$post->user->username, 10, '') }}</span>
-                    </a>
-                    <span class="mx-1 text-muted">&middot;</span>
-
-                    {{-- Timestamp --}}
-                    <span class="fs-sm text-muted ms-2">
-                        {{ @$post->created_at?->shortAbsoluteDiffForHumans() }}
-                    </span>
-                @else
-                    {{-- Avatar --}}
-                    <a class="img-link me-2" href="{{ url('profile/' . @$post->user->username) }}">
-                        <img class="img-avatar img-avatar32 img-avatar-thumb rounded-circle border border-primary border-2"
-                            src="{{ @$post->user->avatar ?? asset('src/assets/media/avatars/avatar13.jpg') }}"
-                            alt="Avatar">
-                    </a>
-
-                    {{-- Username + Verified Tick --}}
-                    <div class="d-flex align-items-center">
-                        <a class="fw-semibold me-1" href="{{ url('profile/' . @$post->user->username) }}"
-                            style="color: #5A4FDC">
-                            {{ displayName(@$post->user->name) }}
-                        </a>
-
-                        {{-- @if ($post->user->is_verified) --}}
-                        <!-- Twitter-style blue tick SVG -->
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                            fill="#1DA1F2">
-                            <path d="M22.5 5.5l-12 12-5.5-5.5 1.5-1.5 4 4 10.5-10.5z" />
-                        </svg>
-                        {{-- @endif --}}
-                    </div>
-
-                    <a href="{{ url('profile/', @$post->user->username) }}" class="fs-sm text-muted mx-1"
-                        title="{{ @$post->user->username }}">
-                        {{-- @<span>{{ $post->user->username }}</span> --}}
-                        @<span>{{ Str::limit(@$post->user->username, 10, '') }}</span>
-                    </a>
-                    <span class="mx-1 text-muted">&middot;</span>
-
-                    {{-- Timestamp --}}
-                    <span class="fs-sm text-muted">
-                        {{ @$post->created_at?->shortAbsoluteDiffForHumans() }}
-                    </span>
+                {{-- Verified tick for Creator / Influencer --}}
+                @if(in_array(userLevel($post->user->id), ['Creator', 'Influencer']))
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="#1877f2">
+                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
                 @endif
+
+                {{-- Role badge --}}
+                {{-- @php $role = userLevel($post->user->id); @endphp
+                @if($role === 'Creator')
+                    <span class="badge-creator">Creator</span>
+                @elseif($role === 'Influencer')
+                    <span class="badge-influencer">Influencer</span>
+                @endif --}}
+            </a>
+            <div class="post-time">
+                <span>@</span>{{ $post->user->username }} · {{ $post->created_at->diffForHumans() }}
             </div>
-
-
-
-            {{-- <div class="block-options">
-
-                @if (auth()->user()->id == $post->user_id)
-                    <div class="dropdown">
-                        <button type="button" class="btn-block-option dropdown-toggle text-muted fs-sm"
-                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Est. Earning
-                            {{ getCurrencyCode() }}{{ estimatedEarnings($post->id) }}
-                        </button>
-
-                        <div class="dropdown-menu dropdown-menu-end">
-
-                            <a class="dropdown-item" href="{{ url('post/timeline/' . $post->id . '/analytics') }}">
-                                <i class="far fa-fw fa-eye text-success me-1"></i>Posts Est. Earnings
-                            </a>
-                            @if (userLevel(auth()->user()->id) == 'Creator' || userLevel(auth()->user()->id) == 'Influencer')
-                                <a class="dropdown-item" href="javascript:void(0)"
-                                    wire:click="openEditModal({{ $post->unicode }})" data-bs-toggle="modal"
-                                    data-bs-target="#modal-block-from-edit">
-                                    <i class="far fa-fw fa-edit text-primary me-1"></i> Edit Post
-                                </a>
-
-                                <a class="dropdown-item" href="javascript:void(0)"
-                                    wire:click="deletePost({{ $post->unicode }})">
-                                    <i class="far fa-fw fa-trash-alt text-danger me-1"></i> Delete Post
-                                </a>
-                            @endif
-                            <a class="dropdown-item" href="javascript:void(0)">
-                                <i class="far fa-fw fa-thumbs-down text-warning me-1"></i> Stop following this user
-                            </a>
-                            <div role="separator" class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="javascript:void(0)">
-                                <i class="fa fa-fw fa-exclamation-triangle me-1"></i> Report this post
-                            </a>
-                            <a class="dropdown-item" href="javascript:void(0)">
-                                <i class="fa fa-fw fa-bookmark me-1"></i> Bookmark this post
-                            </a>
-                        </div>
-                    </div>
-                @else
-                    <div class="dropdown">
-                        <button type="button" class="btn-block-option  text-muted fs-sm" aria-haspopup="true"
-                            aria-expanded="false">
-                            Est. Earning {{ getCurrencyCode() }}{{ estimatedEarnings($post->id) }}
-                        </button>
-                    </div>
-                @endif
-
-            </div> --}}
-
-
         </div>
 
+        {{-- Earnings (owner only) --}}
+        {{-- @if(auth()->id() === $post->user_id) --}}
+            <a href="{{ url('post/timeline/'.$post->id.'/analytics') }}"
+               style="font-size:12px;color:#65676b;text-decoration:none;white-space:nowrap">
+                {{ getCurrencyCode() }}{{ estimatedEarnings($post->id) }}
+            </a>
+        {{-- @endif --}}
+    </div>
+
+    {{-- ── Post text ───────────────────────────────────────── --}}
+    @if($post->content)
+        <div class="post-text" id="post-text-{{ $post->id }}">
+            @php
+                $fullText   = strip_tags($post->content);
+                $shortText  = Str::limit($fullText, 280);
+                $needsMore  = strlen($fullText) > 280;
+            @endphp
+
+            <span class="text-body" id="text-body-{{ $post->id }}">{{ $shortText }}</span>
+
+            @if($needsMore)
+                <button class="see-more-btn"
+                        onclick="
+                            document.getElementById('text-body-{{ $post->id }}').textContent = {{ json_encode($fullText) }};
+                            this.remove();
+                        ">
+                    See more
+                </button>
+            @endif
+        </div>
+    @endif
+
+    {{-- ═══════════════════════════════════════════════════════
+         IMAGES
+         ═══════════════════════════════════════════════════════ --}}
+    @if($post->images && $post->images->count())
         @php
-            $url = extractFirstUrl(@$post->content);
+            $imgs      = $post->images;
+            $total     = $imgs->count();
+            $shown     = $imgs->take(4);
+            $remaining = $total - 4;
         @endphp
 
-        <div class="block-content">
+        <div class="post-images">
+            <div class="img-grid count-{{ min($total, 4) }}">
+                @foreach($shown as $i => $image)
+                    <div class="img-cell">
+                        <a href="{{ $image->path }}"
+                           data-fslightbox="gallery-{{ $post->id }}">
+                            <img src="{{ $image->path }}"
+                                 alt="Post image"
+                                 loading="lazy">
+                        </a>
 
-            <div class="post-content" data-full="{!! e(strip_tags(@$post->content)) !!}"
-                data-short="{{ e(Str::limit(strip_tags(@$post->content), 130)) }}" data-expanded="false">
-
-                {!! Str::limit(strip_tags(@$post->content), 130) !!}
-
-                @if (Str::length(strip_tags(@$post->content)) > 130)
-                    <a href="#" class="see-more">See more</a>
-                @endif
-            </div>
-
-            @php
-                $imageCount = @$post->images->count();
-                // $videoCount = $post->videos->count();
-            @endphp
-
-
-            {{-- @if ($post->has_video && $post->video && $post->video->processing_status === 'completed')
-               
-                <div class="post-video position-relative" style="cursor: pointer;">
-                    <a href="{{ url('rolls', $post->video->id) }}" class="stretched-link"></a>
-
-                   
-                    <img src="{{ $post->video->thumbnail_path }}" alt="Video thumbnail" class="w-100 rounded">
-
-                    
-                    <div class="video-play-overlay position-absolute top-50 start-50 translate-middle">
-                        <div class="play-button">
-                            <i class="fas fa-play"></i>
-                        </div>
-                    </div>
-
-                    
-                    <span class="video-duration position-absolute bottom-0 end-0 m-2 badge bg-dark">
-                        {{ $post->video->formatted_duration }}
-                    </span>
-
-                
-                    <div class="video-stats position-absolute bottom-0 start-0 m-2 text-white">
-                        <small>
-                            <i class="fas fa-eye"></i>
-                            {{ formatCount($post->video->view_count) }}
-                        </small>
-                    </div>
-                </div>
-            @endif
-            @if ($post->has_video && $post->video && $post->video->processing_status === 'processing')
-                <div class="alert alert-info">
-                    <i class="fas fa-spinner fa-spin me-2"></i>
-                    Video is processing... Check back soon!
-                </div>
-            @endif --}}
-
-
-            {{-- image Processsing --}}
-
-            @if (@$imageCount)
-                <hr>
-                <div class="row g-sm js-gallery img-fluid-100">
-
-                    @php
-
-                        $col = match (@$imageCount) {
-                            1 => 'col-12',
-                            2 => 'col-6',
-                            3 => 'col-4',
-                            4 => 'col-3',
-                        };
-                    @endphp
-
-
-                    @foreach (@$post->images as $image)
-                        <div class="{{ $col }} mb-2">
-                            <a class="img-link img-link-simple img-link-zoom-in img-lightbox"
-                                href="{{ asset($image->path) }}">
-                                <img class="img-fluid rounded" loading="lazy" src="{{ asset($image->path) }}"
-                                    alt="Post image">
+                        {{-- "+N more" overlay on the 4th image --}}
+                        @if($i === 3 && $remaining > 0)
+                            <a href="{{ $image->path }}"
+                               data-fslightbox="gallery-{{ $post->id }}"
+                               class="img-more-overlay text-decoration-none">
+                                +{{ $remaining }}
                             </a>
-                        </div>
-                    @endforeach
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
 
+    {{-- ═══════════════════════════════════════════════════════
+         VIDEO THUMBNAIL IN FEED
+         Clicking takes the user to the full video player page.
+
+         Thumbnail priority:
+         1. $vid->thumbnail  — stored URL from Cloudinary at upload time
+         2. $vid->poster_url — accessor builds it from public_id on the fly
+         3. Placeholder       — dark box with video icon
+         ═══════════════════════════════════════════════════════ --}}
+    @if($post->video)
+        @php
+            $vid       = $post->video;
+            $playerUrl = url('rolls/' . $vid->id);
+
+            // Best thumbnail: stored column, then on-the-fly Cloudinary URL, then nothing
+            $poster = $vid->thumbnail_path
+                   ?? ($vid->public_id ? $vid->poster_url : null);
+
+                //    echo $playerUrl;
+        @endphp
+
+        <a href="{{ $playerUrl }}" class="post-video-thumb d-block text-decoration-none">
+
+            {{-- Poster frame --}}
+            @if($poster)
+                <img src="{{ $poster }}"
+                     alt="Video thumbnail"
+                     loading="lazy"
+                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                {{-- Hidden fallback shown if image fails to load --}}
+                <div style="display:none;height:300px;background:#111;align-items:center;justify-content:center">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" opacity=".4">
+                        <path d="M15 10l4.553-2.532A1 1 0 0121 8.382v7.236a1 1 0 01-1.447.894L15 14"/>
+                        <rect x="2" y="6" width="13" height="12" rx="2"/>
+                    </svg>
+                </div>
+            @else
+                {{-- No thumbnail: dark placeholder with video icon --}}
+                <div style="height:300px;background:#111;display:flex;align-items:center;justify-content:center">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" opacity=".4">
+                        <path d="M15 10l4.553-2.532A1 1 0 0121 8.382v7.236a1 1 0 01-1.447.894L15 14"/>
+                        <rect x="2" y="6" width="13" height="12" rx="2"/>
+                    </svg>
                 </div>
             @endif
 
-            {{-- @php
-                $url = extractFirstUrl($post->content);
-                $preview = $url ? getLinkPreview($url) : null;
-            @endphp
-
-            @if ($preview)
-                <a href="{{ $preview['url'] }}" target="_blank" class="og-card">
-                    @if ($preview['image'])
-                        <img src="{{ $preview['image'] }}" class="og-image">
-                    @endif
-
-                    <div class="og-body">
-                        <div class="og-title">{{ $preview['title'] }}</div>
-                        <div class="og-desc">{{ $preview['description'] }}</div>
-                        <div class="og-host">{{ @$preview['host'] }}</div>
-                    </div>
-                </a>
-            @endif --}}
-
-            {{-- @if ($url && ($embed = youtubeEmbed($url)))
-                    <iframe width="100%" height="315"
-                            src="{{ $embed }}"
-                            frameborder="0"
-                            allowfullscreen></iframe>
-                @endif --}}
-
-            {{-- @php
-                $url = extractFirstUrl($post->content);
-                $preview = $url ? getLinkPreview($url) : null;
-            @endphp
-
-            @if ($preview && !isEmbeddablePlatform($url))
-                <a href="{{ $preview['url'] }}" target="_blank" rel="noopener" class="og-card">
-
-                    @if (!empty($preview['image']))
-                        <div class="og-image-wrapper">
-                            <img src="{{ $preview['image'] }}" alt="{{ $preview['title'] ?? 'Link preview image' }}"
-                                loading="lazy">
-                        </div>
-                    @endif
-
-                    <div class="og-body">
-                        @if (!empty($preview['title']))
-                            <div class="og-title">
-                                {{ Str::limit($preview['title'], 80) }}
-                            </div>
-                        @endif
-
-                        @if (!empty($preview['description']))
-                            <div class="og-description">
-                                {{ Str::limit($preview['description'], 140) }}
-                            </div>
-                        @endif
-
-                        <div class="og-host">
-                            {{ @$preview['host'] }}
-                        </div>
-                    </div>
-                </a>
-            @endif --}}
-
-
-
-
-            {{-- @if ($url && ($embed = youtubeEmbed($url)))
-                <div class="youtube-embed">
-                    <iframe width="100%" height="315" src="{{ $embed }}" frameborder="0"
-                        allow="accelerometer; allow="autoplay; clipboard-write; encrypted-media; gyroscope;
-                        picture-in-picture; web-share" allowfullscreen>
-                    </iframe>
+            {{-- Play button overlay --}}
+            <div class="video-play-overlay">
+                <div class="play-btn">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="#050505">
+                        <polygon points="5 3 19 12 5 21 5 3"/>
+                    </svg>
                 </div>
+            </div>
+
+            {{-- "● VIDEO" badge --}}
+            <span class="video-type-badge">● Video</span>
+
+            {{-- Duration badge --}}
+            @if(!empty($vid->duration))
+                <span class="video-badge">{{ gmdate('i:s', $vid->duration) }}</span>
             @endif
 
-            @if ($url && isInstagramUrl($url))
-                <blockquote class="instagram-media" data-instgrm-permalink="{{ $url }}"
-                    data-instgrm-version="14" style="width:100%; margin: 0 auto;">
-                </blockquote>
-            @endif --}}
+        </a>
+    @endif
 
+    {{-- ── Action bar ──────────────────────────────────────── --}}
+    <div class="post-actions">
 
+        {{-- Like --}}
+        <button class="post-action-btn {{ $likedByMe ? 'liked' : '' }}"
+                wire:click="toggleLike">
+            <svg width="18" height="18" viewBox="0 0 24 24"
+                 fill="{{ $likedByMe ? 'currentColor' : 'none' }}"
+                 stroke="currentColor" stroke-width="2">
+                <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06
+                         a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78
+                         1.06-1.06a5.5 5.5 0 000-7.78z"/>
+            </svg>
+            {{ number_format($likesCount) }}
+        </button>
 
+        {{-- Comment --}}
+        <a class="post-action-btn" href="{{ url('timeline/'.$post->id) }}">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2">
+                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+            </svg>
+            {{ $commentCount }}
+        </a>
 
+        {{-- Views --}}
+        <span class="post-action-btn" style="cursor:default">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+            </svg>
+            {{ sumCounter($post->views, $post->views_external) }}
+        </span>
 
-
-            {{-- @if ($url)
-                @php $preview = buildLinkPreview($url); @endphp
-
-                <a href="{{ $preview['url'] }}" target="_blank" class="link-preview-card">
-
-                    <div class="link-preview-host">
-                        {{ @$preview['host'] }}
-                    </div>
-
-                    <div class="link-preview-url">
-                        {{ $preview['url'] }}
-                    </div>
-                </a>
-            @endif --}}
-
-
-
-            <ul class="nav nav-pills fs-sm push align-items-center">
-
-                {{-- ❤️ Like --}}
-                <li class="nav-item me-2">
-                    <a class="nav-link d-flex align-items-center gap-1" wire:click="toggleLike"
-                        href="javascript:void(0)">
-                        <i class="fa fa-heart transition"
-                            style="
-                    color: {{ $likedByMe ? '#e0245e' : '#6c757d' }};
-                    opacity: {{ $likedByMe ? '1' : '.6' }};"></i>
-
-                        <span>{{ number_format($likesCount) }}</span>
-                    </a>
-                </li>
-
-                {{-- 💬 Comments --}}
-                <li class="nav-item me-2">
-                    <a class="nav-link" href="{{ url('timeline/' . $post->id) }}">
-                        <i class="fa fa-comment-alt opacity-50 me-1"></i>
-                        {{ $commentCount }}
-                        {{-- {{ sumCounter($post->comments, $post->comments_external) }} --}}
-                    </a>
-                </li>
-
-                {{-- 👁 Views --}}
-                <li class="nav-item me-2">
-                    <a class="nav-link" href="javascript:void(0)">
-                        <i class="fa fa-eye opacity-50 me-1"></i>
-                        {{ sumCounter(@$post->views, @$post->views_external) }}
-                    </a>
-                </li>
-
-                {{-- 🔁 Share --}}
-                <li class="nav-item me-2">
-                    <a class="nav-link" href="javascript:void(0)" data-bs-toggle="modal"
-                        data-bs-target="#modal-block-fromright-{{ $post->id }}">
-                        <i class="fa fa-share opacity-50"></i>
-                    </a>
-                </li>
-
-                {{-- 📊 Analytics (owner only) --}}
-                @if (auth()->id() === @$post->user_id)
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url('post/timeline/' . @$post->id . '/analytics') }}">
-                            <i class="si si-bar-chart opacity-50"></i>
-                            {{ getCurrencyCode() }}{{ estimatedEarnings(@$post->id) }}
-                        </a>
-                    </li>
-                @else
-                    <li class="nav-item">
-                        <a class="nav-link" href="javascript:void(0)">
-                            <i class="si si-bar-chart opacity-50"></i>
-                            {{ getCurrencyCode() }}{{ estimatedEarnings(@$post->id) }}
-                        </a>
-                    </li>
-                @endif
-
-            </ul>
-
-        </div>
-
-        {{-- Comment section --}}
-        <div class="block-content block-content-full bg-body-light">
-             @if (userLevel() == 'Basic' && @$post->user_id == auth()->user()->id)
-                <li class="fa fa-usd"> </li> <a href="{{ url('upgrade') }}" class="text-mute">Monetize This Post</a>
-            @endif
-            <hr>
-
-            <livewire:user.post-comments :post="@$post" :wire:key="'post-comments-'.$post->id" />
-        </div>
-
-
-        {{-- @if($showPlayer)
-
-            <livewire:user.video-player 
-                :videoId="$activeVideoId"
-                wire:key="video-player-{{ $activeVideoId }}"
-            />
-
-        @endif --}}
-
-
-
+        {{-- Share --}}
+        <button class="post-action-btn"
+                data-bs-toggle="modal"
+                data-bs-target="#share-modal-{{ $post->id }}">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2">
+                <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/>
+                <circle cx="18" cy="19" r="3"/>
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+            </svg>
+            Share
+        </button>
 
     </div>
 
+    {{-- ── Comments section ───────────────────────────────── --}}
+    <div class="post-comments">
+        @if(userLevel() === 'Basic' && $post->user_id === auth()->id())
+            <a href="{{ url('upgrade') }}" style="font-size:12px;color:#65676b">
+                💰 Monetize this post
+            </a>
+            <hr class="my-2">
+        @endif
 
-    <!-- From Right Block Modal -->
-    <div class="modal fade" id="modal-block-fromright-{{ @$post->id }}" tabindex="-1" role="dialog"
-        aria-labelledby="modal-block-fromright" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-fromright" role="document">
-            <div class="modal-content">
-                <div class="block block-rounded block-themed block-transparent mb-0">
-                    <div class="block-header bg-primary-dark">
-                        <h3 class="block-title">Share Post</h3>
-                        <div class="block-options">
-                            <button type="button" class="btn-block-option" data-bs-dismiss="modal"
-                                aria-label="Close">
-                                <i class="fa fa-fw fa-times"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="block-content">
-                        <p>
-                            Share this Post on all social media and make money when people view, like or comment on the
-                            post
-                        </p>
-                        <p>
-                            {{ url('timeline/' . @$post->id) }}
-                        </p>
+        <livewire:user.post-comments
+            :post="$post"
+            :wire:key="'post-comments-'.$post->id" />
+    </div>
 
-                        <?php
-                        $url = url('timeline/' . @$post->id);
-                        ?>
+</div>
 
+{{-- ── Share modal ─────────────────────────────────────────── --}}
+<div class="modal fade" id="share-modal-{{ $post->id }}" tabindex="-1">
+    <div class="modal-dialog modal-dialog-fromright">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Share Post</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted mb-3">Share and earn when people engage with this post.</p>
 
-                        <button type="button" onclick="copyToClipboard('{{ $url }}')"
-                            class="btn btn-sm btn-alt-secondary" data-bs-dismiss="modal">Copy Link</button>
-                        <hr>
-                        <ul class="nav nav-pills fs-sm push">
-                            <li class="nav-item me-1">
+                @php $shareUrl = url('timeline/'.$post->id); @endphp
 
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control form-control-sm"
+                           value="{{ $shareUrl }}" readonly id="share-url-{{ $post->id }}">
+                    <button class="btn btn-outline-secondary btn-sm"
+                            onclick="navigator.clipboard.writeText('{{ $shareUrl }}')
+                                     .then(()=>this.textContent='Copied!')">
+                        Copy
+                    </button>
+                </div>
 
-                                <a class="nav-link"
-                                    href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode($url) }}"
-                                    target="_blank">
-                                    <i class="fab fa-facebook fa-2x opacity-50 me-1"></i>
-                                </a>
-
-
-                            </li>
-                            <li class="nav-item me-1">
-                                <a class="nav-link"
-                                    href="https://twitter.com/intent/tweet?url={{ urlencode($url) }}&text=Check%20this%20out!"
-                                    target="_blank">
-                                    <i class="fab fa-square-x-twitter fa-2x opacity-50 me-1"></i>
-                                </a>
-                            </li>
-                            <li class="nav-item me-1">
-                                <a class="nav-link" href="https://www.instagram.com/?url={{ urlencode($url) }}"
-                                    target="_blank">
-                                    <i class="fab fa-instagram fa-2x opacity-50 me-1"></i>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link"
-                                    href="https://www.linkedin.com/shareArticle?mini=true&url={{ urlencode($url) }}"
-                                    target="_blank">
-                                    <i class="fab fa-linkedin-in fa-2x opacity-50 me-1"></i>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link"
-                                    href="https://pinterest.com/pin/create/button/?url={{ urlencode($url) }}"
-                                    target="_blank">
-                                    <i class="fab fa-pinterest-p fa-2x opacity-50 me-1"></i>
-                                </a>
-                            </li>
-                        </ul>
-
-                    </div>
-                    <div class="block-content block-content-full text-end bg-body">
-                        <button type="button" class="btn btn-sm btn-primary" data-bs-dismiss="modal">Close</button>
-                    </div>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode($shareUrl) }}"
+                       target="_blank" class="btn btn-sm btn-primary">
+                        <i class="fab fa-facebook me-1"></i>Facebook
+                    </a>
+                    <a href="https://twitter.com/intent/tweet?url={{ urlencode($shareUrl) }}"
+                       target="_blank" class="btn btn-sm btn-dark">
+                        <i class="fab fa-x-twitter me-1"></i>Twitter
+                    </a>
+                    <a href="https://wa.me/?text={{ urlencode($shareUrl) }}"
+                       target="_blank" class="btn btn-sm btn-success">
+                        <i class="fab fa-whatsapp me-1"></i>WhatsApp
+                    </a>
+                    <a href="https://t.me/share/url?url={{ urlencode($shareUrl) }}"
+                       target="_blank" class="btn btn-sm btn-info text-white">
+                        <i class="fab fa-telegram me-1"></i>Telegram
+                    </a>
                 </div>
             </div>
         </div>
     </div>
-    <!-- END From Right Block Modal -->
-
-
-    <script>
-        document.addEventListener('click', function(e) {
-            if (!e.target.classList.contains('see-more')) return;
-
-            e.preventDefault();
-
-            const container = e.target.closest('.post-content');
-            if (!container) return;
-
-            container.innerText = container.dataset.full;
-        });
-    </script>
-
-
+</div>
 
 </div>

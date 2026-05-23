@@ -14,6 +14,7 @@ use App\Http\Controllers\CloudinaryWebhookController;
 use App\Http\Controllers\GeneralController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\RollsWatchController;
 use App\Http\Controllers\VideoAnalyticsController;
 use App\Http\Controllers\WebhookController;
 use App\Livewire\CreateProduct;
@@ -34,6 +35,7 @@ use App\Livewire\User\Profile;
 use App\Livewire\User\ProfileConnections;
 use App\Livewire\User\PromotionalContent;
 use App\Livewire\User\ReferralList;
+use App\Livewire\User\Rolls;
 use App\Livewire\User\Search;
 use App\Livewire\User\Settings;
 use App\Livewire\User\ShowNewPosts;
@@ -188,67 +190,73 @@ Route::middleware([
         Route::get('how/it/works', HowItWorks::class);
         Route::get('search/user', Search::class);
         // Route::get('rolls/play/{videoId}', VideoPlayer::class);
-        Route::get('rolls/{videoId}', VideoRolls::class)->name('rolls.show');
+
+
+        //VIDEO PLAYER ROUTE
+        Route::get('rolls/{videoId}', Rolls::class);
         // Route::get('earners/list', EarningList::class);
         Route::get('earner/list', EarningList::class);
         Route::get('user/blog', Blog::class);
         Route::get('user/payouts', Payout::class);
     });
 
-
-    Route::group(['middleware' => 'auth', 'role:admin'], function () {
-        Route::get('admin/home', [\App\Http\Controllers\Admin\AdminController::class, 'home'])->name('admin.home');
-
-        Route::get('user/list/{level}', [\App\Http\Controllers\Admin\UserController::class, 'userList'])->name('user.list');
-        Route::get('user/search', [\App\Http\Controllers\Admin\UserController::class, 'userSearch']);
-        Route::get('user/info/{id}', [\App\Http\Controllers\Admin\UserController::class, 'userInfo']);
-        Route::post('user/credit/wallet', [\App\Http\Controllers\Admin\UserController::class, 'processWalletCredit'])->name('credit.wallet');
-        Route::post('user/update/currency', [\App\Http\Controllers\Admin\UserController::class, 'updateCurrency'])->name('update.current');
-        Route::post('user/change/status', [\App\Http\Controllers\Admin\UserController::class, 'changeStatus'])->name('change.status');
-        Route::post('process/upgrade', [UserController::class, 'upgradeProcess'])->name('upgrade.user');
-        Route::get('add/bonus/{userId}/{levelid}', [UserController::class, 'creditBonus']);
-
-        Route::get('send/access/code', [\App\Http\Controllers\Admin\AccessCodeController::class, 'sendAccessCode'])->name('access.code.send');
-        Route::post('send/access/code', [\App\Http\Controllers\Admin\AccessCodeController::class, 'processValidateCode'])->name('immaculate');
-        Route::get('list/accesscode', [\App\Http\Controllers\Admin\AccessCodeController::class, 'listAccessCode'])->name('list.accesscode');
-        Route::get('generate/virtual/account/{partner_id}', [\App\Http\Controllers\Admin\PartnerController::class, 'generateVirtualAccount']);
-        // Route::get('partner/list', [\App\Http\Controllers\Admin\PartnerController::class, 'list']);
-        // Route::get('partner/payments', [\App\Http\Controllers\Admin\PartnerController::class, 'partnerPayments']);
-        // Route::get('partner/{id}/activate', [\App\Http\Controllers\Admin\PartnerController::class, 'viewPartnerActivate']);
-        // Route::get('partner/{id}', [\App\Http\Controllers\Admin\PartnerController::class, 'partnerInfo']);
-        // Route::get('partner/validate/activate/transaction/{id}', [\App\Http\Controllers\Admin\PartnerController::class, 'validateAgentTransaction']);
-        Route::get('withdrawal/list', [\App\Http\Controllers\Admin\WithdrawalController::class, 'withdrawalList']);
-        Route::get('withdrawal/list/{id}', [\App\Http\Controllers\Admin\WithdrawalController::class, 'withdrawalListUpdate']);
-        Route::get('level/management', [\App\Http\Controllers\Admin\LevelManagementController::class, 'index']);
-        Route::get('generate/plan/{id}', [LevelManagementController::class, 'generatePaystackPlanId']);
-        Route::get('payouts', [MonthlyPayoutController::class, 'payouts']);
-        Route::get('current/payouts', [MonthlyPayoutController::class, 'index']);
-        Route::get('/payouts/monthly/levels/{level}', [MonthlyPayoutController::class, 'levelUserBreakdown']);
-        Route::get('process/payouts/monthly/levels/{level}', [MonthlyPayoutController::class, 'processLevelPrayout']);
-        Route::get('user/engagement/analytics/{id}', [UserEngagementController::class, 'engagementAnalytics']);
-        Route::get('user/transaction/list/{id}', [UserController::class, 'transactionList']);
-        Route::get('user/post/list/{id}', [UserController::class, 'postList']);
-        Route::get('user/engagement/payouts', [EngagementPayoutController::class, 'index']);
-        Route::get('user/bank/information', [UserController::class, 'bankInformation']);
-        Route::get('monthly/payout/{level}', [PayoutController::class, 'index']);
-        Route::get('user/queue/payout/{id}', [PayoutController::class, 'queuePayout']);
-        Route::get('view/payout/info/{id}', [PayoutController::class, 'viewPayoutInformation']);
-        Route::post('fund/transfer', [PayoutController::class, 'fundTransfer'])->name('fund.transfer');
-        Route::get('update/payout/fund/{id}', [PayoutController::class, 'updatePayoutStatus']);
-
-        Route::get('create/blog/post', [AdminBlogController::class, 'create'])->name('create');
-        Route::get('view/blog/list', [AdminBlogController::class, 'list'])->name('list');
-        Route::post('create/blog/post', [AdminBlogController::class, 'store'])->name('store.blog');
-        Route::get('delete/blog/{slug}', [AdminBlogController::class, 'deletePost']);
-
-        Route::get('currency/list', [CurrencyController::class, 'index'])->name('currency.list');
-        Route::get('currency/status/{id}', [CurrencyController::class, 'changeStatus'])->name('currency.status');
-        Route::put('currency/update/{id}', [CurrencyController::class, 'update'])->name('currency.update');
+    // Route::get('rolls/{video}', VideoRolls::class);
 
 
-         Route::get('admin/subscribe/test/{levelId}', [AdminController::class, 'testSubscription'])->name('test.subscribe');
-         Route::get('admin/verify/flutterwave/charge/admin', [AdminController::class, 'verifyFlutterwaveAdminCharge'])->name('verify.flutterwave.charge.admin'); 
 
-            
-    });
+});
+
+
+Route::group(['middleware' => 'auth', 'role:admin'], function () {
+    Route::get('admin/home', [\App\Http\Controllers\Admin\AdminController::class, 'home'])->name('admin.home');
+
+    Route::get('user/list/{level}', [\App\Http\Controllers\Admin\UserController::class, 'userList'])->name('user.list');
+    Route::get('user/search', [\App\Http\Controllers\Admin\UserController::class, 'userSearch']);
+    Route::get('user/info/{id}', [\App\Http\Controllers\Admin\UserController::class, 'userInfo']);
+    Route::post('user/credit/wallet', [\App\Http\Controllers\Admin\UserController::class, 'processWalletCredit'])->name('credit.wallet');
+    Route::post('user/update/currency', [\App\Http\Controllers\Admin\UserController::class, 'updateCurrency'])->name('update.current');
+    Route::post('user/change/status', [\App\Http\Controllers\Admin\UserController::class, 'changeStatus'])->name('change.status');
+    Route::post('process/upgrade', [UserController::class, 'upgradeProcess'])->name('upgrade.user');
+    Route::get('add/bonus/{userId}/{levelid}', [UserController::class, 'creditBonus']);
+
+    Route::get('send/access/code', [\App\Http\Controllers\Admin\AccessCodeController::class, 'sendAccessCode'])->name('access.code.send');
+    Route::post('send/access/code', [\App\Http\Controllers\Admin\AccessCodeController::class, 'processValidateCode'])->name('immaculate');
+    Route::get('list/accesscode', [\App\Http\Controllers\Admin\AccessCodeController::class, 'listAccessCode'])->name('list.accesscode');
+    Route::get('generate/virtual/account/{partner_id}', [\App\Http\Controllers\Admin\PartnerController::class, 'generateVirtualAccount']);
+    // Route::get('partner/list', [\App\Http\Controllers\Admin\PartnerController::class, 'list']);
+    // Route::get('partner/payments', [\App\Http\Controllers\Admin\PartnerController::class, 'partnerPayments']);
+    // Route::get('partner/{id}/activate', [\App\Http\Controllers\Admin\PartnerController::class, 'viewPartnerActivate']);
+    // Route::get('partner/{id}', [\App\Http\Controllers\Admin\PartnerController::class, 'partnerInfo']);
+    // Route::get('partner/validate/activate/transaction/{id}', [\App\Http\Controllers\Admin\PartnerController::class, 'validateAgentTransaction']);
+    Route::get('withdrawal/list', [\App\Http\Controllers\Admin\WithdrawalController::class, 'withdrawalList']);
+    Route::get('withdrawal/list/{id}', [\App\Http\Controllers\Admin\WithdrawalController::class, 'withdrawalListUpdate']);
+    Route::get('level/management', [\App\Http\Controllers\Admin\LevelManagementController::class, 'index']);
+    Route::get('generate/plan/{id}', [LevelManagementController::class, 'generatePaystackPlanId']);
+    Route::get('payouts', [MonthlyPayoutController::class, 'payouts']);
+    Route::get('current/payouts', [MonthlyPayoutController::class, 'index']);
+    Route::get('/payouts/monthly/levels/{level}', [MonthlyPayoutController::class, 'levelUserBreakdown']);
+    Route::get('process/payouts/monthly/levels/{level}', [MonthlyPayoutController::class, 'processLevelPrayout']);
+    Route::get('user/engagement/analytics/{id}', [UserEngagementController::class, 'engagementAnalytics']);
+    Route::get('user/transaction/list/{id}', [UserController::class, 'transactionList']);
+    Route::get('user/post/list/{id}', [UserController::class, 'postList']);
+    Route::get('user/engagement/payouts', [EngagementPayoutController::class, 'index']);
+    Route::get('user/bank/information', [UserController::class, 'bankInformation']);
+    Route::get('monthly/payout/{level}', [PayoutController::class, 'index']);
+    Route::get('user/queue/payout/{id}', [PayoutController::class, 'queuePayout']);
+    Route::get('view/payout/info/{id}', [PayoutController::class, 'viewPayoutInformation']);
+    Route::post('fund/transfer', [PayoutController::class, 'fundTransfer'])->name('fund.transfer');
+    Route::get('update/payout/fund/{id}', [PayoutController::class, 'updatePayoutStatus']);
+
+    Route::get('create/blog/post', [AdminBlogController::class, 'create'])->name('create');
+    Route::get('view/blog/list', [AdminBlogController::class, 'list'])->name('list');
+    Route::post('create/blog/post', [AdminBlogController::class, 'store'])->name('store.blog');
+    Route::get('delete/blog/{slug}', [AdminBlogController::class, 'deletePost']);
+
+    Route::get('currency/list', [CurrencyController::class, 'index'])->name('currency.list');
+    Route::get('currency/status/{id}', [CurrencyController::class, 'changeStatus'])->name('currency.status');
+    Route::put('currency/update/{id}', [CurrencyController::class, 'update'])->name('currency.update');
+
+
+    Route::get('admin/subscribe/test/{levelId}', [AdminController::class, 'testSubscription'])->name('test.subscribe');
+    Route::get('admin/verify/flutterwave/charge/admin', [AdminController::class, 'verifyFlutterwaveAdminCharge'])->name('verify.flutterwave.charge.admin');
 });
