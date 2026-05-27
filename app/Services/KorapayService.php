@@ -49,7 +49,7 @@ class KorapayService
         }
 
         // Always charge in NGN (single source of truth)
-        $amountNGN = convertToBaseCurrency($amount, 'NGN');
+        $amountNGN = convertToBaseCurrency($level->amount, 'NGN');
 
         return $this->callKoraPay($amountNGN, $level);
 
