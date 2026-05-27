@@ -69,10 +69,24 @@ class WebhookController extends Controller
                 return response()->json(['status' => 'error', 'message' => 'Currency mismatch'], 400);
             }
 
+            $subject = 'Webhook Received: Kora Pay Security Checks Passed';
+            $content = "Security checks passed for event: {$request['event']}. Transaction ref: {$reference} is being processed.";
+
+
+            Mail::to('solotob3@gmail.com')
+                ->send(new GeneralMail(
+                    (object)[
+                        'name' => 'Oluwatobi Solomon',
+                        'email' => 'solotob3@gmail.com'
+                    ],
+                    $subject,
+                    $content
+                ));
+
 
             if ($status === 'success') {
 
-                DB::transaction(function () use ($transaction, $payload, $event) {
+                DB::transaction(function () use ($transaction, $payload, $event, $reference) {
 
                     /**
                      * Refresh transaction
@@ -98,6 +112,22 @@ class WebhookController extends Controller
                         $transaction,
                         $payload
                     );
+
+                    $subject = 'Webhook Received: Upgrade Processed Successfully';
+                    $content = "Upgrade processed successfully for event: {$event}. Transaction ref: {$reference} has been marked successful and subscription upgraded.";
+
+
+                    Mail::to('solotob3@gmail.com')
+                        ->send(new GeneralMail(
+                            (object)[
+                                'name' => 'Oluwatobi Solomon',
+                                'email' => 'solotob3@gmail.com'
+                            ],
+                            $subject,
+                            $content
+                        ));
+
+                        
 
                     return response()->json(['status' => 'success'], 200);
                 });
