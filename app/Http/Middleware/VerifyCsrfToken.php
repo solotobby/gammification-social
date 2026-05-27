@@ -14,5 +14,6 @@ class VerifyCsrfToken extends Middleware
     protected $except = [
         'webhooks/cloudinary/video-processing',
         'flutterwave/webhook',
+        'korapay/webhook',
     ];
 }

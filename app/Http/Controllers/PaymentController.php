@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Transaction;
 use App\Services\FlutterwavePaymentService;
+use App\Services\KorapayService;
 use App\Services\SubscriptionService;
 use App\Services\TransactionService;
 use Illuminate\Http\Request;
@@ -14,23 +15,28 @@ class PaymentController extends Controller
     protected SubscriptionService $subscriptionService;
     protected FlutterwavePaymentService $flutterwavePaymentService;
     protected TransactionService $transactionService;
+    protected KorapayService $korapayService;
 
-    public function __construct(SubscriptionService $subscriptionService, FlutterwavePaymentService $flutterwavePaymentService, TransactionService $transactionService)
+    public function __construct(SubscriptionService $subscriptionService, FlutterwavePaymentService $flutterwavePaymentService, TransactionService $transactionService, KorapayService $korapayService)
     {
         $this->middleware('auth');
         $this->subscriptionService = $subscriptionService;
         $this->flutterwavePaymentService = $flutterwavePaymentService;
         $this->transactionService = $transactionService;
+        $this->korapayService = $korapayService;
     }
 
-    public function createSubscription($levelId, SubscriptionService $subscriptionService, FlutterwavePaymentService $flutterwavePaymentService)
+    public function createSubscription($levelId, SubscriptionService $subscriptionService, FlutterwavePaymentService $flutterwavePaymentService, KorapayService $korapayService)
     {
 
         $user = auth()->user();
         $userCurrency = $user->wallet->currency;
 
         if ($userCurrency == 'NGN') {
-            $authUrl = $subscriptionService->processSubscriptionPayment($levelId);
+
+
+            $authUrl = $korapayService->initiatePayment($levelId);
+            //$subscriptionService->processSubscriptionPayment($levelId);
 
             return redirect($authUrl);
         } else {
@@ -52,18 +58,17 @@ class PaymentController extends Controller
         }
     }
 
-    public function verifyKoraSubscriptionPayment(SubscriptionService $subscriptionService)
+    public function verifyKoraSubscriptionPayment(SubscriptionService $subscriptionService, KorapayService $korapayService)
     {
 
         try {
-            $result = $subscriptionService->verifySubscriptionPayment(
+            $result = $korapayService->verifySubscriptionPayment(
                 $reference = request()->query('reference')
             );
 
             return redirect('upgrade')->with(
                 'success',
-                "Successfully upgraded to {$result['level_name']}. " .
-                    "Next payment: {$result['next_payment_date']->toDateString()}"
+                "Payment received successfully. Account upgrade processing..."
             );
         } catch (\Exception $e) {
             return redirect('upgrade')->with(

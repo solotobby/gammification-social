@@ -164,7 +164,7 @@ class FlutterwavePaymentService
                 reference: $reference,
                 amount: $amount,
                 currency: $userCurrency,
-                status: 'pending',
+                status: 'initiated',
                 action: 'Debit',
                 type: 'subscription_upgrade',
                 description: $user->name . ' upgrade to ' . $level->name,
@@ -595,7 +595,7 @@ class FlutterwavePaymentService
         }
     }
 
-    public function createAdminCharge($levelId)
+    public function createAdminCharge($levelId) //relatively decomissioned, but can be used for testing and admin initiated charges
     {
 
         return DB::transaction(function () use ($levelId) {

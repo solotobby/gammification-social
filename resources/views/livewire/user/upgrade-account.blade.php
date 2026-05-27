@@ -20,7 +20,6 @@
 
             @include('layouts.upgrade')
 
-
     </main>
 
 

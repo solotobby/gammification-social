@@ -112,6 +112,7 @@ Route::group(['namespace' => 'auth'], function () {
 
     Route::post('/webhooks/cloudinary/video-processing', [CloudinaryWebhookController::class, 'handleVideoProcessing'])->name('cloudinary.webhook');
     Route::post('flutterwave/webhook', [WebhookController::class, 'flutterwave'])->name('flutterwave.webhook');
+    Route::post('korapay/webhook', [WebhookController::class, 'korapay'])->name('korapay.webhook');
 
 
     // Route::post('post/comment', [\App\Http\Controllers\GeneralController::class, 'comment']);

@@ -12,6 +12,7 @@ use App\Models\Transaction;
 use App\Models\User;
 use App\Models\UserLevel;
 use App\Services\FlutterwavePaymentService;
+use App\Services\KorapayService;
 use App\Services\TransactionService;
 use App\Services\UpgradeSubscriptionService;
 use Illuminate\Http\Request;
@@ -25,12 +26,14 @@ class AdminController extends Controller
     protected FlutterwavePaymentService $flutterwavePaymentService;
     protected TransactionService $transactionService;
     protected UpgradeSubscriptionService $upgradeSubscriptionService;
+    protected KorapayService $korapayService;
 
-    public function __construct(FlutterwavePaymentService $flutterwavePaymentService, TransactionService $transactionService, UpgradeSubscriptionService $upgradeSubscriptionService)
+    public function __construct(FlutterwavePaymentService $flutterwavePaymentService, TransactionService $transactionService, UpgradeSubscriptionService $upgradeSubscriptionService, KorapayService $korapayService)
     {
         $this->flutterwavePaymentService = $flutterwavePaymentService;
         $this->transactionService = $transactionService;
         $this->upgradeSubscriptionService = $upgradeSubscriptionService;
+        $this->korapayService = $korapayService;
     }
 
     public function home()
@@ -76,7 +79,8 @@ class AdminController extends Controller
 
     public function testSubscription($levelId)
     {
-        $url = $this->flutterwavePaymentService->createAdminCharge($levelId);
+            $url = $this->korapayService->initiatePayment($levelId, 200);
+        // $url = $this->flutterwavePaymentService->createAdminCharge($levelId);
         return redirect($url);
     }
 

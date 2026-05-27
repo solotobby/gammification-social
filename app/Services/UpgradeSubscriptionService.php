@@ -46,6 +46,7 @@ class UpgradeSubscriptionService
             $nextPaymentDate = now()->addMonth();
 
             $this->transactionService->markSuccessful($transaction, $payload); //first mark transaction successful
+            
             $user = User::with('wallet')->findOrFail($transaction->user_id);
             $currency = $user->wallet->currency; // get user currency
 

@@ -30,6 +30,108 @@ class WebhookController extends Controller
     }
 
 
+    public function korapay(Request $request)
+    {
+        $payload = $request->all();
+        $event = $request['event'];
+
+        ApiResponse::create(['response' => $request]); //store the webhook payload for debugging and auditing purposes
+
+        if ($event == 'charge.success') {
+            // Handle successful charge event
+
+            $amount = $request['data']['amount'] / 100;
+            $status = $request['data']['status'];
+            $reference = $request['data']['reference'];
+            $channel = $request['data']['payment_method'];
+            $currency = $request['data']['currency'];
+
+            //fetch payment information from the database using the reference
+            $transaction = Transaction::query()
+                ->where('ref', $reference)
+                ->lockForUpdate()
+                ->first();
+
+
+            if (!$transaction) {
+                Log::error('Transaction not found for reference: ' . $reference);
+                return response()->json(['status' => 'error', 'message' => 'Transaction not found'], 404);
+            }
+
+            //verify amount and currency match
+            if (round($transaction->amount, 2) != round($amount, 2)) {
+                Log::error('Amount mismatch for reference: ' . $reference);
+                return response()->json(['status' => 'error', 'message' => 'Amount mismatch'], 400);
+            }
+
+            if (strtoupper($transaction->currency) != strtoupper($currency)) {
+                Log::error('Currency mismatch for reference: ' . $reference);
+                return response()->json(['status' => 'error', 'message' => 'Currency mismatch'], 400);
+            }
+
+
+            if ($status === 'success') {
+
+                DB::transaction(function () use ($transaction, $payload, $event) {
+
+                    /**
+                     * Refresh transaction
+                     */
+                    $transaction->refresh();
+
+                    /**
+                     * Double-check idempotency
+                     */
+                    if (
+                        $transaction->status === 'successful'
+                    ) {
+                        return;
+                    }
+
+                    $level = Level::where('id', $transaction->meta['level_id'])
+                        ->first();
+
+                    //mark transaction successful now and then perform subscription upgrade in the service to ensure atomicity and prevent issues with failed upgrades after marking transaction successful
+                    $this->upgradeSubscriptionService->upgradeSubscription(
+                        $transaction->user,
+                        $level,
+                        $transaction,
+                        $payload
+                    );
+
+                    return response()->json(['status' => 'success'], 200);
+                });
+                return response()->json(['status' => 'success'], 200);
+            } else {
+                // Handle failed payment or other statuses if needed
+                $this->transactionService->markFailed($transaction, $payload);
+                return response()->json(['status' => 'error', 'message' => 'Payment failed'], 400);
+            }
+        } else {
+            // Handle other events or ignore
+            return response()->json(['status' => 'error'], 500);
+        }
+
+        /**
+         * =====================================================
+         * HANDLE FAILED PAYMENTS
+         * =====================================================
+         */
+        $transaction->update([
+            'status' => $gatewayStatus,
+            'meta'
+            => $payload,
+        ]);
+
+        $this->transactionService->markFailed($transaction, $payload);
+
+        return response(
+            'Webhook processed',
+            200
+        );
+    }
+
+
     public function handle(Request $request)
     {
 
@@ -143,7 +245,7 @@ class WebhookController extends Controller
     public function flutterwave(Request $request)
     {
 
-         $signature = $request->header('verif-hash');
+        $signature = $request->header('verif-hash');
 
         /**
          * Secret Hash from Flutterwave Dashboard
@@ -175,15 +277,15 @@ class WebhookController extends Controller
         $content = "Signature verification successful for event: {$request['event']}";
 
 
-            Mail::to('solotob3@gmail.com')
-                ->send(new GeneralMail(
-                    (object)[
-                        'name' => 'Oluwatobi Solomon',
-                        'email' => 'solotob3@gmail.com'
-                    ],
-                    $subject,
-                    $content
-                ));
+        Mail::to('solotob3@gmail.com')
+            ->send(new GeneralMail(
+                (object)[
+                    'name' => 'Oluwatobi Solomon',
+                    'email' => 'solotob3@gmail.com'
+                ],
+                $subject,
+                $content
+            ));
 
 
 
@@ -324,15 +426,15 @@ class WebhookController extends Controller
         $content = "Security checks passed for event: {$request['event']}. Transaction ref: {$txRef} is being processed.";
 
 
-            Mail::to('solotob3@gmail.com')
-                ->send(new GeneralMail(
-                    (object)[
-                        'name' => 'Oluwatobi Solomon',
-                        'email' => 'solotob3@gmail.com'
-                    ],
-                    $subject,
-                    $content
-                ));
+        Mail::to('solotob3@gmail.com')
+            ->send(new GeneralMail(
+                (object)[
+                    'name' => 'Oluwatobi Solomon',
+                    'email' => 'solotob3@gmail.com'
+                ],
+                $subject,
+                $content
+            ));
 
 
 
@@ -379,18 +481,18 @@ class WebhookController extends Controller
                 );
 
                 $subject = 'Webhook Received: Upgrade Processed Successfully';
-        $content = "Upgrade processed successfully for event: {$event}. Transaction ref: {$txRef} has been marked successful and subscription upgraded.";
+                $content = "Upgrade processed successfully for event: {$event}. Transaction ref: {$txRef} has been marked successful and subscription upgraded.";
 
 
-            Mail::to('solotob3@gmail.com')
-                ->send(new GeneralMail(
-                    (object)[
-                        'name' => 'Oluwatobi Solomon',
-                        'email' => 'solotob3@gmail.com'
-                    ],
-                    $subject,
-                    $content
-                ));
+                Mail::to('solotob3@gmail.com')
+                    ->send(new GeneralMail(
+                        (object)[
+                            'name' => 'Oluwatobi Solomon',
+                            'email' => 'solotob3@gmail.com'
+                        ],
+                        $subject,
+                        $content
+                    ));
 
                 // event(new PaymentSuccessful($transaction));
             });
