@@ -104,6 +104,18 @@ class WebhookController extends Controller
 
         $reference = $payload['data']['reference'];
 
+          Mail::to('solotob3@gmail.com')
+                        ->send(
+                            new GeneralMail(
+                                (object)[
+                                    'name' => 'Admin',
+                                    'email' => 'solotob3@gmail.com'
+                                ],
+                                'Kora Webhook Received',
+                                "Webhook {$event} received successfully for {$reference}"
+                            )
+                        );
+
         /**
          * =========================================================
          * STEP 4: PREVENT REPLAY ATTACKS / DUPLICATE EVENTS
@@ -143,6 +155,18 @@ class WebhookController extends Controller
                 $reference,
                 $event
             ) {
+
+                  Mail::to('solotob3@gmail.com')
+                        ->send(
+                            new GeneralMail(
+                                (object)[
+                                    'name' => 'Admin',
+                                    'email' => 'solotob3@gmail.com'
+                                ],
+                                'Kora Webhook Transaction Started',
+                                "Webhook {$event} started successfully for {$reference}"
+                            )
+                        );
 
                 /**
                  * =====================================================
@@ -214,6 +238,8 @@ class WebhookController extends Controller
                     throw new \Exception('Currency mismatch');
                 }
 
+
+
                 /**
                  * =====================================================
                  * VERIFY PAYMENT STATUS
@@ -238,6 +264,18 @@ class WebhookController extends Controller
                     return;
                 }
 
+                  Mail::to('solotob3@gmail.com')
+                        ->send(
+                            new GeneralMail(
+                                (object)[
+                                    'name' => 'Admin',
+                                    'email' => 'solotob3@gmail.com'
+                                ],
+                                'Kora Webhook Payment Status Verified',
+                                "Webhook {$event} payment status verified successfully for {$reference}"
+                            )
+                        );
+
                 /**
                  * =====================================================
                  * FETCH SUBSCRIPTION LEVEL
@@ -259,6 +297,18 @@ class WebhookController extends Controller
 
                     throw new \Exception('Subscription level missing');
                 }
+
+                  Mail::to('solotob3@gmail.com')
+                        ->send(
+                            new GeneralMail(
+                                (object)[
+                                    'name' => 'Admin',
+                                    'email' => 'solotob3@gmail.com'
+                                ],
+                                'Kora Webhook Level Fetched Successfully',
+                                "Webhook {$event} level fetched successfully for {$reference}"
+                            )
+                        );
 
                 /**
                  * =====================================================
