@@ -56,44 +56,43 @@ class WebhookController extends Controller
                 ->first();
 
 
-            if (!$transaction) {
-                Log::error('Transaction not found for reference: ' . $reference);
-                return response()->json(['status' => 'error', 'message' => 'Transaction not found'], 404);
-            }
+            // if (!$transaction) {
+            //     Log::error('Transaction not found for reference: ' . $reference);
+            //     return response()->json(['status' => 'error', 'message' => 'Transaction not found'], 404);
+            // }
 
-            //verify amount and currency match
-            if (round($transaction->amount, 2) != round($amount, 2)) {
-                Log::error('Amount mismatch for reference: ' . $reference);
-                return response()->json(['status' => 'error', 'message' => 'Amount mismatch'], 400);
-            }
+            // //verify amount and currency match
+            // if (round($transaction->amount, 2) != round($amount, 2)) {
+            //     Log::error('Amount mismatch for reference: ' . $reference);
+            //     return response()->json(['status' => 'error', 'message' => 'Amount mismatch'], 400);
+            // }
 
-            if (strtoupper($transaction->currency) != strtoupper($currency)) {
-                Log::error('Currency mismatch for reference: ' . $reference);
-                return response()->json(['status' => 'error', 'message' => 'Currency mismatch'], 400);
-            }
+            // if (strtoupper($transaction->currency) != strtoupper($currency)) {
+            //     Log::error('Currency mismatch for reference: ' . $reference);
+            //     return response()->json(['status' => 'error', 'message' => 'Currency mismatch'], 400);
+            // }
 
-            $subject = 'Webhook Received: Kora Pay Security Checks Passed';
-            $content = "Security checks passed for event: {$request['event']}. Transaction ref: {$reference} is being processed.";
+            // $subject = 'Webhook Received: Kora Pay Security Checks Passed';
+            // $content = "Security checks passed for event: {$request['event']}. Transaction ref: {$reference} is being processed.";
 
 
-            Mail::to('solotob3@gmail.com')
-                ->send(new GeneralMail(
-                    (object)[
-                        'name' => 'Oluwatobi Solomon',
-                        'email' => 'solotob3@gmail.com'
-                    ],
-                    $subject,
-                    $content
-                ));
+            // Mail::to('solotob3@gmail.com')
+            //     ->send(new GeneralMail(
+            //         (object)[
+            //             'name' => 'Oluwatobi Solomon',
+            //             'email' => 'solotob3@gmail.com'
+            //         ],
+            //         $subject,
+            //         $content
+            //     ));
 
             if (
                 $transaction->status === 'successful'
             ) {
-                return response()->json(['message' => 'PAYMENT ALREADY PROCESSED'], 4001);
+                return response()->json(['message' => 'PAYMENT ALREADY PROCESSED'], 400);
             }
 
-            $level = Level::where('id', $transaction->meta['level_id'])
-                ->first();
+            $level = Level::where('id', $transaction->meta['level_id'])->first();
 
             $this->upgradeSubscriptionService->upgradeSubscription(
                 $transaction->user,
@@ -118,61 +117,6 @@ class WebhookController extends Controller
 
             return response()->json(['status' => 'success'], 200);
 
-
-
-            // if ($status === 'success') {
-
-            //     DB::transaction(function () use ($transaction, $payload, $event, $reference) {
-
-            //         /**
-            //          * Refresh transaction
-            //          */
-            //         $transaction->refresh();
-
-            //         /**
-            //          * Double-check idempotency
-            //          */
-            //         if (
-            //             $transaction->status === 'successful'
-            //         ) {
-            //             return;
-            //         }
-
-            //         $level = Level::where('id', $transaction->meta['level_id'])
-            //             ->first();
-
-            //         //mark transaction successful now and then perform subscription upgrade in the service to ensure atomicity and prevent issues with failed upgrades after marking transaction successful
-            //         $this->upgradeSubscriptionService->upgradeSubscription(
-            //             $transaction->user,
-            //             $level,
-            //             $transaction,
-            //             $payload
-            //         );
-
-            //         $subject = 'Webhook Received: Upgrade Processed Successfully';
-            //         $content = "Upgrade processed successfully for event: {$event}. Transaction ref: {$reference} has been marked successful and subscription upgraded.";
-
-
-            //         Mail::to('solotob3@gmail.com')
-            //             ->send(new GeneralMail(
-            //                 (object)[
-            //                     'name' => 'Oluwatobi Solomon',
-            //                     'email' => 'solotob3@gmail.com'
-            //                 ],
-            //                 $subject,
-            //                 $content
-            //             ));
-
-
-
-            //         return response()->json(['status' => 'success'], 200);
-            //     });
-            //     return response()->json(['status' => 'success'], 200);
-            // } else {
-            //     // Handle failed payment or other statuses if needed
-            //     $this->transactionService->markFailed($transaction, $payload);
-            //     return response()->json(['status' => 'error', 'message' => 'Payment failed'], 400);
-            // }
         } else {
             // Handle other events or ignore
             return response()->json(['status' => 'error'], 500);
