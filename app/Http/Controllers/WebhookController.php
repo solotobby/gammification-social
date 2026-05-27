@@ -29,137 +29,441 @@ class WebhookController extends Controller
         $this->upgradeSubscriptionService = $upgradeSubscriptionService;
     }
 
-
     public function korapay(Request $request)
     {
-        $payload = $request->all();
-        $event = $request['event'];
+        /**
+         * =========================================================
+         * STEP 1: VERIFY SIGNATURE
+         * =========================================================
+         */
 
-        ApiResponse::create(['response' => $request]); //store the webhook payload for debugging and auditing purposes
+        // $signature = $request->header('X-Korapay-Signature');
 
-        if ($event == 'charge.success') {
-            // Handle successful charge event
+        // if (!$signature) {
+        //     Log::warning('Kora webhook missing signature');
 
-            $amount = $request['data']['amount'] / 100;
-            $status = $request['data']['status'];
-            $reference = $request['data']['reference'];
-            $channel = $request['data']['payment_method'];
-            $currency = $request['data']['currency'];
+        //     return response()->json([
+        //         'status' => 'error',
+        //         'message' => 'Unauthorized'
+        //     ], Response::HTTP_UNAUTHORIZED);
+        // }
 
-            //fetch payment information from the database using the reference
-            $transaction = Transaction::query()
-                ->where('ref', $reference)
-                ->lockForUpdate()
-                ->first();
+        // $secret = config('services.korapay.webhook_secret');
 
+        // $computedSignature = hash_hmac(
+        //     'sha256',
+        //     $request->getContent(),
+        //     $secret
+        // );
 
-            if (!$transaction) {
-                Log::error('Transaction not found for reference: ' . $reference);
-                return response()->json(['status' => 'error', 'message' => 'Transaction not found'], 404);
-            }
+        // if (!hash_equals($computedSignature, $signature)) {
+        //     Log::warning('Invalid Kora webhook signature');
 
-            //verify amount and currency match
-            if (round($transaction->amount, 2) != round($amount, 2)) {
-                Log::error('Amount mismatch for reference: ' . $reference);
-                return response()->json(['status' => 'error', 'message' => 'Amount mismatch'], 400);
-            }
+        //     return response()->json([
+        //         'status' => 'error',
+        //         'message' => 'Invalid signature'
+        //     ], Response::HTTP_UNAUTHORIZED);
+        // }
 
-            if (strtoupper($transaction->currency) != strtoupper($currency)) {
-                Log::error('Currency mismatch for reference: ' . $reference);
-                return response()->json(['status' => 'error', 'message' => 'Currency mismatch'], 400);
-            }
+        /**
+         * =========================================================
+         * STEP 2: VALIDATE PAYLOAD STRUCTURE
+         * =========================================================
+         */
 
-            $subject = 'Webhook Received: Kora Pay Security Checks Passed';
-            $content = "Security checks passed for event: {$request['event']}. Transaction ref: {$reference} is being processed.";
+        $payload = $request->validate([
+            'event' => 'required|string',
+            'data.reference' => 'required|string',
+            'data.currency' => 'required|string',
+            'data.amount' => 'required|numeric',
+            'data.status' => 'required|string',
+            'data.payment_method' => 'nullable|string',
+            'data.transaction_date' => 'nullable|string',
+        ]);
 
+        $event = $payload['event'];
 
-            Mail::to('solotob3@gmail.com')
-                ->send(new GeneralMail(
-                    (object)[
-                        'name' => 'Oluwatobi Solomon',
-                        'email' => 'solotob3@gmail.com'
-                    ],
-                    $subject,
-                    $content
-                ));
+        /**
+         * =========================================================
+         * STEP 3: ONLY PROCESS SUPPORTED EVENTS
+         * =========================================================
+         */
 
+        $supportedEvents = [
+            'charge.success',
+        ];
 
-            if ($status === 'success') {
+        if (!in_array($event, $supportedEvents, true)) {
 
-                DB::transaction(function () use ($transaction, $payload, $event, $reference) {
+            Log::info("Ignoring unsupported Kora event: {$event}");
 
-                    /**
-                     * Refresh transaction
-                     */
-                    $transaction->refresh();
+            return response()->json([
+                'status' => 'ignored'
+            ], Response::HTTP_OK);
+        }
 
-                    /**
-                     * Double-check idempotency
-                     */
-                    if (
-                        $transaction->status === 'successful'
-                    ) {
-                        return;
-                    }
+        $reference = $payload['data']['reference'];
 
-                    $level = Level::where('id', $transaction->meta['level_id'])
-                        ->first();
+        /**
+         * =========================================================
+         * STEP 4: PREVENT REPLAY ATTACKS / DUPLICATE EVENTS
+         * =========================================================
+         */
 
-                    //mark transaction successful now and then perform subscription upgrade in the service to ensure atomicity and prevent issues with failed upgrades after marking transaction successful
-                    $this->upgradeSubscriptionService->upgradeSubscription(
+        // $alreadyProcessed = WebhookEvent::query()
+        //     ->where('provider', 'korapay')
+        //     ->where('event_reference', $reference)
+        //     ->where('event_type', $event)
+        //     ->exists();
+
+        // if ($alreadyProcessed) {
+
+        //     Log::info("Duplicate webhook ignored: {$reference}");
+
+        //     return response()->json([
+        //         'status' => 'duplicate'
+        //     ], Response::HTTP_OK);
+        // }
+
+        /**
+         * =========================================================
+         * STEP 5: STORE RAW PAYLOAD FOR AUDIT
+         * =========================================================
+         */
+
+        ApiResponse::create([
+            'provider' => 'korapay',
+            'response' => $payload,
+        ]);
+
+        try {
+
+            DB::transaction(function () use (
+                $payload,
+                $reference,
+                $event
+            ) {
+
+                /**
+                 * =====================================================
+                 * LOCK TRANSACTION ROW
+                 * =====================================================
+                 */
+
+                $transaction = Transaction::query()
+                    ->where('ref', $reference)
+                    ->lockForUpdate()
+                    ->first();
+
+                if (!$transaction) {
+
+                    Log::error("Transaction not found: {$reference}");
+
+                    throw new \Exception('Transaction not found');
+                }
+
+                /**
+                 * =====================================================
+                 * IDEMPOTENCY CHECK
+                 * =====================================================
+                 */
+
+                if ($transaction->status === 'successful') {
+
+                    Log::info("Transaction already processed: {$reference}");
+
+                    return;
+                }
+
+                /**
+                 * =====================================================
+                 * VERIFY PAYMENT DETAILS
+                 * =====================================================
+                 */
+
+                $incomingAmount = round(
+                    $payload['data']['amount'] / 100,
+                    2
+                );
+
+                $incomingCurrency = strtoupper(
+                    $payload['data']['currency']
+                );
+
+                if (
+                    round($transaction->amount, 2) !== $incomingAmount
+                ) {
+
+                    Log::critical(
+                        "Amount mismatch for transaction {$reference}"
+                    );
+
+                    throw new \Exception('Amount mismatch');
+                }
+
+                if (
+                    strtoupper($transaction->currency)
+                    !==
+                    $incomingCurrency
+                ) {
+
+                    Log::critical(
+                        "Currency mismatch for transaction {$reference}"
+                    );
+
+                    throw new \Exception('Currency mismatch');
+                }
+
+                /**
+                 * =====================================================
+                 * VERIFY PAYMENT STATUS
+                 * =====================================================
+                 */
+
+                if (
+                    $payload['data']['status'] !== 'success'
+                ) {
+
+                        Log::critical(
+                            "Payment not successful for transaction {$reference}"
+                        );
+    
+                        $this->transactionService->markFailed($transaction, $payload);
+
+                    // $transaction->update([
+                    //     'status' => 'failed',
+                    //     'gateway_response' => $payload,
+                    // ]);
+
+                    return;
+                }
+
+                /**
+                 * =====================================================
+                 * FETCH SUBSCRIPTION LEVEL
+                 * =====================================================
+                 */
+
+                $levelId = data_get(
+                    $transaction->meta,
+                    'level_id'
+                );
+
+                $level = Level::find($levelId);
+
+                if (!$level) {
+
+                    Log::critical(
+                        "Level not found for transaction {$reference}"
+                    );
+
+                    throw new \Exception('Subscription level missing');
+                }
+
+                /**
+                 * =====================================================
+                 * PERFORM SUBSCRIPTION UPGRADE
+                 * =====================================================
+                 */
+
+                $this->upgradeSubscriptionService
+                    ->upgradeSubscription(
                         $transaction->user,
                         $level,
                         $transaction,
                         $payload
                     );
 
-                    $subject = 'Webhook Received: Upgrade Processed Successfully';
-                    $content = "Upgrade processed successfully for event: {$event}. Transaction ref: {$reference} has been marked successful and subscription upgraded.";
+              
+                /**
+                 * =====================================================
+                 * OPTIONAL ASYNC ALERTING
+                 * =====================================================
+                 */
 
+                // dispatch(function () use ($reference, $event) {
 
                     Mail::to('solotob3@gmail.com')
-                        ->send(new GeneralMail(
-                            (object)[
-                                'name' => 'Oluwatobi Solomon',
-                                'email' => 'solotob3@gmail.com'
-                            ],
-                            $subject,
-                            $content
-                        ));
+                        ->send(
+                            new GeneralMail(
+                                (object)[
+                                    'name' => 'Admin',
+                                    'email' => 'solotob3@gmail.com'
+                                ],
+                                'Kora Webhook Processed',
+                                "Webhook {$event} processed successfully for {$reference}"
+                            )
+                        );
 
-                        
+                // })->afterCommit();
 
-                    return response()->json(['status' => 'success'], 200);
-                });
-                return response()->json(['status' => 'success'], 200);
-            } else {
-                // Handle failed payment or other statuses if needed
-                $this->transactionService->markFailed($transaction, $payload);
-                return response()->json(['status' => 'error', 'message' => 'Payment failed'], 400);
-            }
-        } else {
-            // Handle other events or ignore
-            return response()->json(['status' => 'error'], 500);
+            }, 3);
+
+        } catch (\Throwable $e) {
+
+            Log::critical('Kora webhook processing failed', [
+                'reference' => $reference,
+                'event' => $event,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+              Mail::to('solotob3@gmail.com')
+                        ->send(
+                            new GeneralMail(
+                                (object)[
+                                    'name' => 'Admin - Failed Webhook Alert',
+                                    'email' => 'solotob3@gmail.com'
+                                ],
+                                'Kora Webhook Process failed',
+                                "Webhook {$event} processed failed for {$reference}"
+                            )
+                        );
+
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Webhook processing failed'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
-        /**
-         * =====================================================
-         * HANDLE FAILED PAYMENTS
-         * =====================================================
-         */
-        $transaction->update([
-            'status' => $gatewayStatus,
-            'meta'
-            => $payload,
-        ]);
-
-        $this->transactionService->markFailed($transaction, $payload);
-
-        return response(
-            'Webhook processed',
-            200
-        );
+        return response()->json([
+            'status' => 'success'
+        ], Response::HTTP_OK);
     }
+
+
+
+    // public function korapay(Request $request)
+    // {
+    //     $payload = $request->all();
+    //     $event = $request['event'];
+
+    //     ApiResponse::create(['response' => $request]); //store the webhook payload for debugging and auditing purposes
+
+    //     if ($event == 'charge.success') {
+    //         // Handle successful charge event
+
+    //         $amount = $request['data']['amount'] / 100;
+    //         $status = $request['data']['status'];
+    //         $reference = $request['data']['reference'];
+    //         $channel = $request['data']['payment_method'];
+    //         $currency = $request['data']['currency'];
+
+    //         //fetch payment information from the database using the reference
+    //         $transaction = Transaction::query()
+    //             ->where('ref', $reference)
+    //             ->lockForUpdate()
+    //             ->first();
+
+
+    //         if (!$transaction) {
+    //             Log::error('Transaction not found for reference: ' . $reference);
+    //             return response()->json(['status' => 'error', 'message' => 'Transaction not found'], 404);
+    //         }
+
+    //         //verify amount and currency match
+    //         if (round($transaction->amount, 2) != round($amount, 2)) {
+    //             Log::error('Amount mismatch for reference: ' . $reference);
+    //             return response()->json(['status' => 'error', 'message' => 'Amount mismatch'], 400);
+    //         }
+
+    //         if (strtoupper($transaction->currency) != strtoupper($currency)) {
+    //             Log::error('Currency mismatch for reference: ' . $reference);
+    //             return response()->json(['status' => 'error', 'message' => 'Currency mismatch'], 400);
+    //         }
+
+    //         $subject = 'Webhook Received: Kora Pay Security Checks Passed';
+    //         $content = "Security checks passed for event: {$request['event']}. Transaction ref: {$reference} is being processed.";
+
+
+    //         Mail::to('solotob3@gmail.com')
+    //             ->send(new GeneralMail(
+    //                 (object)[
+    //                     'name' => 'Oluwatobi Solomon',
+    //                     'email' => 'solotob3@gmail.com'
+    //                 ],
+    //                 $subject,
+    //                 $content
+    //             ));
+
+
+    //         if ($status === 'success') {
+
+    //             DB::transaction(function () use ($transaction, $payload, $event, $reference) {
+
+    //                 /**
+    //                  * Refresh transaction
+    //                  */
+    //                 $transaction->refresh();
+
+    //                 /**
+    //                  * Double-check idempotency
+    //                  */
+    //                 if (
+    //                     $transaction->status === 'successful'
+    //                 ) {
+    //                     return;
+    //                 }
+
+    //                 $level = Level::where('id', $transaction->meta['level_id'])
+    //                     ->first();
+
+    //                 //mark transaction successful now and then perform subscription upgrade in the service to ensure atomicity and prevent issues with failed upgrades after marking transaction successful
+    //                 $this->upgradeSubscriptionService->upgradeSubscription(
+    //                     $transaction->user,
+    //                     $level,
+    //                     $transaction,
+    //                     $payload
+    //                 );
+
+    //                 $subject = 'Webhook Received: Upgrade Processed Successfully';
+    //                 $content = "Upgrade processed successfully for event: {$event}. Transaction ref: {$reference} has been marked successful and subscription upgraded.";
+
+
+    //                 Mail::to('solotob3@gmail.com')
+    //                     ->send(new GeneralMail(
+    //                         (object)[
+    //                             'name' => 'Oluwatobi Solomon',
+    //                             'email' => 'solotob3@gmail.com'
+    //                         ],
+    //                         $subject,
+    //                         $content
+    //                     ));
+
+
+
+    //                 return response()->json(['status' => 'success'], 200);
+    //             });
+    //             return response()->json(['status' => 'success'], 200);
+    //         } else {
+    //             // Handle failed payment or other statuses if needed
+    //             $this->transactionService->markFailed($transaction, $payload);
+    //             return response()->json(['status' => 'error', 'message' => 'Payment failed'], 400);
+    //         }
+    //     } else {
+    //         // Handle other events or ignore
+    //         return response()->json(['status' => 'error'], 500);
+    //     }
+
+    //     /**
+    //      * =====================================================
+    //      * HANDLE FAILED PAYMENTS
+    //      * =====================================================
+    //      */
+    //     $transaction->update([
+    //         'status' => $gatewayStatus,
+    //         'meta'
+    //         => $payload,
+    //     ]);
+
+    //     $this->transactionService->markFailed($transaction, $payload);
+
+    //     return response(
+    //         'Webhook processed',
+    //         200
+    //     );
+    // }
 
 
     public function handle(Request $request)
