@@ -288,6 +288,29 @@ class PayoutController extends Controller
                 return response()->json(['status' => 'error', 'message' => 'No funds available'], 422);
             }
 
+            $currency = $payoutInfo->currency ?? 'NGN';
+            // Str
+            $idempotencyKey = Str::uuid()->toString(); //'payhankey_payout_' . $payoutInfo->id . '_' . time();
+
+            $transactionProcess =  $this->transactionService->createTransaction(
+                $user,
+                $idempotencyKey,
+                'kora',
+                generateTransactionRef(),
+                (float)$transferAmount,
+                $currency,
+                'successful',
+                'Credit',
+                'payhankey_payout_and_bonus',
+                "Payhankey Payout for : " . $payoutInfo->month
+            );
+
+
+            if (! $transactionProcess) {
+                DB::rollBack();
+                return response()->json(['status' => 'error', 'message' => 'Failed to create transaction record'], 500);
+            }
+            
             // 🚀 Perform external transfer FIRST
             $fundTransferResponse = $this->fundTransferService->transfer(
                 $user,
@@ -319,22 +342,6 @@ class PayoutController extends Controller
                 ]);
             }
 
-            $currency = $payoutInfo->currency ?? 'NGN';
-            // Str
-            $idempotencyKey = Str::uuid()->toString(); //'payhankey_payout_' . $payoutInfo->id . '_' . time();
-
-            $this->transactionService->createTransaction(
-                $user,
-                $idempotencyKey,
-                'kora',
-                generateTransactionRef(),
-                (float)$transferAmount,
-                $currency,
-                'successful',
-                'Credit',
-                'payhankey_payout_and_bonus',
-                "Payhankey Payout for : " . $payoutInfo->month
-            );
 
             DB::commit();
 
