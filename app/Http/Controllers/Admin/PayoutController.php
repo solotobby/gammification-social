@@ -18,6 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class PayoutController extends Controller
 {
@@ -319,7 +320,8 @@ class PayoutController extends Controller
             }
 
             $currency = $payoutInfo->currency ?? 'NGN';
-            $idempotencyKey = 'payhankey_payout_' . $payoutInfo->id . '_' . time();
+            // Str
+            $idempotencyKey = Str::uuid()->toString(); //'payhankey_payout_' . $payoutInfo->id . '_' . time();
 
             $this->transactionService->createTransaction(
                 $user,
