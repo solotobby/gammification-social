@@ -319,11 +319,14 @@ class PayoutController extends Controller
             }
 
             $currency = $payoutInfo->currency ?? 'NGN';
+            $idempotencyKey = 'payhankey_payout_' . $payoutInfo->id . '_' . time();
 
             $this->transactionService->createTransaction(
                 $user,
+                $idempotencyKey,
+                'kora',
                 generateTransactionRef(),
-                $transferAmount,
+                (float)$transferAmount,
                 $currency,
                 'successful',
                 'Credit',
