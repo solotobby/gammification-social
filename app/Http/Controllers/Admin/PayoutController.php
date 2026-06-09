@@ -33,6 +33,7 @@ class PayoutController extends Controller
         $this->fundTransferService = $fundTransferService;
         $this->transactionService = $transactionService;
     }
+    
     public function index($level)
     {
 

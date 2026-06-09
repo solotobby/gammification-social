@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Mail\GeneralMail;
 use App\Models\Level;
 use App\Models\Transaction;
 use App\Models\UserPaymentPlan;
@@ -17,7 +18,7 @@ use App\Models\SubscriptionStat;
 use App\Models\User;
 use App\Models\UserLevel;
 use Carbon\Carbon;
-
+use Illuminate\Support\Facades\Mail;
 
 class KorapayService
 {
@@ -34,7 +35,8 @@ class KorapayService
         $this->transactionService = $transactionService;
     }
 
-    public function initiatePayment($levelId, $amount = null){
+    public function initiatePayment($levelId, $amount = null)
+    {
 
         $user = Auth::user();
 
@@ -52,14 +54,11 @@ class KorapayService
         $amountNGN = convertToBaseCurrency($level->amount, 'NGN');
 
         return $this->callKoraPay($amountNGN, $level);
-
-
-
     }
 
-     private function callKoraPay($amount, $level)
+    private function callKoraPay($amount, $level)
     {
-        
+
         $user = Auth::user();
         $reference = generateTransactionRef();
 
@@ -139,7 +138,7 @@ class KorapayService
     }
 
 
-      private function verifyWithKoraPay($reference)
+    private function verifyWithKoraPay($reference)
     {
         try {
             $res = Http::withHeaders([
@@ -220,8 +219,11 @@ class KorapayService
         }
 
         $nextPaymentDate = now()->addMonth();
+        $user = $transaction->user;
+        $amount = $transaction->amount;
+        $currency = $transaction->currency;
 
-        DB::transaction(function () use ($transaction, $data, $level, $nextPaymentDate) {
+        DB::transaction(function () use ($transaction, $data, $level, $nextPaymentDate, $user, $reference, $amount, $currency) {
 
             // Lock transaction row
             $lockedTransaction = Transaction::where('id', $transaction->id)
@@ -231,62 +233,7 @@ class KorapayService
             if ($lockedTransaction->status === 'success') {
                 return;
             }
-
             $this->transactionService->markProcessing($lockedTransaction, $data);
-
-            // $user = User::with('wallet')->findOrFail($lockedTransaction->user_id);
-            // $currency = $user->wallet->currency;
-
-            // $upgradeAmount = convertToBaseCurrency($level->amount, $currency);
-
-            // Subscription update
-            // UserLevel::updateOrCreate(
-            //     ['user_id' => $user->id],
-            //     [
-            //         'level_id'          => $level->id,
-            //         'plan_name'         => $level->name,
-            //         'plan_code'         => $level->id,
-            //         'subscription_code' => $level->id,
-            //         'email_token'       => $level->id,
-            //         'start_date'        => now(),
-            //         'status'            => 'active',
-            //         'next_payment_date' => $nextPaymentDate,
-            //     ]
-            // );
-
-            // Prevent duplicate bonus (lock check)
-            // $hasReceivedBonus = SubscriptionStat::where('user_id', $user->id)
-            //     ->lockForUpdate()
-            //     ->exists();
-
-            // if (!$hasReceivedBonus) {
-            //     $bonus = convertToBaseCurrency($level->reg_bonus, $currency);
-
-            //     $user->wallet->increment('balance', $bonus);
-
-            //     Transaction::create([
-            //         'user_id'     => $user->id,
-            //         'ref'         => $lockedTransaction->ref . '-bonus',
-            //         'amount'      => $bonus,
-            //         'currency'    => $currency,
-            //         'status'      => 'successful',
-            //         'type'        => 'reg_bonus',
-            //         'action'      => 'Credit',
-            //         'description' => "Upgrade bonus for {$level->name}",
-            //     ]);
-            // }
-
-            // SubscriptionStat::create([
-            //     'user_id'    => $user->id,
-            //     'level_id'   => $level->id,
-            //     'plan_name'  => $level->name,
-            //     'amount'     => $upgradeAmount,
-            //     'currency'   => $currency,
-            //     'start_date' => now(),
-            //     'end_date'   => $nextPaymentDate,
-            // ]);
-
-            // userActivity('subscribed');
         });
 
         return [
@@ -294,5 +241,4 @@ class KorapayService
             'next_payment_date' => $nextPaymentDate,
         ];
     }
-
 }

@@ -56,10 +56,10 @@ class WebhookController extends Controller
                 ->first();
 
 
-            // if (!$transaction) {
-            //     Log::error('Transaction not found for reference: ' . $reference);
-            //     return response()->json(['status' => 'error', 'message' => 'Transaction not found'], 404);
-            // }
+            if (!$transaction) {
+                Log::error('Transaction not found for reference: ' . $reference);
+                return response()->json(['status' => 'error', 'message' => 'Transaction not found'], 404);
+            }
 
             // //verify amount and currency match
             // if (round($transaction->amount, 2) != round($amount, 2)) {
@@ -102,7 +102,7 @@ class WebhookController extends Controller
             );
 
             $subject = 'Webhook Received: Upgrade Processed Successfully';
-            $content = "Upgrade processed successfully for event: {$event}. Transaction ref: {$reference} has been marked successful and subscription upgraded.";
+            $content = "Upgrade processed successfully for event: {$event}. Transaction ref: {$reference} has been marked successful and subscription upgraded for {$transaction->user->name}.";
 
 
             Mail::to('solotob3@gmail.com')
