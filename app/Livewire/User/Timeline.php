@@ -27,7 +27,8 @@ use Livewire\WithFileUploads;
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
-
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 #[On('user.timeline')]
 #[On('openVideoPlayer')]
@@ -85,7 +86,7 @@ class Timeline extends Component
     public function openVideoPlayer($videoId)
     {
         $this->dispatch('openVideoPlayer', videoId: $videoId)
-                ->to(\App\Livewire\User\VideoPlayer::class);
+            ->to(\App\Livewire\User\VideoPlayer::class);
         $this->activeVideoId = $videoId;
         $this->isVideoOpen = true;
         dd("Opening video player for video ID: $videoId");
@@ -174,7 +175,6 @@ class Timeline extends Component
 
         $this->validate($rules);
 
-
         // Determine max length
         $maxLength = in_array($level, ['Creator', 'Influencer']) ? null : 160;
 
@@ -233,17 +233,28 @@ class Timeline extends Component
 
         if (!empty($this->images)) {
             foreach ($this->images as $image) {
-                $uploadedFileUrl = cloudinary()->upload($image->getRealPath(), [
-                    'folder' => 'payhankey_post_images',
-                ])->getSecurePath();
+                // $uploadedFileUrl = cloudinary()->upload($image->getRealPath(), [
+                //     'folder' => 'payhankey_post_images',
+                // ])->getSecurePath();
+                
+
+                 $path = Storage::disk('spaces')->putFileAs(
+                    'payhankey_media/images', // folder inside bucket
+                    $image,
+                    Str::uuid() . '-' . auth()->id(), // unique filename
+                    'public'
+                );
+                 $url = config('filesystems.disks.spaces.url') . '/' . $path;
+                 
 
                 PostImages::create([
                     'user_id' => Auth::id(),
                     'post_id' => $timelines->id,
-                    'path' => $uploadedFileUrl,
+                    'path' => $url,
                 ]);
             }
         }
+
         session()->flash('success', 'Your post was successful!');
 
         $this->reset('content', 'images');

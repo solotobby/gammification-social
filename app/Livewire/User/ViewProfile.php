@@ -15,6 +15,8 @@ use Livewire\Attributes\On;
 use Illuminate\Support\Facades\DB;
 use Livewire\WithFileUploads;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class ViewProfile extends Component
 {
@@ -129,14 +131,24 @@ class ViewProfile extends Component
             'avatar' => 'image|max:2048', // 2MB
         ]);
 
-        $uploaded = Cloudinary::upload($this->avatar->getRealPath(), [
-            'folder' => 'payhankey_avatars',
-            'public_id' => 'user_' . auth()->id(),
-            'overwrite' => true,
-        ]);
+        $path = Storage::disk('spaces')->putFileAs(
+            'payhankey_media/profiles', // folder inside bucket
+            $this->avatar, // the uploaded file
+            Str::uuid() . '-' . auth()->id(), // unique filename
+            'public'
+        );
+        $url = config('filesystems.disks.spaces.url') . '/' . $path;
+
+
+        // $uploaded = Cloudinary::upload($this->avatar->getRealPath(), [
+        //     'folder' => 'payhankey_avatars',
+        //     'public_id' => 'user_' . auth()->id(),
+        //     'overwrite' => true,
+        // ]);
+
 
         auth()->user()->update([
-            'avatar' => $uploaded->getSecurePath(),
+            'avatar' => $url,
         ]);
 
         $this->reset('avatar');
