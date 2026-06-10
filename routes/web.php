@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\EngagementPayoutController;
 use App\Http\Controllers\Admin\LevelManagementController;
 use App\Http\Controllers\Admin\MonthlyPayoutController;
 use App\Http\Controllers\Admin\PayoutController;
+use App\Http\Controllers\Admin\TrendController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\UserEngagementController;
 use App\Http\Controllers\BlogController;
@@ -260,4 +261,9 @@ Route::group(['middleware' => 'auth', 'role:admin'], function () {
 
     Route::get('admin/subscribe/test/{levelId}', [AdminController::class, 'testSubscription'])->name('test.subscribe');
     Route::get('admin/verify/flutterwave/charge/admin', [AdminController::class, 'verifyFlutterwaveAdminCharge'])->name('verify.flutterwave.charge.admin');
+
+    ///trend management route
+    Route::get('trend/management', [TrendController::class, 'index'])->name('trend.management');
+    Route::post('trend/store', [TrendController::class, 'store'])->name('trend.store');
+    Route::get('trend/toggle/status/{id}', [TrendController::class, 'toggleStatus'])->name('admin.trends.toggleStatus');
 });

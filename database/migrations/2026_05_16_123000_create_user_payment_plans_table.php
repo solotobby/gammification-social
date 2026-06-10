@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('user_payment_plans', function (Blueprint $table) {
-           $table->uuid('id')->primary();
+            $table->uuid('id')->primary();
             $table->uuid('user_id');
             $table->uuid('level_id');
             $table->string('name');

@@ -144,4 +144,14 @@ class Post extends Model
 
         return $query;
     }
+
+    public function trends()
+    {
+        return $this->belongsToMany(Trend::class, 'post_trends', 'post_id', 'trend_id');
+    }   
+
+     public function postTrends()
+    {
+        return $this->hasMany(PostTrend::class);
+    }
 }

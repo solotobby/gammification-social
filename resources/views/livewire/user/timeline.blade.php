@@ -1,7 +1,7 @@
 <div>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css">
     <script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
-    
+
     <style>
         .form-control {
             resize: none;
@@ -84,7 +84,7 @@
             </div>
 
 
-             @foreach (['success' => 'success', 'info' => 'warning', 'error' => 'danger'] as $key => $type)
+            @foreach (['success' => 'success', 'info' => 'warning', 'error' => 'danger'] as $key => $type)
                 @if (session()->has($key))
                     <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 3000)" x-show="show" x-transition.opacity
                         class="alert alert-{{ $type }} mb-2" role="alert">
@@ -152,6 +152,46 @@
                                 </div>
                             </div>
                         @endif
+                        {{-- Selected trends display --}}
+                        @if (count($selectedTrends) > 0)
+                            <div class="d-flex flex-wrap gap-1 mb-2">
+                                @foreach (activeTrends()->whereIn('id', $selectedTrends) as $trend)
+                                    <span class="badge bg-primary d-flex align-items-center gap-1">
+                                        #{{ $trend->name }}
+                                        <button type="button" wire:click="removeTrend('{{ $trend->id }}')"
+                                            class="btn-close btn-close-white btn-sm ms-1" style="font-size:0.6rem;"
+                                            aria-label="Remove"></button>
+                                    </span>
+                                @endforeach
+                            </div>
+                        @endif
+
+                        {{-- Trend picker — only shows unselected trends --}}
+                        <small class="text-muted d-block mt-2">
+                            Add trend to your post <span class="text-danger fw-semibold">(min. 2 required)</span>:
+                        </small>
+                        @foreach (activeTrends()->whereNotIn('id', $selectedTrends) as $trend)
+                            <button type="button" wire:click="addTrend('{{ $trend->id }}')"
+                                class="btn btn-sm btn-outline-secondary me-1 mb-1">
+                                #{{ $trend->name }}
+                            </button>
+                        @endforeach
+
+                        {{-- Counter feedback --}}
+                        <small class="d-block mt-1 {{ count($selectedTrends) >= 2 ? 'text-success' : 'text-muted' }}">
+                            {{ count($selectedTrends) }} selected
+                            @if (count($selectedTrends) >= 2)
+                                <i class="fa fa-check-circle ms-1"></i>
+                            @endif
+                        </small>
+
+                        {{-- <small class="text-muted d-block mt-2">Add trend to your post:</small>
+                        @foreach (activeTrends() as $trend)
+                            <button type="button" wire:click="addTrend('{{ $trend->name }}')"
+                                class="btn btn-sm btn-outline-secondary me-1 mb-1">
+                                #{{ $trend->name }}
+                            </button>
+                        @endforeach --}}
 
                     </div>
                     <div class="card-footer">
@@ -159,15 +199,17 @@
                             Post</button>
                     </div>
 
+
+
                 </form>
             </div>
 
-             @foreach (@$posts as $post)
+            @foreach (@$posts as $post)
                 <livewire:user.post-content :post="@$post" :wire:key="'post-'.$post->id" />
             @endforeach
 
 
-             @if (@$isVideoOpen)
+            @if (@$isVideoOpen)
                 <livewire:user.video-player :videoId="$activeVideoId" wire:key="video-player-{{ @$activeVideoId }}" />
             @endif {{-- Global Video Player --}}
 
@@ -197,7 +239,7 @@
 
 
 
-  @include('layouts.onboarding')
+    @include('layouts.onboarding')
 
 
 </div>

@@ -7,6 +7,7 @@ use App\Models\Level;
 use App\Models\LevelPlanId;
 use App\Models\Partner;
 use App\Models\Post;
+use App\Models\Trend;
 use App\Models\TrendingTopic;
 use App\Models\User;
 use App\Models\UserActivity;
@@ -83,7 +84,36 @@ if (!function_exists('engagement')) {
 if (!function_exists('trendingTopics')) {
     function trendingTopics()
     {
-        return TrendingTopic::orderBy('score', 'desc')->limit(5)->get();
+        return Trend::where('trends.status', 'active')
+            ->leftJoin('post_trends', 'trends.id', '=', 'post_trends.trend_id')
+            ->leftJoin('posts', function ($join) {
+                $join->on('post_trends.post_id', '=', 'posts.id')
+                     ->where('posts.status', 'LIVE');
+            })
+            ->select(
+                'trends.id',
+                'trends.name',
+                'trends.description',
+                DB::raw('COUNT(post_trends.id) as post_count')
+            )
+            ->groupBy('trends.id', 'trends.name', 'trends.description')
+            ->orderByDesc('post_count')
+            ->take(5)
+            ->get();
+    }
+}
+
+// if (!function_exists('trendingTopics')) {
+//     function trendingTopics()
+//     {
+//         return TrendingTopic::orderBy('score', 'desc')->limit(5)->get();
+//     }
+// }
+
+if (!function_exists('activeTrends')) {
+    function activeTrends()
+    {
+        return Trend::where('status', 'active')->latest()->take(10)->get();
     }
 }
 
@@ -110,7 +140,7 @@ if (!function_exists('countryList')) {
         $currencies = Currency::where('is_active', true)->orderBy('country')->get();
         return $currencies;
     }
-}   
+}
 
 if (!function_exists('generateCode')) {
     function generateCode($number)

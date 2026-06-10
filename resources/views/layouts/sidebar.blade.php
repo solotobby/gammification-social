@@ -80,6 +80,11 @@
                 <span class="nav-main-link-name">Bank Account</span>
             </a>
 
+            <a class="nav-main-link" href="{{ url('trend/management') }}">
+                <i class="nav-main-link-icon fa fa-list"></i>
+                <span class="nav-main-link-name">Trend Mgt.</span>
+            </a>
+
             </li>
         </ul>
     @else

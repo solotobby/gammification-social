@@ -10,7 +10,9 @@ use App\Models\AccessCode;
 use App\Models\Comment;
 use App\Models\Post;
 use App\Models\PostImages;
+use App\Models\PostTrend;
 use App\Models\Transaction;
+use App\Models\Trend;
 use App\Models\User;
 use App\Models\UserComment;
 use App\Models\UserLevel;
@@ -44,6 +46,7 @@ class Timeline extends Component
     public $images = [];
     public $videos = [];
     public $imagePreviews = [];
+    public array $selectedTrends = [];
 
     protected $rules = [
         'content' => 'required|string',
@@ -106,11 +109,14 @@ class Timeline extends Component
 
         $this->posts = collect();
         $this->loadPosts();
+
         // $this->buffer = collect();
 
         // $this->loadInitial();
         // $this->preloadNext();
     }
+
+
 
     public function loadPosts()
     {
@@ -155,6 +161,20 @@ class Timeline extends Component
         $this->loadPosts();
     }
 
+    public function addTrend(string $trendId): void
+    {
+        if (!in_array($trendId, $this->selectedTrends)) {
+            $this->selectedTrends[] = $trendId;
+        }
+    }
+
+    public function removeTrend(string $trendId): void
+    {
+        $this->selectedTrends = array_values(
+            array_filter($this->selectedTrends, fn($id) => $id !== $trendId)
+        );
+    }
+
 
 
     public function createPost()
@@ -177,6 +197,12 @@ class Timeline extends Component
 
         // Determine max length
         $maxLength = in_array($level, ['Creator', 'Influencer']) ? null : 160;
+
+        if (count($this->selectedTrends) < 2) {
+            session()->flash('error', 'Please select at least 2 trending topics for your post.');
+            return;
+        }
+
 
         // Check content length for regular users
         if ($maxLength && strlen($this->content) > $maxLength) {
@@ -231,21 +257,29 @@ class Timeline extends Component
         $uniqueCode = rand(1000, 9999) . time();
         $timelines = Post::create(['user_id' => $user->id, 'content' => $content, 'unicode' => $uniqueCode, 'comment_external' => 0, 'status' => $status]);
 
+        foreach ($this->selectedTrends as $trendId) {  
+            PostTrend::create([
+                    'post_id' => $timelines->id,
+                    'trend_id' => $trendId,
+                ]); 
+            // $timelines->trends()->attach($trendId);
+        }   
+
         if (!empty($this->images)) {
             foreach ($this->images as $image) {
                 // $uploadedFileUrl = cloudinary()->upload($image->getRealPath(), [
                 //     'folder' => 'payhankey_post_images',
                 // ])->getSecurePath();
-                
 
-                 $path = Storage::disk('spaces')->putFileAs(
+
+                $path = Storage::disk('spaces')->putFileAs(
                     'payhankey_media/images', // folder inside bucket
                     $image,
                     Str::uuid() . '-' . auth()->id(), // unique filename
                     'public'
                 );
-                 $url = config('filesystems.disks.spaces.url') . '/' . $path;
-                 
+                $url = config('filesystems.disks.spaces.url') . '/' . $path;
+
 
                 PostImages::create([
                     'user_id' => Auth::id(),
@@ -257,7 +291,7 @@ class Timeline extends Component
 
         session()->flash('success', 'Your post was successful!');
 
-        $this->reset('content', 'images');
+        $this->reset('content', 'images', 'selectedTrends');
     }
 
 
