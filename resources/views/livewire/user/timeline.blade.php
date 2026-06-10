@@ -213,6 +213,8 @@
                 <livewire:user.video-player :videoId="$activeVideoId" wire:key="video-player-{{ @$activeVideoId }}" />
             @endif {{-- Global Video Player --}}
 
+
+            
             @if ($hasMore)
                 <div class="text-center my-3">
                     <button wire:click="loadNextPage" wire:loading.attr="disabled" class="btn btn-sm btn-primary">

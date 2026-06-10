@@ -1,530 +1,855 @@
 {{--
     livewire/user/post-content.blade.php
-
-    Renders a single post card in the feed.
-    Handles: text · images (1-4) · video (thumbnail + play → video page)
+    Twitter/X + Facebook hybrid card
+    Data expected on $post:
+      $post->user, $post->images (collection), $post->video (single),
+      $post->trends (collection), $post->content,
+      $post->views, $post->views_external, $post->comments
+    Component properties: $likedByMe (bool), $likesCount (int), $commentCount (int)
 --}}
 
 <div>
-<style>
-/* ── Post card ─────────────────────────────────────────────── */
-.post-card {
-    background: #fff;
-    border-radius: 8px;
-    border: 1px solid #e4e6eb;
-    margin-bottom: 12px;
-    overflow: hidden;
-}
+    <style>
+        /* ── Reset / scope ──────────────────────────────────────── */
+        .pk-card *,
+        .pk-card *::before,
+        .pk-card *::after {
+            box-sizing: border-box;
+        }
 
-/* ── Header ────────────────────────────────────────────────── */
-.post-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 16px 8px;
-}
-.post-avatar {
-    width: 40px; height: 40px;
-    border-radius: 50%;
-    object-fit: cover;
-    flex-shrink: 0;
-}
-.post-meta { flex: 1; min-width: 0; }
-.post-author {
-    font-weight: 700;
-    font-size: 14px;
-    color: #050505;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-.post-author:hover { text-decoration: underline; color: #050505; }
-.post-time {
-    font-size: 12px;
-    color: #65676b;
-    margin-top: 1px;
-}
-.badge-creator {
-    display: inline-flex; align-items: center;
-    background: #e7f3ff; color: #1877f2;
-    font-size: 10px; font-weight: 700;
-    padding: 1px 6px; border-radius: 99px;
-    letter-spacing: .04em; text-transform: uppercase;
-}
-.badge-influencer {
-    display: inline-flex; align-items: center;
-    background: #f0e6ff; color: #7c3aed;
-    font-size: 10px; font-weight: 700;
-    padding: 1px 6px; border-radius: 99px;
-    letter-spacing: .04em; text-transform: uppercase;
-}
+        /* ── Card shell ─────────────────────────────────────────── */
+        .pk-card {
+            background: #fff;
+            border: 1px solid #eff3f4;
+            border-radius: 0;
+            /* X-style: no radius on feed cards */
+            margin-bottom: 1px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
 
-/* ── Post text ─────────────────────────────────────────────── */
-.post-text {
-    padding: 0 16px 10px;
-    font-size: 15px;
-    line-height: 1.5;
-    color: #050505;
-    white-space: pre-wrap;
-    word-break: break-word;
-}
-.post-text a { color: #1877f2; text-decoration: none; }
-.post-text a:hover { text-decoration: underline; }
-.see-more-btn {
-    background: none; border: none; padding: 0;
-    color: #65676b; font-size: 14px; font-weight: 600;
-    cursor: pointer; font-family: inherit;
-}
+        .pk-card+.pk-card {
+            border-top: none;
+        }
 
-/* ── Image grid ────────────────────────────────────────────── */
-.post-images { padding: 0; }
+        /* Round only when it's a standalone detail card */
+        .pk-card.pk-standalone {
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border: 1px solid #eff3f4;
+        }
 
-.img-grid {
-    display: grid;
-    gap: 2px;
-    max-height: 500px;
-    overflow: hidden;
-}
-/* 1 image: full width, fixed height */
-.img-grid.count-1 {
-    grid-template-columns: 1fr;
-}
-.img-grid.count-1 .img-cell { height: 380px; }
+        /* ── Header ─────────────────────────────────────────────── */
+        .pk-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 14px 16px 0;
+        }
 
-/* 2 images: side by side */
-.img-grid.count-2 {
-    grid-template-columns: 1fr 1fr;
-}
-.img-grid.count-2 .img-cell { height: 300px; }
+        .pk-avatar-col {
+            flex-shrink: 0;
+        }
 
-/* 3 images: first full width, two below */
-.img-grid.count-3 {
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 250px 250px;
-}
-.img-grid.count-3 .img-cell:first-child {
-    grid-column: 1 / -1;
-    height: 250px;
-}
-.img-grid.count-3 .img-cell { height: 250px; }
+        .pk-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            object-fit: cover;
+            display: block;
+        }
 
-/* 4 images: 2×2 grid */
-.img-grid.count-4 {
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 220px 220px;
-}
-.img-grid.count-4 .img-cell { height: 220px; }
+        .pk-name-row {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 4px;
+            line-height: 1.2;
+        }
 
-.img-cell {
-    position: relative;
-    overflow: hidden;
-    background: #f0f2f5;
-    cursor: pointer;
-}
-.img-cell img {
-    width: 100%; height: 100%;
-    object-fit: cover;
-    display: block;
-    transition: transform .2s;
-}
-.img-cell:hover img { transform: scale(1.02); }
+        .pk-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: #0f1419;
+            text-decoration: none;
+        }
 
-/* "+N more" overlay on last image when > 4 */
-.img-more-overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(0,0,0,.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    font-size: 28px;
-    font-weight: 700;
-}
+        .pk-name:hover {
+            text-decoration: underline;
+            color: #0f1419;
+        }
 
-/* ── Video thumbnail in feed ───────────────────────────────── */
-.post-video-thumb {
-    position: relative;
-    background: #000;
-    cursor: pointer;
-    overflow: hidden;
-    max-height: 400px;
-}
-.post-video-thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    transition: transform .2s;
-    max-height: 400px;
-}
-.post-video-thumb:hover img { transform: scale(1.02); }
+        /* Verified badge — creator = blue, influencer = brand purple */
+        .pk-tick {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
 
-/* Play button overlay */
-.video-play-overlay {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0,0,0,.25);
-    transition: background .2s;
-}
-.post-video-thumb:hover .video-play-overlay {
-    background: rgba(0,0,0,.4);
-}
-.play-btn {
-    width: 64px; height: 64px;
-    background: rgba(255,255,255,.92);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    transition: transform .15s;
-}
-.post-video-thumb:hover .play-btn { transform: scale(1.1); }
-.play-btn svg { margin-left: 4px; }
+        /* Influencer crown label */
+        .pk-influencer-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+            color: #5A4FDC;
+            background: rgba(90, 79, 220, .08);
+            border-radius: 4px;
+            padding: 1px 5px;
+        }
 
-/* Video badge: duration / role */
-.video-badge {
-    position: absolute;
-    bottom: 10px; left: 10px;
-    background: rgba(0,0,0,.65);
-    color: #fff;
-    font-size: 11px;
-    font-weight: 600;
-    padding: 2px 8px;
-    border-radius: 4px;
-    letter-spacing: .03em;
-}
-.video-type-badge {
-    position: absolute;
-    top: 10px; left: 10px;
-    background: #f02849;
-    color: #fff;
-    font-size: 10px;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 4px;
-    text-transform: uppercase;
-    letter-spacing: .05em;
-}
+        .pk-handle-row {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 1px;
+        }
 
-/* ── Action bar ────────────────────────────────────────────── */
-.post-actions {
-    display: flex;
-    border-top: 1px solid #e4e6eb;
-    margin: 8px 16px 0;
-    padding: 4px 0;
-}
-.post-action-btn {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    padding: 8px 4px;
-    border: none;
-    background: transparent;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 600;
-    color: #65676b;
-    cursor: pointer;
-    transition: background .15s;
-    font-family: inherit;
-    text-decoration: none;
-}
-.post-action-btn:hover { background: #f0f2f5; color: #050505; }
-.post-action-btn.liked { color: #e0245e; }
-.post-action-btn svg, .post-action-btn i { flex-shrink: 0; }
+        .pk-handle {
+            font-size: 14px;
+            color: #536471;
+            text-decoration: none;
+        }
 
-/* ── Comments ──────────────────────────────────────────────── */
-.post-comments {
-    padding: 10px 16px 12px;
-    border-top: 1px solid #e4e6eb;
-    background: #f7f8fa;
-}
-</style>
+        .pk-handle:hover {
+            text-decoration: underline;
+            color: #536471;
+        }
 
-<div class="post-card">
+        .pk-sep {
+            color: #ccd3d8;
+            font-size: 13px;
+        }
 
-    {{-- ── Header ─────────────────────────────────────────── --}}
-    <div class="post-header">
-        <a href="{{ url('profile/' . $post->user->username) }}">
-            <img class="post-avatar"
-                 src="{{ $post->user->avatar ?? asset('src/assets/media/avatars/avatar13.jpg') }}"
-                 alt="{{ $post->user->name }}">
-        </a>
+        .pk-time {
+            font-size: 14px;
+            color: #536471;
+        }
 
-        <div class="post-meta">
-            <a class="post-author" href="{{ url('profile/' . $post->user->username) }}">
-                {{ displayName($post->user->name) }}
+        /* Earnings pill — owner only */
+        .pk-earn {
+            font-size: 12px;
+            font-weight: 600;
+            color: #00ba7c;
+            background: rgba(0, 186, 124, .08);
+            border-radius: 20px;
+            padding: 2px 8px;
+            white-space: nowrap;
+            text-decoration: none;
+        }
 
-                {{-- Verified tick for Creator / Influencer --}}
-                @if(in_array(userLevel($post->user->id), ['Creator', 'Influencer']))
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="#1877f2">
-                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                @endif
+        .pk-earn:hover {
+            background: rgba(0, 186, 124, .15);
+            color: #00ba7c;
+        }
 
-                {{-- Role badge --}}
-                {{-- @php $role = userLevel($post->user->id); @endphp
-                @if($role === 'Creator')
-                    <span class="badge-creator">Creator</span>
-                @elseif($role === 'Influencer')
-                    <span class="badge-influencer">Influencer</span>
-                @endif --}}
-            </a>
-            <div class="post-time">
-                <span>@</span>{{ $post->user->username }} · {{ $post->created_at->diffForHumans() }}
+        /* Options kebab */
+        .pk-options-btn {
+            background: none;
+            border: none;
+            padding: 6px;
+            border-radius: 50%;
+            color: #536471;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background .15s, color .15s;
+            margin-left: auto;
+            flex-shrink: 0;
+        }
+
+        .pk-options-btn:hover {
+            background: rgba(90, 79, 220, .08);
+            color: #5A4FDC;
+        }
+
+        /* ── Body ───────────────────────────────────────────────── */
+        .pk-body {
+            padding: 10px 16px 0 72px;
+        }
+
+        /* 72px = 44px avatar + 12px gap + 16px left pad */
+
+        .pk-text {
+            font-size: 15px;
+            line-height: 1.55;
+            color: #0f1419;
+            white-space: pre-wrap;
+            word-break: break-word;
+            margin: 0;
+        }
+
+        .pk-text a {
+            color: #1d9bf0;
+            text-decoration: none;
+        }
+
+        .pk-text a:hover {
+            text-decoration: underline;
+        }
+
+        .pk-see-more {
+            background: none;
+            border: none;
+            padding: 0;
+            color: #1d9bf0;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            margin-left: 4px;
+        }
+
+        .pk-see-more:hover {
+            text-decoration: underline;
+        }
+
+        /* ── Trend tags ─────────────────────────────────────────── */
+        /* Signature: left-border rule — editorial eyebrow, not a chip cloud */
+        .pk-trends {
+            margin-top: 10px;
+            padding-left: 10px;
+            border-left: 2px solid #5A4FDC;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .pk-trend {
+            font-size: 13px;
+            font-weight: 700;
+            color: #5A4FDC;
+            text-decoration: none;
+            letter-spacing: -.01em;
+        }
+
+        .pk-trend:hover {
+            text-decoration: underline;
+            color: #5A4FDC;
+        }
+
+        /* ── Media ──────────────────────────────────────────────── */
+        /* Sits edge-to-edge below the indented body */
+        .pk-media {
+            margin: 12px 16px 0 72px;
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid #eff3f4;
+        }
+
+        /* Image grid — Facebook-style */
+        .pk-img-grid {
+            display: grid;
+            gap: 2px;
+            background: #000;
+        }
+
+        .pk-img-grid.n1 {
+            grid-template-columns: 1fr;
+        }
+
+        .pk-img-grid.n1 .pk-img-cell {
+            height: 360px;
+        }
+
+        .pk-img-grid.n2 {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .pk-img-grid.n2 .pk-img-cell {
+            height: 280px;
+        }
+
+        .pk-img-grid.n3 {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .pk-img-grid.n3 .pk-img-cell:first-child {
+            grid-row: span 2;
+            height: 100%;
+            min-height: 280px;
+        }
+
+        .pk-img-grid.n3 .pk-img-cell {
+            height: 200px;
+        }
+
+        .pk-img-grid.n4 {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .pk-img-grid.n4 .pk-img-cell {
+            height: 200px;
+        }
+
+        .pk-img-cell {
+            position: relative;
+            overflow: hidden;
+            background: #0f1419;
+            cursor: pointer;
+        }
+
+        .pk-img-cell img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform .25s ease;
+        }
+
+        .pk-img-cell:hover img {
+            transform: scale(1.03);
+        }
+
+        .pk-img-more {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, .55);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 26px;
+            font-weight: 700;
+            text-decoration: none;
+            letter-spacing: -.02em;
+        }
+
+        /* Video thumbnail */
+        .pk-video {
+            position: relative;
+            background: #000;
+            cursor: pointer;
+            overflow: hidden;
+            display: block;
+            text-decoration: none;
+        }
+
+        .pk-video img {
+            width: 100%;
+            max-height: 380px;
+            object-fit: cover;
+            display: block;
+            transition: transform .25s;
+        }
+
+        .pk-video:hover img {
+            transform: scale(1.02);
+        }
+
+        .pk-video-placeholder {
+            height: 280px;
+            background: #111827;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pk-video-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, .25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background .2s;
+        }
+
+        .pk-video:hover .pk-video-overlay {
+            background: rgba(0, 0, 0, .42);
+        }
+
+        .pk-play {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, .93);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform .15s;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, .3);
+        }
+
+        .pk-video:hover .pk-play {
+            transform: scale(1.08);
+        }
+
+        .pk-video-pill {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: #f02849;
+            color: #fff;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+        }
+
+        .pk-video-dur {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, .7);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 2px 7px;
+            border-radius: 4px;
+        }
+
+        /* ── Action bar ─────────────────────────────────────────── */
+        .pk-actions {
+            display: flex;
+            padding: 4px 8px 4px 64px;
+            gap: 0;
+            margin-top: 8px;
+            border-top: 1px solid #eff3f4;
+        }
+
+        .pk-action {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 9px 6px;
+            border: none;
+            background: transparent;
+            border-radius: 99px;
+            font-size: 13px;
+            font-weight: 400;
+            color: #536471;
+            cursor: pointer;
+            transition: background .15s, color .15s;
+            font-family: inherit;
+            text-decoration: none;
+            min-width: 0;
+            white-space: nowrap;
+        }
+
+        .pk-action:hover {
+            color: #1d9bf0;
+            background: rgba(29, 155, 240, .08);
+        }
+
+        .pk-action.pk-like:hover {
+            color: #f91880;
+            background: rgba(249, 24, 128, .08);
+        }
+
+        .pk-action.pk-share:hover {
+            color: #5A4FDC;
+            background: rgba(90, 79, 220, .08);
+        }
+
+        .pk-action.pk-view {
+            cursor: default;
+        }
+
+        .pk-action.pk-view:hover {
+            background: rgba(0, 186, 124, .08);
+            color: #00ba7c;
+        }
+
+        .pk-action.pk-liked {
+            color: #f91880;
+        }
+
+        .pk-action.pk-liked svg {
+            animation: pk-pop .25s ease;
+        }
+
+        @keyframes pk-pop {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.4);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* ── Comments ───────────────────────────────────────────── */
+        .pk-comments {
+            padding: 10px 16px 14px;
+            border-top: 1px solid #eff3f4;
+            background: #f7f8fa;
+        }
+
+        /* ── Share modal overrides ──────────────────────────────── */
+        .pk-modal-header {
+            background: linear-gradient(120deg, #5A4FDC 0%, #7c6ef0 100%);
+            border: none;
+            border-radius: 0;
+            padding: 16px 20px;
+        }
+
+        .pk-share-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: opacity .15s;
+        }
+
+        .pk-share-btn:hover {
+            opacity: .85;
+        }
+    </style>
+
+    @php
+        $level = userLevel($post->user->id);
+        $isOwner = auth()->id() === $post->user_id;
+        $fullText = strip_tags($post->content);
+        $shortText = Str::limit($fullText, 280);
+        $needsMore = mb_strlen($fullText) > 280;
+        $imgs = $post->images ?? collect();
+        $imgCount = $imgs->count();
+        $vid = $post->video ?? null;
+        $postTrends = $post->trends ?? collect();
+        $shareUrl = url('timeline/' . $post->id);
+    @endphp
+
+    <div class="pk-card">
+
+        {{-- ══════════════════════════════════════════
+         HEADER
+    ══════════════════════════════════════════ --}}
+        <div class="pk-header">
+
+            {{-- Avatar --}}
+            <div class="pk-avatar-col">
+                <a href="{{ url('profile/' . $post->user->username) }}">
+                    <img class="pk-avatar"
+                        src="{{ $post->user->avatar ?? asset('src/assets/media/avatars/avatar13.jpg') }}"
+                        alt="{{ $post->user->name }}">
+                </a>
             </div>
-        </div>
 
-        {{-- Earnings (owner only) --}}
-        {{-- @if(auth()->id() === $post->user_id) --}}
-            <a href="{{ url('post/timeline/'.$post->id.'/analytics') }}"
-               style="font-size:12px;color:#65676b;text-decoration:none;white-space:nowrap">
-                {{ getCurrencyCode() }}{{ estimatedEarnings($post->id) }}
-            </a>
-        {{-- @endif --}}
-    </div>
+            {{-- Name / handle / time --}}
+            <div style="flex:1;min-width:0">
+                <div class="pk-name-row">
+                    <a class="pk-name" href="{{ url('profile/' . $post->user->username) }}">
+                        {{ displayName($post->user->name) }}
+                    </a>
 
-    {{-- ── Post text ───────────────────────────────────────── --}}
-    @if($post->content)
-        <div class="post-text" id="post-text-{{ $post->id }}">
-            @php
-                $fullText   = strip_tags($post->content);
-                $shortText  = Str::limit($fullText, 280);
-                $needsMore  = strlen($fullText) > 280;
-            @endphp
+                    @if ($level === 'Creator')
+                        <svg class="pk-tick" viewBox="0 0 22 22" fill="none">
+                            <circle cx="11" cy="11" r="11" fill="#1d9bf0" />
+                            <path d="M7 11l3 3 5-5" stroke="#fff" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    @elseif ($level === 'Influencer')
+                        <svg class="pk-tick" viewBox="0 0 22 22" fill="none">
+                            <circle cx="11" cy="11" r="11" fill="#5A4FDC" />
+                            <path d="M7 11l3 3 5-5" stroke="#fff" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                        {{-- <span class="pk-influencer-label">Influencer</span> --}}
+                    @endif
 
-            <span class="text-body" id="text-body-{{ $post->id }}">{{ $shortText }}</span>
+                    {{-- @if ($isOwner) --}}
 
-            @if($needsMore)
-                <button class="see-more-btn"
-                        onclick="
-                            document.getElementById('text-body-{{ $post->id }}').textContent = {{ json_encode($fullText) }};
-                            this.remove();
-                        ">
-                    See more
-                </button>
-            @endif
-        </div>
-    @endif
+                    {{-- @endif --}}
+                </div>
 
-    {{-- ═══════════════════════════════════════════════════════
-         IMAGES
-         ═══════════════════════════════════════════════════════ --}}
-    @if($post->images && $post->images->count())
-        @php
-            $imgs      = $post->images;
-            $total     = $imgs->count();
-            $shown     = $imgs->take(4);
-            $remaining = $total - 4;
-        @endphp
+                <div class="pk-handle-row">
+                    <a class="pk-handle" href="{{ url('profile/' . $post->user->username) }}">
+                        <span>@</span>{{ Str::limit($post->user->username, 18, '') }}
+                    </a>
+                    <span class="pk-sep">·</span>
+                    <span class="pk-time">{{ $post->created_at->diffForHumans() }}</span>
+                </div>
+            </div>
 
-        <div class="post-images">
-            <div class="img-grid count-{{ min($total, 4) }}">
-                @foreach($shown as $i => $image)
-                    <div class="img-cell">
-                        <a href="{{ $image->path }}"
-                           data-fslightbox="gallery-{{ $post->id }}">
-                            <img src="{{ $image->path }}"
-                                 alt="Post image"
-                                 loading="lazy">
+            {{-- Options --}}
+            <div class="dropdown">
+                <a href="{{ url('post/timeline/' . $post->id . '/analytics') }}" class="pk-earns ms-1">
+                    {{ getCurrencyCode() }}{{ estimatedEarnings($post->id) }}
+                </a>
+
+                {{-- <button class="pk-options-btn" data-bs-toggle="dropdown" aria-expanded="false">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/>
+                </svg>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end shadow border-0" style="border-radius:12px;min-width:200px">
+                @if ($isOwner)
+                    <a class="dropdown-item py-2" href="{{ url('post/timeline/'.$post->id.'/analytics') }}">
+                        <i class="far fa-fw fa-chart-bar text-success me-2"></i> View earnings
+                    </a>
+                    @if (in_array($level, ['Creator', 'Influencer']))
+                        <a class="dropdown-item py-2" href="javascript:void(0)">
+                            <i class="far fa-fw fa-edit text-primary me-2"></i> Edit post
                         </a>
-
-                        {{-- "+N more" overlay on the 4th image --}}
-                        @if($i === 3 && $remaining > 0)
-                            <a href="{{ $image->path }}"
-                               data-fslightbox="gallery-{{ $post->id }}"
-                               class="img-more-overlay text-decoration-none">
-                                +{{ $remaining }}
-                            </a>
-                        @endif
-                    </div>
-                @endforeach
+                        <div class="dropdown-divider m-0"></div>
+                        <a class="dropdown-item py-2 text-danger" href="javascript:void(0)"
+                           wire:click="deletePost({{ $post->unicode }})">
+                            <i class="far fa-fw fa-trash-alt me-2"></i> Delete post
+                        </a>
+                    @endif
+                @else
+                    <a class="dropdown-item py-2" href="javascript:void(0)">
+                        <i class="fa fa-fw fa-bookmark text-primary me-2"></i> Bookmark
+                    </a>
+                     <a class="dropdown-item py-2" href="javascript:void(0)">
+                        <i class="fa fa-fw fa-user-minus text-warning me-2"></i>
+                        Unfollow @{{ $post - > user - > username }}
+                    </a> 
+                     <div class="dropdown-divider m-0"></div>
+                    <a class="dropdown-item py-2 text-danger" href="javascript:void(0)">
+                        <i class="fa fa-fw fa-flag me-2"></i> Report post 
+                    </a>
+                @endif
+            </div> --}}
             </div>
+
+        </div>{{-- /pk-header --}}
+
+        {{-- ══════════════════════════════════════════
+         BODY — text + trends
+    ══════════════════════════════════════════ --}}
+        <div class="pk-body">
+
+            {{-- Text --}}
+            @if ($post->content)
+
+            {!! $post->content !!}
+                {{-- <p class="pk-text" id="pk-text-{{ $post->id }}">
+                    <span id="pk-span-{{ $post->id }}">{{ $shortText }}</span>
+                    @if ($needsMore)
+                        <button class="pk-see-more"
+                            onclick="(function(btn){
+                                document.getElementById('pk-span-{{ $post->id }}').textContent = {{ json_encode($fullText) }};
+                                btn.remove();
+                            })(this)">
+                            Show more
+                        </button>
+                    @endif
+                </p> --}}
+                <br>
+            @endif
+
+            {{-- Trends — editorial left-rule treatment --}}
+            @if ($postTrends->isNotEmpty())
+                <div class="pk-trends">
+                    @foreach ($postTrends as $trend)
+                        <a href="javascript:void(0)" class="pk-trend">#{{ $trend->name }}</a>
+                    @endforeach
+                </div>
+            @endif
+
         </div>
-    @endif
 
-    {{-- ═══════════════════════════════════════════════════════
-         VIDEO THUMBNAIL IN FEED
-         Clicking takes the user to the full video player page.
-
-         Thumbnail priority:
-         1. $vid->thumbnail  — stored URL from Cloudinary at upload time
-         2. $vid->poster_url — accessor builds it from public_id on the fly
-         3. Placeholder       — dark box with video icon
-         ═══════════════════════════════════════════════════════ --}}
-    @if($post->video)
-        @php
-            $vid       = $post->video;
-            $playerUrl = url('rolls/' . $vid->id);
-
-            // Best thumbnail: stored column, then on-the-fly Cloudinary URL, then nothing
-            $poster = $vid->thumbnail_path
-                   ?? ($vid->public_id ? $vid->poster_url : null);
-
-                //    echo $playerUrl;
-        @endphp
-
-        <a href="{{ $playerUrl }}" class="post-video-thumb d-block text-decoration-none">
-
-            {{-- Poster frame --}}
-            @if($poster)
-                <img src="{{ $poster }}"
-                     alt="Video thumbnail"
-                     loading="lazy"
-                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-                {{-- Hidden fallback shown if image fails to load --}}
-                <div style="display:none;height:300px;background:#111;align-items:center;justify-content:center">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" opacity=".4">
-                        <path d="M15 10l4.553-2.532A1 1 0 0121 8.382v7.236a1 1 0 01-1.447.894L15 14"/>
-                        <rect x="2" y="6" width="13" height="12" rx="2"/>
-                    </svg>
-                </div>
-            @else
-                {{-- No thumbnail: dark placeholder with video icon --}}
-                <div style="height:300px;background:#111;display:flex;align-items:center;justify-content:center">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" opacity=".4">
-                        <path d="M15 10l4.553-2.532A1 1 0 0121 8.382v7.236a1 1 0 01-1.447.894L15 14"/>
-                        <rect x="2" y="6" width="13" height="12" rx="2"/>
-                    </svg>
-                </div>
-            @endif
-
-            {{-- Play button overlay --}}
-            <div class="video-play-overlay">
-                <div class="play-btn">
-                    <svg width="26" height="26" viewBox="0 0 24 24" fill="#050505">
-                        <polygon points="5 3 19 12 5 21 5 3"/>
-                    </svg>
+        {{-- ══════════════════════════════════════════
+         IMAGES
+    ══════════════════════════════════════════ --}}
+        @if ($imgCount > 0)
+            @php
+                $shown = $imgs->take(4);
+                $remaining = $imgCount - 4;
+                $gridClass = 'n' . min($imgCount, 4);
+            @endphp
+            <div class="pk-media">
+                <div class="pk-img-grid {{ $gridClass }}">
+                    @foreach ($shown as $i => $image)
+                        <div class="pk-img-cell">
+                            <a href="{{ $image->path }}" data-fslightbox="gal-{{ $post->id }}">
+                                <img src="{{ $image->path }}" alt="Post image" loading="lazy">
+                            </a>
+                            @if ($i === 3 && $remaining > 0)
+                                <a href="{{ $image->path }}" data-fslightbox="gal-{{ $post->id }}"
+                                    class="pk-img-more">
+                                    +{{ $remaining }}
+                                </a>
+                            @endif
+                        </div>
+                    @endforeach
                 </div>
             </div>
-
-            {{-- "● VIDEO" badge --}}
-            <span class="video-type-badge">● Video</span>
-
-            {{-- Duration badge --}}
-            @if(!empty($vid->duration))
-                <span class="video-badge">{{ gmdate('i:s', $vid->duration) }}</span>
-            @endif
-
-        </a>
-    @endif
-
-    {{-- ── Action bar ──────────────────────────────────────── --}}
-    <div class="post-actions">
-
-        {{-- Like --}}
-        <button class="post-action-btn {{ $likedByMe ? 'liked' : '' }}"
-                wire:click="toggleLike">
-            <svg width="18" height="18" viewBox="0 0 24 24"
-                 fill="{{ $likedByMe ? 'currentColor' : 'none' }}"
-                 stroke="currentColor" stroke-width="2">
-                <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06
-                         a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78
-                         1.06-1.06a5.5 5.5 0 000-7.78z"/>
-            </svg>
-            {{ number_format($likesCount) }}
-        </button>
-
-        {{-- Comment --}}
-        <a class="post-action-btn" href="{{ url('timeline/'.$post->id) }}">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="2">
-                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
-            </svg>
-            {{ $commentCount }}
-        </a>
-
-        {{-- Views --}}
-        <span class="post-action-btn" style="cursor:default">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="2">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                <circle cx="12" cy="12" r="3"/>
-            </svg>
-            {{ sumCounter($post->views, $post->views_external) }}
-        </span>
-
-        {{-- Share --}}
-        <button class="post-action-btn"
-                data-bs-toggle="modal"
-                data-bs-target="#share-modal-{{ $post->id }}">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="2">
-                <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/>
-                <circle cx="18" cy="19" r="3"/>
-                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
-                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
-            </svg>
-            Share
-        </button>
-
-    </div>
-
-    {{-- ── Comments section ───────────────────────────────── --}}
-    <div class="post-comments">
-        @if(userLevel() === 'Basic' && $post->user_id === auth()->id())
-            <a href="{{ url('upgrade') }}" style="font-size:12px;color:#65676b">
-                💰 Monetize this post
-            </a>
-            <hr class="my-2">
         @endif
 
-        <livewire:user.post-comments
-            :post="$post"
-            :wire:key="'post-comments-'.$post->id" />
-    </div>
+        {{-- ══════════════════════════════════════════
+         VIDEO
+    ══════════════════════════════════════════ --}}
+        @if ($vid)
+            @php
+                $poster = $vid->thumbnail_path ?? ($vid->public_id ? $vid->poster_url ?? null : null);
+                $playerUrl = url('rolls/' . $vid->id);
+            @endphp
+            <div class="pk-media">
+                <a href="{{ $playerUrl }}" class="pk-video">
 
-</div>
+                    @if ($poster)
+                        <img src="{{ $poster }}" alt="Video" loading="lazy"
+                            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                        <div class="pk-video-placeholder" style="display:none">
+                            <svg width="40" height="40" fill="none" stroke="#fff" stroke-width="1.5"
+                                opacity=".4" viewBox="0 0 24 24">
+                                <path d="M15 10l4.553-2.532A1 1 0 0121 8.382v7.236a1 1 0 01-1.447.894L15 14" />
+                                <rect x="2" y="6" width="13" height="12" rx="2" />
+                            </svg>
+                        </div>
+                    @else
+                        <div class="pk-video-placeholder">
+                            <svg width="40" height="40" fill="none" stroke="#fff" stroke-width="1.5"
+                                opacity=".4" viewBox="0 0 24 24">
+                                <path d="M15 10l4.553-2.532A1 1 0 0121 8.382v7.236a1 1 0 01-1.447.894L15 14" />
+                                <rect x="2" y="6" width="13" height="12" rx="2" />
+                            </svg>
+                        </div>
+                    @endif
 
-{{-- ── Share modal ─────────────────────────────────────────── --}}
-<div class="modal fade" id="share-modal-{{ $post->id }}" tabindex="-1">
-    <div class="modal-dialog modal-dialog-fromright">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title">Share Post</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <div class="pk-video-overlay">
+                        <div class="pk-play">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="#0f1419">
+                                <polygon points="5 3 19 12 5 21 5 3" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    <span class="pk-video-pill">● Video</span>
+
+                    @if (!empty($vid->duration))
+                        <span class="pk-video-dur">{{ gmdate('i:s', $vid->duration) }}</span>
+                    @endif
+
+                </a>
             </div>
-            <div class="modal-body">
-                <p class="text-muted mb-3">Share and earn when people engage with this post.</p>
+        @endif
 
-                @php $shareUrl = url('timeline/'.$post->id); @endphp
+        {{-- ══════════════════════════════════════════
+         ACTION BAR
+    ══════════════════════════════════════════ --}}
+        <div class="pk-actions">
 
-                <div class="input-group mb-3">
-                    <input type="text" class="form-control form-control-sm"
-                           value="{{ $shareUrl }}" readonly id="share-url-{{ $post->id }}">
-                    <button class="btn btn-outline-secondary btn-sm"
-                            onclick="navigator.clipboard.writeText('{{ $shareUrl }}')
-                                     .then(()=>this.textContent='Copied!')">
-                        Copy
-                    </button>
+            {{-- Like --}}
+            <button class="pk-action pk-like {{ $likedByMe ? 'pk-liked' : '' }}" wire:click="toggleLike">
+                <svg width="18" height="18" viewBox="0 0 24 24"
+                    fill="{{ $likedByMe ? 'currentColor' : 'none' }}" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06
+                         a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78
+                         1.06-1.06a5.5 5.5 0 000-7.78z" />
+                </svg>
+                {{ $likesCount > 0 ? number_format($likesCount) : '' }}
+            </button>
+
+            {{-- Comment --}}
+            <a class="pk-action" href="{{ url('timeline/' . $post->id) }}">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+                </svg>
+                {{ $commentCount > 0 ? number_format($commentCount) : '' }}
+            </a>
+
+            {{-- Views --}}
+            <span class="pk-action pk-view">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                </svg>
+                {{ sumCounter($post->views, $post->views_external) }}
+            </span>
+
+            {{-- Share --}}
+            <button class="pk-action pk-share" data-bs-toggle="modal"
+                data-bs-target="#pk-share-{{ $post->id }}">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="18" cy="5" r="3" />
+                    <circle cx="6" cy="12" r="3" />
+                    <circle cx="18" cy="19" r="3" />
+                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+                </svg>
+                Share
+            </button>
+
+        </div>
+
+        {{-- ══════════════════════════════════════════
+         COMMENTS
+    ══════════════════════════════════════════ --}}
+        <div class="pk-comments">
+            @if (userLevel() === 'Basic' && $isOwner)
+                <a href="{{ url('upgrade') }}"
+                    style="font-size:12px;color:#5A4FDC;font-weight:600;text-decoration:none">
+                    💰 Upgrade to monetize this post
+                </a>
+                <hr class="my-2">
+            @endif
+
+            <livewire:user.post-comments :post="$post" :wire:key="'post-comments-'.$post->id" />
+        </div>
+
+    </div>{{-- /pk-card --}}
+
+    {{-- ══════════════════════════════════════════
+     SHARE MODAL
+══════════════════════════════════════════ --}}
+    <div class="modal fade" id="pk-share-{{ $post->id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 overflow-hidden" style="border-radius:16px">
+                <div class="pk-modal-header d-flex align-items-center justify-content-between">
+                    <span style="font-size:15px;font-weight:700;color:#fff">
+                        Share post
+                    </span>
+                    <button type="button" class="btn-close btn-close-white btn-sm" data-bs-dismiss="modal"></button>
                 </div>
+                <div class="modal-body p-4">
+                    <p class="text-muted mb-3" style="font-size:13px">
+                        Share and earn when people engage with this post.
+                    </p>
 
-                <div class="d-flex gap-3 flex-wrap">
-                    <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode($shareUrl) }}"
-                       target="_blank" class="btn btn-sm btn-primary">
-                        <i class="fab fa-facebook me-1"></i>Facebook
-                    </a>
-                    <a href="https://twitter.com/intent/tweet?url={{ urlencode($shareUrl) }}"
-                       target="_blank" class="btn btn-sm btn-dark">
-                        <i class="fab fa-x-twitter me-1"></i>Twitter
-                    </a>
-                    <a href="https://wa.me/?text={{ urlencode($shareUrl) }}"
-                       target="_blank" class="btn btn-sm btn-success">
-                        <i class="fab fa-whatsapp me-1"></i>WhatsApp
-                    </a>
-                    <a href="https://t.me/share/url?url={{ urlencode($shareUrl) }}"
-                       target="_blank" class="btn btn-sm btn-info text-white">
-                        <i class="fab fa-telegram me-1"></i>Telegram
-                    </a>
+                    <div class="input-group mb-4" style="border-radius:8px;overflow:hidden">
+                        <input type="text" class="form-control form-control-sm border-end-0"
+                            value="{{ $shareUrl }}" readonly>
+                        <button class="btn btn-outline-secondary btn-sm border-start-0"
+                            style="font-size:12px;font-weight:600"
+                            onclick="navigator.clipboard.writeText('{{ $shareUrl }}').then(()=>{this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1500)})">
+                            Copy
+                        </button>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode($shareUrl) }}"
+                            target="_blank" class="pk-share-btn text-white" style="background:#1877f2">
+                            <i class="fab fa-facebook-f"></i> Facebook
+                        </a>
+                        <a href="https://twitter.com/intent/tweet?url={{ urlencode($shareUrl) }}" target="_blank"
+                            class="pk-share-btn text-white" style="background:#000">
+                            <i class="fab fa-x-twitter"></i> X
+                        </a>
+                        <a href="https://wa.me/?text={{ urlencode($shareUrl) }}" target="_blank"
+                            class="pk-share-btn text-white" style="background:#25d366">
+                            <i class="fab fa-whatsapp"></i> WhatsApp
+                        </a>
+                        <a href="https://t.me/share/url?url={{ urlencode($shareUrl) }}" target="_blank"
+                            class="pk-share-btn text-white" style="background:#229ed9">
+                            <i class="fab fa-telegram"></i> Telegram
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
 </div>

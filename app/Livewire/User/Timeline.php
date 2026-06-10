@@ -121,7 +121,7 @@ class Timeline extends Component
     public function loadPosts()
     {
         // Step 1: get latest posts per user (interleaving)
-        $query = Post::with('user')
+        $query = Post::with(['user', 'trends'])
             ->where('status', 'LIVE')
             ->latest('created_at');
 
