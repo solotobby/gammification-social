@@ -180,6 +180,7 @@ class Timeline extends Component
     public function createPost()
     {
         $level = userLevel();
+        
 
         $rules = [
             'content' => 'required|string',
@@ -238,7 +239,7 @@ class Timeline extends Component
 
         $user = Auth::user();
 
-        $content = $this->convertUrlsToLinks($this->content);
+        $content = $this->convertUrlsToLinks(strip_tags($this->content));
         $getContent = Post::where(['user_id' => $user->id])->pluck('content')->toArray();
 
         // dd($content);

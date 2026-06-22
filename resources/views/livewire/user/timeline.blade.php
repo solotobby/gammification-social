@@ -41,12 +41,12 @@
     <div class="row">
         <div class="col-md-8">
             {{-- @if ($userLevel === 'Basic') --}}
-            <div class="alert alert-info">
+            {{-- <div class="alert alert-info">
                 <h5 class="fs-5 fw-light mb-2">Let your friends join Payhankey!</h5>
                 <p class="text-muteddd">
                     Your friends will vibe easily with your content & help you increase your engagement. <a
                         href="{{ url('referral/list') }}">Learn More</a>
-                </p>
+                </p> --}}
 
                 <div class="input-group mb-4">
                     <input type="text" id="referralLink" class="form-control"
@@ -56,12 +56,12 @@
                         <i class="fa fa-copy"></i>
                     </button>
                 </div>
-                <a href="{{ url('referral/list') }}" class="btn btn-primary mb-2">
+                {{-- <a href="{{ url('referral/list') }}" class="btn btn-primary mb-2">
                     View Referral List<i class="fa fa-arrow-right ms-1"></i>
-                </a>
-            </div>
+                </a> 
+            </div>--}}
             {{-- @endif --}}
-            <div class="block block-bordered block-rounded">
+            {{-- <div class="block block-bordered block-rounded">
                 <div class="block-content block-content-full">
                     <div class="alert alert-info">
                         <b>Post, Grow engagements and Earn from every posts.</b><br>
@@ -81,7 +81,7 @@
                         </a>
                     </div>
                 </div>
-            </div>
+            </div> --}}
 
 
             @foreach (['success' => 'success', 'info' => 'warning', 'error' => 'danger'] as $key => $type)
