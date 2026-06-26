@@ -1,7 +1,7 @@
 @extends('general.master.body')
 
 @section('content')
- {{-- <section class="pagehero">
+    {{-- <section class="pagehero">
   <div class="wrap pagehero__inner">
     <div class="crumbs"><a href="{{ url('/') }}">Home</a> / <span>Top earners</span></div>
     <span class="eyebrow">Top earners</span>
@@ -110,616 +110,570 @@
 
 
 
-<section class="pagehero">
-    <div class="wrap pagehero__inner">
-        <div class="crumbs">
-            <a href="{{ url('/') }}">Home</a> / <span>Top earners</span>
+    <section class="pagehero">
+        <div class="wrap pagehero__inner">
+            <div class="crumbs">
+                <a href="{{ url('/') }}">Home</a> / <span>Top earners</span>
+            </div>
+
+            <span class="eyebrow">Top earners</span>
+
+            <h1>The Payhankey leaderboard</h1>
+
+            <p>
+                Real members, ranked by what they've earned. Every name here started with a single free account — and so can
+                you.
+            </p>
         </div>
-
-        <span class="eyebrow">Top earners</span>
-
-        <h1>The Payhankey leaderboard</h1>
-
-        <p>
-            Real members, ranked by what they've earned. Every name here started with a single free account — and so can you.
-        </p>
-    </div>
-</section>
+    </section>
 
 
-<section class="section">
+    <section class="section">
 
-<div class="wrap">
+        <div class="wrap">
 
 
-<div class="center reveal" style="margin-bottom:34px">
+            <div class="center reveal" style="margin-bottom:34px">
 
-<div class="lb-filters">
+                <div class="lb-filters">
 
-<button class="is-active" onclick="switchBoard('month',this)">
-This month
-</button>
+                    <button class="is-active" onclick="switchBoard('month',this)">
+                        This month
+                    </button>
 
-<button onclick="switchBoard('all',this)">
-All time
-</button>
+                    <button onclick="switchBoard('all',this)">
+                        All time
+                    </button>
 
-</div>
+                </div>
 
-</div>
+            </div>
 
 
 
-{{-- ================= LAST MONTH ================= --}}
+            {{-- ================= LAST MONTH ================= --}}
 
-<div id="monthBoard">
-
-
-@php
-$leaders = $lastMonthEarners;
-@endphp
+            <div id="monthBoard">
 
 
-<div class="podium reveal">
+                @php
+                    $leaders = $lastMonthEarners;
+                @endphp
 
 
-@foreach([1,0,2] as $position)
+                <div class="podium reveal">
 
-@if(isset($leaders[$position]))
 
-@php
-$user = $leaders[$position];
+                    @foreach ([1, 0, 2] as $position)
+                        @if (isset($leaders[$position]))
+                            @php
+                                $user = $leaders[$position];
 
-$initials = strtoupper(
-    substr($user->name,0,2)
-);
+                                $initials = strtoupper(substr($user->name, 0, 2));
 
-@endphp
+                            @endphp
 
 
 
-<div class="podium__card 
+                            <div class="podium__card 
     {{ $position == 0 ? 'podium__card--1' : '' }}">
 
 
-<div class="podium__rank podium__rank--{{ $position+1 }}">
-{{ $position+1 }}
-</div>
+                                <div class="podium__rank podium__rank--{{ $position + 1 }}">
+                                    {{ $position + 1 }}
+                                </div>
 
 
 
-<div class="avatar avatar--lg"
-style="background:linear-gradient(135deg,#7C6FF2,#F25C8A)">
-{{ $initials }}
-</div>
+                                <div class="avatar avatar--lg" style="background:linear-gradient(135deg,#7C6FF2,#F25C8A)">
+                                    {{ $initials }}
+                                </div>
 
 
 
-<div class="podium__name">
-{{ $user->name }}
-</div>
+                                <div class="podium__name">
+                                  @<span>{{ $user->username }}</span>
+                                    {{-- {{ $user->name }} --}}
+                                </div>
 
 
-<div class="podium__handle">
-@{{ $user->username }}
-</div>
+                                {{-- <div class="podium__handle">
+                                    @{{ $user->username }}
+                                </div> --}}
 
 
-<div class="podium__earn">
-₦{{ number_format($user->total_paid,2) }}
-</div>
+                                <div class="podium__earn">
+                                    ₦{{ number_format($user->total_paid, 2) }}
+                                </div>
 
 
-<span class="delta delta--up"
-style="justify-content:center;margin-top:6px">
+                                <span class="delta delta--up" style="justify-content:center;margin-top:6px">
 
-<svg viewBox="0 0 24 24"
-fill="none"
-stroke="currentColor"
-stroke-width="2.4"
-stroke-linecap="round"
-stroke-linejoin="round">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+                                        stroke-linecap="round" stroke-linejoin="round">
 
-<polyline points="18 15 12 9 6 15"/>
+                                        <polyline points="18 15 12 9 6 15" />
 
-</svg>
+                                    </svg>
 
-</span>
+                                </span>
 
 
-</div>
+                            </div>
+                        @endif
+                    @endforeach
 
 
-@endif
+                </div>
 
-@endforeach
 
 
-</div>
 
+                <div class="reveal" style="overflow-x:auto">
 
 
+                    <table class="lb-table">
 
-<div class="reveal" style="overflow-x:auto">
 
+                        <thead>
 
-<table class="lb-table">
+                            <tr>
+                                <th>Rank</th>
+                                <th>Creator</th>
+                                <th>Level</th>
+                                <th>Growth</th>
+                                <th>Earnings</th>
+                            </tr>
 
+                        </thead>
 
-<thead>
 
-<tr>
-<th>Rank</th>
-<th>Creator</th>
-<th>Level</th>
-<th>Growth</th>
-<th>Earnings</th>
-</tr>
 
-</thead>
+                        <tbody>
 
 
 
-<tbody>
+                            @foreach ($lastMonthEarners->slice(3) as $key => $user)
+                                @php
 
+                                    $rank = $key + 1;
 
+                                    $initials = strtoupper(substr($user->name, 0, 2));
 
-@foreach($lastMonthEarners->slice(3) as $key=>$user)
+                                @endphp
 
 
-@php
 
-$rank = $key + 4;
+                                <tr>
 
-$initials = strtoupper(
-substr($user->name,0,2)
-);
 
-@endphp
+                                    <td>
+                                        <span class="lb-rank">
+                                            {{ $rank }}
+                                        </span>
+                                    </td>
 
 
 
-<tr>
+                                    <td>
 
+                                        <div class="lb-user">
 
-<td>
-<span class="lb-rank">
-{{ $rank }}
-</span>
-</td>
 
+                                            <div class="avatar"
+                                                style="width:40px;height:40px;font-size:.85rem;background:linear-gradient(135deg,#5A4FDC,#7C6FF2)">
 
+                                                {{ $initials }}
 
-<td>
+                                            </div>
 
-<div class="lb-user">
 
 
-<div class="avatar"
-style="width:40px;height:40px;font-size:.85rem;background:linear-gradient(135deg,#5A4FDC,#7C6FF2)">
+                                            <div>
 
-{{ $initials }}
+                                                <b style="font-family:var(--font-display)">
+                                                    @<span>{{ $user->username }}</span>
+                                                </b>
 
-</div>
 
+                                                {{-- <div style="color:var(--ink-faint);font-size:.85rem">
 
+                                                    @<span>{{ $user->username }}</span>
 
-<div>
+                                                </div> --}}
 
-<b style="font-family:var(--font-display)">
-{{ $user->name }}
-</b>
 
+                                            </div>
 
-<div style="color:var(--ink-faint);font-size:.85rem">
 
-@{{ $user->username }}
+                                        </div>
 
-</div>
+                                    </td>
 
 
-</div>
 
+                                    {{-- <td>
 
-</div>
+                                        <span class="tag-tier tag-tier--c">
 
-</td>
+                                            {{ $user->level ?? 'Creator' }}
 
+                                        </span>
 
+                                    </td> --}}
 
-<td>
 
-<span class="tag-tier tag-tier--c">
 
-{{ $user->level ?? 'Creator' }}
+                                    {{-- <td>
 
-</span>
+                                        <span class="delta delta--up">
 
-</td>
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+                                                stroke-linecap="round" stroke-linejoin="round">
 
+                                                <polyline points="18 15 12 9 6 15" />
 
+                                            </svg>
 
-<td>
+                                        </span>
 
-<span class="delta delta--up">
+                                    </td> --}}
 
-<svg viewBox="0 0 24 24"
-fill="none"
-stroke="currentColor"
-stroke-width="2.4"
-stroke-linecap="round"
-stroke-linejoin="round">
 
-<polyline points="18 15 12 9 6 15"/>
 
-</svg>
+                                    <td>
 
-</span>
+                                        <span class="lb-earn">
 
-</td>
+                                            ₦{{ number_format($user->total_paid, 2) }}
 
+                                        </span>
 
+                                    </td>
 
-<td>
 
-<span class="lb-earn">
+                                </tr>
+                            @endforeach
 
-₦{{ number_format($user->total_paid,2) }}
 
-</span>
 
-</td>
+                        </tbody>
 
 
-</tr>
+                    </table>
 
 
-@endforeach
+                </div>
 
 
 
-</tbody>
+            </div>
 
 
-</table>
 
 
-</div>
 
 
 
-</div>
 
 
+            {{-- ================= ALL TIME ================= --}}
 
 
+            <div id="allBoard" style="display:none">
 
 
 
+                @php
+                    $leaders = $allTimeEarners;
+                @endphp
 
 
-{{-- ================= ALL TIME ================= --}}
 
+                <div class="podium reveal">
 
-<div id="allBoard" style="display:none">
 
 
+                    @foreach ([1, 0, 2] as $position)
+                        @if (isset($leaders[$position]))
+                            @php
 
-@php
-$leaders = $allTimeEarners;
-@endphp
+                                $user = $leaders[$position];
 
+                                $initials = strtoupper(substr($user->name, 0, 2));
 
+                            @endphp
 
-<div class="podium reveal">
 
 
-
-@foreach([1,0,2] as $position)
-
-
-
-@if(isset($leaders[$position]))
-
-
-@php
-
-$user = $leaders[$position];
-
-$initials = strtoupper(
-substr($user->name,0,2)
-);
-
-@endphp
-
-
-
-<div class="podium__card 
+                            <div class="podium__card 
 {{ $position == 0 ? 'podium__card--1' : '' }}">
 
 
-<div class="podium__rank podium__rank--{{ $position+1 }}">
+                                <div class="podium__rank podium__rank--{{ $position + 1 }}">
 
-{{ $position+1 }}
+                                    {{ $position + 1 }}
 
-</div>
+                                </div>
 
 
 
-<div class="avatar avatar--lg"
-style="background:linear-gradient(135deg,#F5B73C,#F25C8A)">
+                                <div class="avatar avatar--lg" style="background:linear-gradient(135deg,#F5B73C,#F25C8A)">
 
-{{ $initials }}
+                                    {{ $initials }}
 
-</div>
+                                </div>
 
 
 
-<div class="podium__name">
-{{ $user->name }}
-</div>
+                                <div class="podium__name">
+                                    @<span>{{ $user->username }}</span>
+                                </div>
 
 
-<div class="podium__handle">
-@{{ $user->username }}
-</div>
+                                {{-- <div class="podium__handle">
+                                    @{{ $user->username }}
+                                </div> --}}
 
 
 
-<div class="podium__earn">
+                                <div class="podium__earn">
 
-₦{{ number_format($user->total_paid,2) }}
+                                    ₦{{ number_format($user->total_paid, 2) }}
 
-</div>
+                                </div>
 
 
-</div>
+                            </div>
+                        @endif
+                    @endforeach
 
 
-@endif
 
+                </div>
 
-@endforeach
 
 
 
-</div>
+                <div class="reveal" style="overflow-x:auto">
 
 
+                    <table class="lb-table">
 
 
-<div class="reveal" style="overflow-x:auto">
+                        <thead>
 
+                            <tr>
 
-<table class="lb-table">
+                                <th>Rank</th>
+                                <th>Creator</th>
+                                {{-- <th>Level</th> --}}
+                                {{-- <th>Growth</th> --}}
+                                <th>Earnings</th>
 
+                            </tr>
 
-<thead>
+                        </thead>
 
-<tr>
 
-<th>Rank</th>
-<th>Creator</th>
-<th>Level</th>
-<th>Growth</th>
-<th>Earnings</th>
 
-</tr>
+                        <tbody>
 
-</thead>
 
 
+                            @foreach ($allTimeEarners->slice(3) as $key => $user)
+                                @php
 
-<tbody>
+                                    $rank = $key + 4;
 
+                                    $initials = strtoupper(substr($user->name, 0, 2));
 
+                                @endphp
 
-@foreach($allTimeEarners->slice(3) as $key=>$user)
 
 
-@php
+                                <tr>
 
-$rank=$key+4;
 
-$initials=strtoupper(substr($user->name,0,2));
+                                    <td>
 
-@endphp
+                                        <span class="lb-rank">
 
+                                            {{ $rank }}
 
+                                        </span>
 
-<tr>
+                                    </td>
 
 
-<td>
 
-<span class="lb-rank">
+                                    <td>
 
-{{ $rank }}
+                                        <div class="lb-user">
 
-</span>
 
-</td>
+                                            <div class="avatar"
+                                                style="width:40px;height:40px;font-size:.85rem;background:linear-gradient(135deg,#12B886,#5A4FDC)">
 
+                                                {{ $initials }}
 
+                                            </div>
 
-<td>
 
-<div class="lb-user">
 
+                                            <div>
 
-<div class="avatar"
-style="width:40px;height:40px;font-size:.85rem;background:linear-gradient(135deg,#12B886,#5A4FDC)">
+                                                <b style="font-family:var(--font-display)">
+                                                    @<span>{{ $user->username }}</span>
+                                                </b>
 
-{{ $initials }}
 
-</div>
+                                                {{-- <div style="color:var(--ink-faint);font-size:.85rem">
 
+                                                    @{{ $user->username }}
 
+                                                </div> --}}
 
-<div>
 
-<b style="font-family:var(--font-display)">
-{{ $user->name }}
-</b>
+                                            </div>
 
 
-<div style="color:var(--ink-faint);font-size:.85rem">
+                                        </div>
 
-@{{ $user->username }}
 
-</div>
+                                    </td>
 
 
-</div>
 
+                                    {{-- <td>
 
-</div>
+                                        <span class="tag-tier tag-tier--c">
 
+                                            {{ $user->level ?? 'Creator' }}
 
-</td>
+                                        </span>
 
+                                    </td> --}}
 
 
-<td>
+                                    <td>
 
-<span class="tag-tier tag-tier--c">
+                                        <span class="delta delta--up">
 
-{{ $user->level ?? 'Creator' }}
+                                            ↑
 
-</span>
+                                        </span>
 
-</td>
+                                    </td>
 
 
-<td>
 
-<span class="delta delta--up">
+                                    <td>
 
-↑
+                                        <span class="lb-earn">
 
-</span>
+                                            ₦{{ number_format($user->total_paid, 2) }}
 
-</td>
+                                        </span>
 
+                                    </td>
 
 
-<td>
+                                </tr>
+                            @endforeach
 
-<span class="lb-earn">
 
-₦{{ number_format($user->total_paid,2) }}
 
-</span>
+                        </tbody>
 
-</td>
 
+                    </table>
 
-</tr>
 
+                </div>
 
 
-@endforeach
 
+            </div>
 
 
-</tbody>
 
 
-</table>
 
 
-</div>
 
+            <p class="center" style="color:var(--ink-faint);font-size:.86rem;margin-top:18px">
 
+                Leaderboard figures refresh monthly. Earnings depend on content, engagement and account level.
 
-</div>
+            </p>
 
 
 
 
 
 
+            <div class="cta-band reveal" style="margin-top:48px">
 
-<p class="center"
-style="color:var(--ink-faint);font-size:.86rem;margin-top:18px">
 
-Leaderboard figures refresh monthly. Earnings depend on content, engagement and account level.
+                <h2>
+                    Want your name on this board?
+                </h2>
 
-</p>
 
+                <p>
+                    Create your free account, start posting, and climb the ranks.
+                </p>
 
 
 
+                <div class="hero__cta">
 
+                    <a class="btn btn--white btn--lg" href="{{ url('/register') }}">
 
-<div class="cta-band reveal" style="margin-top:48px">
+                        Start earning free
 
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                            stroke-linecap="round" stroke-linejoin="round">
 
-<h2>
-Want your name on this board?
-</h2>
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                            <polyline points="12 5 19 12 12 19" />
 
+                        </svg>
 
-<p>
-Create your free account, start posting, and climb the ranks.
-</p>
+                    </a>
 
 
+                </div>
 
-<div class="hero__cta">
 
-<a class="btn btn--white btn--lg"
-href="{{ url('/register') }}">
+            </div>
 
-Start earning free
 
-<svg viewBox="0 0 24 24"
-fill="none"
-stroke="currentColor"
-stroke-width="2.2"
-stroke-linecap="round"
-stroke-linejoin="round">
 
-<line x1="5" y1="12" x2="19" y2="12"/>
-<polyline points="12 5 19 12 12 19"/>
+        </div>
 
-</svg>
+    </section>
 
-</a>
 
 
-</div>
+    <script>
+        function switchBoard(type, button) {
 
+            document.querySelectorAll('.lb-filters button')
+                .forEach(btn => btn.classList.remove('is-active'));
 
-</div>
 
+            button.classList.add('is-active');
 
 
-</div>
+            document.getElementById('monthBoard').style.display =
+                type === 'month' ? 'block' : 'none';
 
-</section>
 
+            document.getElementById('allBoard').style.display =
+                type === 'all' ? 'block' : 'none';
 
-
-<script>
-
-function switchBoard(type, button){
-
-document.querySelectorAll('.lb-filters button')
-.forEach(btn=>btn.classList.remove('is-active'));
-
-
-button.classList.add('is-active');
-
-
-document.getElementById('monthBoard').style.display =
-type === 'month' ? 'block':'none';
-
-
-document.getElementById('allBoard').style.display =
-type === 'all' ? 'block':'none';
-
-}
-
-</script>
+        }
+    </script>
 @endsection
