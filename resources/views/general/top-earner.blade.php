@@ -240,8 +240,8 @@
                             <tr>
                                 <th>Rank</th>
                                 <th>Creator</th>
-                                <th>Level</th>
-                                <th>Growth</th>
+                                {{-- <th>Level</th> --}}
+                                {{-- <th>Growth</th> --}}
                                 <th>Earnings</th>
                             </tr>
 
@@ -484,7 +484,7 @@
                             @foreach ($allTimeEarners->slice(3) as $key => $user)
                                 @php
 
-                                    $rank = $key + 4;
+                                    $rank = $key + 1;
 
                                     $initials = strtoupper(substr($user->name, 0, 2));
 
@@ -556,7 +556,7 @@
                                     </td> --}}
 
 
-                                    <td>
+                                    {{-- <td>
 
                                         <span class="delta delta--up">
 
@@ -564,7 +564,7 @@
 
                                         </span>
 
-                                    </td>
+                                    </td> --}}
 
 
 
