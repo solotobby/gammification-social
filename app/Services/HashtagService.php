@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Hashtag;
 use App\Models\HashtagTrend;
 use App\Models\Post;
+use App\Models\PostHashTag;
 
 class HashtagService
 {
@@ -40,11 +41,12 @@ class HashtagService
                 // 'posts_count' => 1
             ]);
 
+            PostHashTag::create(['post_id' => $post->id, 'hashtag_id' => $hashtag->id]);
 
-            $post->hashtags()
-                ->syncWithoutDetaching([
-                    $hashtag->id
-                ]);
+            // $post->hashtags()
+            //     ->syncWithoutDetaching([
+            //         $hashtag->id
+            //     ]);
 
 
             $hashtag->increment(
