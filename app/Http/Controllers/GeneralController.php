@@ -170,10 +170,10 @@ class GeneralController extends Controller
             ->whereIn('payouts.status', ['queued', 'paid'])
             ->groupBy(
                 'payouts.user_id',
-                'users.name',
-                'users.email',
+                // 'users.name',
+                // 'users.email',
                 'users.username',
-                'users.avatar',
+                // 'users.avatar',
                 // 'users.level',
                 'period'
             )
