@@ -789,7 +789,7 @@
     <section class="pagehero">
         <div class="wrap pagehero__inner" style="max-width:760px">
             <div class="crumbs"><a href="{{ url('/') }}">Home</a> / <a href="{{ url('blog') }}">Blog</a> /
-                <span>{{ $blog->title }}</span></div>
+               </div>
             <span class="art-cat">● {{ @$blog->blogCategory->name }}</span>
             <h1>{{ $blog->title }}</h1>
             <p>{!! $blog->excerpt !!}</p>
@@ -866,9 +866,9 @@
                                     class="post-card__cat">{{ $suggestion->blogCategory->name }}</span></div>
                        
                         <div class="post-card__body">
-                          <a href="">
+                         
                             <h3>{{ $suggestion->title }}</h3>
-                            <p>{{ Str::limit($suggestion->content, 100) }}</p>
+                            <p>{!! Str::limit($suggestion->content, 100) !!}</p>
                             <div class="post-meta">
                                 <div class="avatar" style="background:linear-gradient(135deg,#12B886,#5A4FDC)">AS</div>
                                 <span>
