@@ -860,6 +860,7 @@
             <h2 style="margin-bottom:24px">More from the blog</h2>
             <div class="grid-3">
                 @foreach ($suggestions as $suggestion)
+                <a href="{{ url('blog/' . $suggestion->slug)}}">
                     <article class="post-card reveal">
                       
                             <div class="post-card__img alt2"><span
@@ -876,6 +877,7 @@
                             </div>
                         </div>
                     </article>
+                </a>
                 @endforeach
                 {{-- <article class="post-card reveal">
         <div class="post-card__img alt2"><span class="post-card__cat">Guides</span></div>
