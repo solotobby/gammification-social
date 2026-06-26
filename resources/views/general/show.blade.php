@@ -788,7 +788,8 @@
 
     <section class="pagehero">
         <div class="wrap pagehero__inner" style="max-width:760px">
-            <div class="crumbs"><a href="{{ url('/') }}">Home</a> / <a href="{{ url('blog') }}">Blog</a></div>
+            <div class="crumbs"><a href="{{ url('/') }}">Home</a> / <a href="{{ url('blog') }}">Blog</a> /
+                <span>{{ $blog->title }}</span></div>
             <span class="art-cat">● {{ @$blog->blogCategory->name }}</span>
             <h1>{{ $blog->title }}</h1>
             <p>{!! $blog->excerpt !!}</p>
@@ -859,25 +860,22 @@
             <h2 style="margin-bottom:24px">More from the blog</h2>
             <div class="grid-3">
                 @foreach ($suggestions as $suggestion)
-                
                     <article class="post-card reveal">
                       
                             <div class="post-card__img alt2"><span
                                     class="post-card__cat">{{ $suggestion->blogCategory->name }}</span></div>
                        
                         <div class="post-card__body">
-                          <a href="{{ url('blog/' . $suggestion->slug) }}">
+                          <a href="">
                             <h3>{{ $suggestion->title }}</h3>
-                           </a>
-                            <p>{!! Str::limit($suggestion->content, 100) !!}</p>
+                            <p>{{ Str::limit($suggestion->content, 100) }}</p>
                             <div class="post-meta">
-                                <div class="avatar" style="background:linear-gradient(135deg,#12B886,#5A4FDC)">TE</div>
-                                <span>Team
-                                    Payhankey</span><span>·</span><span>{{ $suggestion->created_at->diffForHumans() }}</span>
+                                <div class="avatar" style="background:linear-gradient(135deg,#12B886,#5A4FDC)">AS</div>
+                                <span>
+                                    Anthony Sam</span><span>·</span><span>{{ $suggestion->created_at->diffForHumans() }}</span>
                             </div>
                         </div>
                     </article>
-                
                 @endforeach
                 {{-- <article class="post-card reveal">
         <div class="post-card__img alt2"><span class="post-card__cat">Guides</span></div>
