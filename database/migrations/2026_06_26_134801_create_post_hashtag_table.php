@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('post_hashtag', function (Blueprint $table) {
-            // $table->uuid('id')->primary();
+            $table->uuid('id')->primary();
             $table->uuid('post_id');
                 // ->constrained()
                 // ->cascadeOnDelete();
