@@ -859,15 +859,16 @@
             <h2 style="margin-bottom:24px">More from the blog</h2>
             <div class="grid-3">
                 @foreach ($suggestions as $suggestion)
+                 <a href="{{ url('blog/' . $suggestion->slug) }}">
                     <article class="post-card reveal">
                       
                             <div class="post-card__img alt2"><span
                                     class="post-card__cat">{{ $suggestion->blogCategory->name }}</span></div>
                        
                         <div class="post-card__body">
-                          <a href="{{ url('blog/' . $suggestion->slug) }}">
+                         
                             <h3>{{ $suggestion->title }}</h3>
-                          </a>
+                          
                             <p>{!! Str::limit($suggestion->content, 100) !!}</p>
                             <div class="post-meta">
                                 <div class="avatar" style="background:linear-gradient(135deg,#12B886,#5A4FDC)">TE</div>
@@ -876,6 +877,7 @@
                             </div>
                         </div>
                     </article>
+                 </a>
                 @endforeach
                 {{-- <article class="post-card reveal">
         <div class="post-card__img alt2"><span class="post-card__cat">Guides</span></div>
