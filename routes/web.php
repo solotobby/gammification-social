@@ -25,6 +25,7 @@ use App\Livewire\User\BankInformation;
 use App\Livewire\User\Blog;
 use App\Livewire\User\DashboardTimeline;
 use App\Livewire\User\EarningList;
+use App\Livewire\User\Hashtag;
 use App\Livewire\User\HowItWorks;
 use App\Livewire\User\HowToEarn;
 use App\Livewire\User\NewTimeline;
@@ -200,6 +201,7 @@ Route::middleware([
         Route::get('how/it/works', HowItWorks::class);
         Route::get('search/user', Search::class);
         // Route::get('rolls/play/{videoId}', VideoPlayer::class);
+        Route::get('hashtag/{tag}', Hashtag::class);
 
 
         //VIDEO PLAYER ROUTE

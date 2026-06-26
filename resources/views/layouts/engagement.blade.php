@@ -149,7 +149,7 @@
                     {{-- Trend name + count --}}
                     <div class="flex-grow-1">
                         <div class="fw-semibold" style="color:#5A4FDC; font-size:0.95rem;">
-                            #{{ $trend->name }}
+                           <a href="{{ url('hashtag/'.$trend->name) }}"> #{{ $trend->name }}</a>
                         </div>
                         <div class="text-muted" style="font-size:0.75rem;">
                             {{ formatNumber($trend->posts_count) }}

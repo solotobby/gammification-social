@@ -6,6 +6,8 @@ use App\Models\Hashtag;
 use App\Models\HashtagTrend;
 use App\Models\Post;
 use App\Models\PostHashTag;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 class HashtagService
 {
@@ -20,8 +22,6 @@ class HashtagService
             $matches
         );
 
-     
-
         return collect($matches[1])
             // ->map(fn($tag) => strtolower($tag))
             ->map(fn($tag) => ($tag))
@@ -31,7 +31,7 @@ class HashtagService
     public function attach(Post $post, $text)
     {
 
-       $tags = $this->extract($text);
+        $tags = $this->extract($text);
 
 
         foreach ($tags as $tag) {
@@ -41,22 +41,35 @@ class HashtagService
                 // 'posts_count' => 1
             ]);
 
-            PostHashTag::create(['post_id' => $post->id, 'hashtag_id' => $hashtag->id]);
 
-            // $post->hashtags()
-            //     ->syncWithoutDetaching([
-            //         $hashtag->id
-            //     ]);
+            $attach = PostHashTag::updateOrInsert(
+                    [
+                        
+                        'id' => Str::uuid(),
+                        'post_id' => $post->id,
+                        'hashtag_id' => $hashtag->id,
+                    ],
+                    [
+                        'updated_at' => now(),
+                        'created_at' => now(),
+                    ]
+                );
+
+            // PostHashTag::create(['post_id' => $post->id, 'hashtag_id' => $hashtag->id]);
+
+            if ($attach) {
+                $hashtag->increment(
+                    'posts_count'
+                );
+
+                $this->recordTrend(
+                    $hashtag
+                );
+            }
 
 
-            $hashtag->increment(
-                'posts_count'
-            );
 
 
-            $this->recordTrend(
-                $hashtag
-            );
 
             return $hashtag;
         }
@@ -64,7 +77,7 @@ class HashtagService
 
     private function recordTrend($hashtag)
     {
-        
+
         HashtagTrend::create([
 
             'hashtag_id' => $hashtag->id,

@@ -171,8 +171,19 @@
             <!-- END Post Update -->
 
 
+            @forelse (@$posts as $post)
+                <livewire:user.post-content :post="$post" :wire:key="'post-'.$post->id" />
+            @empty
+                <div class="ph-empty">
+                    <div class="ph-empty-ic"><i class="fa fa-feather-alt"></i></div>
+                    <h6>Your feed is waiting</h6>
+                    <p>Share your first post above — it can start earning the moment people engage.</p>
+                </div>
+            @endforelse
+            
+
             <!-- Update #2 -->
-            @include('layouts.feeds', $timelines)
+            {{-- @include('layouts.feeds', $timelines) --}}
 
 
 
