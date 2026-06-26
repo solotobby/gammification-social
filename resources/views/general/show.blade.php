@@ -868,7 +868,7 @@
                         <div class="post-card__body">
                          
                             <h3>{{ $suggestion->title }}</h3>
-                            <p>{!! Str::limit($suggestion->content, 100) !!}</p>
+                            <p>{!! Str::limit($suggestion->excerpt, 100) !!}</p>
                             <div class="post-meta">
                                 <div class="avatar" style="background:linear-gradient(135deg,#12B886,#5A4FDC)">AS</div>
                                 <span>
