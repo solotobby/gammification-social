@@ -16,6 +16,7 @@ use App\Models\UserLike;
 use App\Models\UserView;
 use App\Models\ViewsExternal;
 use App\Models\Wallet;
+use App\Services\TrendingHashTags;
 use Brick\Math\BigInteger;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -84,22 +85,24 @@ if (!function_exists('engagement')) {
 if (!function_exists('trendingTopics')) {
     function trendingTopics()
     {
-        return Trend::where('trends.status', 'active')
-            ->leftJoin('post_trends', 'trends.id', '=', 'post_trends.trend_id')
-            ->leftJoin('posts', function ($join) {
-                $join->on('post_trends.post_id', '=', 'posts.id')
-                     ->where('posts.status', 'LIVE');
-            })
-            ->select(
-                'trends.id',
-                'trends.name',
-                'trends.description',
-                DB::raw('COUNT(post_trends.id) as post_count')
-            )
-            ->groupBy('trends.id', 'trends.name', 'trends.description')
-            ->orderByDesc('post_count')
-            ->take(5)
-            ->get();
+        // return Trend::where('trends.status', 'active')
+        //     ->leftJoin('post_trends', 'trends.id', '=', 'post_trends.trend_id')
+        //     ->leftJoin('posts', function ($join) {
+        //         $join->on('post_trends.post_id', '=', 'posts.id')
+        //              ->where('posts.status', 'LIVE');
+        //     })
+        //     ->select(
+        //         'trends.id',
+        //         'trends.name',
+        //         'trends.description',
+        //         DB::raw('COUNT(post_trends.id) as post_count')
+        //     )
+        //     ->groupBy('trends.id', 'trends.name', 'trends.description')
+        //     ->orderByDesc('post_count')
+        //     ->take(5)
+        //     ->get();
+
+       return app(TrendingHashTags::class)->getTrending();
     }
 }
 

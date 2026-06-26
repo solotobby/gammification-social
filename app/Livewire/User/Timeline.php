@@ -20,6 +20,7 @@ use App\Models\UserLike;
 use App\Models\UserView;
 use App\Models\Wallet;
 use App\Notifications\GeneralNotification;
+use App\Services\HashtagService;
 // use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -161,19 +162,19 @@ class Timeline extends Component
         $this->loadPosts();
     }
 
-    public function addTrend(string $trendId): void
-    {
-        if (!in_array($trendId, $this->selectedTrends)) {
-            $this->selectedTrends[] = $trendId;
-        }
-    }
+    // public function addTrend(string $trendId): void
+    // {
+    //     if (!in_array($trendId, $this->selectedTrends)) {
+    //         $this->selectedTrends[] = $trendId;
+    //     }
+    // }
 
-    public function removeTrend(string $trendId): void
-    {
-        $this->selectedTrends = array_values(
-            array_filter($this->selectedTrends, fn($id) => $id !== $trendId)
-        );
-    }
+    // public function removeTrend(string $trendId): void
+    // {
+    //     $this->selectedTrends = array_values(
+    //         array_filter($this->selectedTrends, fn($id) => $id !== $trendId)
+    //     );
+    // }
 
 
 
@@ -199,10 +200,10 @@ class Timeline extends Component
         // Determine max length
         $maxLength = in_array($level, ['Creator', 'Influencer']) ? null : 160;
 
-        if (count($this->selectedTrends) < 2) {
-            session()->flash('error', 'Please select at least 2 trending topics for your post.');
-            return;
-        }
+        // if (count($this->selectedTrends) < 2) {
+        //     session()->flash('error', 'Please select at least 2 trending topics for your post.');
+        //     return;
+        // }
 
 
         // Check content length for regular users
@@ -258,13 +259,18 @@ class Timeline extends Component
         $uniqueCode = rand(1000, 9999) . time();
         $timelines = Post::create(['user_id' => $user->id, 'content' => $content, 'unicode' => $uniqueCode, 'comment_external' => 0, 'status' => $status]);
 
-        foreach ($this->selectedTrends as $trendId) {  
-            PostTrend::create([
-                    'post_id' => $timelines->id,
-                    'trend_id' => $trendId,
-                ]); 
-            // $timelines->trends()->attach($trendId);
-        }   
+        // dd([$timelines, $timelines->body]);
+       app(HashtagService::class)->attach($timelines, $timelines->content);
+
+     
+
+        // foreach ($this->selectedTrends as $trendId) {  
+        //     PostTrend::create([
+        //             'post_id' => $timelines->id,
+        //             'trend_id' => $trendId,
+        //         ]); 
+        //     // $timelines->trends()->attach($trendId);
+        // }   
 
         if (!empty($this->images)) {
             foreach ($this->images as $image) {
@@ -292,7 +298,7 @@ class Timeline extends Component
 
         session()->flash('success', 'Your post was successful!');
 
-        $this->reset('content', 'images', 'selectedTrends');
+        $this->reset('content', 'images');
     }
 
 

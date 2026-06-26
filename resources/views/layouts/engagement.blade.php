@@ -152,15 +152,15 @@
                             #{{ $trend->name }}
                         </div>
                         <div class="text-muted" style="font-size:0.75rem;">
-                            {{ formatNumber($trend->post_count) }}
-                            {{ Str::plural('post', $trend->post_count) }}
+                            {{ formatNumber($trend->posts_count) }}
+                            {{ Str::plural('post', $trend->posts_count) }}
                         </div>
                     </div>
 
                     {{-- Trending bar --}}
                     @php
-                        $max = trendingTopics()->first()->post_count ?: 1;
-                        $pct = $trend->post_count > 0 ? round(($trend->post_count / $max) * 100) : 3;
+                        $max = trendingTopics()->first()->trend_score ?: 1;
+                        $pct = $trend->score > 0 ? round(($trend->trend_score / $max) * 100) : 3;
                     @endphp
                     <div style="width:50px">
                         <div class="rounded-pill" style="

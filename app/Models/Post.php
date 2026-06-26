@@ -95,7 +95,7 @@ class Post extends Model
         return $this->hasMany(UserComment::class);
     }
 
- 
+
 
     public function unpaidComments()
     {
@@ -148,10 +148,20 @@ class Post extends Model
     public function trends()
     {
         return $this->belongsToMany(Trend::class, 'post_trends', 'post_id', 'trend_id');
-    }   
+    }
 
-     public function postTrends()
+    public function postTrends()
     {
         return $this->hasMany(PostTrend::class);
+    }
+
+    public function hashtags()
+    {
+        return $this->belongsToMany(
+            Hashtag::class,
+            'post_hashtag',   // 👈 pivot table name
+            'post_id',        // 👈 foreign key on pivot table
+            'hashtag_id'
+        );
     }
 }

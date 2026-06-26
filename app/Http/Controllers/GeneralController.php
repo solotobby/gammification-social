@@ -205,6 +205,7 @@ class GeneralController extends Controller
     public function ipConfig()
     {
 
+       return trendingTopics();
         return ipLocation();
     }
 
