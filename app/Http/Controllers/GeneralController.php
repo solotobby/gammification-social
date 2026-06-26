@@ -14,6 +14,7 @@ use App\Models\FremiumEngagementStat;
 use App\Models\Level;
 use App\Models\Partner;
 use App\Models\PartnerSlot;
+use App\Models\Payout;
 use App\Models\Post;
 use App\Models\SubscriptionStat;
 use App\Models\Transaction;
@@ -24,6 +25,7 @@ use App\Models\UserLike;
 use App\Models\UserView;
 use App\Models\ViewsExternal;
 use App\Models\WithdrawalMethod;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -34,24 +36,43 @@ use Stevebauman\Location\Facades\Location;
 
 class GeneralController extends Controller
 {
+
+    public function landingpage()
+    {
+        return view('general.landingpage');
+    }
+
     public function how()
     {
-        return view('how');
+        return view('general.how');
+    }
+    public function about()
+    {
+        return view('general.about');
+    }
+
+    public function contact()
+    {
+        return view('general.contact');
+    }
+    public function blog()
+    {
+        return view('general.blog');
     }
 
     public function privacyPolicy()
     {
-        return view('privacy');
+        return view('general.privacy');
     }
 
     public function terms()
     {
-        return view('terms');
+        return view('general.terms');
     }
 
     public function howToEarn()
     {
-        return view('earn');
+        return view('general.earn');
     }
 
     public function admin()
@@ -61,41 +82,122 @@ class GeneralController extends Controller
 
     public function test()
     {
-
-
-
         return ipLocation();
     }
 
     public function topEarners()
     {
 
-        $sub = DB::table('payouts')
+        //     $sub = DB::table('payouts')
+        //         ->join('users', 'users.id', '=', 'payouts.user_id')
+        //         ->selectRaw("
+        //     payouts.month as month_key,
+        //     users.id,
+        //     users.username,
+        //     SUM(payouts.amount) as total_paid,
+        //     ROW_NUMBER() OVER (
+        //         PARTITION BY payouts.month
+        //         ORDER BY SUM(payouts.amount) DESC
+        //     ) as rank_position
+        // ")
+        //         ->where('payouts.status', 'Queued')
+        //         ->groupBy('payouts.month', 'users.id', 'users.username');
+
+        //     $topEarners = DB::query()
+        //         ->fromSub($sub, 'ranked')
+        //         ->where('rank_position', '<=', 10)
+        //         ->orderBy('month_key', 'desc')
+        //         ->orderBy('total_paid', 'desc')
+        //         ->get()
+        //         ->groupBy('month_key');
+
+
+
+
+        // $topPayouts = Payout::query()
+        //     ->select(
+        //         'payouts.user_id',
+        //         'users.name',
+        //         'users.email',
+        //         'users.username',
+        //         DB::raw("
+        //     CASE 
+        //         WHEN payouts.created_at BETWEEN '" .
+        //             Carbon::now()->subMonth()->startOfMonth() . "' AND '" .
+        //             Carbon::now()->subMonth()->endOfMonth() . "'
+        //         THEN 'last_month'
+        //         ELSE 'all_time'
+        //     END AS period
+        // "),
+        //         DB::raw('SUM(payouts.amount) as total_paid')
+        //     )
+        //     ->join('users', 'users.id', '=', 'payouts.user_id')
+        //     ->whereIn('payouts.status', ['queued', 'paid'])
+        //     ->groupBy(
+        //         'payouts.user_id',
+        //         'users.name',
+        //         'users.email',
+        //         'users.username',
+        //         'period'
+        //     )
+        //     ->orderBy('period')
+        //     ->orderByDesc('total_paid')
+        //     ->limit(20)
+        //     ->get();
+
+
+
+        $topPayouts = Payout::query()
+            ->select(
+                'payouts.user_id',
+                'users.name',
+                'users.email',
+                'users.username',
+                'users.avatar',
+                // 'users.level',
+                DB::raw("
+            CASE 
+                WHEN payouts.created_at BETWEEN '" .
+                    Carbon::now()->subMonth()->startOfMonth() . "' AND '" .
+                    Carbon::now()->subMonth()->endOfMonth() . "'
+                THEN 'last_month'
+                ELSE 'all_time'
+            END AS period
+        "),
+                DB::raw('SUM(payouts.amount) as total_paid')
+            )
             ->join('users', 'users.id', '=', 'payouts.user_id')
-            ->selectRaw("
-        payouts.month as month_key,
-        users.id,
-        users.username,
-        SUM(payouts.amount) as total_paid,
-        ROW_NUMBER() OVER (
-            PARTITION BY payouts.month
-            ORDER BY SUM(payouts.amount) DESC
-        ) as rank_position
-    ")
-            ->where('payouts.status', 'Queued')
-            ->groupBy('payouts.month', 'users.id', 'users.username');
-
-        $topEarners = DB::query()
-            ->fromSub($sub, 'ranked')
-            ->where('rank_position', '<=', 10)
-            ->orderBy('month_key', 'desc')
-            ->orderBy('total_paid', 'desc')
-            ->get()
-            ->groupBy('month_key');
+            ->whereIn('payouts.status', ['queued', 'paid'])
+            ->groupBy(
+                'payouts.user_id',
+                'users.name',
+                'users.email',
+                'users.username',
+                'users.avatar',
+                // 'users.level',
+                'period'
+            )
+            ->orderBy('period')
+            ->orderByDesc('total_paid')
+            ->get();
 
 
+        $lastMonthEarners = $topPayouts
+            ->where('period', 'last_month')
+            ->values()
+            ->take(10);
 
-        return view('top-earners', ['topEarners' => $topEarners]);
+        $allTimeEarners = $topPayouts
+            ->where('period', 'all_time')
+            ->values()
+            ->take(10);
+
+        return view('general.top-earner', compact(
+            'lastMonthEarners',
+            'allTimeEarners'
+        ));
+
+        // return view('general.top-earner', ['topEarners' => $topPayouts]);
     }
 
 

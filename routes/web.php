@@ -70,15 +70,23 @@ use Illuminate\Http\Request;
 
 Route::group(['namespace' => 'auth'], function () {
 
-    Route::get('/', function () {
-        return view('welcome');
-    });
+    // Route::get('/', function () {
+    //     return view('welcome');
+    // });
+
+    Route::get('/', [GeneralController::class, 'landingpage']);
 
     Route::get('test', [\App\Http\Controllers\GeneralController::class, 'test']);
     Route::get('fix', [\App\Http\Controllers\GeneralController::class, 'devy']);
     Route::get('privacy/policy', [\App\Http\Controllers\GeneralController::class, 'privacyPolicy']);
     Route::get('terms/conditions', [\App\Http\Controllers\GeneralController::class, 'terms']);
+    Route::get('how-it-works', [\App\Http\Controllers\GeneralController::class, 'how']);
 
+    Route::get('about', [\App\Http\Controllers\GeneralController::class, 'about']);
+    Route::get('contact', [\App\Http\Controllers\GeneralController::class, 'contact']);
+    // Route::get('blog', [\App\Http\Controllers\GeneralController::class, 'blog']);
+    // Route::get('blog/{slug}', [\App\Http\Controllers\GeneralController::class, 'showBlogPost']);
+    Route::get('top-earners', [\App\Http\Controllers\GeneralController::class, 'topEarners']);
 
     Route::get('admin', [\App\Http\Controllers\GeneralController::class, 'admin']);
     Route::get('reg', [\App\Http\Controllers\Auth\RegisterController::class, 'reg']);
@@ -92,7 +100,7 @@ Route::group(['namespace' => 'auth'], function () {
     Route::get('access/code/{level}', [\App\Http\Controllers\GeneralController::class, 'accessCode']);
     Route::post('process/access/code', [\App\Http\Controllers\GeneralController::class, 'processAccessCode']);
 
-    Route::get('how-it-works', [\App\Http\Controllers\GeneralController::class, 'how']);
+   
 
     Route::get('success', [\App\Http\Controllers\GeneralController::class, 'success']);
     Route::get('error', [\App\Http\Controllers\GeneralController::class, 'error']);
