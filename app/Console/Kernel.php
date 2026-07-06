@@ -299,21 +299,21 @@ class Kernel extends ConsoleKernel
             });
         })->dailyAt('23:00');
 
-        $schedule->call(function () {
-            $subject = 'Test Mail';
-            $content = "Registered Daily Stats successfully";
+        // $schedule->call(function () {
+        //     $subject = 'Test Mail';
+        //     $content = "Registered Daily Stats successfully";
 
 
-            Mail::to('solotob3@gmail.com')
-                ->send(new GeneralMail(
-                    (object)[
-                        'name' => 'Oluwatobi Solomon',
-                        'email' => 'solotob3@gmail.com'
-                    ],
-                    $subject,
-                    $content
-                ));
-        })->everyFiveMinutes();
+        //     Mail::to('solotob3@gmail.com')
+        //         ->send(new GeneralMail(
+        //             (object)[
+        //                 'name' => 'Oluwatobi Solomon',
+        //                 'email' => 'solotob3@gmail.com'
+        //             ],
+        //             $subject,
+        //             $content
+        //         ));
+        // })->everyFiveMinutes();
     }
 
     /**
