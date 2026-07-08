@@ -211,16 +211,16 @@ class GeneralController extends Controller
 
         $period = CarbonPeriod::create($startDate, $endDate);
 
-        $this->info("========================================");
-        $this->info("Starting Engagement Stats Backfill");
-        $this->info("Date Range: {$startDate->toDateString()} -> {$endDate->toDateString()}");
-        $this->info("========================================");
+        // $this->info("========================================");
+        // $this->info("Starting Engagement Stats Backfill");
+        // $this->info("Date Range: {$startDate->toDateString()} -> {$endDate->toDateString()}");
+        // $this->info("========================================");
 
         $activeUsers = UserLevel::where('status', 'active')
             ->whereIn('plan_name', ['Creator', 'Influencer'])
             ->get();
 
-        $this->info("Found {$activeUsers->count()} active users.");
+        // $this->info("Found {$activeUsers->count()} active users.");
 
         $results = [];
 
@@ -228,13 +228,13 @@ class GeneralController extends Controller
 
             $date = $day->toDateString();
 
-            $this->newLine();
-            $this->info("Processing Date: {$date}");
-            $this->info(str_repeat('-', 60));
+            // $this->newLine();
+            // $this->info("Processing Date: {$date}");
+            // $this->info(str_repeat('-', 60));
 
             foreach ($activeUsers as $userLevel) {
 
-                $this->line("Checking User #{$userLevel->user_id} ({$userLevel->plan_name})...");
+                // $this->line("Checking User #{$userLevel->user_id} ({$userLevel->plan_name})...");
 
                 DB::transaction(function () use ($userLevel, $date, &$results) {
 
@@ -282,30 +282,30 @@ class GeneralController extends Controller
                     $results[] = $data;
 
                     // Display JSON
-                    $this->line(json_encode($data, JSON_PRETTY_PRINT));
+                    // $this->line(json_encode($data, JSON_PRETTY_PRINT));
 
                     if ($points === 0) {
-                        $this->warn("   ↳ No engagement found. Skipping insert.");
+                        // $this->warn("   ↳ No engagement found. Skipping insert.");
                         return;
                     }
 
                     EngagementDailyStat::create($data);
 
-                    $this->info("   ✓ Saved successfully.");
+                    // $this->info("   ✓ Saved successfully.");
                 });
             }
         }
 
-        $this->newLine();
-        $this->info("========================================");
-        $this->info("Backfill Completed");
-        $this->info("========================================");
+        // $this->newLine();
+        // $this->info("========================================");
+        // $this->info("Backfill Completed");
+        // $this->info("========================================");
 
-        $this->newLine();
-        $this->info("Summary JSON:");
+        // $this->newLine();
+        // $this->info("Summary JSON:");
 
-        $this->line(json_encode($results, JSON_PRETTY_PRINT));
-        
+        // $this->line(json_encode($results, JSON_PRETTY_PRINT));
+
 
        
     }
