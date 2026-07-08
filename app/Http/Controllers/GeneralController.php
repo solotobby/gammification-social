@@ -202,41 +202,38 @@ class GeneralController extends Controller
     }
 
 
-
     public function ipConfig()
     {
-
         $startDate = Carbon::create(2026, 6, 15);
         $endDate   = Carbon::create(2026, 6, 30);
 
         $period = CarbonPeriod::create($startDate, $endDate);
 
-        // $this->info("========================================");
-        // $this->info("Starting Engagement Stats Backfill");
-        // $this->info("Date Range: {$startDate->toDateString()} -> {$endDate->toDateString()}");
-        // $this->info("========================================");
-
         $activeUsers = UserLevel::where('status', 'active')
             ->whereIn('plan_name', ['Creator', 'Influencer'])
             ->get();
 
-        // $this->info("Found {$activeUsers->count()} active users.");
-
         $results = [];
+
+        $usersProcessed = 0;
+        $statsCreated = 0;
+        $statsSkipped = 0;
 
         foreach ($period as $day) {
 
             $date = $day->toDateString();
 
-            // $this->newLine();
-            // $this->info("Processing Date: {$date}");
-            // $this->info(str_repeat('-', 60));
-
             foreach ($activeUsers as $userLevel) {
 
-                // $this->line("Checking User #{$userLevel->user_id} ({$userLevel->plan_name})...");
+                $usersProcessed++;
 
-                DB::transaction(function () use ($userLevel, $date, &$results) {
+                DB::transaction(function () use (
+                    $userLevel,
+                    $date,
+                    &$results,
+                    &$statsCreated,
+                    &$statsSkipped
+                ) {
 
                     // Skip if record already exists
                     if (
@@ -244,23 +241,20 @@ class GeneralController extends Controller
                         ->whereDate('date', $date)
                         ->exists()
                     ) {
-                        $this->warn("   ↳ Already exists. Skipping.");
+                        $statsSkipped++;
                         return;
                     }
 
-                    // Count views
                     $views = UserView::where('poster_user_id', $userLevel->user_id)
                         ->whereDate('created_at', $date)
                         ->where('type', 'view')
                         ->count();
 
-                    // Count likes
                     $likes = UserLike::where('poster_user_id', $userLevel->user_id)
                         ->whereDate('created_at', $date)
                         ->where('type', 'like')
                         ->count();
 
-                    // Count comments
                     $comments = UserComment::where('poster_user_id', $userLevel->user_id)
                         ->whereDate('created_at', $date)
                         ->where('type', 'comment')
@@ -278,37 +272,143 @@ class GeneralController extends Controller
                         'points'    => $points,
                     ];
 
-                    // Store for final JSON output
                     $results[] = $data;
 
-                    // Display JSON
-                    // $this->line(json_encode($data, JSON_PRETTY_PRINT));
-
+                    // Don't create empty stats
                     if ($points === 0) {
-                        // $this->warn("   ↳ No engagement found. Skipping insert.");
+                        $statsSkipped++;
                         return;
                     }
 
                     EngagementDailyStat::create($data);
 
-                    // $this->info("   ✓ Saved successfully.");
+                    $statsCreated++;
                 });
             }
         }
 
-        // $this->newLine();
-        // $this->info("========================================");
-        // $this->info("Backfill Completed");
-        // $this->info("========================================");
-
-        // $this->newLine();
-        // $this->info("Summary JSON:");
-
-        // $this->line(json_encode($results, JSON_PRETTY_PRINT));
-
-
-       
+        return response()->json([
+            'status' => true,
+            'message' => 'Engagement backfill completed',
+            'summary' => [
+                'users_processed' => $usersProcessed,
+                'stats_created' => $statsCreated,
+                'stats_skipped' => $statsSkipped,
+                'date_range' => [
+                    'from' => $startDate->toDateString(),
+                    'to' => $endDate->toDateString(),
+                ],
+            ],
+            'data' => $results,
+        ], 200, [], JSON_PRETTY_PRINT);
     }
+
+    // public function ipConfig()
+    // {
+
+    //     $startDate = Carbon::create(2026, 6, 15);
+    //     $endDate   = Carbon::create(2026, 6, 30);
+
+    //     $period = CarbonPeriod::create($startDate, $endDate);
+
+    //     // $this->info("========================================");
+    //     // $this->info("Starting Engagement Stats Backfill");
+    //     // $this->info("Date Range: {$startDate->toDateString()} -> {$endDate->toDateString()}");
+    //     // $this->info("========================================");
+
+    //     $activeUsers = UserLevel::where('status', 'active')
+    //         ->whereIn('plan_name', ['Creator', 'Influencer'])
+    //         ->get();
+
+    //     // $this->info("Found {$activeUsers->count()} active users.");
+
+    //     $results = [];
+
+    //     foreach ($period as $day) {
+
+    //         $date = $day->toDateString();
+
+    //         // $this->newLine();
+    //         // $this->info("Processing Date: {$date}");
+    //         // $this->info(str_repeat('-', 60));
+
+    //         foreach ($activeUsers as $userLevel) {
+
+    //             // $this->line("Checking User #{$userLevel->user_id} ({$userLevel->plan_name})...");
+
+    //             DB::transaction(function () use ($userLevel, $date, &$results) {
+
+    //                 // Skip if record already exists
+    //                 if (
+    //                     EngagementDailyStat::where('user_id', $userLevel->user_id)
+    //                     ->whereDate('date', $date)
+    //                     ->exists()
+    //                 ) {
+    //                     $this->warn("   ↳ Already exists. Skipping.");
+    //                     return;
+    //                 }
+
+    //                 // Count views
+    //                 $views = UserView::where('poster_user_id', $userLevel->user_id)
+    //                     ->whereDate('created_at', $date)
+    //                     ->where('type', 'view')
+    //                     ->count();
+
+    //                 // Count likes
+    //                 $likes = UserLike::where('poster_user_id', $userLevel->user_id)
+    //                     ->whereDate('created_at', $date)
+    //                     ->where('type', 'like')
+    //                     ->count();
+
+    //                 // Count comments
+    //                 $comments = UserComment::where('poster_user_id', $userLevel->user_id)
+    //                     ->whereDate('created_at', $date)
+    //                     ->where('type', 'comment')
+    //                     ->count();
+
+    //                 $points = $views + $likes + $comments;
+
+    //                 $data = [
+    //                     'date'      => $date,
+    //                     'user_id'   => $userLevel->user_id,
+    //                     'level'     => $userLevel->plan_name,
+    //                     'views'     => $views,
+    //                     'likes'     => $likes,
+    //                     'comments'  => $comments,
+    //                     'points'    => $points,
+    //                 ];
+
+    //                 // Store for final JSON output
+    //                 $results[] = $data;
+
+    //                 // Display JSON
+    //                 // $this->line(json_encode($data, JSON_PRETTY_PRINT));
+
+    //                 if ($points === 0) {
+    //                     // $this->warn("   ↳ No engagement found. Skipping insert.");
+    //                     return;
+    //                 }
+
+    //                 EngagementDailyStat::create($data);
+
+    //                 // $this->info("   ✓ Saved successfully.");
+    //             });
+    //         }
+    //     }
+
+    //     // $this->newLine();
+    //     // $this->info("========================================");
+    //     // $this->info("Backfill Completed");
+    //     // $this->info("========================================");
+
+    //     // $this->newLine();
+    //     // $this->info("Summary JSON:");
+
+    //     // $this->line(json_encode($results, JSON_PRETTY_PRINT));
+
+
+
+    // }
 
     public function dinkyLogin()
     {
