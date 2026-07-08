@@ -205,89 +205,90 @@ class GeneralController extends Controller
 
     public function ipConfig()
     {
+        
 
-        $month = now()->subMonth()->format('Y-m');
+    //     $month = now()->subMonth()->format('Y-m');
 
-        $startDate = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
-        $endDate   = Carbon::createFromFormat('Y-m', $month)->endOfMonth();
+    //     $startDate = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
+    //     $endDate   = Carbon::createFromFormat('Y-m', $month)->endOfMonth();
 
-        $stats = EngagementDailyStat::whereBetween(
-            'date',
-            [
-                $startDate,
-                $endDate,
-            ]
-        )
-            ->groupBy('user_id', 'level')
-            ->selectRaw('
-        user_id,
-        level,
-        SUM(views) as views,
-        SUM(likes) as likes,
-        SUM(comments) as comments,
-        SUM(points) as points
-    ')
-            ->get();
+    //     $stats = EngagementDailyStat::whereBetween(
+    //         'date',
+    //         [
+    //             $startDate,
+    //             $endDate,
+    //         ]
+    //     )
+    //         ->groupBy('user_id', 'level')
+    //         ->selectRaw('
+    //     user_id,
+    //     level,
+    //     SUM(views) as views,
+    //     SUM(likes) as likes,
+    //     SUM(comments) as comments,
+    //     SUM(points) as points
+    // ')
+    //         ->get();
 
-        $processedUsers = 0;
-        $createdRecords = 0;
-        $updatedRecords = 0;
-        $results = [];
+    //     $processedUsers = 0;
+    //     $createdRecords = 0;
+    //     $updatedRecords = 0;
+    //     $results = [];
 
-        foreach ($stats as $stat) {
+    //     foreach ($stats as $stat) {
 
-            $processedUsers++;
+    //         $processedUsers++;
             
 
-            $monthlyStat = EngagementMonthlyStat::updateOrCreate(
+    //         $monthlyStat = EngagementMonthlyStat::updateOrCreate(
 
             
-                [
-                    'user_id' => $stat->user_id,
-                    'level'   => $stat->level,
-                    'month'   => $month,
-                ],
-                [
-                    'views'    => $stat->views,
-                    'likes'    => $stat->likes,
-                    'comments' => $stat->comments,
-                    'points'   => $stat->points,
-                ]
-            );
+    //             [
+    //                 'user_id' => $stat->user_id,
+    //                 'level'   => $stat->level,
+    //                 'month'   => $month,
+    //             ],
+    //             [
+    //                 'views'    => $stat->views,
+    //                 'likes'    => $stat->likes,
+    //                 'comments' => $stat->comments,
+    //                 'points'   => $stat->points,
+    //             ]
+    //         );
 
-            if ($monthlyStat->wasRecentlyCreated) {
-                $createdRecords++;
-            } else {
-                $updatedRecords++;
-            }
+    //         if ($monthlyStat->wasRecentlyCreated) {
+    //             $createdRecords++;
+    //         } else {
+    //             $updatedRecords++;
+    //         }
 
-            $results[] = [
-                'user_id' => $stat->user_id,
-                'level' => $stat->level,
-                'month' => $month,
-                'views' => $stat->views,
-                'likes' => $stat->likes,
-                'comments' => $stat->comments,
-                'points' => $stat->points,
-            ];
-        }
+    //         $results[] = [
+    //             'user_id' => $stat->user_id,
+    //             'level' => $stat->level,
+    //             'month' => $month,
+    //             'views' => $stat->views,
+    //             'likes' => $stat->likes,
+    //             'comments' => $stat->comments,
+    //             'points' => $stat->points,
+    //         ];
+    //     }
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Monthly engagement stats generated successfully',
-            'summary' => [
-                'month' => $month,
-                'date_range' => [
-                    'from' => $startDate->toDateString(),
-                    'to' => $endDate->toDateString(),
-                ],
-                'users_processed' => $processedUsers,
-                'monthly_stats_created' => $createdRecords,
-                'monthly_stats_updated' => $updatedRecords,
-                'total_records' => count($results),
-            ],
-            'data' => $results,
-        ], 200, [], JSON_PRETTY_PRINT);
+    //     return response()->json([
+    //         'status' => true,
+    //         'message' => 'Monthly engagement stats generated successfully',
+    //         'summary' => [
+    //             'month' => $month,
+    //             'date_range' => [
+    //                 'from' => $startDate->toDateString(),
+    //                 'to' => $endDate->toDateString(),
+    //             ],
+    //             'users_processed' => $processedUsers,
+    //             'monthly_stats_created' => $createdRecords,
+    //             'monthly_stats_updated' => $updatedRecords,
+    //             'total_records' => count($results),
+    //         ],
+    //         'data' => $results,
+    //     ], 200, [], JSON_PRETTY_PRINT);
     }
 
     // public function ipConfig()
