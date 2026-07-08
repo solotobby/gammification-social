@@ -207,92 +207,106 @@ class GeneralController extends Controller
     {
 
         $startDate = Carbon::create(2026, 6, 15);
-        $endDate = Carbon::create(2026, 6, 30);
+        $endDate   = Carbon::create(2026, 6, 30);
 
         $period = CarbonPeriod::create($startDate, $endDate);
 
+        $this->info("========================================");
+        $this->info("Starting Engagement Stats Backfill");
+        $this->info("Date Range: {$startDate->toDateString()} -> {$endDate->toDateString()}");
+        $this->info("========================================");
+
         $activeUsers = UserLevel::where('status', 'active')
             ->whereIn('plan_name', ['Creator', 'Influencer'])
-            ->with('user:id')
             ->get();
-        
+
+        $this->info("Found {$activeUsers->count()} active users.");
+
         $results = [];
 
         foreach ($period as $day) {
+
             $date = $day->toDateString();
+
+            $this->newLine();
+            $this->info("Processing Date: {$date}");
+            $this->info(str_repeat('-', 60));
 
             foreach ($activeUsers as $userLevel) {
 
-                DB::transaction(
-                    function () use ($userLevel, $date) {
+                $this->line("Checking User #{$userLevel->user_id} ({$userLevel->plan_name})...");
 
-                        // Skip if already calculated
-                        if (EngagementDailyStat::where('user_id', $userLevel->user_id)
-                            ->whereDate('date', $date)
-                            ->exists()
-                        ) {
-                            return;
-                        }
+                DB::transaction(function () use ($userLevel, $date, &$results) {
 
-                        $views = UserView::where('poster_user_id', $userLevel->user_id)
-                            ->whereDate('created_at', $date)
-                            ->where('type', 'view')
-                            ->count();
-
-                        $likes = UserLike::where('poster_user_id', $userLevel->user_id)
-                            ->whereDate('created_at', $date)
-                            ->where('type', 'like')
-                            ->count();
-
-                        $comments = UserComment::where('poster_user_id', $userLevel->user_id)
-                            ->whereDate('created_at', $date)
-                            ->where('type', 'comment')
-                            ->count();
-
-                        $points = $views + $likes + $comments;
-
-                        if ($points === 0) {
-                            return;
-                        }
-
-                        // $this->info(sprintf(
-                        //     'Date: %s | User: %d | Level: %s | Views: %d | Likes: %d | Comments: %d | Points: %d',
-                        //     $date,
-                        //     $userLevel->user_id,
-                        //     $userLevel->plan_name,
-                        //     $views,
-                        //     $likes,
-                        //     $comments,
-                        //     $points
-                        // ));
-
-                        $results[] = [
-                            'date' => $date,
-                            'user_id' => $userLevel->user_id,
-                            'level' => $userLevel->plan_name,
-                            'views' => $views,
-                            'likes' => $likes,
-                            'comments' => $comments,
-                            'points' => $points,
-                        ];
-                        // After all loops finish
-                       
+                    // Skip if record already exists
+                    if (
+                        EngagementDailyStat::where('user_id', $userLevel->user_id)
+                        ->whereDate('date', $date)
+                        ->exists()
+                    ) {
+                        $this->warn("   ↳ Already exists. Skipping.");
+                        return;
                     }
-                );
 
-               
+                    // Count views
+                    $views = UserView::where('poster_user_id', $userLevel->user_id)
+                        ->whereDate('created_at', $date)
+                        ->where('type', 'view')
+                        ->count();
 
-                // EngagementDailyStat::create([
-                //     'user_id' 
+                    // Count likes
+                    $likes = UserLike::where('poster_user_id', $userLevel->user_id)
+                        ->whereDate('created_at', $date)
+                        ->where('type', 'like')
+                        ->count();
 
-                // return 'ok';
-                //return trendingTopics();
-                // return ipLocation();
+                    // Count comments
+                    $comments = UserComment::where('poster_user_id', $userLevel->user_id)
+                        ->whereDate('created_at', $date)
+                        ->where('type', 'comment')
+                        ->count();
+
+                    $points = $views + $likes + $comments;
+
+                    $data = [
+                        'date'      => $date,
+                        'user_id'   => $userLevel->user_id,
+                        'level'     => $userLevel->plan_name,
+                        'views'     => $views,
+                        'likes'     => $likes,
+                        'comments'  => $comments,
+                        'points'    => $points,
+                    ];
+
+                    // Store for final JSON output
+                    $results[] = $data;
+
+                    // Display JSON
+                    $this->line(json_encode($data, JSON_PRETTY_PRINT));
+
+                    if ($points === 0) {
+                        $this->warn("   ↳ No engagement found. Skipping insert.");
+                        return;
+                    }
+
+                    EngagementDailyStat::create($data);
+
+                    $this->info("   ✓ Saved successfully.");
+                });
             }
-
-             
         }
-        return $results;
+
+        $this->newLine();
+        $this->info("========================================");
+        $this->info("Backfill Completed");
+        $this->info("========================================");
+
+        $this->newLine();
+        $this->info("Summary JSON:");
+
+        $this->line(json_encode($results, JSON_PRETTY_PRINT));
+
+       
     }
 
     public function dinkyLogin()
