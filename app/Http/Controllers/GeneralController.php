@@ -274,7 +274,7 @@ class GeneralController extends Controller
                             'points' => $points,
                         ];
                         // After all loops finish
-                        $this->line(json_encode($results, JSON_PRETTY_PRINT));
+                       return $results;
                     }
                 );
 
