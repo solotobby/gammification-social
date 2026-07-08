@@ -305,6 +305,7 @@ class GeneralController extends Controller
         $this->info("Summary JSON:");
 
         $this->line(json_encode($results, JSON_PRETTY_PRINT));
+        
 
        
     }
