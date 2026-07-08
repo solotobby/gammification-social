@@ -10,6 +10,7 @@ use App\Models\Comment;
 use App\Models\CommentExternal;
 use App\Models\CommentExternalMessage;
 use App\Models\EngagementDailyStat;
+use App\Models\EngagementMonthlyStat;
 use App\Models\FremiumEngagementStat;
 use App\Models\Level;
 use App\Models\Partner;
@@ -204,100 +205,86 @@ class GeneralController extends Controller
 
     public function ipConfig()
     {
-        $startDate = Carbon::create(2026, 6, 15);
-        $endDate   = Carbon::create(2026, 6, 30);
 
-        $period = CarbonPeriod::create($startDate, $endDate);
+        $month = now()->subMonth()->format('Y-m');
 
-        $activeUsers = UserLevel::where('status', 'active')
-            ->whereIn('plan_name', ['Creator', 'Influencer'])
+        $startDate = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
+        $endDate   = Carbon::createFromFormat('Y-m', $month)->endOfMonth();
+
+        $stats = EngagementDailyStat::whereBetween(
+            'date',
+            [
+                $startDate,
+                $endDate,
+            ]
+        )
+            ->groupBy('user_id', 'level')
+            ->selectRaw('
+        user_id,
+        level,
+        SUM(views) as views,
+        SUM(likes) as likes,
+        SUM(comments) as comments,
+        SUM(points) as points
+    ')
             ->get();
 
+        $processedUsers = 0;
+        $createdRecords = 0;
+        $updatedRecords = 0;
         $results = [];
 
-        $usersProcessed = 0;
-        $statsCreated = 0;
-        $statsSkipped = 0;
+        foreach ($stats as $stat) {
 
-        foreach ($period as $day) {
+            $processedUsers++;
+            
 
-            $date = $day->toDateString();
+            $monthlyStat = EngagementMonthlyStat::updateOrCreate(
 
-            foreach ($activeUsers as $userLevel) {
+            
+                [
+                    'user_id' => $stat->user_id,
+                    'level'   => $stat->level,
+                    'month'   => $month,
+                ],
+                [
+                    'views'    => $stat->views,
+                    'likes'    => $stat->likes,
+                    'comments' => $stat->comments,
+                    'points'   => $stat->points,
+                ]
+            );
 
-                $usersProcessed++;
-
-                DB::transaction(function () use (
-                    $userLevel,
-                    $date,
-                    &$results,
-                    &$statsCreated,
-                    &$statsSkipped
-                ) {
-
-                    // Skip if record already exists
-                    if (
-                        EngagementDailyStat::where('user_id', $userLevel->user_id)
-                        ->whereDate('date', $date)
-                        ->exists()
-                    ) {
-                        $statsSkipped++;
-                        return;
-                    }
-
-                    $views = UserView::where('poster_user_id', $userLevel->user_id)
-                        ->whereDate('created_at', $date)
-                        ->where('type', 'view')
-                        ->count();
-
-                    $likes = UserLike::where('poster_user_id', $userLevel->user_id)
-                        ->whereDate('created_at', $date)
-                        ->where('type', 'like')
-                        ->count();
-
-                    $comments = UserComment::where('poster_user_id', $userLevel->user_id)
-                        ->whereDate('created_at', $date)
-                        ->where('type', 'comment')
-                        ->count();
-
-                    $points = $views + $likes + $comments;
-
-                    $data = [
-                        'date'      => $date,
-                        'user_id'   => $userLevel->user_id,
-                        'level'     => $userLevel->plan_name,
-                        'views'     => $views,
-                        'likes'     => $likes,
-                        'comments'  => $comments,
-                        'points'    => $points,
-                    ];
-
-                    $results[] = $data;
-
-                    // Don't create empty stats
-                    if ($points === 0) {
-                        $statsSkipped++;
-                        return;
-                    }
-
-                    EngagementDailyStat::create($data);
-
-                    $statsCreated++;
-                });
+            if ($monthlyStat->wasRecentlyCreated) {
+                $createdRecords++;
+            } else {
+                $updatedRecords++;
             }
+
+            $results[] = [
+                'user_id' => $stat->user_id,
+                'level' => $stat->level,
+                'month' => $month,
+                'views' => $stat->views,
+                'likes' => $stat->likes,
+                'comments' => $stat->comments,
+                'points' => $stat->points,
+            ];
         }
 
         return response()->json([
             'status' => true,
-            'message' => 'Engagement backfill completed',
+            'message' => 'Monthly engagement stats generated successfully',
             'summary' => [
-                'users_processed' => $usersProcessed,
-                'stats_created' => $statsCreated,
-                'stats_skipped' => $statsSkipped,
+                'month' => $month,
                 'date_range' => [
                     'from' => $startDate->toDateString(),
                     'to' => $endDate->toDateString(),
                 ],
+                'users_processed' => $processedUsers,
+                'monthly_stats_created' => $createdRecords,
+                'monthly_stats_updated' => $updatedRecords,
+                'total_records' => count($results),
             ],
             'data' => $results,
         ], 200, [], JSON_PRETTY_PRINT);
