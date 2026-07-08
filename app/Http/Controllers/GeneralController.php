@@ -215,6 +215,8 @@ class GeneralController extends Controller
             ->whereIn('plan_name', ['Creator', 'Influencer'])
             ->with('user:id')
             ->get();
+        
+        $results = [];
 
         foreach ($period as $day) {
             $date = $day->toDateString();
@@ -274,11 +276,11 @@ class GeneralController extends Controller
                             'points' => $points,
                         ];
                         // After all loops finish
-                       return $results;
+                       
                     }
                 );
 
-
+               
 
                 // EngagementDailyStat::create([
                 //     'user_id' 
@@ -287,7 +289,10 @@ class GeneralController extends Controller
                 //return trendingTopics();
                 // return ipLocation();
             }
+
+             
         }
+        return $results;
     }
 
     public function dinkyLogin()
