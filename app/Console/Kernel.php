@@ -296,6 +296,11 @@ class Kernel extends ConsoleKernel
                 DB::table('users')
                     ->whereIn('id', $userIds)
                     ->delete();
+
+                DB::table('user_levels')
+                    ->whereIn('user_id', $userIds)
+                    ->delete();
+                    
             });
         })->dailyAt('23:00');
 

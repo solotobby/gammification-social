@@ -26,6 +26,7 @@ use App\Models\UserView;
 use App\Models\ViewsExternal;
 use App\Models\WithdrawalMethod;
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -205,8 +206,88 @@ class GeneralController extends Controller
     public function ipConfig()
     {
 
-       return trendingTopics();
-        return ipLocation();
+        $startDate = Carbon::create(2026, 6, 15);
+        $endDate = Carbon::create(2026, 6, 30);
+
+        $period = CarbonPeriod::create($startDate, $endDate);
+
+        $activeUsers = UserLevel::where('status', 'active')
+            ->whereIn('plan_name', ['Creator', 'Influencer'])
+            ->with('user:id')
+            ->get();
+
+        foreach ($period as $day) {
+            $date = $day->toDateString();
+
+            foreach ($activeUsers as $userLevel) {
+
+                DB::transaction(
+                    function () use ($userLevel, $date) {
+
+                        // Skip if already calculated
+                        if (EngagementDailyStat::where('user_id', $userLevel->user_id)
+                            ->whereDate('date', $date)
+                            ->exists()
+                        ) {
+                            return;
+                        }
+
+                        $views = UserView::where('poster_user_id', $userLevel->user_id)
+                            ->whereDate('created_at', $date)
+                            ->where('type', 'view')
+                            ->count();
+
+                        $likes = UserLike::where('poster_user_id', $userLevel->user_id)
+                            ->whereDate('created_at', $date)
+                            ->where('type', 'like')
+                            ->count();
+
+                        $comments = UserComment::where('poster_user_id', $userLevel->user_id)
+                            ->whereDate('created_at', $date)
+                            ->where('type', 'comment')
+                            ->count();
+
+                        $points = $views + $likes + $comments;
+
+                        if ($points === 0) {
+                            return;
+                        }
+
+                        // $this->info(sprintf(
+                        //     'Date: %s | User: %d | Level: %s | Views: %d | Likes: %d | Comments: %d | Points: %d',
+                        //     $date,
+                        //     $userLevel->user_id,
+                        //     $userLevel->plan_name,
+                        //     $views,
+                        //     $likes,
+                        //     $comments,
+                        //     $points
+                        // ));
+
+                        $results[] = [
+                            'date' => $date,
+                            'user_id' => $userLevel->user_id,
+                            'level' => $userLevel->plan_name,
+                            'views' => $views,
+                            'likes' => $likes,
+                            'comments' => $comments,
+                            'points' => $points,
+                        ];
+                        // After all loops finish
+                        $this->line(json_encode($results, JSON_PRETTY_PRINT));
+                    }
+                );
+
+
+
+                // EngagementDailyStat::create([
+                //     'user_id' 
+
+                // return 'ok';
+                //return trendingTopics();
+                // return ipLocation();
+            }
+        }
     }
 
     public function dinkyLogin()
