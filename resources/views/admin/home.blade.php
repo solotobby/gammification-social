@@ -51,7 +51,7 @@
                     <div class="block-content block-content-full ratio ratio-16x9">
                         <div class="d-flex justify-content-center align-items-center">
                             <div>
-                                <div class="fs-2 mb-1">{{ $onlineUsers }}</div>
+                                {{-- <div class="fs-2 mb-1">{{ $onlineUsers }}</div> --}}1
                                 <div class="text-muted">Users Online</div>
                             </div>
                         </div>
@@ -131,7 +131,7 @@
             <!-- Charts -->
             <!-- jQuery Sparkline (.js-sparkline class is initialized in Helpers.jqSparkline() -->
             <!-- For more info and examples you can check out http://omnipotent.net/jquery.sparkline/#s-about -->
-            <div class="col-md-6">
+            {{-- <div class="col-md-6">
                 <a class="block block-rounded block-link-pop bg-in" href="javascript:void(0)">
                     <div class="block-content block-content-full d-flex justify-content-between">
                         <div class="me-3">
@@ -145,9 +145,9 @@
                                 Total Posts
                             </p>
                         </div>
-                    </div>
+                    </div> 
                     <div class="block-content block-content-full overflow-hidden">
-                        <!-- Sparkline Container -->
+                       
                         <span class="js-sparkline" data-type="line" data-points="[120,140,60,85,160,180,120]"
                             data-width="100%" data-height="140px" data-fill-color="transparent"
                             data-spot-color="transparent" data-min-spot-color="transparent"
@@ -172,7 +172,7 @@
                         </div>
                     </div>
                     <div class="block-content block-content-full overflow-hidden">
-                        <!-- Sparkline Container -->
+                       
                         <span class="js-sparkline" data-type="line" data-points="[45,28,36,63,70,85,120]" data-width="100%"
                             data-height="140px" data-line-color="#689550" data-fill-color="transparent"
                             data-spot-color="transparent" data-min-spot-color="transparent"
@@ -197,7 +197,7 @@
                         </div>
                     </div>
                     <div class="block-content block-content-full overflow-hidden">
-                        <!-- Sparkline Container -->
+                       
                         <span class="js-sparkline" data-type="line" data-points="[320,420,180,98,520,630,250]"
                             data-width="100%" data-height="140px" data-line-color="#333" data-fill-color="transparent"
                             data-spot-color="transparent" data-min-spot-color="transparent"
@@ -222,7 +222,7 @@
                         </div>
                     </div>
                     <div class="block-content block-content-full overflow-hidden">
-                        <!-- Sparkline Container -->
+                        
                         <span class="js-sparkline" data-type="line" data-points="[3,5,8,2,1,6,7]" data-width="100%"
                             data-height="140px" data-line-color="#ffb119" data-fill-color="transparent"
                             data-spot-color="transparent" data-min-spot-color="transparent"
@@ -230,7 +230,7 @@
                             data-highlight-line-color="#ffb119" data-tooltip-suffix="Tickets"></span>
                     </div>
                 </a>
-            </div>
+            </div> --}}
             <!-- END Charts -->
 
             <!-- More Stats -->
