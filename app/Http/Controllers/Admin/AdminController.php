@@ -86,7 +86,7 @@ class AdminController extends Controller
                 'rev' => $rev,
                 'posts' => $posts,
                 // 'levelCounts' => $levelCounts,
-                // 'onlineUsers' => $onlineUsers
+                'onlineUsers' => $onlineUsers
             ]);
         }
     }
