@@ -111,7 +111,7 @@
             @foreach ($levelCounts as $level)
     <div class="col-6 col-md-3">
         <a class="block block-rounded block-link-pop text-center"
-            href="{{ url('user/list/' . $level->level_id) }}">
+            href="{{ url('user/list/' . $level->level->name) }}">
             <div class="block-content block-content-full ratio ratio-16x9">
                 <div class="d-flex justify-content-center align-items-center">
                     <div>
