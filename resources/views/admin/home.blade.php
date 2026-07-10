@@ -131,7 +131,7 @@
             <!-- Charts -->
             <!-- jQuery Sparkline (.js-sparkline class is initialized in Helpers.jqSparkline() -->
             <!-- For more info and examples you can check out http://omnipotent.net/jquery.sparkline/#s-about -->
-            {{-- <div class="col-md-6">
+            <div class="col-md-6">
                 <a class="block block-rounded block-link-pop bg-in" href="javascript:void(0)">
                     <div class="block-content block-content-full d-flex justify-content-between">
                         <div class="me-3">
@@ -230,7 +230,7 @@
                             data-highlight-line-color="#ffb119" data-tooltip-suffix="Tickets"></span>
                     </div>
                 </a>
-            </div> --}}
+            </div>
             <!-- END Charts -->
 
             <!-- More Stats -->

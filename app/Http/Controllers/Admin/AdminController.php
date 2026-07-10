@@ -54,7 +54,7 @@ class AdminController extends Controller
 
             $rev = $nairaInDollar + $usd;
 
-            // $posts = Post::query()->get(['views', 'views_external', 'likes', 'likes_external', 'comments', 'comment_external']);
+            $posts = Post::query()->get(['views', 'views_external', 'likes', 'likes_external', 'comments', 'comment_external']);
             // // $levelCounts = UserLevel::where('status', 'active')
             // //     ->where('next_payment_date', '>', now())
             // //     ->groupBy('plan_name')
@@ -86,7 +86,7 @@ class AdminController extends Controller
                 // 'partnerCount' => $partnerCount,
                 // 'accesscodeCount' => $accesscodeCount,
                 'rev' => $rev,
-                // 'posts' => $posts,
+                'posts' => $posts,
                 'levelCounts' => $levelCounts,
                 'onlineUsers' => $onlineUsers
             ];
