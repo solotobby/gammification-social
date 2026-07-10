@@ -41,53 +41,55 @@ class AdminController extends Controller
         $res = securityVerification();
         if ($res == 'OK') {
 
-            $userCount = User::role('user')->orderBy('created_at', 'desc')->count();
-            // $partnerCount = Partner::where('status', true)->count();
-            // $accesscodeCount = AccessCode::all()->count();
-            $tx = Transaction::where(['status' => 'successful', 'status' => 'allocated'])->get();
-            $usd = $tx->where('currency', 'USD')->sum('amount');
-            $naira = $tx->where('currency', 'NGN')->sum('amount');
+            return 'okay';
 
-            $nairaInDollar = $naira / 1500;
+            // $userCount = User::role('user')->orderBy('created_at', 'desc')->count();
+            // // $partnerCount = Partner::where('status', true)->count();
+            // // $accesscodeCount = AccessCode::all()->count();
+            // $tx = Transaction::where(['status' => 'successful', 'status' => 'allocated'])->get();
+            // $usd = $tx->where('currency', 'USD')->sum('amount');
+            // $naira = $tx->where('currency', 'NGN')->sum('amount');
 
-            $rev = $nairaInDollar + $usd;
+            // $nairaInDollar = $naira / 1500;
 
-            $posts = Post::query()->get(['views', 'views_external', 'likes', 'likes_external', 'comments', 'comment_external']);
-            // $levelCounts = UserLevel::where('status', 'active')
-            //     ->where('next_payment_date', '>', now())
-            //     ->groupBy('plan_name')
-            //     ->select('plan_name', DB::raw('COUNT(user_id) as total'))
-            //     ->get();
+            // $rev = $nairaInDollar + $usd;
 
-            $levelCounts = Cache::remember(
-                'dashboard.plan-counts',
-                now()->addMinutes(5),
-                fn() => UserLevel::query()
-                    ->active()
-                    ->valid()
-                    ->selectRaw('plan_id, COUNT(*) as total')
-                    ->groupBy('plan_id')
-                    ->with('plan:id,name')
-                    ->get()
-            );
+            // $posts = Post::query()->get(['views', 'views_external', 'likes', 'likes_external', 'comments', 'comment_external']);
+            // // $levelCounts = UserLevel::where('status', 'active')
+            // //     ->where('next_payment_date', '>', now())
+            // //     ->groupBy('plan_name')
+            // //     ->select('plan_name', DB::raw('COUNT(user_id) as total'))
+            // //     ->get();
+
+            // $levelCounts = Cache::remember(
+            //     'dashboard.plan-counts',
+            //     now()->addMinutes(5),
+            //     fn() => UserLevel::query()
+            //         ->active()
+            //         ->valid()
+            //         ->selectRaw('plan_id, COUNT(*) as total')
+            //         ->groupBy('plan_id')
+            //         ->with('plan:id,name')
+            //         ->get()
+            // );
 
 
-            $onlineUsers = collect(Cache::get('online_users', []))
-                ->filter(fn($lastSeen) => now()->diffInMinutes($lastSeen) <= 2)
-                ->count();
+            // $onlineUsers = collect(Cache::get('online_users', []))
+            //     ->filter(fn($lastSeen) => now()->diffInMinutes($lastSeen) <= 2)
+            //     ->count();
 
-            $levelId = Level::where('name', 'Creator')->first()->id;
+            // $levelId = Level::where('name', 'Creator')->first()->id;
 
-            return [
-                'levelId' => $levelId,
-                'userCount' => $userCount,
-                // 'partnerCount' => $partnerCount,
-                // 'accesscodeCount' => $accesscodeCount,
-                'rev' => $rev,
-                // 'posts' => $posts,
-                // 'levelCounts' => $levelCounts,
-                // 'onlineUsers' => $onlineUsers
-            ];
+            // return [
+            //     'levelId' => $levelId,
+            //     'userCount' => $userCount,
+            //     // 'partnerCount' => $partnerCount,
+            //     // 'accesscodeCount' => $accesscodeCount,
+            //     'rev' => $rev,
+            //     // 'posts' => $posts,
+            //     // 'levelCounts' => $levelCounts,
+            //     // 'onlineUsers' => $onlineUsers
+            // ];
 
             // return view('admin.home', [
             //     'levelId' => $levelId,
