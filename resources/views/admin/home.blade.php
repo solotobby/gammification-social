@@ -108,7 +108,7 @@
                     </div>
                 </a>
             </div>
-            {{-- @foreach ($levelCounts as $level)
+            @foreach ($levelCounts as $level)
                 <div class="col-6 col-md-3">
                     <a class="block block-rounded block-link-pop text-center"
                         href="{{ url('user/list/' . $level->plan_name) }}">
@@ -122,7 +122,7 @@
                         </div>
                     </a>
                 </div>
-            @endforeach --}}
+            @endforeach
 
            
 
@@ -139,7 +139,7 @@
                         </div>
                         <div>
                             <p class="fs-3 fw-light mb-0">
-                                {{ number_format($posts->count()) }}
+                                {{-- {{ number_format($posts->count()) }} --}}
                             </p>
                             <p class="text-muted mb-0">
                                 Total Posts
@@ -161,7 +161,7 @@
                     <div class="block-content block-content-full d-flex justify-content-between">
                         <div class="me-3">
                             <p class="fs-3 fw-light mb-0">
-                                {{ number_format($posts->sum('views')) }}
+                                {{-- {{ number_format($posts->sum('views')) }} --}}
                             </p>
                             <p class="text-muted mb-0">
                                 Views
@@ -189,7 +189,7 @@
                         </div>
                         <div>
                             <p class="fs-3 fw-light mb-0">
-                                {{ number_format($posts->sum('likes')) }}
+                                {{-- {{ number_format($posts->sum('likes')) }} --}}
                             </p>
                             <p class="text-muted mb-0">
                                 Likes
@@ -211,7 +211,7 @@
                     <div class="block-content block-content-full d-flex justify-content-between">
                         <div class="me-3">
                             <p class="fs-3 fw-light mb-0">
-                                {{ number_format($posts->sum('comments')) }}
+                                {{-- {{ number_format($posts->sum('comments')) }} --}}
                             </p>
                             <p class="text-muted mb-0">
                                 Comments
@@ -244,7 +244,7 @@
                                         <i class="fa fa-thumbs-up text-primary"></i>
                                     </div>
                                     <p class="fs-3 fw-light mt-3 mb-0">
-                                        {{ number_format($posts->sum('likes_external')) }}
+                                        {{-- {{ number_format($posts->sum('likes_external')) }} --}}
                                     </p>
                                     <p class="text-muted mb-0">
                                         Ex. Likes
@@ -257,7 +257,7 @@
                                         <i class="fa fa-eye text-primary"></i>
                                     </div>
                                     <p class="fs-3 fw-light mt-3 mb-0">
-                                        {{ number_format($posts->sum('views_external')) }}
+                                        {{-- {{ number_format($posts->sum('views_external')) }} --}}
                                     </p>
                                     <p class="text-muted mb-0">
                                         Ex. Views
@@ -270,7 +270,7 @@
                                         <i class="fa fa-comments text-primary"></i>
                                     </div>
                                     <p class="fs-3 fw-light mt-3 mb-0">
-                                        {{ number_format($posts->sum('comment_external')) }}
+                                        {{-- {{ number_format($posts->sum('comment_external')) }} --}}
                                     </p>
                                     <p class="text-muted mb-0">
                                         Ex. Comments
