@@ -109,6 +109,23 @@
                 </a>
             </div>
             @foreach ($levelCounts as $level)
+    <div class="col-6 col-md-3">
+        <a class="block block-rounded block-link-pop text-center"
+            href="{{ url('user/list/' . $level->level_id) }}">
+            <div class="block-content block-content-full ratio ratio-16x9">
+                <div class="d-flex justify-content-center align-items-center">
+                    <div>
+                        <div class="fs-2 mb-1">{{ number_format($level->total) }}</div>
+                        <div class="text-muted">
+                            {{ $level->level->name ?? 'Unknown Level' }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+@endforeach
+            {{-- @foreach ($levelCounts as $level)
                 <div class="col-6 col-md-3">
                     <a class="block block-rounded block-link-pop text-center"
                         href="{{ url('user/list/' . $level->plan_name) }}">
@@ -122,7 +139,7 @@
                         </div>
                     </a>
                 </div>
-            @endforeach
+            @endforeach --}}
 
            
 

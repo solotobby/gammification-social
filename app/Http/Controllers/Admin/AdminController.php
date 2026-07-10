@@ -80,16 +80,16 @@ class AdminController extends Controller
 
             $levelId = Level::where('name', 'Creator')->first()->id;
 
-            return [
-                'levelId' => $levelId,
-                'userCount' => $userCount,
-                // 'partnerCount' => $partnerCount,
-                // 'accesscodeCount' => $accesscodeCount,
-                'rev' => $rev,
-                // 'posts' => $posts,
-                'levelCounts' => $levelCounts,
-                'onlineUsers' => $onlineUsers
-            ];
+            // return [
+            //     'levelId' => $levelId,
+            //     'userCount' => $userCount,
+            //     // 'partnerCount' => $partnerCount,
+            //     // 'accesscodeCount' => $accesscodeCount,
+            //     'rev' => $rev,
+            //     // 'posts' => $posts,
+            //     'levelCounts' => $levelCounts,
+            //     'onlineUsers' => $onlineUsers
+            // ];
 
             return view('admin.home', [
                 'levelId' => $levelId,
