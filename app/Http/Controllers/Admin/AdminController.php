@@ -42,8 +42,8 @@ class AdminController extends Controller
         if ($res == 'OK') {
 
             $userCount = User::role('user')->orderBy('created_at', 'desc')->count();
-            $partnerCount = Partner::where('status', true)->count();
-            $accesscodeCount = AccessCode::all()->count();
+            // $partnerCount = Partner::where('status', true)->count();
+            // $accesscodeCount = AccessCode::all()->count();
             $tx = Transaction::where(['status' => 'successful', 'status' => 'allocated'])->get();
             $usd = $tx->where('currency', 'USD')->sum('amount');
             $naira = $tx->where('currency', 'NGN')->sum('amount');
@@ -81,12 +81,12 @@ class AdminController extends Controller
             return [
                 'levelId' => $levelId,
                 'userCount' => $userCount,
-                'partnerCount' => $partnerCount,
-                'accesscodeCount' => $accesscodeCount,
+                // 'partnerCount' => $partnerCount,
+                // 'accesscodeCount' => $accesscodeCount,
                 'rev' => $rev,
-                'posts' => $posts,
-                'levelCounts' => $levelCounts,
-                'onlineUsers' => $onlineUsers
+                // 'posts' => $posts,
+                // 'levelCounts' => $levelCounts,
+                // 'onlineUsers' => $onlineUsers
             ];
 
             // return view('admin.home', [
