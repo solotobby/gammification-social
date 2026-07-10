@@ -108,7 +108,7 @@
                     </div>
                 </a>
             </div>
-            @foreach ($levelCounts as $level)
+            {{-- @foreach ($levelCounts as $level)
                 <div class="col-6 col-md-3">
                     <a class="block block-rounded block-link-pop text-center"
                         href="{{ url('user/list/' . $level->plan_name) }}">
@@ -122,7 +122,7 @@
                         </div>
                     </a>
                 </div>
-            @endforeach
+            @endforeach --}}
 
            
 
