@@ -74,9 +74,9 @@ class AdminController extends Controller
             );
 
 
-            // $onlineUsers = collect(Cache::get('online_users', []))
-            //     ->filter(fn($lastSeen) => now()->diffInMinutes($lastSeen) <= 2)
-            //     ->count();
+            $onlineUsers = collect(Cache::get('online_users', []))
+                ->filter(fn($lastSeen) => now()->diffInMinutes($lastSeen) <= 2)
+                ->count();
 
             // $levelId = Level::where('name', 'Creator')->first()->id;
 
@@ -88,7 +88,7 @@ class AdminController extends Controller
                 'rev' => $rev,
                 // 'posts' => $posts,
                 'levelCounts' => $levelCounts,
-                // 'onlineUsers' => $onlineUsers
+                'onlineUsers' => $onlineUsers
             ];
 
             // return view('admin.home', [
