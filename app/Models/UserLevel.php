@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 class UserLevel extends Model
 {
     use HasFactory, UuidTrait;
+    public const STATUS_ACTIVE = 'active';
 
     protected $fillable = ['user_id', 'level_id', 'plan_name', 'plan_code', 'subscription_code', 'start_date', 'email_token', 'status', 'next_payment_date'];
 
@@ -18,18 +19,31 @@ class UserLevel extends Model
     ];
 
 
-    public function scopeActive($query)
-    {
-        return $query
-            ->where('status', 'active')
-            ->where('next_payment_date', '>', now());
-    }
+   
+    // public function scopeActive($query)
+    // {
+    //     return $query
+    //         ->where('status', 'active')
+    //         ->where('next_payment_date', '>', now());
+    // }
 
-    public function user(){
+    public function user()
+    {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function wallet(){
+    public function wallet()
+    {
         return $this->hasOne(Wallet::class, 'user_id', 'user_id');
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('status', self::STATUS_ACTIVE);
+    }
+
+    public function scopeValid($query)
+    {
+        return $query->where('next_payment_date', '>', now());
     }
 }

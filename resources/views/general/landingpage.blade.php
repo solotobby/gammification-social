@@ -7,16 +7,18 @@
 <section class="hero">
   <div class="wrap hero__inner">
     <div>
-      <span class="hero__pill">Free to join <b>+$2 bonus</b></span>
-      <h1>Get paid for the posts you <span class="grad">already make</span>.</h1>
-      <p class="hero__sub">Payhankey is the social platform that turns your likes, comments and views into real money — no followers, subscribers or watch hours needed. Earn from your very first post.</p>
+      <span class="hero__pill">Join 32k+ <b>African Creators</b></span>
+      <h1>Africa's AI Creator Platform <span class="grad">Where Every Creator Can Earn</span>.</h1>
+      <p class="hero__sub">Join over 32,000 creators using Payhankey to publish content, grow their audience and earn through AI-powered monetization. Receive payouts directly to your local bank account or digital wallet in your local currency.</p>
       <div class="hero__cta">
-        <a class="btn btn--white btn--lg" href="{{ url('/register') }}">Create free account <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
-        <a class="btn btn--light btn--lg" href="{{ url('/how-it-works') }}">See how it works</a>
+        <a class="btn btn--white btn--lg" href="{{ url('/register') }}">Start Earning for Free <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+        <a class="btn btn--light btn--lg" href="{{ url('/login') }}">Login</a>
       </div>
       <div class="hero__trust">
-        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> 100% free signup</div>
-        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> $1 minimum payout</div>
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> 32K+ Creators</div>
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> 1.7K+ Paid Creators</div>
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> AI Powered Recommendations</div>
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Servicing 6 African Countries</div>
         <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> PayPal · USDT · Local bank</div>
       </div>
     </div>
@@ -56,14 +58,14 @@
   <div class="wrap">
     <div class="section-head center reveal">
       <span class="eyebrow eyebrow--center">How it works</span>
-      <h2>Start earning in four simple steps</h2>
-      <p class="lead">No complicated setup, no waiting to qualify. Sign up and your earnings begin on your first post.</p>
+      <h2>Start Building Your Creator Business in Four Simple Steps</h2>
+      <p class="lead">Creating, growing and monetizing your content on Payhankey takes just a few minutes. Whether you're a student, influencer, educator, comedian, musician, business owner or content creator, you can start building your audience and earning from your content.</p>
     </div>
     <div class="steps">
-      <div class="step reveal"><div class="step__n"></div><div class="step__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><h3>Create your account</h3><p>Sign up free in under a minute and claim your welcome bonus of up to $2 instantly.</p></div>
-      <div class="step reveal"><div class="step__n"></div><div class="step__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div><h3>Post your content</h3><p>Share posts, facts, quizzes, teasers and videos. Everything you create can earn.</p></div>
-      <div class="step reveal"><div class="step__n"></div><div class="step__icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-8-4.5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 6.5-8 11-8 11z"/></svg></div><h3>Earn from engagement</h3><p>Every like, comment and view on your content adds real money to your balance.</p></div>
-      <div class="step reveal"><div class="step__n"></div><div class="step__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg></div><h3>Withdraw your money</h3><p>Cash out from just $1 to PayPal, USDT or your local bank on the 2nd of each month.</p></div>
+      <div class="step reveal"><div class="step__n"></div><div class="step__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><h3>Create your free account</h3><p>Create your free Payhankey account in under one minute, verify your profile, and receive a welcome bonus of up to $2 to begin your creator journey.</p></div>
+      <div class="step reveal"><div class="step__n"></div><div class="step__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div><h3>Share Your Best Content</h3><p>Publish videos, photos, quizzes, articles, educational content, entertainment, business updates, music and more. Every quality post has the opportunity to earn.</p></div>
+      <div class="step reveal"><div class="step__n"></div><div class="step__icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-8-4.5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 6.5-8 11-8 11z"/></svg></div><h3>Watch Your Eaenings Grow</h3><p>As your content receives geniue views, likes, comments and shares, eligible engagement contributes to your creator earnings. Our AI-powered recommendation engine helps quaulity content reach the right audience.</p></div>
+      <div class="step reveal"><div class="step__n"></div><div class="step__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg></div><h3>Get Paid your Way</h3><p>Withdraw your earnings securely from just $1 through PayPal, USDT or directly to your local bank account in supported African countries</p></div>
     </div>
   </div>
 </section>

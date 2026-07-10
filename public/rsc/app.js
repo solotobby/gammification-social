@@ -80,19 +80,19 @@
   var feed = document.querySelector('[data-feed]');
   if (feed) {
     var names = [
-      ['Amara O.', 'AO', 'a video', 1.20],
-      ['Kwame B.', 'KB', 'a post', 0.85],
-      ['Zinhle M.', 'ZM', 'a quiz', 0.60],
-      ['Tunde A.', 'TA', 'a teaser', 1.05],
-      ['Fatima D.', 'FD', 'comments', 0.45],
-      ['Chidi N.', 'CN', 'a referral', 2.00],
-      ['Lerato K.', 'LK', 'views', 1.75],
-      ['Yusuf I.', 'YI', 'a post', 0.95]
+      ['Creator .', 'C', 'payout today', 3420],
+      ['Creators .', 'I', 'paid today', 1284],
+      ['Countries.', 'CO', 'present', 6],
+      ['Posts .', 'P', 'monetised today', 9843],
+      // ['Fatima D.', 'FD', 'comments', 0.45],
+      // ['Chidi N.', 'CN', 'a referral', 2.00],
+      // ['Lerato K.', 'LK', 'views', 1.75],
+      // ['Yusuf I.', 'YI', 'a post', 0.95]
     ];
     function feedItem(n) {
       return '<div class="feed__item"><div class="feed__av">' + n[1] + '</div>' +
-        '<div class="feed__txt"><b>' + n[0] + '</b> earned from ' + n[2] + '</div>' +
-        '<div class="feed__amt">+$' + n[3].toFixed(2) + '</div></div>';
+        '<div class="feed__txt"><b>' + n[0] + '</b> ' + n[2] + '</div>' +
+        '<div class="feed__amt">' + n[3].toFixed(2) + '</div></div>';
     }
     var i = 0;
     feed.innerHTML = feedItem(names[0]) + feedItem(names[1]) + feedItem(names[2]);

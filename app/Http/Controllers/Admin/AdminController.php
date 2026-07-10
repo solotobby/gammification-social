@@ -53,15 +53,29 @@ class AdminController extends Controller
             $rev = $nairaInDollar + $usd;
 
             $posts = Post::query()->get(['views', 'views_external', 'likes', 'likes_external', 'comments', 'comment_external']);
-            $levelCounts = UserLevel::where('status', 'active')
-                ->where('next_payment_date', '>', now())
-                ->groupBy('plan_name')
-                ->select('plan_name', DB::raw('COUNT(user_id) as total'))
-                ->get();
+            // $levelCounts = UserLevel::where('status', 'active')
+            //     ->where('next_payment_date', '>', now())
+            //     ->groupBy('plan_name')
+            //     ->select('plan_name', DB::raw('COUNT(user_id) as total'))
+            //     ->get();
+
+            $levelCounts = Cache::remember(
+                'dashboard.plan-counts',
+                now()->addMinutes(5),
+                fn() => UserLevel::query()
+                    ->active()
+                    ->valid()
+                    ->selectRaw('plan_id, COUNT(*) as total')
+                    ->groupBy('plan_id')
+                    ->with('plan:id,name')
+                    ->get()
+            );
+
 
             $onlineUsers = collect(Cache::get('online_users', []))
                 ->filter(fn($lastSeen) => now()->diffInMinutes($lastSeen) <= 2)
                 ->count();
+                
             $levelId = Level::where('name', 'Creator')->first()->id;
 
             return view('admin.home', [
@@ -72,14 +86,14 @@ class AdminController extends Controller
                 'rev' => $rev,
                 'posts' => $posts,
                 'levelCounts' => $levelCounts,
-                'onlineUsers' => $onlineUsers
+                // 'onlineUsers' => $onlineUsers
             ]);
         }
     }
 
     public function testSubscription($levelId)
     {
-            $url = $this->korapayService->initiatePayment($levelId, 200);
+        $url = $this->korapayService->initiatePayment($levelId, 200);
         // $url = $this->flutterwavePaymentService->createAdminCharge($levelId);
         return redirect($url);
     }
