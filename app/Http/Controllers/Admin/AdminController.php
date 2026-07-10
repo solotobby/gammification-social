@@ -54,24 +54,24 @@ class AdminController extends Controller
 
             $rev = $nairaInDollar + $usd;
 
-            $posts = Post::query()->get(['views', 'views_external', 'likes', 'likes_external', 'comments', 'comment_external']);
+            // $posts = Post::query()->get(['views', 'views_external', 'likes', 'likes_external', 'comments', 'comment_external']);
             // // $levelCounts = UserLevel::where('status', 'active')
             // //     ->where('next_payment_date', '>', now())
             // //     ->groupBy('plan_name')
             // //     ->select('plan_name', DB::raw('COUNT(user_id) as total'))
             // //     ->get();
 
-            // $levelCounts = Cache::remember(
-            //     'dashboard.plan-counts',
-            //     now()->addMinutes(5),
-            //     fn() => UserLevel::query()
-            //         ->active()
-            //         ->valid()
-            //         ->selectRaw('plan_id, COUNT(*) as total')
-            //         ->groupBy('plan_id')
-            //         ->with('plan:id,name')
-            //         ->get()
-            // );
+            $levelCounts = Cache::remember(
+                'dashboard.plan-counts',
+                now()->addMinutes(5),
+                fn() => UserLevel::query()
+                    ->active()
+                    ->valid()
+                    ->selectRaw('plan_id, COUNT(*) as total')
+                    ->groupBy('plan_id')
+                    ->with('plan:id,name')
+                    ->get()
+            );
 
 
             // $onlineUsers = collect(Cache::get('online_users', []))
@@ -86,8 +86,8 @@ class AdminController extends Controller
                 // 'partnerCount' => $partnerCount,
                 // 'accesscodeCount' => $accesscodeCount,
                 'rev' => $rev,
-                'posts' => $posts,
-                // 'levelCounts' => $levelCounts,
+                // 'posts' => $posts,
+                'levelCounts' => $levelCounts,
                 // 'onlineUsers' => $onlineUsers
             ];
 
