@@ -46,4 +46,9 @@ class UserLevel extends Model
     {
         return $query->where('next_payment_date', '>', now());
     }
+
+    public function level()
+    {
+        return $this->belongsTo(Level::class, 'level_id');
+    }
 }

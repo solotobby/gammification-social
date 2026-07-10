@@ -67,9 +67,9 @@ class AdminController extends Controller
                 fn() => UserLevel::query()
                     ->active()
                     ->valid()
-                    ->selectRaw('plan_name, COUNT(*) as total')
-                    ->groupBy('plan_name')
-                    ->with('plan:id,name')
+                    ->selectRaw('level_id, COUNT(*) as total')
+                    ->groupBy('level_id')
+                    ->with('level:id,name')
                     ->get()
             );
 
