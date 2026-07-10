@@ -78,10 +78,10 @@ class AdminController extends Controller
                 ->filter(fn($lastSeen) => now()->diffInMinutes($lastSeen) <= 2)
                 ->count();
 
-            // $levelId = Level::where('name', 'Creator')->first()->id;
+            $levelId = Level::where('name', 'Creator')->first()->id;
 
             return [
-                // 'levelId' => $levelId,
+                'levelId' => $levelId,
                 'userCount' => $userCount,
                 // 'partnerCount' => $partnerCount,
                 // 'accesscodeCount' => $accesscodeCount,
