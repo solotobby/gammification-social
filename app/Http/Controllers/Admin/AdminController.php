@@ -41,9 +41,9 @@ class AdminController extends Controller
         $res = securityVerification();
         if ($res == 'OK') {
 
-            return 'okay';
+            
 
-            // $userCount = User::role('user')->orderBy('created_at', 'desc')->count();
+            $userCount = User::role('user')->orderBy('created_at', 'desc')->count();
             // // $partnerCount = Partner::where('status', true)->count();
             // // $accesscodeCount = AccessCode::all()->count();
             // $tx = Transaction::where(['status' => 'successful', 'status' => 'allocated'])->get();
@@ -80,16 +80,16 @@ class AdminController extends Controller
 
             // $levelId = Level::where('name', 'Creator')->first()->id;
 
-            // return [
-            //     'levelId' => $levelId,
-            //     'userCount' => $userCount,
-            //     // 'partnerCount' => $partnerCount,
-            //     // 'accesscodeCount' => $accesscodeCount,
-            //     'rev' => $rev,
-            //     // 'posts' => $posts,
-            //     // 'levelCounts' => $levelCounts,
-            //     // 'onlineUsers' => $onlineUsers
-            // ];
+            return [
+                // 'levelId' => $levelId,
+                'userCount' => $userCount,
+                // 'partnerCount' => $partnerCount,
+                // 'accesscodeCount' => $accesscodeCount,
+                // 'rev' => $rev,
+                // 'posts' => $posts,
+                // 'levelCounts' => $levelCounts,
+                // 'onlineUsers' => $onlineUsers
+            ];
 
             // return view('admin.home', [
             //     'levelId' => $levelId,
