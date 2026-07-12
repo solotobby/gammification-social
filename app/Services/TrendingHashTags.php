@@ -54,7 +54,7 @@ class TrendingHashTags
             )
 
 
-            ->limit(20)
+            ->limit(5)
 
             ->get();
     }
