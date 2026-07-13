@@ -12,6 +12,7 @@ use App\Models\TrendingTopic;
 use App\Models\User;
 use App\Models\UserActivity;
 use App\Models\UserComment;
+use App\Models\UserLevel;
 use App\Models\UserLike;
 use App\Models\UserView;
 use App\Models\ViewsExternal;
@@ -86,7 +87,7 @@ if (!function_exists('trendingTopics')) {
     function trendingTopics()
     {
         // return Trend::where('trends.status', 'active')
-        //     ->leftJoin('post_trends', 'trends.id', '=', 'post_trends.trend_id')
+        //     ->leftJoin('post_trends', 'trends.id', '=', 'post_trends.trend_id ')
         //     ->leftJoin('posts', function ($join) {
         //         $join->on('post_trends.post_id', '=', 'posts.id')
         //              ->where('posts.status', 'LIVE');
@@ -191,9 +192,11 @@ if (!function_exists('userBaseCurrency')) {
 if (!function_exists('userLevel')) {
     function userLevel($userId = null)
     {
-        $user = $userId ? User::find($userId) : auth()->user();
 
-        return $user?->activeLevel?->plan_name ?? 'Basic';
+        $userId ??= auth()->id();
+       return UserLevel::where('user_id', $userId)->first()->plan_name;
+
+        // return $user?->activeLevel?->plan_name ;//?? 'Basic';
 
         // return $userId ? User::find($userId)->activeLevel->plan_name : auth()->user()->activeLevel->plan_name;
     }

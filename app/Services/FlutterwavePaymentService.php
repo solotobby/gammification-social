@@ -55,17 +55,49 @@ class FlutterwavePaymentService
         }
     }
 
+    private function amount($levelId)
+    {
+
+        $level = Level::findOrFail($levelId);
+        $user = auth()->user();
+        $userCurrency = userBaseCurrency();
+
+        if (!$userCurrency) {
+            $userCurrency = $user->wallet->currency;
+        }
+        if ($userCurrency == 'NGN') {
+
+            $discountRate = 0.1; // 10% discount for recurring subscription
+            $discountedAmount =  $level->amount * (1 - $discountRate);
+        } else {
+            $discountRate = 0.0; // 10% discount for recurring subscription
+            $discountedAmount =  $level->amount * (1 - $discountRate);
+        }
+        return $discountedAmount;
+    }
+
     public function createPaymentPlan($levelId)
     {
         $level = Level::findOrFail($levelId);
 
         $user = auth()->user();
 
-        $userCurrency = $user->wallet->currency;
+        $userCurrency = userBaseCurrency();
+        if (!$userCurrency) {
+            $userCurrency = $user->wallet->currency;
+        }
+        if ($userCurrency == 'NGN') {
+
+            $discountRate = 0.1; // 10% discount for recurring subscription
+            $discountedAmount =  $level->amount * (1 - $discountRate);
+        } else {
+            $discountRate = 0.0; // 10% discount for recurring subscription
+            $discountedAmount =  $level->amount * (1 - $discountRate);
+        }
 
         $payload = [
             'name' => "Subscription Plan for Level {$level->name}",
-            'amount' => convertToBaseCurrency($level->amount,  $userCurrency) * 100, // amount in kobo
+            'amount' => convertToBaseCurrency($this->amount($levelId),  $userCurrency) * 100, // amount in kobo
             'currency' => $userCurrency,
             'interval' => 'monthly',
             'duration' => 24, // 2 years
@@ -145,8 +177,11 @@ class FlutterwavePaymentService
              * PAYMENT DETAILS
              * =========================================================
              */
+            // $discountRate = 0.1; // 10% discount for recurring subscription
+            // $discountedAmount =  $level->amount * (1 - $discountRate);
+            
             $amount = convertToBaseCurrency(
-                $level->amount,
+                $this->amount($levelId), // $level->amount,
                 $userCurrency
             );
 
@@ -631,7 +666,7 @@ class FlutterwavePaymentService
             $reference = generateTransactionRef();
 
             // Create transaction
-           $transaction = $this->transactionService->createTransaction(
+            $transaction = $this->transactionService->createTransaction(
                 user: $user,
                 idempotencyKey: $idempotencyKey,
                 provider: 'flutterwave',

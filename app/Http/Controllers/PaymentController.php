@@ -29,33 +29,72 @@ class PaymentController extends Controller
     public function createSubscription($levelId, SubscriptionService $subscriptionService, FlutterwavePaymentService $flutterwavePaymentService, KorapayService $korapayService)
     {
 
+        //subscription payment flow
+
         $user = auth()->user();
-        $userCurrency = $user->wallet->currency;
+        $userCurrency = userBaseCurrency(); //$user->wallet->currency;
 
-        if ($userCurrency == 'NGN') {
+        // if ($userCurrency == 'NGN') {
 
 
-            $authUrl = $korapayService->initiatePayment($levelId);
-            //$subscriptionService->processSubscriptionPayment($levelId);
+        //     $authUrl = $korapayService->initiatePayment($levelId);
+        //     //$subscriptionService->processSubscriptionPayment($levelId);
 
-            return redirect($authUrl);
+        //     return redirect($authUrl);
+        // } else {
+
+        //fetch payment plan based on level and currency
+        $userpaymentPlan = $flutterwavePaymentService->getPaymentPlan($user, $levelId, $userCurrency);
+
+        if ($userpaymentPlan) {
+            $paymentPlan = $userpaymentPlan;
         } else {
-
-            //fetch payment plan based on level and currency
-            $userpaymentPlan = $flutterwavePaymentService->getPaymentPlan($user, $levelId, $userCurrency);
-
-            if ($userpaymentPlan) {
-                $paymentPlan = $userpaymentPlan;
-            } else {
-                $paymentPlan = $flutterwavePaymentService->createPaymentPlan($levelId);
-            }
-
-            // return $paymentPlan;
-
-            $charge = $flutterwavePaymentService->createCharge($levelId, $paymentPlan);
-
-            return redirect($charge);
+            $paymentPlan = $flutterwavePaymentService->createPaymentPlan($levelId);
         }
+
+        // return $paymentPlan;
+
+        $charge = $flutterwavePaymentService->createCharge($levelId, $paymentPlan);
+
+        return redirect($charge);
+        // }
+    }
+
+    public function createPaygSubscription($levelId, SubscriptionService $subscriptionService, FlutterwavePaymentService $flutterwavePaymentService, KorapayService $korapayService)
+    {
+
+        $user = auth()->user();
+        // $userCurrency = $user->wallet->currency;
+
+        $authUrl = $korapayService->initiatePayment($levelId);
+        //$subscriptionService->processSubscriptionPayment($levelId);
+
+        return redirect($authUrl);
+
+
+        // if ($userCurrency == 'NGN') {
+
+        //     $authUrl = $korapayService->initiatePaygPayment($levelId);
+        //     //$subscriptionService->processSubscriptionPayment($levelId);
+
+        //     return redirect($authUrl);
+        // } else {
+
+        //     //fetch payment plan based on level and currency
+        //     $userpaymentPlan = $flutterwavePaymentService->getPaymentPlan($user, $levelId, $userCurrency);
+
+        //     if ($userpaymentPlan) {
+        //         $paymentPlan = $userpaymentPlan;
+        //     } else {
+        //         $paymentPlan = $flutterwavePaymentService->createPaymentPlan($levelId);
+        //     }
+
+        //     // return $paymentPlan;
+
+        //     $charge = $flutterwavePaymentService->createCharge($levelId, $paymentPlan);
+
+        //     return redirect($charge);
+        // }       
     }
 
     public function verifyKoraSubscriptionPayment(SubscriptionService $subscriptionService, KorapayService $korapayService)

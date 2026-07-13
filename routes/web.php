@@ -172,6 +172,7 @@ Route::middleware([
         Route::get('verify/subscription/payment/', [\App\Http\Controllers\PaymentController::class, 'verifyKoraSubscriptionPayment'])->name('verify.subscription');
         Route::get('verify/fluterwave/charge', [PaymentController::class, 'verifyFlutterwaveCharge'])->name('verify.flutterwave.charge');
         Route::get('subscribe/{levelId}', [\App\Http\Controllers\PaymentController::class, 'createSubscription'])->name('subscribe');
+        Route::get('payg-subscribe/{levelId}', [\App\Http\Controllers\PaymentController::class, 'createPaygSubscription'])->name('payg-subscribe');
 
 
 

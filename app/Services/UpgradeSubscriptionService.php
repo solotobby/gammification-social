@@ -27,10 +27,6 @@ class UpgradeSubscriptionService
 
         DB::transaction(function () use ($user, $level, $transaction, $payload) {
 
-
-
-
-
             $nextPaymentDate = now()->addMonth();
 
             $this->transactionService->markSuccessful($transaction, $payload); //first mark transaction successful
