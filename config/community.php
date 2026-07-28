@@ -21,7 +21,7 @@ return [
     |
     */
 
-    'platform_fee_percent' => (int) env('COMMUNITY_PLATFORM_FEE_PERCENT', 25),
+    'platform_fee_percent' => (int) env('COMMUNITY_PLATFORM_FEE_PERCENT', 10),
 
     /*
     |--------------------------------------------------------------------------
