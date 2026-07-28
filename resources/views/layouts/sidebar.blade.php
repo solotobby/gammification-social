@@ -102,6 +102,11 @@
                     </a>
                 @endif
 
+                {{-- <a class="nav-main-link" href="{{ url('community') }}">
+                    <i class="nav-main-link-icon fa fa-users"></i>
+                    <span class="nav-main-link-name">Community</span>
+                </a> --}}
+
                 <a class="nav-main-link" href="{{ url('upgrade') }}">
                     <i class="nav-main-link-icon fa fa-level-up-alt"></i>
                     <span class="nav-main-link-name">Upgrade Level</span>
@@ -136,7 +141,7 @@
                 </a>
 
                 <a class="nav-main-link" href="{{ url('referral/list') }}">
-                    <i class="nav-main-link-icon fa fa-users"></i>
+                    <i class="nav-main-link-icon fa fa-user-friends"></i>
                     <span class="nav-main-link-name">My Referrals</span>
                 </a>
 

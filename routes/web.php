@@ -12,8 +12,10 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\UserEngagementController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CloudinaryWebhookController;
+use App\Http\Controllers\FlutterwaveWebhookController;
 use App\Http\Controllers\GeneralController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\KorapayWebhookController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\RollsWatchController;
 use App\Http\Controllers\VideoAnalyticsController;
@@ -23,6 +25,8 @@ use App\Livewire\Level;
 use App\Livewire\User\Analytics;
 use App\Livewire\User\BankInformation;
 use App\Livewire\User\Blog;
+use App\Livewire\User\Community;
+use App\Livewire\User\CommunityDetails;
 use App\Livewire\User\DashboardTimeline;
 use App\Livewire\User\EarningList;
 use App\Livewire\User\Hashtag;
@@ -101,7 +105,7 @@ Route::group(['namespace' => 'auth'], function () {
     Route::get('access/code/{level}', [\App\Http\Controllers\GeneralController::class, 'accessCode']);
     Route::post('process/access/code', [\App\Http\Controllers\GeneralController::class, 'processAccessCode']);
 
-   
+
 
     Route::get('success', [\App\Http\Controllers\GeneralController::class, 'success']);
     Route::get('error', [\App\Http\Controllers\GeneralController::class, 'error']);
@@ -124,6 +128,10 @@ Route::group(['namespace' => 'auth'], function () {
     Route::post('flutterwave/webhook', [WebhookController::class, 'flutterwave'])->name('flutterwave.webhook');
     Route::post('korapay/webhook', [WebhookController::class, 'korapay'])->name('korapay.webhook');
 
+
+    // routes/api.php (no CSRF by default)
+    // Route::post('/webhooks/korapay', [KorapayWebhookController::class])->name('webhooks.korapay');
+    // Route::post('/webhooks/flutterwave', [FlutterwaveWebhookController::class])->name('webhooks.flutterwave');
 
     // Route::post('post/comment', [\App\Http\Controllers\GeneralController::class, 'comment']);
 
@@ -211,6 +219,10 @@ Route::middleware([
         Route::get('earner/list', EarningList::class);
         Route::get('user/blog', Blog::class);
         Route::get('user/payouts', Payout::class);
+
+        //community
+        Route::get('community', Community::class);
+        Route::get('community/{community}', CommunityDetails::class)->name('community.show');
     });
 
     // Route::get('rolls/{video}', VideoRolls::class);

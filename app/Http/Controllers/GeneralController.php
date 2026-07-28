@@ -41,12 +41,13 @@ class GeneralController extends Controller
 
     public function landingpage()
     {
-        return view('general.landingpage');
+        return view('welcome');
+        // return view('general.landingpage');
     }
 
     public function how()
     {
-        return view('general.how');
+        return view('how');
     }
     public function about()
     {

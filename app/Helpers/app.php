@@ -86,24 +86,7 @@ if (!function_exists('engagement')) {
 if (!function_exists('trendingTopics')) {
     function trendingTopics()
     {
-        // return Trend::where('trends.status', 'active')
-        //     ->leftJoin('post_trends', 'trends.id', '=', 'post_trends.trend_id ')
-        //     ->leftJoin('posts', function ($join) {
-        //         $join->on('post_trends.post_id', '=', 'posts.id')
-        //              ->where('posts.status', 'LIVE');
-        //     })
-        //     ->select(
-        //         'trends.id',
-        //         'trends.name',
-        //         'trends.description',
-        //         DB::raw('COUNT(post_trends.id) as post_count')
-        //     )
-        //     ->groupBy('trends.id', 'trends.name', 'trends.description')
-        //     ->orderByDesc('post_count')
-        //     ->take(5)
-        //     ->get();
-
-       return app(TrendingHashTags::class)->getTrending();
+        return app(TrendingHashTags::class)->getTrending();
     }
 }
 
@@ -194,7 +177,7 @@ if (!function_exists('userLevel')) {
     {
 
         $userId ??= auth()->id();
-       return UserLevel::where('user_id', $userId)->first()->plan_name;
+        return UserLevel::where('user_id', $userId)->first()->plan_name;
 
         // return $user?->activeLevel?->plan_name ;//?? 'Basic';
 
@@ -507,6 +490,36 @@ if (!function_exists('convertToBaseCurrency')) {
     }
 }
 
+if (!function_exists('convertCurrency')) {
+    function convertCurrency($amount, $from, $to)
+    {
+        $rates = Currency::where('is_active', true)
+            ->pluck('base_rate', 'code')
+            ->toArray();
+
+        $from = strtoupper($from);
+        $to = strtoupper($to);
+
+        if (!isset($rates[$from])) {
+            throw new InvalidArgumentException("Unsupported currency: {$from}");
+        }
+
+        if (!isset($rates[$to])) {
+            throw new InvalidArgumentException("Unsupported currency: {$to}");
+        }
+
+        if ($from === $to) {
+            return round($amount, 2);
+        }
+
+        // Convert source currency to base currency (USD)
+        $baseAmount = $amount / $rates[$from];
+
+        // Convert base currency to target currency
+        return round($baseAmount * $rates[$to], 2);
+    }
+}
+
 
 if (!function_exists('viewsAmountCalculator')) {
     function viewsAmountCalculator($postId): float
@@ -679,10 +692,6 @@ if (!function_exists('maskCode')) {
     }
 }
 
-
-
-
-
 /////PAYSTACK INTEGRATION////
 
 if (!function_exists('bankList')) {
@@ -703,7 +712,7 @@ if (!function_exists('generateVirtualAccount')) {
     function generateVirtualAccount($partner)
     {
 
-        //check if user exist, if yes, update informatioon
+        //check if user exist, if yes, update information
         //$fetchCustomer = fetchCustomer($partner->email);
 
         // if($fetchCustomer['status'] == true){

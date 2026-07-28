@@ -575,7 +575,7 @@
         <div class="col-md-8 ph-feed-wrap">
 
             {{-- ===== Invite & earn (referral) ===== --}}
-            <div class="ph-invite">
+            {{-- <div class="ph-invite">
                 <span class="ph-inv-ic"><i class="fa fa-gift"></i></span>
                 <div class="ph-inv-txt">
                     <b>Invite friends &amp; earn together</b>
@@ -589,7 +589,7 @@
                         </button>
                     </div>
                 </div>
-            </div>
+            </div> --}}
 
             {{-- ===== Flash messages ===== --}}
             @foreach (['success' => 'success', 'info' => 'warning', 'error' => 'danger'] as $key => $type)
@@ -632,8 +632,8 @@
                             </div>
                         </div>
 
-                        <span class="ph-nudge"><i class="fa fa-bolt"></i> Every like, comment &amp; view on this post
-                            earns you money, Add hashtags for more visiblity</span>
+                        {{-- <span class="ph-nudge"><i class="fa fa-bolt"></i> Every like, comment &amp; view on this post
+                            earns you money, Add hashtags for more visiblity</span> --}}
 
                         {{-- Images (Creator / Influencer only) --}}
                         @if (in_array($userLevel, ['Creator', 'Influencer']))

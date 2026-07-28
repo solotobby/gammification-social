@@ -6,9 +6,6 @@ use App\Models\Hashtag;
 
 class TrendingHashTags
 {
-
-
-
     public function getTrending()
     {
 
