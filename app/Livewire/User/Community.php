@@ -43,6 +43,10 @@ class Community extends Component
         $this->filter = request()->query('filter', 'all');
         $this->search = request()->query('search', '');
         $this->platformFeePercent = (int) config('community.platform_fee_percent', 25);
+         if (userBaseCurrency() === 'NGN') {
+            $this->billing_type = 'one_off';
+            $this->billing_interval = null;
+        }
     }
 
     protected function rules(): array
@@ -137,6 +141,7 @@ class Community extends Component
 
         $isPaid = $validated['type'] === 'paid';
         $isSubscription = $isPaid && $validated['billing_type'] === 'subscription';
+
         $currency = userBaseCurrency();
 
         $community = DB::transaction(function () use ($validated, $isPaid, $isSubscription, $currency) {
@@ -146,10 +151,6 @@ class Community extends Component
                 'description' => $validated['description'],
                 'community_categories_id' => $validated['community_categories_id'],
                 'type' => $validated['type'],
-                // Every paid-only field is null (not 0.00 / not omitted) when
-                // the community isn't paid — fee_payer's column is nullable
-                // specifically to make this safe (see migration
-                // 2026_07_20_000010_make_fee_payer_nullable_on_communities_table).
                 'currency' => $currency,
                 'monthly_fee' => $isPaid ? $validated['monthly_fee'] : 0.00,
                 'fee_payer' => $isPaid ? $validated['fee_payer'] : 0.00,

@@ -1130,7 +1130,8 @@
                                         {{-- <path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"
                                             stroke-linecap="round" /> --}}
                                     </svg>
-                                    {{ getCurrencyCode() }}{{ number_format(convertCurrency($community->member_charge, $community->currency, auth()->user()->wallet->currency),2) }} {{ $community->price_suffix }}
+                                    {{ getCurrencyCode() }}{{ number_format(convertCurrency($community->member_charge, $community->currency, auth()->user()->wallet->currency), 2) }}
+                                    {{ $community->price_suffix }}
                                     {{-- &#8358;{{ number_format($community->member_charge, 2) }}/mo --}}
                                 </span>
                             @break
@@ -1161,20 +1162,24 @@
                         <button type="button" class="pk-btn pk-btn-violet" wire:click="join"
                             wire:loading.attr="disabled" wire:target="join">Join community</button>
                     @elseif ($community->type === 'paid')
-                        @if ($this->hasPendingSubscription())
-                            <button type="button" class="pk-btn pk-btn-outline" disabled>Payment pending</button>
+                        @if ($this->userSubscriptionStatus($community->id) === 'active')
+                            <button type="button" class="pk-btn pk-btn-outline pk-btn-sm" disabled>Joined</button>
+                        @elseif ($this->userSubscriptionStatus($community->id) === 'pending')
+                            <button type="button" class="pk-btn pk-btn-outline pk-btn-sm" disabled>Pending</button>
                         @else
-                            <button type="button" class="pk-btn pk-btn-violet" wire:click="subscribe"
-                                wire:loading.attr="disabled"
-                                wire:target="subscribe">{{ $this->subscribeLabel() }}</button>
+                            <a href="{{ url('community/payment/' . $community->id) }}"
+                                class="pk-btn pk-btn-violet pk-btn-sm">
+                                {{ $community->billing_type === 'one_off' ? 'Pay Once' : 'Subscribe' }}
+                            </a>
                         @endif
-                        {{-- <button type="button" class="pk-btn pk-btn-violet">Subscribe</button> --}}
                     @elseif ($community->type === 'approval')
                         @if ($this->hasPendingRequest())
-                            <button type="button" class="pk-btn pk-btn-outline" disabled>Request pending</button>
+                            <button type="button" class="pk-btn pk-btn-outline" disabled>Request
+                                pending</button>
                         @else
                             <button type="button" class="pk-btn pk-btn-outline" wire:click="requestToJoin"
-                                wire:loading.attr="disabled" wire:target="requestToJoin">Request to join</button>
+                                wire:loading.attr="disabled" wire:target="requestToJoin">Request to
+                                join</button>
                         @endif
                     @else
                         <button type="button" class="pk-btn pk-btn-outline" disabled>Invite only</button>

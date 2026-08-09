@@ -92,6 +92,11 @@ class CommunityDetails extends Component
         return $this->isOwner() || $this->isAdmin();
     }
 
+    public function isOwnerOrAdminOrMember(): bool
+    {
+        return $this->isOwner() || $this->isAdmin() || $this->isMember();
+    }
+
     /**
      * Public communities' member lists are open to anyone (browsing a
      * public community shouldn't require joining first). Every other type
@@ -99,7 +104,7 @@ class CommunityDetails extends Component
      */
     public function canViewMembers(): bool
     {
-        return $this->community->type === 'public' || $this->isOwnerOrAdmin();
+        return $this->community->type === 'public' || $this->isOwnerOrAdminOrMember();
     }
 
     // =========================================================
@@ -606,51 +611,60 @@ class CommunityDetails extends Component
     }
 
     public function subscribeLabel(): string
-{
-    $price = number_format((float) $this->community->monthly_fee, 2);
+    {
+        $price = number_format((float) $this->community->monthly_fee, 2);
 
-    if ($this->community->billing_type === 'one_off') {
-        return "Pay ₦{$price}";
+        if ($this->community->billing_type === 'one_off') {
+            return "Pay ₦{$price}";
+        }
+
+        $suffix = config("community.billing_intervals.{$this->community->billing_interval}.suffix", '/mo');
+
+        return "Subscribe ₦{$price}{$suffix}";
     }
 
-    $suffix = config("community.billing_intervals.{$this->community->billing_interval}.suffix", '/mo');
 
-    return "Subscribe ₦{$price}{$suffix}";
-}
-
-
-public function subscribe(): void
-{
-    if ($this->community->type !== 'paid' || $this->isMember()) {
-        return;
+    public function userSubscriptionStatus(string $communityId)
+    {
+        return CommunitySubscription::where('community_id', $communityId)
+            ->where('user_id', auth()->id())
+            // ->where('status', 'pending')
+            ->first()?->status;
     }
 
-    $service = app(CommunitySubscriptionService::class);
-    $existing = $service->pendingOrActiveFor($this->community, auth()->user());
 
-    if ($existing?->status === 'active') {
-        return;
+    public function subscribe(): void
+    {
+        if ($this->community->type !== 'paid' || $this->isMember()) {
+            return;
+        }
+
+        $service = app(CommunitySubscriptionService::class);
+        $existing = $service->pendingOrActiveFor($this->community, auth()->user());
+
+        if ($existing?->status === 'active') {
+            return;
+        }
+
+        $subscription = $existing ?? $service->initiate($this->community, auth()->user());
+
+        dd($subscription);
+
+        // -----------------------------------------------------------------
+        // TODO: payment gateway goes here, for BOTH billing types — the only
+        // difference between one_off and subscription is what you send the
+        // gateway (a single charge vs a plan/recurring authorization) and
+        // what expires_at ends up being once activate() runs. Typical shape:
+        //   $url = $this->paymentGateway->checkoutUrl($subscription);
+        //   return redirect()->away($url);
+        //
+        // On successful payment (webhook/callback controller, NOT this
+        // component instance — it won't exist when the webhook fires):
+        //   app(CommunitySubscriptionService::class)->activate($subscription);
+        // -----------------------------------------------------------------
+        $service->activate($subscription);
+        session()->flash('status', 'Payment step isn\'t wired up yet — this is a placeholder.');
     }
-
-    $subscription = $existing ?? $service->initiate($this->community, auth()->user());
-
-    dd($subscription);
-
-    // -----------------------------------------------------------------
-    // TODO: payment gateway goes here, for BOTH billing types — the only
-    // difference between one_off and subscription is what you send the
-    // gateway (a single charge vs a plan/recurring authorization) and
-    // what expires_at ends up being once activate() runs. Typical shape:
-    //   $url = $this->paymentGateway->checkoutUrl($subscription);
-    //   return redirect()->away($url);
-    //
-    // On successful payment (webhook/callback controller, NOT this
-    // component instance — it won't exist when the webhook fires):
-    //   app(CommunitySubscriptionService::class)->activate($subscription);
-    // -----------------------------------------------------------------
-    $service->activate($subscription);
-    session()->flash('status', 'Payment step isn\'t wired up yet — this is a placeholder.');
-}
 
 
     public function render()
