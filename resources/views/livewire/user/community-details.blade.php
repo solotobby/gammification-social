@@ -1559,7 +1559,7 @@
                             <path d="M8 11V7a4 4 0 0 1 8 0v4" />
                         </svg>
                         <b>Members list is private</b>
-                        Only the owner and admins can view the member list for this community.
+                        Only the owner, admins, and members can view the member list for this community.
                     </div>
                 @endif
             </div>
