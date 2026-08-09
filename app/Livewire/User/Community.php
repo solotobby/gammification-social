@@ -32,6 +32,7 @@ class Community extends Component
     public string $fee_payer = 'creator';
     public string $billing_type = 'subscription';
     public ?string $billing_interval = 'monthly';
+ 
 
     // ---- platform economics ----
     public int $platformFeePercent;
@@ -104,20 +105,30 @@ class Community extends Component
             return null;
         }
 
+        // dd($this->platformFeePercent);
+
+        $userCurrencyCode = getCurrencyCode(); //userBaseCurrency();
+        $userBaseCurrency = userBaseCurrency();
+       
+
         $rate = $this->platformFeePercent / 100;
+
 
         $memberCharge = $this->fee_payer === 'members'
             ? round($this->monthly_fee / (1 - $rate), 2)
             : round((float) $this->monthly_fee, 2);
 
+
         $platformCut = round($memberCharge * $rate, 2);
         $creatorPayout = round($memberCharge - $platformCut, 2);
+
+        // dd($memberCharge, $platformCut, $creatorPayout);
 
         $suffix = $this->billing_type === 'one_off'
             ? ' one-time'
             : config("community.billing_intervals.{$this->billing_interval}.suffix", '');
 
-        return compact('memberCharge', 'platformCut', 'creatorPayout', 'suffix');
+        return compact('memberCharge', 'platformCut', 'creatorPayout', 'userCurrencyCode', 'userBaseCurrency', 'suffix');
     }
 
     public function createCommunity(): void

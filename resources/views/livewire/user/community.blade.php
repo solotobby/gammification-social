@@ -470,11 +470,11 @@
                 }
 
                 /* The <form> sits between modal-content and modal-body/modal-footer,
-                           which breaks Bootstrap's built-in scrollable-modal flex chain
-                           (it expects modal-body to be a direct flex child of modal-content)
+                                       which breaks Bootstrap's built-in scrollable-modal flex chain
+                                       (it expects modal-body to be a direct flex child of modal-content)
     .
-                           Re-establish that chain through the form so only the body scrolls
-                           and the header/footer stay pinned in place. */
+                                       Re-establish that chain through the form so only the body scrolls
+                                       and the header/footer stay pinned in place. */
                 .communities-page .modal-content form {
                     display: flex;
                     flex-direction: column;
@@ -929,7 +929,8 @@
                                                 {{-- <path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"
                                                     stroke-linecap="round" /> --}}
                                             </svg>
-                                            {{ getCurrencyCode() }}{{ number_format(convertCurrency($community->member_charge, $community->currency, auth()->user()->wallet->currency),2) }} {{ $community->price_suffix }}
+                                            {{ getCurrencyCode() }}{{ number_format(convertCurrency($community->member_charge, $community->currency, auth()->user()->wallet->currency), 2) }}
+                                            {{ $community->price_suffix }}
                                             {{-- &#8358;{{ number_format($community->member_charge, 2) }} --}}
                                         </span>
                                     @break
@@ -972,15 +973,21 @@
                                         <button type="button" class="pk-btn pk-btn-outline pk-btn-sm"
                                             disabled>Pending</button>
                                     @else
-                                        <button type="button" class="pk-btn pk-btn-violet pk-btn-sm"
+                                        <a href="{{ url('community/payment/' . $community->id) }}"
+                                            class="pk-btn pk-btn-violet pk-btn-sm" {{-- wire:click.prevent="subscribe('{{ $community->id }}')"
+                                            wire:loading.attr="disabled"
+                                            wire:target="subscribe('{{ $community->id }}') --}} ">
+                                            {{ $community->billing_type === 'one_off' ? 'Pay once' : 'Subscribe' }}
+                                        </a>
+                                        {{-- <button type="button" class="pk-btn pk-btn-violet pk-btn-sm"
                                             wire:click="subscribe('{{ $community->id }}')"
                                             wire:loading.attr="disabled"
                                             wire:target="subscribe('{{ $community->id }}')">
                                             {{ $community->billing_type === 'one_off' ? 'Pay once' : 'Subscribe' }}
-                                        </button>
-                                    @endif
+                                        </button> --}}
+ @endif
 
-                                    {{-- @if ($this->hasPendingSubscription($community->id))
+                                            {{-- @if ($this->hasPendingSubscription($community->id))
                                         <button type="button" class="pk-btn pk-btn-outline pk-btn-sm"
                                             disabled>Pending</button>
                                     @else
@@ -991,12 +998,13 @@
                                             {{ $community->billing_type === 'one_off' ? 'Pay once' : 'Subscribe' }}
                                         </button>
                                     @endif --}}
-                                    {{-- <button type="button" class="pk-btn pk-btn-violet pk-btn-sm">Subscribe</button> --}}
-                                @else
-                                    <button type="button" class="pk-btn pk-btn-violet pk-btn-sm"
-                                        wire:click="join('{{ $community->id }}')" wire:loading.attr="disabled"
-                                        wire:target="join('{{ $community->id }}')">Join</button>
-                                @endif
+                                            {{-- <button type="button" class="pk-btn pk-btn-violet pk-btn-sm">Subscribe</button> --}}
+                                        @else
+                                            <button type="button" class="pk-btn pk-btn-violet pk-btn-sm"
+                                                wire:click="join('{{ $community->id }}')"
+                                                wire:loading.attr="disabled"
+                                                wire:target="join('{{ $community->id }}')">Join</button>
+                                    @endif
                             </div>
                         </article>
                         @empty
@@ -1196,27 +1204,39 @@
                                         </span>
                                     </label>
 
-                                    @if ($type === 'paid')
+                                    {{-- @if ($type === 'paid')
                                         <div class="pk-price-field">
-                                            {{-- $basePrice = convertToBaseCurrency($level->amount, auth()->user()->wallet->currency); --}}
+                                            {{-- $basePrice = convertToBaseCurrency($level->amount, auth()->user()->wallet->currency); --
                                             <label>How should members pay?</label>
                                             <div class="pk-billing-toggle">
-                                                <label
-                                                    class="pk-billing-opt @if ($billing_type === 'one_off') pk-sel @endif">
-                                                    <input type="radio" name="cBillingType" value="one_off"
-                                                        wire:model.live="billing_type">
-                                                    One-off payment
-                                                </label>
-                                                <label
-                                                    class="pk-billing-opt @if ($billing_type === 'subscription') pk-sel @endif">
-                                                    <input type="radio" name="cBillingType" value="subscription"
-                                                        wire:model.live="billing_type">
-                                                    Subscription
-                                                </label>
+                                                @if (userBaseCurrency() === 'NGN')
+                                                    <label
+                                                        class="pk-billing-opt @if ($billing_type === 'one_off') pk-sel @endif">
+                                                        <input type="radio" name="cBillingType" value="one_off" 
+                                                            wire:model.live="billing_type">
+                                                        One-off payment
+                                                    </label>
+                                                @else
+                                                    <label
+                                                        class="pk-billing-opt @if ($billing_type === 'one_off') pk-sel @endif">
+                                                        <input type="radio" name="cBillingType" value="one_off"
+                                                            wire:model.live="billing_type">
+                                                        One-off payment
+                                                    </label>
+                                                    <label
+                                                        class="pk-billing-opt @if ($billing_type === 'subscription') pk-sel @endif">
+                                                        <input type="radio" name="cBillingType" value="subscription"
+                                                            wire:model.live="billing_type">
+                                                        Subscription
+                                                    </label>
+                                                @endif
+
+
                                             </div>
                                             @error('billing_type')
                                                 <div class="pk-field-error">{{ $message }}</div>
                                             @enderror
+                                            
 
                                             @if ($billing_type === 'subscription')
                                                 <div class="pk-field" style="margin-bottom:12px">
@@ -1236,10 +1256,23 @@
                                             <label for="cFee">
                                                 {{ $billing_type === 'one_off' ? 'Price (one-time)' : 'Price per billing cycle' }}
                                             </label>
+                                            @php($preview = $this->feePreview())
+
+                                            <?php
+                                            
+                                            $userBaseCurrency = userBaseCurrency();
+                                            if ($userBaseCurrency == 'USD') {
+                                                $placehoder = 10;
+                                            } else {
+                                                $placehoder = 2500;
+                                            }
+                                            
+                                            ?>
                                             <div class="pk-currency-input">
                                                 <span>{{ getCurrencyCode() }}</span>
                                                 <input type="number" id="cFee" min="100" step="50"
-                                                    wire:model.live.debounce.400ms="monthly_fee" placeholder="2500" />
+                                                    wire:model.live.debounce.400ms="monthly_fee"
+                                                    placeholder="{{ $placehoder }}" />
                                             </div>
                                             @error('monthly_fee')
                                                 <div class="pk-field-error">{{ $message }}</div>
@@ -1279,20 +1312,172 @@
                                                 <div class="pk-field-error">{{ $message }}</div>
                                             @enderror
 
-                                            @php($preview = $this->feePreview())
+
                                             @if ($preview)
                                                 <div class="pk-fee-preview">
                                                     <div class="pk-fp-row">
                                                         <span>Members pay{{ $preview['suffix'] }}</span>
-                                                        <b>{{ getCurrencyCode() }}{{ number_format(convertToBaseCurrency($preview['memberCharge'], auth()->user()->wallet->currency),2) }} </b>
+                                                        <b>{{ getCurrencyCode() }}{{ number_format($preview['memberCharge'], 2) }}
+                                                        </b>
                                                     </div>
                                                     <div class="pk-fp-row">
                                                         <span>Payhankey fee ({{ $platformFeePercent }}%)</span>
-                                                        <b>{{ getCurrencyCode() }}{{ number_format(convertToBaseCurrency($preview['platformCut'], auth()->user()->wallet->currency),2) }} </b>
+                                                        <b>{{ getCurrencyCode() }}{{ number_format($preview['platformCut'], 2) }}
+                                                        </b>
                                                     </div>
                                                     <div class="pk-fp-row pk-fp-total">
                                                         <span>You receive{{ $preview['suffix'] }}</span>
-                                                        <b>{{ getCurrencyCode() }}{{ number_format(convertToBaseCurrency($preview['creatorPayout'], auth()->user()->wallet->currency),2) }} </b>
+                                                        <b>{{ getCurrencyCode() }}{{ number_format($preview['creatorPayout'], 2) }}
+                                                        </b>
+                                                    </div>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @endif --}}
+
+                                   
+                                    @if ($type === 'paid')
+                                        <div class="pk-price-field">
+                                            <label>How should members pay?</label>
+
+                                            <div class="pk-billing-toggle">
+                                                {{-- One-off is always available --}}
+                                                <label
+                                                    class="pk-billing-opt @if ($billing_type === 'one_off') pk-sel @endif">
+                                                    <input type="radio" name="cBillingType" value="one_off"
+                                                        wire:model.live="billing_type">
+                                                    One-off payment
+                                                </label>
+
+                                                {{-- Subscription is only available when base currency is NOT NGN --}}
+                                                @if (userBaseCurrency() !== 'NGN')
+                                                    <label
+                                                        class="pk-billing-opt @if ($billing_type === 'subscription') pk-sel @endif">
+                                                        <input type="radio" name="cBillingType" value="subscription"
+                                                            wire:model.live="billing_type">
+                                                        Subscription
+                                                    </label>
+                                                @endif
+                                            </div>
+
+                                            @error('billing_type')
+                                                <div class="pk-field-error">{{ $message }}</div>
+                                            @enderror
+
+                                            {{-- Billing interval is only available for subscriptions --}}
+                                            @if ($billing_type === 'subscription' && userBaseCurrency() !== 'NGN')
+                                                <div class="pk-field" style="margin-bottom:12px">
+                                                    <label for="cInterval">Billing interval</label>
+
+                                                    <select id="cInterval" wire:model.live="billing_interval">
+                                                        @foreach (config('community.billing_intervals', []) as $key => $meta)
+                                                            <option value="{{ $key }}">
+                                                                {{ $meta['label'] }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+
+                                                    @error('billing_interval')
+                                                        <div class="pk-field-error">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
+                                            @endif
+
+                                            <label for="cFee">
+                                                {{ $billing_type === 'one_off' ? 'Price (one-time)' : 'Price per billing cycle' }}
+                                            </label>
+
+                                            @php($preview = $this->feePreview())
+
+                                            <?php
+                                            $userBaseCurrency = userBaseCurrency();
+                                            
+                                            if ($userBaseCurrency === 'USD') {
+                                                $placehoder = 10;
+                                            } else {
+                                                $placehoder = 2500;
+                                            }
+                                            ?>
+
+                                            <div class="pk-currency-input">
+                                                <span>{{ getCurrencyCode() }}</span>
+                                                <input type="number" id="cFee" min="100" step="50"
+                                                    wire:model.live.debounce.400ms="monthly_fee"
+                                                    placeholder="{{ $placehoder }}" />
+                                            </div>
+
+                                            @error('monthly_fee')
+                                                <div class="pk-field-error">{{ $message }}</div>
+                                            @enderror
+
+                                            <div class="pk-fee-note">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="2">
+                                                    <circle cx="12" cy="12" r="10" />
+                                                    <path d="M12 16v-4M12 8h.01" />
+                                                </svg>
+
+                                                <span>
+                                                    Payhankey charges a <strong>{{ $platformFeePercent }}%</strong>
+                                                    platform fee on every payment made into a paid community.
+                                                </span>
+                                            </div>
+
+                                            <div class="pk-fee-payer-row">
+                                                <label
+                                                    class="pk-fee-payer-opt @if ($fee_payer === 'creator') pk-sel @endif">
+                                                    <input type="radio" name="cFeePayer" value="creator"
+                                                        wire:model.live="fee_payer" />
+
+                                                    <span>
+                                                        <b>I'll cover the {{ $platformFeePercent }}% fee</b>
+                                                        <span>
+                                                            It's deducted from what you receive — members pay exactly
+                                                            the amount above.
+                                                        </span>
+                                                    </span>
+                                                </label>
+
+                                                <label
+                                                    class="pk-fee-payer-opt @if ($fee_payer === 'members') pk-sel @endif">
+                                                    <input type="radio" name="cFeePayer" value="members"
+                                                        wire:model.live="fee_payer" />
+
+                                                    <span>
+                                                        <b>My members will cover it</b>
+                                                        <span>
+                                                            The fee is added on top, so you still receive the full
+                                                            amount above.
+                                                        </span>
+                                                    </span>
+                                                </label>
+                                            </div>
+
+                                            @error('fee_payer')
+                                                <div class="pk-field-error">{{ $message }}</div>
+                                            @enderror
+
+                                            @if ($preview)
+                                                <div class="pk-fee-preview">
+                                                    <div class="pk-fp-row">
+                                                        <span>Members pay{{ $preview['suffix'] }}</span>
+                                                        <b>
+                                                            {{ getCurrencyCode() }}{{ number_format($preview['memberCharge'], 2) }}
+                                                        </b>
+                                                    </div>
+
+                                                    <div class="pk-fp-row">
+                                                        <span>Payhankey fee ({{ $platformFeePercent }}%)</span>
+                                                        <b>
+                                                            {{ getCurrencyCode() }}{{ number_format($preview['platformCut'], 2) }}
+                                                        </b>
+                                                    </div>
+
+                                                    <div class="pk-fp-row pk-fp-total">
+                                                        <span>You receive{{ $preview['suffix'] }}</span>
+                                                        <b>
+                                                            {{ getCurrencyCode() }}{{ number_format($preview['creatorPayout'], 2) }}
+                                                        </b>
                                                     </div>
                                                 </div>
                                             @endif

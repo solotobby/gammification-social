@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Community;
 use App\Models\Transaction;
+use App\Models\User;
+// use App\Services\CommunityPaymentService;
+use App\Services\CommunitySubscriptionService;
 use App\Services\FlutterwavePaymentService;
 use App\Services\KorapayService;
 use App\Services\SubscriptionService;
@@ -16,14 +20,24 @@ class PaymentController extends Controller
     protected FlutterwavePaymentService $flutterwavePaymentService;
     protected TransactionService $transactionService;
     protected KorapayService $korapayService;
+    // protected CommunityPaymentService $communityPaymentService;
+    protected CommunitySubscriptionService $communitySubscriptionService;
 
-    public function __construct(SubscriptionService $subscriptionService, FlutterwavePaymentService $flutterwavePaymentService, TransactionService $transactionService, KorapayService $korapayService)
+    public function __construct(
+        SubscriptionService $subscriptionService, 
+        FlutterwavePaymentService $flutterwavePaymentService, 
+        TransactionService $transactionService, 
+        KorapayService $korapayService, 
+        // CommunityPaymentService $communityPaymentService, 
+        CommunitySubscriptionService $communitySubscriptionService)
     {
         $this->middleware('auth');
         $this->subscriptionService = $subscriptionService;
         $this->flutterwavePaymentService = $flutterwavePaymentService;
         $this->transactionService = $transactionService;
         $this->korapayService = $korapayService;
+        // $this->communityPaymentService = $communityPaymentService;
+        $this->communitySubscriptionService = $communitySubscriptionService;
     }
 
     public function createSubscription($levelId, SubscriptionService $subscriptionService, FlutterwavePaymentService $flutterwavePaymentService, KorapayService $korapayService)
@@ -166,6 +180,60 @@ class PaymentController extends Controller
                     $e->getMessage()
                 );
             }
+        }
+    }
+
+    public function paidCommunityPayment($communityId)
+    {
+        $user = auth()->user();
+
+         $community = Community::findOrFail($communityId);
+         $communitySubscriptionService = app(CommunitySubscriptionService::class);
+
+      
+
+        // $existing = $communitySubscriptionService->pendingOrActiveFor($community, $user);
+
+        // if ($existing?->status === 'active') {
+        //     return;
+        // }
+
+        // $subscription = $existing ?? $communitySubscriptionService->generatePaymentLink($community, $user);
+
+         try {
+            $checkoutUrl = $communitySubscriptionService->generatePaymentLink($community, $user);
+        } catch (\Throwable $e) {
+            report($e);
+            session()->flash('error', "We couldn't start your payment. Please try again shortly.");
+            return;
+        }
+        // dd($checkoutUrl);
+        return redirect($checkoutUrl);
+
+
+    }
+
+    public function verifyKoraCommunitySubscriptionPayment(Request $request, CommunitySubscriptionService $communitySubscriptionService, KorapayService $korapayService)
+    {
+        try {
+            
+        //   return  $request->query('reference');
+           app(CommunitySubscriptionService::class)->verifyKoraCommunityPayment($request->query('reference'));
+            // $result = $korapayService->verifySubscriptionPayment(
+            //     $reference = $request->query('reference')
+            // );
+
+
+
+            return redirect()->route('community')->with(
+                'success',
+                "Payment received successfully. Community subscription processing..."
+            );
+        } catch (\Exception $e) {
+            return redirect()->route('community')->with(
+                'error',
+                $e->getMessage()
+            );
         }
     }
 }

@@ -181,8 +181,9 @@ Route::middleware([
         Route::get('verify/fluterwave/charge', [PaymentController::class, 'verifyFlutterwaveCharge'])->name('verify.flutterwave.charge');
         Route::get('subscribe/{levelId}', [\App\Http\Controllers\PaymentController::class, 'createSubscription'])->name('subscribe');
         Route::get('payg-subscribe/{levelId}', [\App\Http\Controllers\PaymentController::class, 'createPaygSubscription'])->name('payg-subscribe');
+        Route::get('verify/community/subscription/payment/', [\App\Http\Controllers\PaymentController::class, 'verifyKoraCommunitySubscriptionPayment'])->name('verify.korapay.community.subscription');
 
-
+        Route::get('community/payment/{communityId}', [PaymentController::class, 'paidCommunityPayment'])->name('community.payment');
 
         //video player analytics route
         Route::post('api/videos/{video}/watch-time', [VideoAnalyticsController::class, 'trackWatchTime']);
@@ -221,7 +222,7 @@ Route::middleware([
         Route::get('user/payouts', Payout::class);
 
         //community
-        Route::get('community', Community::class);
+        Route::get('community', Community::class)->name('community');
         Route::get('community/{community}', CommunityDetails::class)->name('community.show');
     });
 

@@ -1102,8 +1102,11 @@ if (!function_exists('verifyKorayPay')) {
 }
 
 if (!function_exists('generateTransactionRef')) {
-    function generateTransactionRef(): string
+    function generateTransactionRef($type = null): string
     {
+        if ($type === 'community') {
+            return 'COM-' . now()->format('YmdHis') . '-' . random_int(1000, 99999999);
+        }
         return 'PKY-' . now()->format('YmdHis') . '-' . random_int(1000, 99999999);
     }
 }

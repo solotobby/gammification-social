@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Mail\GeneralMail;
 use App\Models\ApiResponse;
+use App\Models\Community;
 use App\Models\Level;
 use App\Models\Partner;
 use App\Models\PartnerSlot;
 use App\Models\Transaction;
 use App\Models\Webhook;
+use App\Services\CommunitySubscriptionService;
 use App\Services\TransactionService;
 use App\Services\UpgradeSubscriptionService;
 use Illuminate\Http\Request;
@@ -22,11 +24,13 @@ class WebhookController extends Controller
 
     protected TransactionService $transactionService;
     protected UpgradeSubscriptionService $upgradeSubscriptionService;
+    protected CommunitySubscriptionService $communitySubscriptionService;
 
-    public function __construct(TransactionService $transactionService, UpgradeSubscriptionService $upgradeSubscriptionService)
+    public function __construct(TransactionService $transactionService, UpgradeSubscriptionService $upgradeSubscriptionService, CommunitySubscriptionService $communitySubscriptionService)
     {
         $this->transactionService = $transactionService;
         $this->upgradeSubscriptionService = $upgradeSubscriptionService;
+        $this->communitySubscriptionService = $communitySubscriptionService;
     }
 
 
@@ -92,31 +96,90 @@ class WebhookController extends Controller
                 return response()->json(['message' => 'PAYMENT ALREADY PROCESSED'], 400);
             }
 
-            $level = Level::where('id', $transaction->meta['level_id'])->first();
+            if (str_starts_with(strtoupper($reference), 'COM-')) {
 
-            $this->upgradeSubscriptionService->upgradeSubscription(
-                $transaction->user,
-                $level,
-                $transaction,
-                $payload
-            );
+                $payload = $transaction->meta;
 
-            $subject = 'Webhook Received: Upgrade Processed Successfully';
-            $content = "Upgrade processed successfully for event: {$event}. Transaction ref: {$reference} has been marked successful and subscription upgraded for {$transaction->user->name}.";
+                $communityId = $transaction->meta['community_id'] ?? null;
+
+                if (!$communityId) {
+                    Log::error('Community ID missing from transaction metadata', [
+                        'reference' => $reference,
+                        'transaction_id' => $transaction->id,
+                        'meta' => $transaction->meta,
+                    ]);
+
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Community ID not found',
+                    ], 400);
+                }
 
 
-            Mail::to('solotob3@gmail.com')
-                ->send(new GeneralMail(
-                    (object)[
-                        'name' => 'Oluwatobi Solomon',
-                        'email' => 'solotob3@gmail.com'
-                    ],
-                    $subject,
-                    $content
-                ));
+                $community = Community::find($communityId);
+
+                if (!$community) {
+                    Log::error('Community not found for ID: ' . $communityId, [
+                        'reference' => $reference,
+                        'transaction_id' => $transaction->id,
+                    ]);
+
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Community not found',
+                    ], 404);
+                }
+
+                app(CommunitySubscriptionService::class)->initiate($community, $transaction->user, $transaction);
+
+
+                $subject = 'Webhook Received: Upgrade Processed Successfully';
+                $content = "Upgrade processed successfully for event: {$event}. Transaction ref: {$reference} has been marked successful and subscription upgraded for {$transaction->user->name}.";
+
+                Mail::to('solotob3@gmail.com')
+                    ->send(new GeneralMail(
+                        (object)[
+                            'name' => 'Oluwatobi Solomon',
+                            'email' => 'solotob3@gmail.com'
+                        ],
+                        $subject,
+                        $content
+                    ));
+
+
+            } elseif (str_starts_with(strtoupper($reference), 'PKY-')) {
+
+                $level = Level::where('id', $transaction->meta['level_id'])->first();
+
+                $this->upgradeSubscriptionService->upgradeSubscription(
+                    $transaction->user,
+                    $level,
+                    $transaction,
+                    $payload
+                );
+
+                $subject = 'Webhook Received: Upgrade Processed Successfully';
+                $content = "Upgrade processed successfully for event: {$event}. Transaction ref: {$reference} has been marked successful and subscription upgraded for {$transaction->user->name}.";
+
+                Mail::to('solotob3@gmail.com')
+                    ->send(new GeneralMail(
+                        (object)[
+                            'name' => 'Oluwatobi Solomon',
+                            'email' => 'solotob3@gmail.com'
+                        ],
+                        $subject,
+                        $content
+                    ));
+            } else {
+
+                // Unknown reference format
+                Log::error('Unknown transaction reference prefix: ' . $reference);
+                return response()->json(['status' => 'error', 'message' => 'Unknown transaction reference'], 400);
+            }
+
+
 
             return response()->json(['status' => 'success'], 200);
-
         } else {
             // Handle other events or ignore
             return response()->json(['status' => 'error'], 500);
@@ -520,6 +583,4 @@ class WebhookController extends Controller
             200
         );
     }
-
-    
 }
