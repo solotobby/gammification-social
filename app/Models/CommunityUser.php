@@ -3,12 +3,22 @@
 namespace App\Models;
 
 use App\Traits\UuidTrait;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
-class CommunityUser extends Model
+class CommunityUser extends Pivot
 {
-    use HasFactory, UuidTrait;
+    use UuidTrait;
 
-    
+    public $incrementing = false;
+
+    protected $table = 'community_users';
+
+    protected $keyType = 'string';
+
+    protected $fillable = [
+        'community_id',
+        'user_id',
+        'role',
+        'status',
+    ];
 }

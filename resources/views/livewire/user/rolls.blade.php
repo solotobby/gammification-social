@@ -84,6 +84,25 @@
 }
 .reels-header > * { pointer-events: auto; }
 
+.reels-sound-hint {
+    position: absolute;
+    top: max(56px, calc(env(safe-area-inset-top) + 44px));
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 210;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, .72);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
 .reels-icon-btn {
     width: 40px;
     height: 40px;
@@ -799,6 +818,10 @@
                 </button>
             </header>
 
+            <div class="reels-sound-hint" x-show="_autoplayBlocked" x-transition.opacity x-cloak>
+                <i class="fa-solid fa-volume-high"></i> Tap anywhere for sound
+            </div>
+
             <div class="reels-feed" x-ref="feed" @click="onTap($event)">
 
                 @forelse($videos as $post)
@@ -808,7 +831,11 @@
                         $liked = $likeOverrides[$post->id]['liked'] ?? (bool) ($post->liked_by_me ?? false);
                         $likes = $likeOverrides[$post->id]['count'] ?? $post->totalLikes();
                         $comments = $post->totalComments();
-                        $src = $vid->quality_versions['medium'] ?? $vid->quality_versions['low'] ?? $vid->low_quality_url ?? $vid->path;
+                        $qualities = $vid->quality_versions ?? [];
+                        $srcHigh = $qualities['high'] ?? $vid->path;
+                        $srcMedium = $qualities['medium'] ?? $srcHigh;
+                        $srcLow = $qualities['low'] ?? $srcMedium;
+                        $src = $srcMedium;
                         $poster = $vid->thumbnail_path ?? '';
                         $caption = strip_tags($post->content ?? '');
                         $shareUrl = route('rolls.show', ['video' => $vid->id]);
@@ -820,10 +847,13 @@
 
                     <article class="reels-slide reels-card"
                              data-post-id="{{ $post->id }}"
-                             data-src="{{ $src }}">
+                             data-src="{{ $src }}"
+                             data-src-high="{{ $srcHigh }}"
+                             data-src-medium="{{ $srcMedium }}"
+                             data-src-low="{{ $srcLow }}">
 
                         <div class="reels-slide-media">
-                        <video class="reels-video" poster="{{ $poster }}" playsinline preload="none" loop></video>
+                        <video class="reels-video" poster="{{ $poster }}" playsinline preload="auto" loop></video>
                         <div class="reels-vignette"></div>
 
                         <div class="reels-flash" id="flash-{{ $post->id }}">
@@ -1002,7 +1032,8 @@
 <script>
 Alpine.data('rollsPlayer', function(wire) {
     return {
-        muted: true,
+        muted: false,
+        _autoplayBlocked: false,
         commentPostId: null,
         commentText: '',
         shareOpen: false,
@@ -1033,7 +1064,20 @@ Alpine.data('rollsPlayer', function(wire) {
                     const first = this._feed.querySelector('.reels-card[data-post-id]');
                     if (first) this._activate(first);
                 }
-            }, 500);
+            }, 100);
+
+            const unlockAudio = () => {
+                if (this.muted) {
+                    this.muted = false;
+                    this._autoplayBlocked = false;
+                    if (this._activeVideo) {
+                        this._activeVideo.muted = false;
+                        this._activeVideo.play().catch(() => {});
+                    }
+                }
+            };
+            this.$refs.feed?.addEventListener('click', unlockAudio, { once: true, passive: true });
+            this.$refs.feed?.addEventListener('touchstart', unlockAudio, { once: true, passive: true });
 
             Livewire.hook('morph.updated', () => {
                 this._feed.querySelectorAll('.reels-card[data-post-id]').forEach(c => {
@@ -1090,18 +1134,56 @@ Alpine.data('rollsPlayer', function(wire) {
 
         _loadAndPlay(card, video) {
             video.muted = this.muted;
+            const src = this._pickQuality(card);
             if (!card.dataset.loaded) {
                 card.dataset.loaded = '1';
-                video.src = card.dataset.src;
+                card.dataset.currentQuality = src.label;
+                video.src = src.url;
                 video.addEventListener('canplay', () => {
                     if (this._activeCard === card) this._doPlay(video);
                 }, { once: true });
                 video.addEventListener('timeupdate', () => this._updateProgress(card.dataset.postId, video));
                 video.addEventListener('ended', () => this._resetProgress(card.dataset.postId));
+                video.addEventListener('waiting', () => this._maybeDowngrade(card, video));
                 video.load();
             } else {
                 this._doPlay(video);
             }
+        },
+
+        _pickQuality(card) {
+            const high = card.dataset.srcHigh || card.dataset.src;
+            const medium = card.dataset.srcMedium || high;
+            const low = card.dataset.srcLow || medium;
+            const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+            const type = conn?.effectiveType || '4g';
+            const saveData = conn?.saveData === true;
+
+            if (saveData || type === 'slow-2g' || type === '2g') {
+                return { url: low, label: 'low' };
+            }
+            if (type === '3g') {
+                return { url: medium, label: 'medium' };
+            }
+            return { url: high, label: 'high' };
+        },
+
+        _maybeDowngrade(card, video) {
+            const current = card.dataset.currentQuality || 'high';
+            const order = ['high', 'medium', 'low'];
+            const idx = order.indexOf(current);
+            if (idx === -1 || idx >= order.length - 1) return;
+
+            const next = order[idx + 1];
+            const nextUrl = card.dataset['src' + next.charAt(0).toUpperCase() + next.slice(1)];
+            if (!nextUrl || nextUrl === video.src) return;
+
+            const t = video.currentTime;
+            card.dataset.currentQuality = next;
+            video.src = nextUrl;
+            video.load();
+            video.currentTime = t;
+            this._doPlay(video);
         },
 
         _updateProgress(postId, video) {
@@ -1119,8 +1201,11 @@ Alpine.data('rollsPlayer', function(wire) {
             video.muted = this.muted;
             const p = video.play();
             if (p?.then) {
-                p.catch(() => {
+                p.then(() => {
+                    this._autoplayBlocked = false;
+                }).catch(() => {
                     if (!this.muted) {
+                        this._autoplayBlocked = true;
                         video.muted = true;
                         this.muted = true;
                         video.play().catch(() => {});
@@ -1164,7 +1249,13 @@ Alpine.data('rollsPlayer', function(wire) {
 
         toggleMute() {
             this.muted = !this.muted;
-            if (this._activeVideo) this._activeVideo.muted = this.muted;
+            this._autoplayBlocked = false;
+            if (this._activeVideo) {
+                this._activeVideo.muted = this.muted;
+                if (!this.muted && this._activeVideo.paused) {
+                    this._activeVideo.play().catch(() => {});
+                }
+            }
         },
 
         _applyLikeState(postId, liked, count) {

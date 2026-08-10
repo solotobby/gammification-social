@@ -1,85 +1,71 @@
-@extends('general.master.body')
+@extends('general.master.apple')
 
-@section('content')
-    <section class="pagehero">
-        <div class="wrap pagehero__inner">
-            <div class="crumbs"><a href="{{ url('/') }}">Home</a> / <span>Blog</span></div>
-            <span class="eyebrow">Payhankey blog</span>
-            <h1>Tips, guides & creator stories</h1>
-            <p>Everything you need to earn more, grow faster, and get the most out of Payhankey.</p>
-        </div>
-    </section>
+@section('title', 'Blog · Payhankey')
 
-    <section class="section--tight">
-        <div class="wrap">
-            <form method="get" action="{{ route('blog') }}"
-                style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;margin-bottom:28px">
-                <div class="blog-cats">
-                    <a href="{{ route('blog') }}"
-                        class="chip {{ ! request('category') ? 'is-active' : '' }}">All</a>
-                    @foreach ($blogCategories as $category)
-                        <a href="{{ route('blog', ['category' => $category->id]) }}"
-                            class="chip {{ (string) request('category') === (string) $category->id ? 'is-active' : '' }}">
-                            {{ $category->name }}
-                        </a>
-                    @endforeach
-                </div>
-                <div class="searchbar">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-                    </svg>
-                    <input class="input" type="search" name="q" value="{{ request('q') }}"
-                        placeholder="Search articles" aria-label="Search articles">
-                </div>
-            </form>
+@section('apple_content')
+@include('general.partials.apl-pagehero', [
+    'crumb' => 'Blog',
+    'eyebrow' => 'Payhankey blog',
+    'title' => 'Tips, guides &amp; creator stories',
+    'lead' => 'Everything you need to earn more, grow faster, and get the most out of Payhankey.',
+])
 
-            @if ($blogs->count())
-                <div class="grid-3">
-                    @foreach ($blogs as $blog)
-                        @include('general.partials.post-card', ['blog' => $blog])
-                    @endforeach
-                </div>
+<section class="apl-section apl-section--soft">
+    <div class="apl-wrap">
+        <form method="get" action="{{ route('blog') }}" class="apl-blog-toolbar">
+            <div class="apl-chips-row">
+                <a href="{{ route('blog') }}" class="apl-chip-filter {{ ! request('category') ? 'is-active' : '' }}">All</a>
+                @foreach ($blogCategories as $category)
+                    <a href="{{ route('blog', ['category' => $category->id]) }}"
+                        class="apl-chip-filter {{ (string) request('category') === (string) $category->id ? 'is-active' : '' }}">
+                        {{ $category->name }}
+                    </a>
+                @endforeach
+            </div>
+            <div class="apl-search">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="search" name="q" value="{{ request('q') }}" placeholder="Search articles" aria-label="Search articles">
+            </div>
+        </form>
 
-                @if ($blogs->hasPages())
-                    <div style="margin-top:36px;display:flex;justify-content:center;gap:8px;flex-wrap:wrap">
-                        @if ($blogs->onFirstPage())
-                            <span class="chip" style="opacity:.45;cursor:not-allowed">← Prev</span>
-                        @else
-                            <a class="chip" href="{{ $blogs->previousPageUrl() }}">← Prev</a>
-                        @endif
-                        <span class="chip is-active" style="cursor:default">
-                            Page {{ $blogs->currentPage() }} of {{ $blogs->lastPage() }}
-                        </span>
-                        @if ($blogs->hasMorePages())
-                            <a class="chip" href="{{ $blogs->nextPageUrl() }}">Next →</a>
-                        @else
-                            <span class="chip" style="opacity:.45;cursor:not-allowed">Next →</span>
-                        @endif
-                    </div>
-                @endif
-            @else
-                <div class="center reveal" style="padding:48px 20px;color:var(--ink-faint)">
-                    <h3 style="color:var(--ink);margin-bottom:8px">No articles found</h3>
-                    <p>Try a different search or category.</p>
+        @if ($blogs->count())
+            <div class="apl-grid-3">
+                @foreach ($blogs as $blog)
+                    @include('general.partials.post-card', ['blog' => $blog])
+                @endforeach
+            </div>
+
+            @if ($blogs->hasPages())
+                <div style="margin-top:36px;display:flex;justify-content:center;gap:8px;flex-wrap:wrap">
+                    @if ($blogs->onFirstPage())
+                        <span class="apl-chip-filter" style="opacity:.45;cursor:not-allowed">← Prev</span>
+                    @else
+                        <a class="apl-chip-filter" href="{{ $blogs->previousPageUrl() }}">← Prev</a>
+                    @endif
+                    <span class="apl-chip-filter is-active" style="cursor:default">
+                        Page {{ $blogs->currentPage() }} of {{ $blogs->lastPage() }}
+                    </span>
+                    @if ($blogs->hasMorePages())
+                        <a class="apl-chip-filter" href="{{ $blogs->nextPageUrl() }}">Next →</a>
+                    @else
+                        <span class="apl-chip-filter" style="opacity:.45;cursor:not-allowed">Next →</span>
+                    @endif
                 </div>
             @endif
-        </div>
-    </section>
-
-    <section class="section">
-        <div class="wrap">
-            <div class="cta-band reveal">
-                <h2>Don't just read about earning — start.</h2>
-                <p>Put these tips into practice on a free Payhankey account and watch your first earnings roll in.</p>
-                <div class="hero__cta">
-                    <a class="btn btn--white btn--lg" href="{{ url('/register') }}">
-                        Create free account
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
-                        </svg>
-                    </a>
-                </div>
+        @else
+            <div class="reveal" style="padding:48px 20px;text-align:center;color:var(--ink-faint)">
+                <h3 style="color:var(--ink);margin-bottom:8px;font-size:1.3rem">No articles found</h3>
+                <p>Try a different search or category.</p>
             </div>
-        </div>
-    </section>
+        @endif
+    </div>
+</section>
+
+<section class="apl-close">
+    <h2 class="reveal">Don't just read about earning — start.</h2>
+    <p class="reveal">Put these tips into practice on a free Payhankey account.</p>
+    <div class="apl-close__cta reveal">
+        <a class="apl-btn apl-btn--fill" href="{{ url('/register') }}">Create free account</a>
+    </div>
+</section>
 @endsection

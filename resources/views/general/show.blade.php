@@ -1,6 +1,8 @@
-@extends('general.master.body')
+@extends('general.master.apple')
 
-@section('content')
+@section('title', $blog->title . ' · Payhankey')
+
+@section('apple_content')
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -862,42 +864,22 @@
     </section>
 
     <!-- RELATED -->
-    <section class="section" style="padding-top:0">
-        <div class="wrap">
-            <h2 style="margin-bottom:24px">More from the blog</h2>
-            <div class="grid-3">
+    <section class="apl-section apl-section--soft">
+        <div class="apl-wrap">
+            <h2 style="margin-bottom:24px;font-size:clamp(1.5rem,3vw,2rem);font-weight:700;letter-spacing:-.03em">More from the blog</h2>
+            <div class="apl-grid-3">
                 @foreach ($suggestions as $suggestion)
                     @include('general.partials.post-card', ['blog' => $suggestion, 'reveal' => true])
                 @endforeach
             </div>
-                {{-- <article class="post-card reveal">
-        <div class="post-card__img alt2"><span class="post-card__cat">Guides</span></div>
-        <div class="post-card__body"><h3>The complete beginner's guide to getting started</h3><p>From signup to your first withdrawal, step by step.</p><div class="post-meta"><div class="avatar" style="background:linear-gradient(135deg,#12B886,#5A4FDC)">TE</div><span>Team Payhankey</span><span>·</span><span>8 min</span></div></div>
-      </article>
-      <article class="post-card reveal">
-        <div class="post-card__img alt3"><span class="post-card__cat">Growth</span></div>
-        <div class="post-card__body"><h3>10 tips for growing your online income</h3><p>How to build income that compounds, post after post.</p><div class="post-meta"><div class="avatar" style="background:linear-gradient(135deg,#F5B73C,#F25C8A)">KB</div><span>Kwame B.</span><span>·</span><span>5 min</span></div></div>
-      </article>
-      <article class="post-card reveal">
-        <div class="post-card__img alt4"><span class="post-card__cat">Payouts</span></div>
-        <div class="post-card__body"><h3>PayPal, USDT or bank: choosing your payout method</h3><p>Every withdrawal option compared so you can pick the best fit.</p><div class="post-meta"><div class="avatar" style="background:linear-gradient(135deg,#7C6FF2,#F25C8A)">TE</div><span>Team Payhankey</span><span>·</span><span>4 min</span></div></div>
-      </article> --}}
-            </div>
         </div>
     </section>
 
-    <section class="section" style="padding-top:0">
-        <div class="wrap">
-            <div class="cta-band reveal">
-                <h2>Don't just read about earning — start.</h2>
-                <p>Put these habits into practice on a free Payhankey account and watch your first earnings roll in.</p>
-                <div class="hero__cta"><a class="btn btn--white btn--lg" href="{{ url('/register') }}">Create free account <svg
-                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="5" y1="12" x2="19" y2="12" />
-                            <polyline points="12 5 19 12 12 19" />
-                        </svg></a></div>
-            </div>
+    <section class="apl-close">
+        <h2 class="reveal">Don't just read about earning — start.</h2>
+        <p class="reveal">Put these habits into practice on a free Payhankey account.</p>
+        <div class="apl-close__cta reveal">
+            <a class="apl-btn apl-btn--fill" href="{{ url('/register') }}">Create free account</a>
         </div>
     </section>
 

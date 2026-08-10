@@ -225,7 +225,7 @@ class PaymentController extends Controller
 
             return redirect()->route('community')->with(
                 'success',
-                "Payment received successfully. Community subscription processing..."
+                'Payment received. Your membership will activate shortly once processing completes.'
             );
         } catch (\Exception $e) {
             return redirect()->route('community')->with(

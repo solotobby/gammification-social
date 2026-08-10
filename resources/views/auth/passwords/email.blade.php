@@ -1,150 +1,37 @@
-<!doctype html>
-<html lang="en">
+@extends('layouts.auth')
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+@section('title', 'Forgot password · Payhankey')
 
-    <title>Sign In</title>
+@section('content')
+    <a class="auth-scaffold__back" href="{{ url('/login') }}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to log in
+    </a>
 
-    <meta name="description" content="Payhankey | Monetize your posts, comments and views to earn daily">
-    <meta name="author" content="Payhankey">
-    <meta name="robots" content="index, follow">
+    <h1>Forgot your password?</h1>
+    <p class="auth-scaffold__lead">No problem. Enter your email and we'll send you a password reset link.</p>
 
-    <!-- Open Graph Meta -->
-    <meta property="og:title" content="Payhankey | Monetize your posts, comments and views to earn daily">
-    <meta property="og:site_name" content="payhankey">
-    <meta property="og:description" content="Payhankey | Monetize your posts, comments and views to earn daily">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://payhankey.com">
-    <meta property="og:image" content="">
+    @if (session('status'))
+        <div class="alert alert--success">{{ session('status') }}</div>
+    @endif
 
-    <!-- Icons -->
-    <!-- The following icons can be replaced with your own, they are used by desktop and mobile browsers -->
-    <link rel="shortcut icon" href="{{ asset('favicon.png') }}">
-    <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('favicon.png') }}">
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('favicon.png') }}">
-    <!-- END Icons -->
+    @if ($errors->any())
+        <div class="alert alert--error">
+            @foreach ($errors->all() as $error)
+                <div>{{ $error }}</div>
+            @endforeach
+        </div>
+    @endif
 
-    <!-- Stylesheets -->
-    <!-- Dashmix framework -->
-    <link rel="stylesheet" id="css-main" href="{{ asset('src/assets/css/dashmix.css') }}">
-
-    <!-- You can include a specific file from css/themes/ folder to alter the default color theme of the template. eg: -->
-    <!-- <link rel="stylesheet" id="css-theme" href="assets/css/themes/xwork.min.css"> -->
-    <!-- END Stylesheets -->
-
-    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-10842521152"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-
-        function gtag() {
-            dataLayer.push(arguments);
-        }
-        gtag('js', new Date());
-
-        gtag('config', 'AW-10842521152');
-    </script>
-</head>
-
-<!-- You can include a specific file from css/themes/ folder to alter the default color theme of the template. eg: -->
-<!-- <link rel="stylesheet" id="css-theme" href="assets/css/themes/xwork.min.css"> -->
-<!-- END Stylesheets -->
-</head>
-
-<body>
-    <!-- Page Container -->
-
-    <div id="page-container">
-
-        <!-- Main Container -->
-        <main id="main-container">
-            <!-- Page Content -->
-            <div class="bg-image" style="background-image: url('assets/media/photos/photo19@2x.jpg');">
-                <div class="row g-0 justify-content-center bg-primary-dark-op">
-                    <div class="hero-static col-sm-8 col-md-6 col-xl-4 d-flex align-items-center p-2 px-sm-0">
-                        <!-- Sign In Block -->
-                        <div class="block block-transparent block-rounded w-100 mb-0 overflow-hidden">
-                            <div
-                                class="block-content block-content-full px-lg-5 px-xl-6 py-4 py-md-5 py-lg-6 bg-body-extra-light">
-                                <!-- Header -->
-                                <div class="mb-2 text-center">
-                                    <a class="" href="{{url('/')}}">
-                                        <img src="{{asset('logo.png')}}" alt="" class="logo-light" height="54" />
-                                        {{-- <span class="text-dark">Dash</span><span class="text-primary">mix</span> --}}
-                                    </a>
-                                    <p class="text-uppercase fw-bold fs-sm text-muted mt-2">Password Reset</p>
-                                </div>
-                                <!-- END Header -->
-
-                                <!-- Sign In Form -->
-                                <!-- jQuery Validation (.js-validation-signin class is initialized in js/pages/op_auth_signin.min.js which was auto compiled from _js/pages/op_auth_signin.js) -->
-                                <!-- For more info and examples you can check out https://github.com/jzaefferer/jquery-validation -->
-                                @if (session('status'))
-                        <div class="alert alert-success" role="alert">
-                            {{ session('status') }}
-                        </div>
-                    @endif
-                   
-                    <form class="js-validation-signin" method="POST" action="{{ route('password.email') }}">
-                        @csrf
-                      <div class="py-3">
-                        <div class="mb-4">
-                          {{-- <input type="text" class="form-control @error('email') is-invalid @enderror form-control-lg form-control-alt" id="login-username" name="email" placeholder="Email Address" required autocomplete="email" autofocus>
-                         --}}
-                         <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" placeholder="Enter Email Address" required autocomplete="email" autofocus>
-
-                            @error('email')
-                                <span class="invalid-feedback" role="alert">
-                                    <strong>{{ $message }}</strong>
-                                </span>
-                            @enderror
-                        </div>
-                        
-                      </div>
-                      <div class="mb-4">
-                        <button type="submit" class="btn w-100 btn-lg btn-hero btn-primary">
-                          <i class="fa fa-fw fa-envelope opacity-50 me-1"></i> Get Password Reset Link
-                        </button>
-                        <p class="mt-3 mb-0 d-lg-flex justify-content-lg-between">
-                            {{-- Not Registered? --}}
-                          
-                          <a class="btn btn-sm btn-alt-secondary d-block d-lg-inline-block mb-1" href="{{ url('login') }}">
-                            <i class="fa fa-sign-in-alt opacity-50 me-1"></i> Sign In Here
-                          </a>
-                        </p>
-                      </div>
-                    </form>
-                                <!-- END Sign In Form -->
-                            </div>
-
-                        </div>
-                        <!-- END Sign In Block -->
-                    </div>
-                </div>
-            </div>
-            <!-- END Page Content -->
-        </main>
-        <!-- END Main Container -->
-    </div>
-    <!-- END Page Container -->
-
-    <!--
-      Dashmix JS
-
-      Core libraries and functionality
-      webpack is putting everything together at assets/_js/main/app.js
-    -->
-    <script src="{{ asset('src/assets/js/dashmix.app.min.js') }}"></script>
-
-    <!-- jQuery (required for jQuery Validation plugin) -->
-    <script src="{{ asset('src/assets/js/lib/jquery.min.js') }}"></script>
-
-    <!-- Page JS Plugins -->
-    <script src="{{ asset('src/assets/js/plugins/jquery-validation/jquery.validate.min.js') }}"></script>
-
-    <!-- Page JS Code -->
-    <script src="{{ asset('src/assets/js/pages/op_auth_signin.min.js') }}"></script>
-</body>
-
-</html>
+    <form method="POST" action="{{ route('password.email') }}">
+        @csrf
+        <div class="field">
+            <label for="email">Email</label>
+            <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="email">
+            @error('email')
+                <div class="field__hint" style="color:var(--rose)">{{ $message }}</div>
+            @enderror
+        </div>
+        <button class="btn btn--primary btn--block auth-scaffold__submit" type="submit">Email password reset link</button>
+    </form>
+@endsection

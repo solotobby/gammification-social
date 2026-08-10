@@ -954,6 +954,12 @@
                     margin-top: 5px
                 }
 
+                .community-show-page .pk-field-hint {
+                    color: var(--pk-muted, #6b7280);
+                    font-size: .74rem;
+                    margin-top: 5px
+                }
+
                 /* ---- feed post card ---- */
                 .community-show-page .pk-post-card {
                     padding: 16px 18px;
@@ -1934,6 +1940,11 @@
                     @elseif ($this->isMember())
                         <button type="button" class="pk-btn pk-btn-violet" disabled>
                             {{ $community->type === 'paid' ? 'Subscribed' : 'Joined' }}</button>
+                        @if (! $this->isOwner())
+                            <button type="button" class="pk-btn pk-btn-outline pk-btn-sm" wire:click="leaveCommunity"
+                                wire:loading.attr="disabled" wire:target="leaveCommunity"
+                                onclick="return confirm('Leave this community?')">Leave</button>
+                        @endif
                     @elseif ($community->type === 'public')
                         <button type="button" class="pk-btn pk-btn-violet" wire:click="join"
                             wire:loading.attr="disabled" wire:target="join">Join community</button>
@@ -2208,7 +2219,7 @@
                             </div>
                         </div>
 
-                        @if ($this->isOwnerOrAdmin())
+                        @if ($this->canDeletePost($post->id))
                             <button type="button" class="pk-icon-btn pk-icon-btn-sm pk-icon-danger"
                                 wire:click="deletePost('{{ $post->id }}')"
                                 onclick="return confirm('Delete this post? This can\'t be undone.')"
@@ -2337,18 +2348,32 @@
                         <!-- Comment Section -->
                         <div class="pt-1">
                             @foreach ($post->comments->take(3) as $comment)
-                                <div class="pk-fb-comment">
+                                <div class="pk-fb-comment" wire:key="comment-{{ $comment->id }}">
                                     <img class="pk-fb-comment-av"
                                         src="{{ $comment->user->avatar ?? '' }}"
                                         alt="{{ $comment->user->name ?? 'User' }}">
                                     <div class="pk-fb-comment-bubble">
-                                        <a class="pk-fb-comment-name" href="#">
-                                            {{ $comment->user->name ?? 'Deleted user' }}
-                                        </a>
-                                        <span class="pk-fb-comment-time">
-                                            {{ $comment->created_at->diffForHumans() }}
-                                        </span>
-                                        <p class="pk-fb-comment-text mb-0">{{ $comment->content }}</p>
+                                        <div class="d-flex align-items-start justify-content-between gap-2">
+                                            <div>
+                                                <a class="pk-fb-comment-name" href="#">
+                                                    {{ $comment->user->name ?? 'Deleted user' }}
+                                                </a>
+                                                <span class="pk-fb-comment-time">
+                                                    {{ $comment->created_at->diffForHumans() }}
+                                                </span>
+                                                <p class="pk-fb-comment-text mb-0">{{ $comment->content }}</p>
+                                            </div>
+                                            @if ($this->canDeleteComment($comment->id))
+                                                <button type="button" class="pk-icon-btn pk-icon-btn-sm pk-icon-danger"
+                                                    wire:click="deleteComment('{{ $comment->id }}')"
+                                                    onclick="return confirm('Delete this comment?')"
+                                                    aria-label="Delete comment" title="Delete comment">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                                                        <path d="M4 7h16M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3" stroke-linecap="round" />
+                                                    </svg>
+                                                </button>
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
                             @endforeach
@@ -2376,107 +2401,6 @@
                 </div>
             @endif
             @endif
-
-            {{-- @forelse ($posts as $post)
-                <article class="pk-card pk-post-card" wire:key="post-{{ $post->id }}"
-                    wire:init="recordView('{{ $post->id }}')">
-                    <div class="pk-post-head">
-                        <div class="pk-ph-av" style="background:{{ $community->color }}">
-                            {{ mb_strtoupper(mb_substr($post->user->name ?? '?', 0, 1)) }}</div>
-                        <div class="flex-grow-1">
-                            <div class="pk-ph-name">{{ $post->user->name ?? 'Deleted user' }}</div>
-                            <div class="pk-ph-time">{{ $post->created_at->diffForHumans() }}</div>
-                        </div>
-                        @if ($this->isOwnerOrAdmin())
-                            <button type="button" class="pk-icon-btn pk-icon-btn-sm pk-icon-danger"
-                                wire:click="deletePost('{{ $post->id }}')"
-                                onclick="return confirm('Delete this post? This can\'t be undone.')"
-                                aria-label="Delete post" title="Delete post">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path
-                                        d="M4 7h16M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3m-7 0 1 13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1l1-13"
-                                        stroke-linecap="round" stroke-linejoin="round" />
-                                </svg>
-                            </button>
-                        @endif
-                    </div>
-
-                    @if ($post->content)
-                        <p class="pk-ph-text">{{ $post->content }}</p>
-                    @endif
-
-                    @if ($post->media->count())
-                        @php $count = $post->media->count(); @endphp
-                        <div class="pk-post-media pk-m{{ min($count, 4) }}">
-                            @foreach ($post->media->take(4) as $i => $item)
-                                <div class="pk-media-item">
-                                    @if ($item->is_video)
-                                        <video src="{{ $item->url }}" controls></video>
-                                    @else
-                                        <img src="{{ $item->url }}" alt="">
-                                    @endif
-                                    @if ($i === 3 && $count > 4)
-                                        <div class="pk-media-more">+{{ $count - 4 }}</div>
-                                    @endif
-                                </div>
-                            @endforeach
-                        </div>
-                    @endif
-
-                    <div class="pk-post-actions">
-                        <button type="button" class="pk-pa @if ($post->liked_by_me) pk-liked @endif"
-                            wire:click="toggleLike('{{ $post->id }}')">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">
-                                <path
-                                    d="M12 20s-7-4.5-9.5-9C1 8 2.5 4.5 6 4.5c2 0 3.2 1.2 4 2.3.8-1.1 2-2.3 4-2.3 3.5 0 5 3.5 3.5 6.5C19 15.5 12 20 12 20Z" />
-                            </svg>
-                            {{ number_format($post->likes_count) }}
-                        </button>
-                        <span class="pk-pa" style="cursor:default">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">
-                                <path d="M21 11.5a8.4 8.4 0 0 1-9 8.4L3 21l1.1-4.5A8.4 8.4 0 1 1 21 11.5Z"
-                                    stroke-linejoin="round" />
-                            </svg>
-                            {{ number_format($post->comments_count) }}
-                        </span>
-                        <span class="pk-pa" style="cursor:default">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">
-                                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z" />
-                                <circle cx="12" cy="12" r="3" />
-                            </svg>
-                            {{ number_format($post->views_count) }}
-                        </span>
-                    </div>
-
-                    <div class="pk-comments">
-                        @foreach ($post->comments->take(3) as $comment)
-                            <div class="pk-comment-row">
-                                <div class="pk-ph-av"
-                                    style="width:28px;height:28px;font-size:.7rem;background:{{ $community->color }}">
-                                    {{ mb_strtoupper(mb_substr($comment->user->name ?? '?', 0, 1)) }}</div>
-                                <div class="pk-comment-bubble">
-                                    <b>{{ $comment->user->name ?? 'Deleted user' }}</b>{{ $comment->content }}
-                                </div>
-                            </div>
-                        @endforeach
-
-                        @if ($this->isMember())
-                            <div class="pk-comment-input-row">
-                                <input type="text" maxlength="500" wire:model="newComment.{{ $post->id }}"
-                                    wire:keydown.enter="addComment('{{ $post->id }}')"
-                                    placeholder="Write a comment…">
-                                <button type="button" class="pk-btn pk-btn-outline pk-btn-sm"
-                                    wire:click="addComment('{{ $post->id }}')">Send</button>
-                            </div>
-                        @endif
-                    </div>
-                </article>
-            @empty
-                <div class="pk-empty">
-                    <b>No posts yet.</b>
-                    {{ $this->isMember() ? 'Be the first to share something.' : 'Join to start the conversation.' }}
-                </div>
-            @endforelse --}}
 
         </div>
 
@@ -2973,14 +2897,18 @@
                                 </div>
                             @endif
 
+                            @php($settingsCurrency = $community->currency ?? userBaseCurrency())
                             <label for="sPrice">
                                 {{ $settingsBillingType === 'one_off' ? 'Price (one-time)' : 'Price per billing cycle' }}
                             </label>
                             <div class="pk-currency-input">
-                                <span>{{ getCurrencyCode() }}</span>
-                                <input type="number" id="sPrice" min="100" step="50"
+                                <span>{{ getCurrencyCode($settingsCurrency) }}</span>
+                                <input type="number" id="sPrice"
+                                    min="{{ communityMinimumPrice($settingsCurrency) }}"
+                                    step="{{ $settingsCurrency === 'USD' ? 1 : 50 }}"
                                     wire:model.live.debounce.400ms="settingsMonthlyFee">
                             </div>
+                            <div class="pk-field-hint">Minimum {{ getCurrencyCode($settingsCurrency) }}{{ number_format(communityMinimumPrice($settingsCurrency), $settingsCurrency === 'USD' ? 2 : 0) }}</div>
                             @error('settingsMonthlyFee')
                                 <div class="pk-field-error">{{ $message }}</div>
                             @enderror
@@ -3045,13 +2973,20 @@
                 {{-- danger zone --}}
                 <div class="pk-card pk-settings-section pk-danger">
                     <h3>Danger zone</h3>
-                    <div
-                        class="pk-danger-row d-flex flex-column flex-sm-row justify-content-sm-between align-items-sm-center gap-2">
-                        <div class="pk-dt"><b>Archive community</b><span>Hide it from search. Members keep access,
-                                no new joins.</span></div>
-                        <button type="button" class="pk-btn pk-btn-outline pk-btn-sm" wire:click="archiveCommunity"
-                            onclick="return confirm('Archive this community? It will become invite-only.')">Archive</button>
-                    </div>
+                    @if ($community->archived_at)
+                        <div class="pk-danger-row d-flex flex-column flex-sm-row justify-content-sm-between align-items-sm-center gap-2">
+                            <div class="pk-dt"><b>Community archived</b><span>Hidden from discovery since
+                                    {{ $community->archived_at->format('M j, Y') }}. Existing members keep access.</span></div>
+                            <button type="button" class="pk-btn pk-btn-outline pk-btn-sm" wire:click="unarchiveCommunity">Restore</button>
+                        </div>
+                    @else
+                        <div class="pk-danger-row d-flex flex-column flex-sm-row justify-content-sm-between align-items-sm-center gap-2">
+                            <div class="pk-dt"><b>Archive community</b><span>Hide from search and block new joins.
+                                    Existing members keep access.</span></div>
+                            <button type="button" class="pk-btn pk-btn-outline pk-btn-sm" wire:click="archiveCommunity"
+                                onclick="return confirm('Archive this community?')">Archive</button>
+                        </div>
+                    @endif
                     <div
                         class="pk-danger-row d-flex flex-column flex-sm-row justify-content-sm-between align-items-sm-center gap-2">
                         <div class="pk-dt"><b>Delete community</b><span>Permanently removes it for all

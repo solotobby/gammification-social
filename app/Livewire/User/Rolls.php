@@ -35,25 +35,9 @@ class Rolls extends Component
     public array $likeOverrides = [];
 
     // ─────────────────────────────────────────────────────────
-    public function mount(?PostVideo $video = null): void
+    public function mount(PostVideo $video): void
     {
-        if ($video) {
-            $this->startVideoId = (string) $video->id;
-        } else {
-            $random = PostVideo::query()
-                ->where('processing_status', 'completed')
-                ->whereNotNull('path')
-                ->whereHas('post', fn ($q) => $q->where('status', 'LIVE'))
-                ->inRandomOrder()
-                ->first();
-
-            if (! $random) {
-                abort(404, 'No videos available yet.');
-            }
-
-            $this->startVideoId = (string) $random->id;
-        }
-
+        $this->startVideoId = (string) $video->id;
         $this->loadVideos();
     }
 

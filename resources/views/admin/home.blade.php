@@ -230,6 +230,191 @@
                 </div>
             </section>
 
+            @php($ca = $communityAnalytics)
+
+            <section class="dash-section">
+                <div class="dash-card__head" style="margin-bottom:1rem;padding:0 0.25rem">
+                    <div>
+                        <h2 class="dash-card__title" style="font-size:1.125rem">Community analytics</h2>
+                        <p class="dash-muted" style="margin:0.25rem 0 0">Paid communities, memberships, and platform revenue</p>
+                    </div>
+                    <a href="{{ route('admin.communities.index') }}" class="dash-link">Manage all</a>
+                </div>
+
+                <div class="dash-grid dash-grid--4" style="margin-bottom:1rem">
+                    <a href="{{ route('admin.communities.index') }}" class="dash-kpi">
+                        <div class="dash-kpi__top">
+                            <span class="dash-kpi__label">Communities</span>
+                            <span class="dash-kpi__icon dash-kpi__icon--indigo"><i class="fa fa-object-group"></i></span>
+                        </div>
+                        <div class="dash-kpi__value">{{ number_format($ca['total']) }}</div>
+                        <div class="dash-kpi__hint">{{ number_format($ca['newCommunitiesWeek']) }} created this week</div>
+                    </a>
+                    <a href="{{ route('admin.communities.index', ['type' => 'paid']) }}" class="dash-kpi">
+                        <div class="dash-kpi__top">
+                            <span class="dash-kpi__label">Paid communities</span>
+                            <span class="dash-kpi__icon dash-kpi__icon--emerald"><i class="fa fa-tags"></i></span>
+                        </div>
+                        <div class="dash-kpi__value">{{ number_format($ca['paid']) }}</div>
+                        <div class="dash-kpi__hint">{{ number_format($ca['public']) }} public · active</div>
+                    </a>
+                    <a href="{{ route('admin.communities.index') }}" class="dash-kpi">
+                        <div class="dash-kpi__top">
+                            <span class="dash-kpi__label">Active subscriptions</span>
+                            <span class="dash-kpi__icon dash-kpi__icon--sky"><i class="fa fa-repeat"></i></span>
+                        </div>
+                        <div class="dash-kpi__value">{{ number_format($ca['activeSubscriptions']) }}</div>
+                        <div class="dash-kpi__hint">{{ number_format($ca['newSubscriptionsWeek']) }} new this week · {{ number_format($ca['pendingSubscriptions']) }} pending</div>
+                    </a>
+                    <div class="dash-kpi">
+                        <div class="dash-kpi__top">
+                            <span class="dash-kpi__label">Community members</span>
+                            <span class="dash-kpi__icon dash-kpi__icon--amber"><i class="fa fa-user-group"></i></span>
+                        </div>
+                        <div class="dash-kpi__value">{{ number_format($ca['totalMembers']) }}</div>
+                        <div class="dash-kpi__hint">{{ number_format($ca['totalPosts']) }} community posts</div>
+                    </div>
+                </div>
+
+                <div class="dash-grid dash-grid--2">
+                    <div class="dash-card">
+                        <div class="dash-card__head">
+                            <div>
+                                <h2 class="dash-card__title">Community growth</h2>
+                                <p class="dash-muted" style="margin:0.25rem 0 0">
+                                    Last 30 days · {{ number_format($ca['growthChart']['communitiesTotal']) }} new communities · {{ number_format($ca['growthChart']['subscriptionsTotal']) }} active subscriptions
+                                </p>
+                            </div>
+                        </div>
+                        <div class="dash-card__body">
+                            <div class="dash-chart">
+                                <canvas id="community-growth-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dash-card">
+                        <div class="dash-card__head">
+                            <div>
+                                <h2 class="dash-card__title">Community payments</h2>
+                                <p class="dash-muted" style="margin:0.25rem 0 0">
+                                    Last 30 days · {{ number_format($ca['revenueChart']['paymentsTotal']) }} payments
+                                </p>
+                            </div>
+                        </div>
+                        <div class="dash-card__body">
+                            <div class="dash-chart">
+                                <canvas id="community-revenue-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            @if ($ca['revenueByCurrency']->isNotEmpty())
+                <section class="dash-section dash-card">
+                    <div class="dash-card__head">
+                        <h2 class="dash-card__title">Community revenue by currency</h2>
+                    </div>
+                    <div class="dash-card__body dash-card__body--flush">
+                        <div class="dash-table-wrap">
+                            <table class="dash-table">
+                                <thead>
+                                    <tr>
+                                        <th>Currency</th>
+                                        <th>Payments</th>
+                                        <th>Gross volume</th>
+                                        <th>Platform fee</th>
+                                        <th>Creator payouts</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($ca['revenueByCurrency'] as $row)
+                                        <tr>
+                                            <td>{{ $row->currency }}</td>
+                                            <td>{{ number_format($row->payments) }}</td>
+                                            <td>{{ $row->currency }} {{ number_format((float) $row->gross, 2) }}</td>
+                                            <td>{{ $row->currency }} {{ number_format((float) $row->platform, 2) }}</td>
+                                            <td>{{ $row->currency }} {{ number_format((float) $row->creator, 2) }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+            @endif
+
+            <section class="dash-section dash-grid dash-grid--2">
+                <div class="dash-card">
+                    <div class="dash-card__head">
+                        <h2 class="dash-card__title">Top communities</h2>
+                        <span class="dash-muted">By member count</span>
+                    </div>
+                    <div class="dash-card__body dash-card__body--flush">
+                        <div class="dash-table-wrap">
+                            <table class="dash-table">
+                                <thead>
+                                    <tr>
+                                        <th>Community</th>
+                                        <th>Type</th>
+                                        <th>Members</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse ($ca['topByMembers'] as $community)
+                                        <tr>
+                                            <td>
+                                                <a href="{{ route('admin.communities.show', $community) }}" class="dash-link">{{ $community->name }}</a>
+                                                <div class="dash-muted">{{ $community->user->name ?? '—' }}</div>
+                                            </td>
+                                            <td>{{ ucfirst($community->type) }}</td>
+                                            <td>{{ number_format($community->members_count) }}</td>
+                                        </tr>
+                                    @empty
+                                        <tr><td colspan="3">No communities yet.</td></tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dash-card">
+                    <div class="dash-card__head">
+                        <h2 class="dash-card__title">Recently created</h2>
+                        <a href="{{ route('admin.communities.index') }}" class="dash-link">View all</a>
+                    </div>
+                    <div class="dash-card__body dash-card__body--flush">
+                        <div class="dash-table-wrap">
+                            <table class="dash-table">
+                                <thead>
+                                    <tr>
+                                        <th>Community</th>
+                                        <th>Currency</th>
+                                        <th>Created</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse ($ca['recentCommunities'] as $community)
+                                        <tr>
+                                            <td>
+                                                <a href="{{ route('admin.communities.show', $community) }}" class="dash-link">{{ $community->name }}</a>
+                                                <div class="dash-muted">{{ ucfirst($community->type) }} · {{ number_format($community->members_count) }} members</div>
+                                            </td>
+                                            <td>{{ $community->currency ?? 'NGN' }}</td>
+                                            <td>{{ $community->created_at?->format('M j, Y') }}</td>
+                                        </tr>
+                                    @empty
+                                        <tr><td colspan="3">No communities yet.</td></tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <section class="dash-section dash-grid dash-grid--2">
                 <div class="dash-card">
                     <div class="dash-card__head">
@@ -293,6 +478,7 @@
                         <a href="{{ route('admin.currencies.index') }}" class="dash-btn dash-btn--ghost"><i class="fa fa-coins"></i> Currencies</a>
                         <a href="{{ route('admin.levels.index') }}" class="dash-btn dash-btn--ghost"><i class="fa fa-layer-group"></i> Levels</a>
                         <a href="{{ route('admin.blog.index') }}" class="dash-btn dash-btn--ghost"><i class="fa fa-blog"></i> Blog</a>
+                        <a href="{{ route('admin.communities.index') }}" class="dash-btn dash-btn--ghost"><i class="fa fa-object-group"></i> Communities</a>
                         @if ($showTestPayment ?? false)
                             <a href="{{ route('admin.test.subscribe', $levelId) }}" class="dash-btn dash-btn--primary"><i class="fa fa-flask"></i> Test payment</a>
                         @endif
@@ -314,6 +500,13 @@
             const engagementLikes = @json($engagementChart['likes'] ?? []);
             const engagementComments = @json($engagementChart['comments'] ?? []);
             const engagementPosts = @json($engagementChart['posts'] ?? []);
+            const communityGrowthLabels = @json($communityAnalytics['growthChart']['labels'] ?? []);
+            const communityGrowthValues = @json($communityAnalytics['growthChart']['communities'] ?? []);
+            const communitySubscriptionValues = @json($communityAnalytics['growthChart']['subscriptions'] ?? []);
+            const communityRevenueLabels = @json($communityAnalytics['revenueChart']['labels'] ?? []);
+            const communityPaymentCounts = @json($communityAnalytics['revenueChart']['payments'] ?? []);
+            const communityNgnPlatform = @json($communityAnalytics['revenueChart']['ngnPlatform'] ?? []);
+            const communityUsdPlatform = @json($communityAnalytics['revenueChart']['usdPlatform'] ?? []);
 
             function asNumbers(values) {
                 return (values || []).map(function (value) {
@@ -469,6 +662,113 @@
                             y: Object.assign({}, scaleDefaults.y, {
                                 suggestedMax: peak > 0 ? Math.ceil(peak * 1.15) : 5,
                             }),
+                        },
+                    },
+                });
+
+                createChart('community-growth-chart', {
+                    type: 'line',
+                    data: {
+                        labels: communityGrowthLabels,
+                        datasets: [
+                            {
+                                label: 'New communities',
+                                data: asNumbers(communityGrowthValues),
+                                borderColor: '#6366f1',
+                                backgroundColor: 'rgba(99, 102, 241, 0.12)',
+                                fill: true,
+                                tension: 0.35,
+                                pointRadius: 0,
+                                pointHoverRadius: 4,
+                                borderWidth: 2,
+                            },
+                            {
+                                label: 'Active subscriptions',
+                                data: asNumbers(communitySubscriptionValues),
+                                borderColor: '#059669',
+                                backgroundColor: 'rgba(5, 150, 105, 0.08)',
+                                fill: false,
+                                tension: 0.35,
+                                pointRadius: 0,
+                                pointHoverRadius: 4,
+                                borderWidth: 2,
+                            },
+                        ],
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { intersect: false, mode: 'index' },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'bottom',
+                                labels: { boxWidth: 10, boxHeight: 10, color: '#64748b', font: { size: 11 }, padding: 14 },
+                            },
+                            tooltip: { backgroundColor: '#0f172a', padding: 10, cornerRadius: 8 },
+                        },
+                        scales: scaleDefaults,
+                    },
+                });
+
+                createChart('community-revenue-chart', {
+                    type: 'bar',
+                    data: {
+                        labels: communityRevenueLabels,
+                        datasets: [
+                            {
+                                label: 'Payments',
+                                data: asNumbers(communityPaymentCounts),
+                                backgroundColor: 'rgba(99, 102, 241, 0.9)',
+                                borderColor: 'rgba(99, 102, 241, 1)',
+                                borderWidth: 1,
+                                borderRadius: 3,
+                                maxBarThickness: 18,
+                                yAxisID: 'y',
+                            },
+                            {
+                                label: 'Platform fee (NGN)',
+                                data: asNumbers(communityNgnPlatform),
+                                backgroundColor: 'rgba(245, 158, 11, 0.85)',
+                                borderColor: 'rgba(245, 158, 11, 1)',
+                                borderWidth: 1,
+                                borderRadius: 3,
+                                maxBarThickness: 18,
+                                yAxisID: 'y1',
+                            },
+                            {
+                                label: 'Platform fee (USD)',
+                                data: asNumbers(communityUsdPlatform),
+                                backgroundColor: 'rgba(16, 185, 129, 0.85)',
+                                borderColor: 'rgba(16, 185, 129, 1)',
+                                borderWidth: 1,
+                                borderRadius: 3,
+                                maxBarThickness: 18,
+                                yAxisID: 'y1',
+                            },
+                        ],
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { intersect: false, mode: 'index' },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'bottom',
+                                labels: { boxWidth: 10, boxHeight: 10, color: '#64748b', font: { size: 11 }, padding: 14 },
+                            },
+                            tooltip: { backgroundColor: '#0f172a', padding: 10, cornerRadius: 8 },
+                        },
+                        scales: {
+                            x: scaleDefaults.x,
+                            y: Object.assign({}, scaleDefaults.y, { position: 'left' }),
+                            y1: {
+                                beginAtZero: true,
+                                position: 'right',
+                                grid: { drawOnChartArea: false },
+                                ticks: { color: '#64748b', font: { size: 11 } },
+                            },
                         },
                     },
                 });

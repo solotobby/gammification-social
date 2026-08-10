@@ -7,7 +7,8 @@
 <style>
     /* ── Shared community UI (list + details + feed) ─────────────── */
     .communities-page,
-    .community-show-page {
+    .community-show-page,
+    #createCommunityModal {
         --pk-violet: #5A4FDC;
         --pk-violet-dark: #4338CA;
         --pk-violet-tint: rgba(90, 79, 220, .10);
@@ -49,7 +50,7 @@
             radial-gradient(ellipse 50% 40% at 95% 15%, rgba(31, 174, 100, .06), transparent 50%);
     }
 
-    .pk-ui-inner { position: relative; z-index: 1; }
+    .pk-ui-inner { position: relative; }
 
     /* Cards */
     .communities-page .pk-card,

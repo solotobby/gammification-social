@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\CommunityFeeCalculator;
 use App\Traits\UuidTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -25,11 +26,13 @@ class Community extends Model
         'fee_payer',
         'platform_fee_percent',
         'user_id',
+        'archived_at',
     ];
 
     protected $casts = [
         'monthly_fee' => 'decimal:2',
         'platform_fee_percent' => 'integer',
+        'archived_at' => 'datetime',
     ];
 
     /** Display-only palette cycled deterministically per community — no extra column needed. */
@@ -67,8 +70,20 @@ class Community extends Model
     public function members()
     {
         return $this->belongsToMany(User::class, 'community_users')
+            ->using(CommunityUser::class)
             ->wherePivot('status', 'active')
-            ->withPivot(['role', 'status'])
+            ->withPivot(['id', 'role', 'status'])
+            ->withTimestamps();
+    }
+
+    /**
+     * All pivot rows regardless of status — used for leave/detach operations.
+     */
+    public function allMembers()
+    {
+        return $this->belongsToMany(User::class, 'community_users')
+            ->using(CommunityUser::class)
+            ->withPivot(['id', 'role', 'status'])
             ->withTimestamps();
     }
 
@@ -105,9 +120,19 @@ class Community extends Model
         return $this->hasMany(CommunitySubscription::class);
     }
 
+    public function paymentPlans()
+    {
+        return $this->hasMany(CommunityPaymentPlan::class);
+    }
+
     public function isPrivate(): bool
     {
         return $this->type === 'private';
+    }
+
+    public function isArchived(): bool
+    {
+        return $this->archived_at !== null;
     }
 
     /**
@@ -138,42 +163,37 @@ class Community extends Model
     /**
      * What a member actually pays, per charge.
      *
-     * If the creator absorbs the platform fee, this is simply the sticker
-     * price they set. If members bear the cost, the price is grossed up so
-     * that after Payhankey takes its cut, the creator still nets exactly
-     * the amount they asked for. This holds whether it's a one-off payment
-     * or a recurring subscription charge — the math is identical, only the
-     * frequency (billing_interval) differs.
+     * If the creator absorbs the platform fee, members pay the list price and
+     * the fee is deducted from the creator's payout. If members bear the cost,
+     * the fee ({list × rate}) is added on top so the creator still receives
+     * the full list price.
      */
     public function getMemberChargeAttribute(): ?float
+    {
+        return $this->feeBreakdown()['memberCharge'] ?? null;
+    }
+
+    public function getPlatformFeeAmountAttribute(): ?float
+    {
+        return $this->feeBreakdown()['platformCut'] ?? null;
+    }
+
+    public function getCreatorPayoutAttribute(): ?float
+    {
+        return $this->feeBreakdown()['creatorPayout'] ?? null;
+    }
+
+    private function feeBreakdown(): ?array
     {
         if ($this->type !== 'paid' || is_null($this->monthly_fee)) {
             return null;
         }
 
-        $rate = $this->feeRate();
-
-        return $this->fee_payer === 'members'
-            ? round((float) $this->monthly_fee / (1 - $rate), 2)
-            : (float) $this->monthly_fee;
-    }
-
-    public function getPlatformFeeAmountAttribute(): ?float
-    {
-        if (is_null($this->member_charge)) {
-            return null;
-        }
-
-        return round($this->member_charge * $this->feeRate(), 2);
-    }
-
-    public function getCreatorPayoutAttribute(): ?float
-    {
-        if (is_null($this->member_charge)) {
-            return null;
-        }
-
-        return round($this->member_charge - $this->platform_fee_amount, 2);
+        return CommunityFeeCalculator::breakdown(
+            (float) $this->monthly_fee,
+            (int) ($this->platform_fee_percent ?? 0),
+            (string) $this->fee_payer,
+        );
     }
 
     /**
@@ -209,8 +229,31 @@ class Community extends Model
         return config("community.billing_intervals.{$this->billing_interval}.suffix", '');
     }
 
-    private function feeRate(): float
+    /**
+     * Normalise a currency code for comparisons (defaults missing values to NGN).
+     */
+    public static function normaliseCurrency(?string $currency): string
     {
-        return ((int) ($this->platform_fee_percent ?? 0)) / 100;
+        return strtoupper((string) ($currency ?: 'NGN'));
+    }
+
+    /**
+     * Whether this community is priced in the given user's wallet currency.
+     */
+    public function isInCurrency(?string $currency = null): bool
+    {
+        $currency ??= userBaseCurrency();
+
+        return self::normaliseCurrency($this->currency) === self::normaliseCurrency($currency);
+    }
+
+    /**
+     * Limit discovery lists to communities in the viewer's wallet currency.
+     */
+    public function scopeForUserCurrency($query, ?string $currency = null)
+    {
+        $currency = self::normaliseCurrency($currency ?? userBaseCurrency());
+
+        return $query->where('currency', $currency);
     }
 }

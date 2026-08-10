@@ -9,6 +9,9 @@ use App\Models\User;
 use App\Services\Payments\FlutterwaveGateway;
 use Illuminate\Support\Carbon;
 use App\Services\Payments\PaymentGatewayResolver;
+use App\Support\CommunityFeeCalculator;
+use App\Services\CommunityMembershipService;
+use App\Services\CommunityFlutterwaveService;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
@@ -49,6 +52,9 @@ class CommunitySubscriptionService
 
     public function generatePaymentLink(Community $community, User $user)
     {
+        if (! $community->isInCurrency(userBaseCurrency($user->id))) {
+            throw new RuntimeException('This community is not available in your currency.');
+        }
 
         //get current user base currency
         $userCurrency = userBaseCurrency();
@@ -72,10 +78,10 @@ class CommunitySubscriptionService
 
         $reference = generateTransactionRef('community');
 
-        $idempotencyKey = $data['idempotency_key']
-            ?? Str::uuid()->toString();
+        $idempotencyKey = Str::uuid()->toString();
 
-        $convertedAmount = (float) convertCurrency($community->monthly_fee, $community->currency, $userCurrency);
+        $chargeAmount = (float) $community->member_charge;
+        $convertedAmount = (float) convertCurrency($chargeAmount, $community->currency, $userCurrency);
 
         $existingTransaction = Transaction::query()
             ->where('idempotency_key', $idempotencyKey)
@@ -207,82 +213,36 @@ class CommunitySubscriptionService
 
     private function flutterwavePaymentLink(Community $community, User $user): string
     {
-
         $userCurrency = userBaseCurrency();
-
         $reference = generateTransactionRef('community');
+        $idempotencyKey = Str::uuid()->toString();
 
-        $idempotencyKey = $data['idempotency_key']
-            ?? Str::uuid()->toString();
+        $chargeAmount = (float) $community->member_charge;
+        $convertedAmount = (float) convertCurrency($chargeAmount, $community->currency, $userCurrency);
 
-        $existingTransaction = Transaction::query()
-            ->where('idempotency_key', $idempotencyKey)
-            ->first();
+        $transaction = $this->transactionService->createTransaction(
+            user: $user,
+            idempotencyKey: $idempotencyKey,
+            provider: 'flutterwave',
+            reference: $reference,
+            amount: $convertedAmount,
+            currency: $userCurrency,
+            status: 'initiated',
+            action: 'Debit',
+            type: 'community_' . $community->billing_type,
+            description: 'Payment for community (' . $community->billing_type . '): ' . $community->name,
+            meta: [
+                'community' => $community->name,
+                'community_id' => $community->id,
+                'user_id' => $user->id,
+                'amount' => $convertedAmount,
+                'currency' => $userCurrency,
+                'billing_type' => $community->billing_type,
+                'billing_interval' => $community->billing_interval,
+            ]
+        );
 
-        $convertedAmount = convertCurrency($community->monthly_fee, $community->currency, $userCurrency);
-
-
-        if (!$existingTransaction) {
-            // Create transaction
-            $this->transactionService->createTransaction(
-                user: $user,
-                idempotencyKey: $idempotencyKey,
-                provider: 'flutterwave',
-                reference: $reference,
-                amount: $convertedAmount,
-                currency: $userCurrency,
-                status: 'pending',
-                action: 'Debit',
-                type: 'community_' . $community->billing_type,
-                description: ' Payment for community ( ' .  $community->billing_type . ' ): ' . $community->name,
-                meta: [
-                    'community' => $community->name,
-                    'community_id' => $community->id,
-                    'user_id' => $user->id,
-                    'amount' => $convertedAmount,
-                    'currency' => $userCurrency
-                ]
-            );
-        }
-
-
-        if ($community->billing_type === 'subscription') {
-            $subscription = $this->createFlvPaymentPlan($community, $user);
-        } else {
-            $response = Http::withToken($this->flutterwaveSecretKey)->acceptJson()
-                ->post("{$this->flutterwaveBaseUrl}/payments", [
-                    'tx_ref' => $reference,
-                    'amount' => (float) $convertedAmount,
-                    'currency' => $userCurrency,
-                    'redirect_url' => route('community.show', $community),
-                    'customer' => [
-                        'email' => $user->email,
-                        'name' => $user->name,
-                    ],
-                    'customizations' => ['title' => $community->name],
-                ]);
-
-            if (! $response->successful() || $response->json('status') !== 'success') {
-                throw new RuntimeException('Flutterwave payment initialization failed: ' . $response->body());
-            }
-        }
-
-        return $response->json('data.link');
-
-        // $subscription = $this->initiate($community, $user);
-        // return $this->gateways->forSubscription($subscription)->initializeCheckout($subscription);
-    }
-
-    private function createFlvPaymentPlan(Community $community, User $user): array
-    {
-        // Implement the logic to create a Flutterwave payment plan for the community subscription.
-        // This is a placeholder implementation and should be replaced with actual API calls to Flutterwave.
-        return [
-            'plan_id' => 'flw_plan_' . Str::random(8),
-            'amount' => $community->monthly_fee,
-            'currency' => userBaseCurrency(),
-            'interval' => $community->billing_interval,
-        ];
+        return app(CommunityFlutterwaveService::class)->checkout($community, $user, $transaction);
     }
 
 
@@ -297,15 +257,15 @@ class CommunitySubscriptionService
     public function initiate(Community $community, User $user, Transaction $transaction): CommunitySubscription
     {
         $baseCurrency = userBaseCurrency();
-        $rate = ($community->platform_fee_percent ?: 0) / 100;
         $basePrice = (float) $community->monthly_fee;
+        $breakdown = CommunityFeeCalculator::breakdown(
+            (int) ($community->platform_fee_percent ?: 0),
+            (string) $community->fee_payer,
+        );
 
-        $memberCharge = $community->fee_payer === 'members'
-            ? round($basePrice / (1 - $rate), 2)
-            : $basePrice;
-
-        $platformCut = round($memberCharge * $rate, 2);
-        $creatorAmount = round($memberCharge - $platformCut, 2);
+        $memberCharge = $breakdown['memberCharge'];
+        $platformCut = $breakdown['platformCut'];
+        $creatorAmount = $breakdown['creatorPayout'];
 
         $initiate = CommunitySubscription::create([
             'id' => (string) Str::uuid(),
@@ -329,6 +289,64 @@ class CommunitySubscriptionService
         return $initiate;
     }
 
+    /**
+     * Entry point for gateway webhooks — first payment or one-off purchase.
+     */
+    public function processSuccessfulPayment(Community $community, User $user, Transaction $transaction): void
+    {
+        $active = CommunitySubscription::query()
+            ->where('community_id', $community->id)
+            ->where('user_id', $user->id)
+            ->where('status', 'active')
+            ->latest()
+            ->first();
+
+        if ($active && $active->isRecurring() && $community->billing_type === 'subscription') {
+            $this->renew($active, $transaction);
+
+            return;
+        }
+
+        if ($active && $active->isOneOff()) {
+            app(TransactionService::class)->markSuccessful($transaction, $transaction->meta ?? []);
+
+            return;
+        }
+
+        $this->initiate($community, $user, $transaction);
+    }
+
+    /**
+     * Extend an active recurring subscription after a renewal charge.
+     */
+    public function renew(CommunitySubscription $subscription, Transaction $transaction): void
+    {
+        $subscription->update([
+            'expires_at' => $this->calculateExpiry($subscription),
+            'cancelled_at' => null,
+        ]);
+
+        app(CommunityMembershipService::class)->attachMember(
+            $subscription->community,
+            $subscription->user_id,
+        );
+
+        app(TransactionService::class)->markSuccessful(
+            $transaction,
+            [
+                'community_id' => $subscription->community_id,
+                'user_id' => $subscription->user_id,
+                'amount' => $subscription->amount,
+                'currency' => $transaction->currency,
+                'billing_type' => $subscription->billing_type,
+                'billing_interval' => $subscription->billing_interval,
+                'renewal' => true,
+            ]
+        );
+
+        app(CommunityPayoutService::class)->recordFromSubscription($subscription, $transaction);
+    }
+
 
 
     /**
@@ -346,13 +364,10 @@ class CommunitySubscriptionService
             'cancelled_at' => null,
         ]);
 
-        $subscription->community->members()->syncWithoutDetaching([
-            $subscription->user_id => [
-                'id' => (string) Str::uuid(),
-                'role' => 'member',
-                'status' => 'active',
-            ],
-        ]);
+        app(CommunityMembershipService::class)->attachMember(
+            $subscription->community,
+            $subscription->user_id,
+        );
 
         app(TransactionService::class)->markSuccessful(
             $transaction,
@@ -404,6 +419,7 @@ class CommunitySubscriptionService
             'weekly' => now()->addWeek(),
             'monthly' => now()->addMonth(),
             'quarterly' => now()->addMonths(3),
+            'biannual' => now()->addMonths(6),
             'yearly', 'annual' => now()->addYear(),
             default => now()->addMonth(),
         };

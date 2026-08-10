@@ -58,6 +58,19 @@ class PostVideo extends Model
     }
 
     /**
+     * Pick a random completed roll ready for playback.
+     */
+    public static function randomPlayable(): ?self
+    {
+        return static::query()
+            ->where('processing_status', 'completed')
+            ->whereNotNull('path')
+            ->whereHas('post', fn ($q) => $q->where('status', 'LIVE'))
+            ->inRandomOrder()
+            ->first();
+    }
+
+    /**
      * Get video URL for specific quality
      */
     public function getQualityUrl($quality = 'high')

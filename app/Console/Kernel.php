@@ -304,6 +304,8 @@ class Kernel extends ConsoleKernel
             });
         })->dailyAt('23:00');
 
+        $schedule->command('communities:expire-subscriptions')->hourly();
+
         // $schedule->call(function () {
         //     $subject = 'Test Mail';
         //     $content = "Registered Daily Stats successfully";

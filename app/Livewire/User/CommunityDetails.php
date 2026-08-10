@@ -13,7 +13,8 @@ use App\Models\CommunityPostLike;
 use App\Models\CommunityPostView;
 use App\Models\CommunitySubscription;
 use App\Models\User;
-use App\Notifications\GeneralNotification;
+use App\Support\CommunityFeeCalculator;
+use App\Services\CommunityMembershipService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
@@ -64,7 +65,21 @@ class CommunityDetails extends Component
     public function mount(Community $community): void
     {
         $this->community = $community->loadCount(['members', 'posts'])->load(['category', 'user']);
-        $this->platformFeePercent = (int) config('community.platform_fee_percent', 25);
+
+        if ($community->isArchived() && ! $this->canAccessArchived()) {
+            abort(404);
+        }
+
+        if (
+            auth()->check()
+            && ! $community->isInCurrency()
+            && ! $this->isOwner()
+            && ! $this->isMember()
+        ) {
+            abort(404);
+        }
+
+        $this->platformFeePercent = (int) config('community.platform_fee_percent', 10);
         $this->billingIntervals = config('community.billing_intervals', []);
 
         $this->settingsName = $community->name;
@@ -131,6 +146,36 @@ class CommunityDetails extends Component
     public function isOwnerOrAdminOrMember(): bool
     {
         return $this->isOwner() || $this->isAdmin() || $this->isMember();
+    }
+
+    public function canAccessArchived(): bool
+    {
+        return $this->isOwnerOrAdmin();
+    }
+
+    public function canDeletePost(string $postId): bool
+    {
+        if ($this->isOwnerOrAdmin()) {
+            return true;
+        }
+
+        $post = $this->community->posts()->find($postId);
+
+        return $post && (string) $post->user_id === (string) auth()->id();
+    }
+
+    public function canDeleteComment(string $commentId): bool
+    {
+        if ($this->isOwner()) {
+            return true;
+        }
+
+        $comment = CommunityPostComment::query()
+            ->where('id', $commentId)
+            ->whereHas('post', fn ($q) => $q->where('community_id', $this->community->id))
+            ->first();
+
+        return $comment && (string) $comment->user_id === (string) auth()->id();
     }
 
     /**
@@ -311,8 +356,8 @@ class CommunityDetails extends Component
      */
     public function deletePost(string $postId): void
     {
-        if (! $this->isOwnerOrAdmin()) {
-            session()->flash('error', 'Only admins can delete posts.');
+        if (! $this->canDeletePost($postId)) {
+            session()->flash('error', 'You cannot delete this post.');
 
             return;
         }
@@ -330,6 +375,29 @@ class CommunityDetails extends Component
         $post->delete();
 
         session()->flash('status', 'Post deleted.');
+    }
+
+    public function deleteComment(string $commentId): void
+    {
+        if (! $this->canDeleteComment($commentId)) {
+            session()->flash('error', 'You cannot delete this comment.');
+
+            return;
+        }
+
+        $comment = CommunityPostComment::query()
+            ->where('id', $commentId)
+            ->whereHas('post', fn ($q) => $q->where('community_id', $this->community->id))
+            ->first();
+
+        if (! $comment) {
+            return;
+        }
+
+        $comment->post->decrement('comments_count');
+        $comment->delete();
+
+        session()->flash('status', 'Comment deleted.');
     }
 
     /**
@@ -363,13 +431,46 @@ class CommunityDetails extends Component
 
     public function join(): void
     {
-        if ($this->community->type !== 'public') {
+        if ($this->community->type !== 'public' || $this->community->isArchived()) {
             return;
         }
 
-        $this->community->members()->syncWithoutDetaching([
-            auth()->id() => ['id' => (string) Str::uuid(), 'role' => 'member', 'status' => 'active'],
-        ]);
+        if (app(CommunityMembershipService::class)->isBanned($this->community, auth()->id())) {
+            session()->flash('error', 'You cannot rejoin this community.');
+
+            return;
+        }
+
+        if (! app(CommunityMembershipService::class)->attachMember($this->community, auth()->id())) {
+            session()->flash('error', 'Unable to join this community.');
+
+            return;
+        }
+
+        $this->community->refresh();
+        session()->flash('status', 'Welcome to ' . $this->community->name . '!');
+    }
+
+    public function leaveCommunity(): void
+    {
+        if ($this->isOwner()) {
+            session()->flash('error', 'Owners cannot leave — transfer ownership or delete the community.');
+
+            return;
+        }
+
+        if (! $this->isMember()) {
+            return;
+        }
+
+        if (! app(CommunityMembershipService::class)->leave($this->community, auth()->user())) {
+            session()->flash('error', 'Unable to leave this community.');
+
+            return;
+        }
+
+        $this->community->refresh();
+        session()->flash('status', 'You have left ' . $this->community->name . '.');
     }
 
     /**
@@ -441,9 +542,11 @@ class CommunityDetails extends Component
         }
 
         DB::transaction(function () use ($request) {
-            $this->community->members()->syncWithoutDetaching([
-                $request->user_id => ['id' => (string) Str::uuid(), 'role' => 'member', 'status' => 'active'],
-            ]);
+            if (! app(CommunityMembershipService::class)->attachMember($this->community, $request->user_id)) {
+                session()->flash('error', 'Could not approve — user may be banned from this community.');
+
+                return;
+            }
 
             $request->update([
                 'status' => 'approved',
@@ -622,13 +725,9 @@ class CommunityDetails extends Component
         }
 
         DB::transaction(function () use ($invite) {
-            $this->community->members()->syncWithoutDetaching([
-                auth()->id() => [
-                    'id' => (string) Str::uuid(),
-                    'role' => 'member',
-                    'status' => 'active',
-                ],
-            ]);
+            if (! app(CommunityMembershipService::class)->attachMember($this->community, auth()->id())) {
+                return;
+            }
 
             $invite->update([
                 'status' => 'accepted',
@@ -763,23 +862,17 @@ class CommunityDetails extends Component
             return null;
         }
 
-        $rate = $this->platformFeePercent / 100;
-
-        $memberCharge = $this->settingsFeePayer === 'members'
-            ? round($this->settingsMonthlyFee / (1 - $rate), 2)
-            : round((float) $this->settingsMonthlyFee, 2);
-
-        $platformCut = round($memberCharge * $rate, 2);
-        $creatorPayout = round($memberCharge - $platformCut, 2);
-
-        $suffix = '';
-        if ($this->settingsBillingType === 'subscription' && $this->settingsBillingInterval) {
-            $suffix = config("community.billing_intervals.{$this->settingsBillingInterval}.suffix", '');
-        } elseif ($this->settingsBillingType === 'one_off') {
-            $suffix = config('community.billing_types.one_off.suffix', '');
-        }
-
-        return compact('memberCharge', 'platformCut', 'creatorPayout', 'suffix');
+        return CommunityFeeCalculator::breakdown(
+            (float) $this->settingsMonthlyFee,
+            $this->platformFeePercent,
+            $this->settingsFeePayer,
+        ) + [
+            'suffix' => $this->settingsBillingType === 'subscription' && $this->settingsBillingInterval
+                ? config("community.billing_intervals.{$this->settingsBillingInterval}.suffix", '')
+                : ($this->settingsBillingType === 'one_off'
+                    ? config('community.billing_types.one_off.suffix', '')
+                    : ''),
+        ];
     }
 
     public function updatedSettingsLogo(): void
@@ -912,7 +1005,12 @@ class CommunityDetails extends Component
             'settingsDescription' => ['required', 'string', 'max:1000'],
             'settingsCategoryId' => ['required', 'exists:community_categories,id'],
             'settingsType' => ['required', Rule::in(['public', 'private', 'paid', 'approval'])],
-            'settingsMonthlyFee' => ['required_if:settingsType,paid', 'nullable', 'numeric', 'min:100'],
+            'settingsMonthlyFee' => [
+                'required_if:settingsType,paid',
+                'nullable',
+                'numeric',
+                'min:'.communityMinimumPrice($this->community->currency ?? userBaseCurrency()),
+            ],
             'settingsFeePayer' => ['required_if:settingsType,paid', 'nullable', Rule::in(['creator', 'members'])],
             'settingsBillingType' => ['required_if:settingsType,paid', 'nullable', Rule::in(['one_off', 'subscription'])],
             'settingsBillingInterval' => [
@@ -970,7 +1068,10 @@ class CommunityDetails extends Component
             return;
         }
 
-        $this->community->update(['type' => 'private']);
+        $this->community->update([
+            'type' => 'private',
+            'archived_at' => now(),
+        ]);
         $this->community->refresh();
         $this->settingsType = 'private';
 
@@ -978,7 +1079,19 @@ class CommunityDetails extends Component
             CommunityInviteController::regenerateLinkInvite($this->community, auth()->user());
         }
 
-        session()->flash('status', 'Community archived — it is now invite-only.');
+        session()->flash('status', 'Community archived — hidden from discovery and closed to new joins.');
+    }
+
+    public function unarchiveCommunity(): void
+    {
+        if (! $this->authorizeOwner()) {
+            return;
+        }
+
+        $this->community->update(['archived_at' => null]);
+        $this->community->refresh();
+
+        session()->flash('status', 'Community restored to discovery.');
     }
 
     public function deleteCommunity()

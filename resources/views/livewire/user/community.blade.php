@@ -232,8 +232,53 @@
                     margin-bottom: 3px
                 }
 
-                .communities-page .pk-load-more-row {
-                    margin-top: 18px
+                .communities-page .pk-pagination {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 10px;
+                    margin-top: 18px;
+                    padding: 14px 18px;
+                    border: 1px solid var(--pk-line);
+                    border-radius: var(--pk-r-md);
+                    background: #fff;
+                    flex-wrap: wrap;
+                }
+
+                .communities-page .pk-pg-info {
+                    font-size: .8rem;
+                    color: var(--pk-gray-500);
+                }
+
+                .communities-page .pk-pg-btns {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+
+                .communities-page .pk-pg-current {
+                    font-size: .8rem;
+                    font-weight: 600;
+                    color: var(--pk-gray-700);
+                }
+
+                .communities-page .pk-pg-btn {
+                    min-width: 36px;
+                    height: 36px;
+                    padding: 0 12px;
+                    border-radius: 8px;
+                    border: 1px solid var(--pk-line);
+                    background: #fff;
+                    font-family: inherit;
+                    font-size: .82rem;
+                    font-weight: 700;
+                    cursor: pointer;
+                    color: var(--pk-ink);
+                }
+
+                .communities-page .pk-pg-btn:disabled {
+                    opacity: .45;
+                    cursor: not-allowed;
                 }
 
                 .communities-page .pk-comm-card {
@@ -461,65 +506,114 @@
                     display: none
                 }
 
-                .communities-page .modal-dialog {
-                    max-height: calc(100vh - 3.5rem)
+                #createCommunityModal.modal {
+                    z-index: 1060;
+                    overflow: hidden !important;
                 }
 
-                .communities-page .modal-content {
+                #createCommunityModal .modal-dialog {
+                    max-height: calc(100vh - 1.25rem);
+                    height: calc(100vh - 1.25rem);
+                    margin: 0.625rem auto;
+                    display: flex;
+                    flex-direction: column;
+                }
+
+                @supports (height: 100dvh) {
+                    #createCommunityModal .modal-dialog {
+                        max-height: calc(100dvh - 1.25rem);
+                        height: calc(100dvh - 1.25rem);
+                    }
+                }
+
+                #createCommunityModal .modal-dialog.modal-dialog-scrollable {
+                    height: calc(100vh - 1.25rem);
+                    max-height: calc(100vh - 1.25rem);
+                }
+
+                @supports (height: 100dvh) {
+                    #createCommunityModal .modal-dialog.modal-dialog-scrollable {
+                        height: calc(100dvh - 1.25rem);
+                        max-height: calc(100dvh - 1.25rem);
+                    }
+                }
+
+                .communities-page .modal-dialog,
+                #createCommunityModal .modal-dialog {
+                    max-height: calc(100vh - 1.25rem);
+                    margin: 0.625rem auto;
+                }
+
+                .communities-page .modal-content,
+                #createCommunityModal .modal-content {
                     border: none;
                     border-radius: var(--pk-r-lg);
                     box-shadow: 0 20px 50px -12px rgba(23, 27, 36, .35);
-                    max-height: calc(100vh - 3.5rem);
-                    overflow: hidden
+                    flex: 1 1 auto;
+                    min-height: 0;
+                    max-height: 100%;
+                    height: 100%;
+                    display: flex;
+                    flex-direction: column;
+                    overflow: hidden;
                 }
 
-                /* The <form> sits between modal-content and modal-body/modal-footer,
-                                       which breaks Bootstrap's built-in scrollable-modal flex chain
-                                       (it expects modal-body to be a direct flex child of modal-content)
-    .
-                                       Re-establish that chain through the form so only the body scrolls
-                                       and the header/footer stay pinned in place. */
-                .communities-page .modal-content form {
+                /* Form wraps modal-body/footer — rebuild Bootstrap's scrollable flex chain */
+                .communities-page .modal-content form,
+                #createCommunityModal .modal-content form {
                     display: flex;
                     flex-direction: column;
                     flex: 1 1 auto;
                     min-height: 0;
-                    overflow: hidden
+                    overflow: hidden;
                 }
 
-                .communities-page .modal-header {
+                .communities-page .modal-header,
+                #createCommunityModal .modal-header {
                     border-bottom: none;
                     padding: 20px 22px 4px;
-                    flex: 0 0 auto
+                    flex: 0 0 auto;
                 }
 
-                .communities-page .modal-header .modal-title {
+                .communities-page .modal-header .modal-title,
+                #createCommunityModal .modal-header .modal-title {
                     font-size: 1.08rem;
                     font-weight: 800;
                     color: var(--pk-ink)
                 }
 
-                .communities-page .modal-body {
+                .communities-page .modal-body,
+                #createCommunityModal .modal-body {
                     padding: 12px 22px 2px;
                     flex: 1 1 auto;
                     min-height: 0;
-                    overflow-y: auto
+                    overflow-x: hidden;
+                    overflow-y: auto;
+                    overscroll-behavior: contain;
+                    -webkit-overflow-scrolling: touch;
                 }
 
-                .communities-page .modal-footer {
-                    border-top: none;
-                    padding: 14px 22px 22px;
-                    flex: 0 0 auto
+                .communities-page .modal-footer,
+                #createCommunityModal .modal-footer {
+                    border-top: 1px solid var(--pk-line);
+                    padding: 12px 22px max(14px, env(safe-area-inset-bottom, 0px));
+                    flex: 0 0 auto;
+                    background: #fff;
+                    position: relative;
+                    z-index: 2;
+                    box-shadow: 0 -6px 16px rgba(23, 27, 36, .06);
                 }
 
-                .communities-page .modal-footer .pk-btn-violet {
+                .communities-page .modal-footer .pk-btn-violet,
+                #createCommunityModal .modal-footer .pk-btn-violet {
                     flex: 1;
                     justify-content: center
                 }
 
                 /* ---- form fields (used inside the modal-body) ---- */
 
-                .communities-page .pk-field {
+                .communities-page .pk-field,
+                #createCommunityModal .pk-field {
                     margin-bottom: 16px
                 }
 
@@ -581,6 +675,12 @@
                 .communities-page .pk-field-error {
                     color: var(--pk-red);
                     font-size: .76rem;
+                    margin-top: 5px
+                }
+
+                .communities-page .pk-field-hint {
+                    color: var(--pk-muted, #6b7280);
+                    font-size: .74rem;
                     margin-top: 5px
                 }
 
@@ -1010,13 +1110,20 @@
 
                     </div>
 
-                    @if ($communities->hasMorePages())
-                        <div class="d-grid d-sm-flex justify-content-sm-center pk-load-more-row">
-                            <button type="button" class="pk-btn pk-btn-outline" wire:click="loadMore"
-                                wire:loading.attr="disabled" wire:target="loadMore">
-                                <span wire:loading.remove wire:target="loadMore">Load more communities</span>
-                                <span wire:loading wire:target="loadMore">Loading…</span>
-                            </button>
+                    @if ($communities->hasPages())
+                        <div class="pk-pagination">
+                            <div class="pk-pg-info">
+                                Showing {{ $communities->firstItem() }}–{{ $communities->lastItem() }} of {{ number_format($communities->total()) }} communities
+                            </div>
+                            <div class="pk-pg-btns">
+                                <button type="button" class="pk-pg-btn" wire:click="previousPage"
+                                    wire:loading.attr="disabled" wire:target="previousPage,nextPage,gotoPage"
+                                    @disabled($communities->onFirstPage())>Prev</button>
+                                <span class="pk-pg-current">Page {{ $communities->currentPage() }} of {{ $communities->lastPage() }}</span>
+                                <button type="button" class="pk-pg-btn" wire:click="nextPage"
+                                    wire:loading.attr="disabled" wire:target="previousPage,nextPage,gotoPage"
+                                    @disabled(! $communities->hasMorePages())>Next</button>
+                            </div>
                         </div>
                     @endif
                 </main>
@@ -1088,6 +1195,8 @@
                 </aside>
             </div>
 
+        </div>{{-- /.pk-ui-inner --}}
+
             {{-- ============ CREATE COMMUNITY MODAL ============ --}}
             {{--
             wire:ignore.self is the fix for the "modal collapses after filling a field" bug.
@@ -1103,7 +1212,7 @@
         --}}
             <div class="modal fade" id="createCommunityModal" tabindex="-1" aria-labelledby="createCommunityTitle"
                 aria-hidden="true" wire:ignore.self>
-                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-dialog modal-dialog-scrollable">
                     <div class="modal-content">
                         <div class="modal-header">
                             <h2 class="modal-title" id="createCommunityTitle">Create a community</h2>
@@ -1192,138 +1301,6 @@
                                         </span>
                                     </label>
 
-                                    {{-- @if ($type === 'paid')
-                                        <div class="pk-price-field">
-                                            {{-- $basePrice = convertToBaseCurrency($level->amount, auth()->user()->wallet->currency); --
-                                            <label>How should members pay?</label>
-                                            <div class="pk-billing-toggle">
-                                                @if (userBaseCurrency() === 'NGN')
-                                                    <label
-                                                        class="pk-billing-opt @if ($billing_type === 'one_off') pk-sel @endif">
-                                                        <input type="radio" name="cBillingType" value="one_off" 
-                                                            wire:model.live="billing_type">
-                                                        One-off payment
-                                                    </label>
-                                                @else
-                                                    <label
-                                                        class="pk-billing-opt @if ($billing_type === 'one_off') pk-sel @endif">
-                                                        <input type="radio" name="cBillingType" value="one_off"
-                                                            wire:model.live="billing_type">
-                                                        One-off payment
-                                                    </label>
-                                                    <label
-                                                        class="pk-billing-opt @if ($billing_type === 'subscription') pk-sel @endif">
-                                                        <input type="radio" name="cBillingType" value="subscription"
-                                                            wire:model.live="billing_type">
-                                                        Subscription
-                                                    </label>
-                                                @endif
-
-
-                                            </div>
-                                            @error('billing_type')
-                                                <div class="pk-field-error">{{ $message }}</div>
-                                            @enderror
-                                            
-
-                                            @if ($billing_type === 'subscription')
-                                                <div class="pk-field" style="margin-bottom:12px">
-                                                    <label for="cInterval">Billing interval</label>
-                                                    <select id="cInterval" wire:model.live="billing_interval">
-                                                        @foreach (config('community.billing_intervals', []) as $key => $meta)
-                                                            <option value="{{ $key }}">{{ $meta['label'] }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                    @error('billing_interval')
-                                                        <div class="pk-field-error">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            @endif
-
-                                            <label for="cFee">
-                                                {{ $billing_type === 'one_off' ? 'Price (one-time)' : 'Price per billing cycle' }}
-                                            </label>
-                                            @php($preview = $this->feePreview())
-
-                                            <?php
-                                            
-                                            $userBaseCurrency = userBaseCurrency();
-                                            if ($userBaseCurrency == 'USD') {
-                                                $placehoder = 10;
-                                            } else {
-                                                $placehoder = 2500;
-                                            }
-                                            
-                                            ?>
-                                            <div class="pk-currency-input">
-                                                <span>{{ getCurrencyCode() }}</span>
-                                                <input type="number" id="cFee" min="100" step="50"
-                                                    wire:model.live.debounce.400ms="monthly_fee"
-                                                    placeholder="{{ $placehoder }}" />
-                                            </div>
-                                            @error('monthly_fee')
-                                                <div class="pk-field-error">{{ $message }}</div>
-                                            @enderror
-
-                                            <div class="pk-fee-note">
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                                    stroke-width="2">
-                                                    <circle cx="12" cy="12" r="10" />
-                                                    <path d="M12 16v-4M12 8h.01" />
-                                                </svg>
-                                                <span>Payhankey charges a <strong>{{ $platformFeePercent }}%</strong>
-                                                    platform fee on every payment made into a paid community.</span>
-                                            </div>
-
-                                            <div class="pk-fee-payer-row">
-                                                <label
-                                                    class="pk-fee-payer-opt @if ($fee_payer === 'creator') pk-sel @endif">
-                                                    <input type="radio" name="cFeePayer" value="creator"
-                                                        wire:model.live="fee_payer" />
-                                                    <span><b>I'll cover the {{ $platformFeePercent }}% fee</b>
-                                                        <span>It's deducted from what you receive — members
-                                                            pay exactly the amount above.</span>
-                                                    </span>
-                                                </label>
-                                                <label
-                                                    class="pk-fee-payer-opt @if ($fee_payer === 'members') pk-sel @endif">
-                                                    <input type="radio" name="cFeePayer" value="members"
-                                                        wire:model.live="fee_payer" />
-                                                    <span><b>My members will cover it</b>
-                                                        <span>The fee is added on top, so you still receive the full
-                                                            amount above.</span>
-                                                    </span>
-                                                </label>
-                                            </div>
-                                            @error('fee_payer')
-                                                <div class="pk-field-error">{{ $message }}</div>
-                                            @enderror
-
-
-                                            @if ($preview)
-                                                <div class="pk-fee-preview">
-                                                    <div class="pk-fp-row">
-                                                        <span>Members pay{{ $preview['suffix'] }}</span>
-                                                        <b>{{ getCurrencyCode() }}{{ number_format($preview['memberCharge'], 2) }}
-                                                        </b>
-                                                    </div>
-                                                    <div class="pk-fp-row">
-                                                        <span>Payhankey fee ({{ $platformFeePercent }}%)</span>
-                                                        <b>{{ getCurrencyCode() }}{{ number_format($preview['platformCut'], 2) }}
-                                                        </b>
-                                                    </div>
-                                                    <div class="pk-fp-row pk-fp-total">
-                                                        <span>You receive{{ $preview['suffix'] }}</span>
-                                                        <b>{{ getCurrencyCode() }}{{ number_format($preview['creatorPayout'], 2) }}
-                                                        </b>
-                                                    </div>
-                                                </div>
-                                            @endif
-                                        </div>
-                                    @endif --}}
-
-                                   
                                     @if ($type === 'paid')
                                         <div class="pk-price-field">
                                             <label>How should members pay?</label>
@@ -1377,22 +1354,15 @@
 
                                             @php($preview = $this->feePreview())
 
-                                            <?php
-                                            $userBaseCurrency = userBaseCurrency();
-                                            
-                                            if ($userBaseCurrency === 'USD') {
-                                                $placehoder = 10;
-                                            } else {
-                                                $placehoder = 2500;
-                                            }
-                                            ?>
-
                                             <div class="pk-currency-input">
                                                 <span>{{ getCurrencyCode() }}</span>
-                                                <input type="number" id="cFee" min="100" step="50"
+                                                <input type="number" id="cFee"
+                                                    min="{{ communityMinimumPrice() }}"
+                                                    step="{{ userBaseCurrency() === 'USD' ? 1 : 50 }}"
                                                     wire:model.live.debounce.400ms="monthly_fee"
-                                                    placeholder="{{ $placehoder }}" />
+                                                    placeholder="{{ userBaseCurrency() === 'USD' ? 10 : 2500 }}" />
                                             </div>
+                                            <div class="pk-field-hint">Minimum {{ getCurrencyCode() }}{{ number_format(communityMinimumPrice(), userBaseCurrency() === 'USD' ? 2 : 0) }}</div>
 
                                             @error('monthly_fee')
                                                 <div class="pk-field-error">{{ $message }}</div>
@@ -1527,6 +1497,5 @@
                 });
             </script>
 
-        </div>
-    </div>
+    </div>{{-- /.communities-page --}}
 </div>

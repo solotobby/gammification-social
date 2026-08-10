@@ -24,6 +24,8 @@ use App\Services\HashtagService;
 use App\Models\PostVideo;
 use App\Services\PostEarningsService;
 use App\Services\VideoUploadService;
+use App\Services\ImageUploadService;
+use App\Jobs\ProcessVideoUpload;
 // use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -54,7 +56,7 @@ class Timeline extends Component
 
     protected $rules = [
         'content' => 'required|string',
-        'images.*' => 'nullable|image|max:2048',
+        'images.*' => 'nullable|image|max:10240',
     ];
 
     public $access_code = '';
@@ -103,6 +105,7 @@ class Timeline extends Component
     public ?int $videoFileSize = null;
     public array $videoQualityVersions = [];
     public bool $composerVideoMode = false;
+    public ?string $videoJobId = null;
 
 
     public function openVideoPlayer($videoId)
@@ -208,7 +211,7 @@ class Timeline extends Component
             $rules['images'] = 'prohibited';
         } else {
             $rules['images'] = 'nullable|array|max:4';
-            $rules['images.*'] = 'image|max:2048';
+            $rules['images.*'] = 'image|max:'.app(ImageUploadService::class)->maxFileKb();
         }
 
         $this->validate($rules);
@@ -250,7 +253,7 @@ class Timeline extends Component
         // Validate images
         if ($maxImages > 0) {
             $this->validate([
-                'images.*' => 'image|max:2048', // 2MB per image
+                'images.*' => 'image|max:'.app(ImageUploadService::class)->maxFileKb(),
             ]);
         }
 
@@ -289,20 +292,9 @@ class Timeline extends Component
         // }   
 
         if (!empty($this->images)) {
+            $imageService = app(ImageUploadService::class);
             foreach ($this->images as $image) {
-                // $uploadedFileUrl = cloudinary()->upload($image->getRealPath(), [
-                //     'folder' => 'payhankey_post_images',
-                // ])->getSecurePath();
-
-
-                $path = Storage::disk('spaces')->putFileAs(
-                    'payhankey_media/images', // folder inside bucket
-                    $image,
-                    Str::uuid() . '-' . auth()->id(), // unique filename
-                    'public'
-                );
-                $url = config('filesystems.disks.spaces.url') . '/' . $path;
-
+                $url = $imageService->upload($image);
 
                 PostImages::create([
                     'user_id' => Auth::id(),
@@ -349,8 +341,11 @@ class Timeline extends Component
             $this->cancelVideoUpload();
         }
 
+        $imageService = app(ImageUploadService::class);
+        $maxImageKb = $imageService->maxFileKb();
+
         $this->validate([
-            'images.*' => 'image|max:2048',
+            'images.*' => "image|max:{$maxImageKb}",
         ]);
 
         $this->imagePreviews = [];
@@ -385,9 +380,15 @@ class Timeline extends Component
         $service = app(VideoUploadService::class);
         $maxKb = $service->maxFileKb($level);
 
-        if ($maxKb === 0) {
+        if (! canUploadVideo($level)) {
             $this->videoUploadStatus = 'error';
-            $this->addError('video', 'Your account level cannot upload videos.');
+            $this->addError('video', 'Only Creator and Influencer accounts can upload rolls.');
+            return;
+        }
+
+        if ($maxKb <= 0) {
+            $this->videoUploadStatus = 'error';
+            $this->addError('video', 'Video upload is not configured for your account level ('.$level.'). Please contact support.');
             return;
         }
 
@@ -407,22 +408,75 @@ class Timeline extends Component
         }
 
         $level = userLevel();
-        if (! in_array($level, ['Creator', 'Influencer'])) {
+        if (! canUploadVideo($level)) {
             $this->videoUploadStatus = 'error';
-            session()->flash('error', 'Permission denied.');
+            session()->flash('error', 'Only Creator and Influencer accounts can upload rolls.');
             return;
         }
 
-        $this->videoUploadStatus = 'uploading';
-        $this->videoUploadProgress = 15;
-        $this->dispatch('videoUploadStatus', status: 'uploading', progress: 15);
+        $this->videoUploadStatus = 'processing';
+        $this->videoUploadProgress = 10;
+        $this->dispatch('videoUploadStatus', status: 'processing', progress: 10);
 
         try {
-            $result = app(VideoUploadService::class)->upload(
+            $service = app(VideoUploadService::class);
+            $this->videoJobId = $service->stage(
                 $this->video->getRealPath(),
-                $level
+                $this->video->getClientOriginalName()
             );
 
+            Cache::put("video_upload:{$this->videoJobId}", [
+                'status' => 'processing',
+                'progress' => 15,
+            ], config('media.upload_cache_ttl', 3600));
+
+            ProcessVideoUpload::dispatch(
+                $this->videoJobId,
+                (string) auth()->id(),
+                $level,
+            )->afterResponse();
+
+            $this->videoUploadProgress = 20;
+            $this->dispatch('videoUploadStatus', status: 'processing', progress: 20);
+        } catch (\Throwable $e) {
+            $this->videoUploadStatus = 'error';
+            $this->videoUploadProgress = 0;
+            $this->dispatch('videoUploadStatus', status: 'error', progress: 0);
+            session()->flash('error', 'Video upload failed: '.$e->getMessage());
+        }
+    }
+
+    public function pollVideoProcessing(): void
+    {
+        if ($this->videoUploadStatus !== 'processing' || ! $this->videoJobId) {
+            return;
+        }
+
+        $payload = Cache::get("video_upload:{$this->videoJobId}");
+
+        if (! is_array($payload)) {
+            return;
+        }
+
+        $status = $payload['status'] ?? 'processing';
+        $progress = (int) ($payload['progress'] ?? 20);
+
+        if ($status === 'processing') {
+            $this->videoUploadProgress = max($this->videoUploadProgress, min($progress, 90));
+            $this->dispatch('videoUploadStatus', status: 'processing', progress: $this->videoUploadProgress);
+            return;
+        }
+
+        if ($status === 'failed') {
+            $this->videoUploadStatus = 'error';
+            $this->videoUploadProgress = 0;
+            $this->dispatch('videoUploadStatus', status: 'error', progress: 0);
+            session()->flash('error', 'Video processing failed: '.($payload['error'] ?? 'Unknown error'));
+            return;
+        }
+
+        if ($status === 'completed' && isset($payload['result']) && is_array($payload['result'])) {
+            $result = $payload['result'];
             $this->cloudinaryVideoUrl = $result['url'];
             $this->cloudinaryVideoPublicId = $result['public_id'];
             $this->cloudinaryThumbnailUrl = $result['thumbnail'];
@@ -431,16 +485,11 @@ class Timeline extends Component
             $this->videoHeight = $result['height'];
             $this->videoFormat = $result['format'];
             $this->videoFileSize = $result['file_size'];
-            $this->videoQualityVersions = $result['quality_versions'];
+            $this->videoQualityVersions = $result['quality_versions'] ?? [];
 
             $this->videoUploadProgress = 100;
             $this->videoUploadStatus = 'done';
             $this->dispatch('videoUploadStatus', status: 'done', progress: 100);
-        } catch (\Throwable $e) {
-            $this->videoUploadStatus = 'error';
-            $this->videoUploadProgress = 0;
-            $this->dispatch('videoUploadStatus', status: 'error', progress: 0);
-            session()->flash('error', 'Video upload failed: '.$e->getMessage());
         }
     }
 
@@ -454,8 +503,8 @@ class Timeline extends Component
     {
         $level = userLevel();
 
-        if (! in_array($level, ['Creator', 'Influencer'])) {
-            session()->flash('error', 'Permission denied.');
+        if (! canUploadVideo($level)) {
+            session()->flash('error', 'Only Creator and Influencer accounts can upload rolls.');
             return;
         }
 
@@ -517,6 +566,16 @@ class Timeline extends Component
                 // ignore cleanup failures
             }
         }
+
+        if ($this->videoJobId) {
+            try {
+                app(VideoUploadService::class)->cleanupStaging($this->videoJobId);
+                Cache::forget("video_upload:{$this->videoJobId}");
+            } catch (\Exception $e) {
+                // ignore
+            }
+        }
+
         $this->resetVideoState();
     }
 
@@ -525,6 +584,7 @@ class Timeline extends Component
         $this->video = null;
         $this->composerVideoMode = false;
         $this->videoUploadProgress = 0;
+        $this->videoJobId = null;
         $this->cloudinaryVideoUrl = null;
         $this->cloudinaryVideoPublicId = null;
         $this->cloudinaryThumbnailUrl = null;

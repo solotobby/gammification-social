@@ -2,16 +2,50 @@
 (function () {
   'use strict';
 
-  /* ---- Sticky nav state + mobile toggle ---- */
-  var nav = document.querySelector('.nav');
-  if (nav) {
-    var onScroll = function () { nav.classList.toggle('is-scrolled', window.scrollY > 8); };
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    var toggle = nav.querySelector('.nav__toggle');
-    if (toggle) toggle.addEventListener('click', function () { nav.classList.toggle('is-open'); });
-    nav.querySelectorAll('.nav__links a').forEach(function (a) {
-      a.addEventListener('click', function () { nav.classList.remove('is-open'); });
+  /* ---- Apple-style nav ---- */
+  var navRoot = document.querySelector('[data-nav]');
+  if (navRoot) {
+    var navBar = navRoot.querySelector('.nav');
+    var toggle = navRoot.querySelector('.nav__toggle');
+    var backdrop = navRoot.querySelector('.nav__backdrop');
+    var sheet = navRoot.querySelector('.nav__sheet');
+
+    var setOpen = function (open) {
+      navRoot.classList.toggle('is-open', open);
+      document.body.classList.toggle('nav-open', open);
+      if (toggle) toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (sheet) sheet.setAttribute('aria-hidden', open ? 'false' : 'true');
+      if (toggle) toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    };
+
+    if (navBar) {
+      var onScroll = function () { navBar.classList.toggle('is-scrolled', window.scrollY > 4); };
+      onScroll();
+      window.addEventListener('scroll', onScroll, { passive: true });
+    }
+
+    if (toggle) {
+      toggle.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        setOpen(!navRoot.classList.contains('is-open'));
+      });
+    }
+
+    if (backdrop) {
+      backdrop.addEventListener('click', function () { setOpen(false); });
+    }
+
+    navRoot.querySelectorAll('.nav__links a, .nav__sheet-links a, .nav__sheet-actions a').forEach(function (a) {
+      a.addEventListener('click', function () { setOpen(false); });
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && navRoot.classList.contains('is-open')) setOpen(false);
+    });
+
+    window.addEventListener('resize', function () {
+      if (window.innerWidth > 900 && navRoot.classList.contains('is-open')) setOpen(false);
     });
   }
 

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Mail\AccessCodeMail;
+use App\Http\Requests\ContactRequest;
 use App\Mail\GeneralMail;
 use App\Models\AccessCode;
 use App\Models\Comment;
@@ -25,6 +25,7 @@ use App\Models\UserLevel;
 use App\Models\UserLike;
 use App\Models\UserView;
 use App\Models\ViewsExternal;
+use App\Services\PublicSiteService;
 use App\Models\WithdrawalMethod;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
@@ -38,16 +39,26 @@ use Stevebauman\Location\Facades\Location;
 
 class GeneralController extends Controller
 {
+    public function __construct(
+        protected PublicSiteService $publicSite,
+    ) {}
 
     public function landingpage()
     {
-        return view('welcome');
-        // return view('general.landingpage');
+        return view('general.landingpage', [
+            'previewEarners' => $this->publicSite->landingPreviewEarners(3),
+            'platformStats' => $this->publicSite->platformStats(),
+        ]);
+    }
+
+    public function features()
+    {
+        return view('general.features');
     }
 
     public function how()
     {
-        return view('how');
+        return view('general.how');
     }
     public function about()
     {
@@ -57,6 +68,19 @@ class GeneralController extends Controller
     public function contact()
     {
         return view('general.contact');
+    }
+
+    public function submitContact(ContactRequest $request)
+    {
+        $data = $request->validated();
+
+        Mail::to(config('payhankey.support_email'))->send(new GeneralMail(
+            (object) ['name' => $data['name'], 'email' => $data['email']],
+            'Contact form: ' . $data['subject'],
+            "From: {$data['name']} ({$data['email']})\n\nSubject: {$data['subject']}\n\n{$data['message']}"
+        ));
+
+        return back()->with('success', 'Thanks! Your message was sent — we\'ll reply within 24 hours.');
     }
     public function blog()
     {
@@ -92,126 +116,35 @@ class GeneralController extends Controller
     //     ]);
     // }
 
-    public function communityPublic( $slug)
+    public function communityPublic($slug)
     {
-        $community = Community::where('slug', $slug)->firstOrFail();
+        $community = Community::where('slug', $slug)
+            ->where('type', 'public')
+            ->whereNull('archived_at')
+            ->firstOrFail();
+
+        if (
+            auth()->check()
+            && ! $community->isInCurrency()
+            && $community->user_id !== auth()->id()
+            && ! $community->members()->where('users.id', auth()->id())->exists()
+        ) {
+            abort(404);
+        }
+
         $community->loadCount(['members', 'posts'])->load(['category', 'user']);
+
         return view('community.publics', ['community' => $community]);
     }
 
     public function topEarners()
     {
+        $earners = $this->publicSite->topEarners(10);
 
-        //     $sub = DB::table('payouts')
-        //         ->join('users', 'users.id', '=', 'payouts.user_id')
-        //         ->selectRaw("
-        //     payouts.month as month_key,
-        //     users.id,
-        //     users.username,
-        //     SUM(payouts.amount) as total_paid,
-        //     ROW_NUMBER() OVER (
-        //         PARTITION BY payouts.month
-        //         ORDER BY SUM(payouts.amount) DESC
-        //     ) as rank_position
-        // ")
-        //         ->where('payouts.status', 'Queued')
-        //         ->groupBy('payouts.month', 'users.id', 'users.username');
-
-        //     $topEarners = DB::query()
-        //         ->fromSub($sub, 'ranked')
-        //         ->where('rank_position', '<=', 10)
-        //         ->orderBy('month_key', 'desc')
-        //         ->orderBy('total_paid', 'desc')
-        //         ->get()
-        //         ->groupBy('month_key');
-
-
-
-
-        // $topPayouts = Payout::query()
-        //     ->select(
-        //         'payouts.user_id',
-        //         'users.name',
-        //         'users.email',
-        //         'users.username',
-        //         DB::raw("
-        //     CASE 
-        //         WHEN payouts.created_at BETWEEN '" .
-        //             Carbon::now()->subMonth()->startOfMonth() . "' AND '" .
-        //             Carbon::now()->subMonth()->endOfMonth() . "'
-        //         THEN 'last_month'
-        //         ELSE 'all_time'
-        //     END AS period
-        // "),
-        //         DB::raw('SUM(payouts.amount) as total_paid')
-        //     )
-        //     ->join('users', 'users.id', '=', 'payouts.user_id')
-        //     ->whereIn('payouts.status', ['queued', 'paid'])
-        //     ->groupBy(
-        //         'payouts.user_id',
-        //         'users.name',
-        //         'users.email',
-        //         'users.username',
-        //         'period'
-        //     )
-        //     ->orderBy('period')
-        //     ->orderByDesc('total_paid')
-        //     ->limit(20)
-        //     ->get();
-
-
-
-        $topPayouts = Payout::query()
-            ->select(
-                'payouts.user_id',
-                'users.name',
-                'users.email',
-                'users.username',
-                'users.avatar',
-                // 'users.level',
-                DB::raw("
-            CASE 
-                WHEN payouts.created_at BETWEEN '" .
-                    Carbon::now()->subMonth()->startOfMonth() . "' AND '" .
-                    Carbon::now()->subMonth()->endOfMonth() . "'
-                THEN 'last_month'
-                ELSE 'all_time'
-            END AS period
-        "),
-                DB::raw('SUM(payouts.amount) as total_paid')
-            )
-            ->join('users', 'users.id', '=', 'payouts.user_id')
-            ->whereIn('payouts.status', ['queued', 'paid'])
-            ->groupBy(
-                'payouts.user_id',
-                // 'users.name',
-                // 'users.email',
-                'users.username',
-                // 'users.avatar',
-                // 'users.level',
-                'period'
-            )
-            ->orderBy('period')
-            ->orderByDesc('total_paid')
-            ->get();
-
-
-        $lastMonthEarners = $topPayouts
-            ->where('period', 'last_month')
-            ->values()
-            ->take(10);
-
-        $allTimeEarners = $topPayouts
-            ->where('period', 'all_time')
-            ->values()
-            ->take(10);
-
-        return view('general.top-earner', compact(
-            'lastMonthEarners',
-            'allTimeEarners'
-        ));
-
-        // return view('general.top-earner', ['topEarners' => $topPayouts]);
+        return view('general.top-earner', [
+            'lastMonthEarners' => $earners['lastMonth'],
+            'allTimeEarners' => $earners['allTime'],
+        ]);
     }
 
 

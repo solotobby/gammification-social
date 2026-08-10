@@ -11,6 +11,10 @@
                     <i class="nav-main-link-icon fa fa-users"></i>
                     <span class="nav-main-link-name">User List</span>
                 </a>
+                <a class="nav-main-link{{ request()->routeIs('admin.communities.*') ? ' active' : '' }}" href="{{ route('admin.communities.index') }}">
+                    <i class="nav-main-link-icon fa fa-object-group"></i>
+                    <span class="nav-main-link-name">Communities</span>
+                </a>
                 <a class="nav-main-link" href="{{ route('admin.currencies.index') }}">
                     <i class="nav-main-link-icon fa fa-coins"></i>
                     <span class="nav-main-link-name">Currency</span>
@@ -87,6 +91,14 @@
                     <i class="nav-main-link-icon fa fa-home"></i>
                     <span class="nav-main-link-name">Dashboard</span>
 
+                </a>
+                <a class="nav-main-link{{ request()->routeIs('rolls.*') ? ' active' : '' }}" href="{{ route('rolls.random') }}">
+                    <i class="nav-main-link-icon fa fa-circle-play"></i>
+                    <span class="nav-main-link-name">Rolls</span>
+                </a>
+                <a class="nav-main-link{{ request()->routeIs('community*') ? ' active' : '' }}" href="{{ route('community') }}">
+                    <i class="nav-main-link-icon fa fa-users"></i>
+                    <span class="nav-main-link-name">Communities</span>
                 </a>
                 @if (Auth::user())
                     <a class="nav-main-link" href="{{ url('profile/' . auth()->user()->username) }}">

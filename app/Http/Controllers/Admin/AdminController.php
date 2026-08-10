@@ -14,6 +14,7 @@ use App\Models\UserLike;
 use App\Models\UserView;
 use App\Services\FlutterwavePaymentService;
 use App\Services\KorapayService;
+use App\Services\Admin\AdminCommunityService;
 use App\Services\TransactionService;
 use App\Services\UpgradeSubscriptionService;
 use Illuminate\Http\Request;
@@ -32,6 +33,7 @@ class AdminController extends Controller
         TransactionService $transactionService,
         UpgradeSubscriptionService $upgradeSubscriptionService,
         KorapayService $korapayService,
+        protected AdminCommunityService $communityAnalytics,
     ) {
         $this->flutterwavePaymentService = $flutterwavePaymentService;
         $this->transactionService = $transactionService;
@@ -45,7 +47,7 @@ class AdminController extends Controller
             abort(404);
         }
 
-        $stats = Cache::remember('admin.dashboard.stats.v4', now()->addMinutes(3), function () {
+        $stats = Cache::remember('admin.dashboard.stats.v5', now()->addMinutes(3), function () {
             $revenue = Transaction::query()
                 ->whereIn('status', ['successful', 'allocated'])
                 ->selectRaw("COALESCE(SUM(CASE WHEN currency = 'USD' THEN amount ELSE 0 END), 0) as usd")
@@ -82,6 +84,7 @@ class AdminController extends Controller
                 'newUsersWeek' => User::role('user')->where('created_at', '>=', now()->subDays(7))->count(),
                 'signupChart' => $this->dailySignupChart(),
                 'engagementChart' => $this->dailyEngagementChart(),
+                'communityAnalytics' => $this->communityAnalytics->dashboardAnalytics(),
             ];
         });
 

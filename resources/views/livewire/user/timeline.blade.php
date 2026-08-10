@@ -823,7 +823,8 @@
             @enderror
 
             {{-- ===== Composer ===== --}}
-            <div class="ph-composer" x-data="timelineComposer()" x-init="boot()">
+            <div class="ph-composer" x-data="timelineComposer()" x-init="boot()"
+                 @if($videoUploadStatus === 'processing' && $videoJobId) wire:poll.2s="pollVideoProcessing" @endif>
                 <form @submit.prevent="videoMode && vStatus === 'done' ? $wire.publishVideo() : (!videoMode ? $wire.createPost() : null)">
                     <div class="ph-comp-body">
 
@@ -864,7 +865,7 @@
                         </div>
 
                         {{-- Facebook-style media preview + toolbar --}}
-                        @if (in_array($userLevel, ['Creator', 'Influencer']))
+                        @if (canUploadVideo($userLevel))
                             @php
                                 $maxImages = $userLevel === 'Creator' ? 1 : 4;
                                 $imgPreviewCount = count($images);
@@ -896,9 +897,9 @@
                                     <button type="button" @click="resetVideo(); $wire.cancelVideoUpload()">Remove</button>
                                 </div>
 
-                                <div class="ph-vprog" x-show="vStatus === 'uploading'">
+                                <div class="ph-vprog" x-show="vStatus === 'uploading' || vStatus === 'processing'">
                                     <div class="ph-vprog-meta">
-                                        <span>Uploading to Spaces…</span>
+                                        <span x-text="vStatus === 'processing' ? 'Processing video (high / medium / low)…' : 'Uploading…'"></span>
                                         <span x-text="vPct + '%'"></span>
                                     </div>
                                     <div class="ph-vprog-track">
@@ -944,8 +945,11 @@
                         @endif
 
                         <div class="ph-comp-foot">
-                            <span class="ph-comp-foot-note" x-show="videoMode && vStatus !== 'done'" x-cloak>
-                                Finish uploading your roll before posting.
+                            <span class="ph-comp-foot-note" x-show="videoMode && vStatus === 'processing'" x-cloak>
+                                Converting your roll to multiple qualities — you can keep this tab open.
+                            </span>
+                            <span class="ph-comp-foot-note" x-show="videoMode && vStatus === 'uploading'" x-cloak>
+                                Uploading your video…
                             </span>
                             <span class="ph-comp-foot-note" x-show="!videoMode" wire:loading.remove wire:target="createPost">
                                 @if (in_array($userLevel, ['Creator', 'Influencer']))
@@ -957,7 +961,7 @@
                             <button class="ph-post-btn" type="submit"
                                 wire:loading.attr="disabled"
                                 wire:target="createPost,publishVideo,uploadVideo,video,uploadToCloudinary"
-                                :disabled="videoMode && vStatus !== 'done'">
+                                :disabled="videoMode && (vStatus === 'uploading' || vStatus === 'processing')">
                                 <span wire:loading.remove wire:target="createPost,publishVideo">
                                     <i class="fa fa-paper-plane"></i>
                                     <span x-text="videoMode ? 'Publish Roll' : 'Post'"></span>
@@ -1026,7 +1030,7 @@
                     Livewire.on('videoUploadStatus', ({ status, progress }) => {
                         this.vStatus = status;
                         this.vPct = progress ?? 0;
-                        if (status === 'uploading' || status === 'ready') {
+                        if (status === 'uploading' || status === 'processing' || status === 'ready') {
                             this.videoMode = true;
                         }
                     });

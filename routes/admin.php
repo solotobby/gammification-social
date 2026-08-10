@@ -4,7 +4,7 @@ use App\Http\Controllers\Admin\AccessCodeController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\BlogController as AdminBlogController;
-use App\Http\Controllers\Admin\CurrencyController;
+use App\Http\Controllers\Admin\CommunityController;
 use App\Http\Controllers\Admin\LevelManagementController;
 use App\Http\Controllers\Admin\MonthlyPayoutController;
 use App\Http\Controllers\Admin\PartnerController;
@@ -76,6 +76,18 @@ Route::middleware(['auth', 'admin'])
             Route::get('create', [AdminBlogController::class, 'create'])->name('create');
             Route::post('/', [AdminBlogController::class, 'store'])->name('store');
             Route::delete('{slug}', [AdminBlogController::class, 'deletePost'])->name('delete');
+        });
+
+        Route::prefix('communities')->name('communities.')->group(function () {
+            Route::get('/', [CommunityController::class, 'index'])->name('index');
+            Route::get('{community}', [CommunityController::class, 'show'])->name('show');
+            Route::post('{community}/archive', [CommunityController::class, 'archive'])->name('archive');
+            Route::post('{community}/unarchive', [CommunityController::class, 'unarchive'])->name('unarchive');
+            Route::post('{community}/ban-member', [CommunityController::class, 'banMember'])->name('ban-member');
+            Route::post('{community}/unban-member', [CommunityController::class, 'unbanMember'])->name('unban-member');
+            Route::post('{community}/remove-member', [CommunityController::class, 'removeMember'])->name('remove-member');
+            Route::delete('{community}/posts/{post}', [CommunityController::class, 'destroyPost'])->name('posts.destroy');
+            Route::delete('{community}', [CommunityController::class, 'destroy'])->name('destroy');
         });
 
         Route::prefix('currencies')->name('currencies.')->group(function () {

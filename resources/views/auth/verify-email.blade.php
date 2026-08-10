@@ -1,69 +1,57 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payhankey Email Verification</title>
+@extends('layouts.auth')
 
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+@section('title', 'Verify email · Payhankey')
 
-    <!-- Bootstrap Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-</head>
-<body class="bg-light">
-
-    <div class="container d-flex justify-content-center align-items-center min-vh-100">
-        <div class="col-md-6 col-lg-5">
-            <div class="card shadow-lg border-0 rounded-4">
-                
-                <div class="card-header bg-primary text-white text-center py-3 rounded-top-4">
-                    <h4 class="mb-0">
-                        <i class="bi bi-envelope-check me-2"></i>
-                        Verify Your Email Address
-                    </h4>
-                </div>
-
-                <div class="card-body p-4 text-center">
-
-                    @if (session('resent'))
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            <i class="bi bi-check-circle me-2"></i>
-                            A fresh verification link has been sent to your email address.
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    @endif
-
-                    <p class="text-muted mb-3">
-                        Thanks for signing up! Before proceeding, please check your email
-                        for a verification link.
-                    </p>
-
-                    <p class="text-muted mb-4">
-                        If you did not receive the email, click the button below to request another.
-                    </p>
-
-                    <form method="POST" action="{{ route('verification.send') }}">
-                        @csrf
-                        <button type="submit" class="btn btn-outline-primary w-100">
-                            <i class="bi bi-arrow-repeat me-1"></i>
-                            Resend Verification Email
-                        </button>
-                    </form>
-                </div>
-
-                <div class="card-footer text-center bg-light rounded-bottom-4">
-                    <small class="text-muted">
-                        Please check your spam or junk folder if you don’t see the email.
-                    </small>
-                </div>
-
-            </div>
-        </div>
+@section('content')
+    <div class="auth-verify__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="4" width="20" height="16" rx="2"/>
+            <path d="M22 7l-10 7L2 7"/>
+        </svg>
     </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+    <h1>Verify your email</h1>
+    <p class="auth-scaffold__lead">
+        Thanks for joining Payhankey. We sent a verification link to
+        @auth
+            <strong class="auth-verify__email">{{ auth()->user()->email }}</strong>.
+        @else
+            your email address.
+        @endauth
+        Open it to activate your account and start posting.
+    </p>
 
+    @if (session('resent') || session('message'))
+        <div class="alert alert--success">
+            A fresh verification link has been sent. Check your inbox.
+        </div>
+    @endif
+
+    @if ($errors->any())
+        <div class="alert alert--error">
+            @foreach ($errors->all() as $error)
+                <div>{{ $error }}</div>
+            @endforeach
+        </div>
+    @endif
+
+    <form method="POST" action="{{ route('verification.send') }}">
+        @csrf
+        <button class="btn btn--primary btn--block auth-scaffold__submit" type="submit">
+            Resend verification email
+        </button>
+    </form>
+
+    <ul class="auth-verify__tips">
+        <li>Links expire after 60 minutes — request a new one if needed.</li>
+        <li>Check your spam or promotions folder if you don't see it.</li>
+        <li>Add <strong>{{ config('mail.from.address', 'hello@payhankey.com') }}</strong> to your contacts.</li>
+    </ul>
+
+    @auth
+        <form method="POST" action="{{ route('logout') }}" class="auth-verify__logout">
+            @csrf
+            <button type="submit">Log out and use a different account</button>
+        </form>
+    @endauth
+@endsection

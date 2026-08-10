@@ -18,6 +18,7 @@ use App\Http\Controllers\GeneralController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\KorapayWebhookController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\RollsController;
 use App\Http\Controllers\RollsWatchController;
 use App\Http\Controllers\VideoAnalyticsController;
 use App\Http\Controllers\WebhookController;
@@ -87,9 +88,13 @@ Route::group(['namespace' => 'auth'], function () {
     Route::get('privacy/policy', [\App\Http\Controllers\GeneralController::class, 'privacyPolicy']);
     Route::get('terms/conditions', [\App\Http\Controllers\GeneralController::class, 'terms']);
     Route::get('how-it-works', [\App\Http\Controllers\GeneralController::class, 'how']);
+    Route::get('features', [\App\Http\Controllers\GeneralController::class, 'features'])->name('features');
 
     Route::get('about', [\App\Http\Controllers\GeneralController::class, 'about']);
     Route::get('contact', [\App\Http\Controllers\GeneralController::class, 'contact']);
+    Route::post('contact', [\App\Http\Controllers\GeneralController::class, 'submitContact'])
+        ->middleware('throttle:6,1')
+        ->name('contact.submit');
     // Route::get('blog', [\App\Http\Controllers\GeneralController::class, 'blog']);
     // Route::get('blog/{slug}', [\App\Http\Controllers\GeneralController::class, 'showBlogPost']);
     Route::get('top-earners', [\App\Http\Controllers\GeneralController::class, 'topEarners']);
@@ -222,7 +227,7 @@ Route::middleware([
 
 
         //VIDEO PLAYER ROUTE
-        Route::get('rolls', Rolls::class)->name('rolls.random');
+        Route::get('rolls', [RollsController::class, 'random'])->name('rolls.random');
         Route::get('rolls/{video}', Rolls::class)->name('rolls.show');
         // Route::get('earners/list', EarningList::class);
         Route::get('earner/list', EarningList::class);

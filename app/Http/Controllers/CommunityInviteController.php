@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Notifications\GeneralNotification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use App\Services\CommunityMembershipService;
 use Illuminate\Support\Str;
 
 class CommunityInviteController extends Controller
@@ -29,19 +30,19 @@ class CommunityInviteController extends Controller
 
         $community = $invite->community;
 
+        if (app(CommunityMembershipService::class)->isBanned($community, auth()->id())) {
+            return redirect()->route('community')->with('error', 'You cannot rejoin this community.');
+        }
+
         if ($community->members()->where('users.id', auth()->id())->exists()) {
             return redirect()->route('community.show', $community)
                 ->with('status', 'You are already a member of this community.');
         }
 
         DB::transaction(function () use ($invite) {
-            $invite->community->members()->syncWithoutDetaching([
-                auth()->id() => [
-                    'id' => (string) Str::uuid(),
-                    'role' => 'member',
-                    'status' => 'active',
-                ],
-            ]);
+            if (! app(CommunityMembershipService::class)->attachMember($invite->community, auth()->id())) {
+                return;
+            }
 
             if ($invite->type === 'direct') {
                 $invite->update([

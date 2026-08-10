@@ -172,17 +172,67 @@ if (!function_exists('userBaseCurrency')) {
     }
 }
 
+if (!function_exists('communityMinimumPrice')) {
+    function communityMinimumPrice(?string $currency = null): float
+    {
+        $currency = strtoupper((string) ($currency ?? userBaseCurrency() ?? 'NGN'));
+        $minimums = config('community.minimum_prices', []);
+
+        return (float) ($minimums[$currency] ?? $minimums['NGN'] ?? 500);
+    }
+}
+
+
+if (!function_exists('normalizeUserLevel')) {
+    function normalizeUserLevel(?string $name): string
+    {
+        $key = strtolower(trim((string) $name));
+
+        return match ($key) {
+            'creator' => 'Creator',
+            'influencer' => 'Influencer',
+            'basic', '' => 'Basic',
+            default => $name !== null && $name !== '' ? $name : 'Basic',
+        };
+    }
+}
+
+if (!function_exists('canUploadVideo')) {
+    function canUploadVideo(?string $level = null): bool
+    {
+        $level ??= userLevel();
+
+        return in_array(normalizeUserLevel($level), ['Creator', 'Influencer'], true);
+    }
+}
 
 if (!function_exists('userLevel')) {
     function userLevel($userId = null)
     {
-
         $userId ??= auth()->id();
-        return UserLevel::where('user_id', $userId)->first()?->plan_name ?? 'Basic';
 
-        // return $user?->activeLevel?->plan_name ;//?? 'Basic';
+        if (! $userId) {
+            return 'Basic';
+        }
 
-        // return $userId ? User::find($userId)->activeLevel->plan_name : auth()->user()->activeLevel->plan_name;
+        $record = UserLevel::where('user_id', $userId)
+            ->where('status', UserLevel::STATUS_ACTIVE)
+            ->orderByDesc('next_payment_date')
+            ->first()
+            ?? UserLevel::where('user_id', $userId)->latest()->first();
+
+        if ($record?->plan_name) {
+            return normalizeUserLevel($record->plan_name);
+        }
+
+        if ($record?->level_id) {
+            $levelName = Level::where('id', $record->level_id)->value('name');
+            if ($levelName) {
+                return normalizeUserLevel($levelName);
+            }
+        }
+
+        return 'Basic';
     }
 }
 

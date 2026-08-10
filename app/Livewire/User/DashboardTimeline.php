@@ -210,29 +210,21 @@ class DashboardTimeline extends Component
         if (!$this->video) return;
 
         $level = userLevel();
-        $maxKB = match ($level) {
-            'Creator'    => 162400,   // 200 MB
-            'Influencer' => 202400,  // 200 MB
-            default      => 0,
-        };
+        $service = app(VideoUploadService::class);
+        $maxKB = $service->maxFileKb($level);
 
-        if ($maxKB === 0) {
+        if (! canUploadVideo($level) || $maxKB <= 0) {
             $this->videoUploadStatus = 'error';
-            $this->addError('video', 'Your account level cannot upload videos.');
+            $this->addError('video', 'Only Creator and Influencer accounts can upload rolls.');
             return;
         }
 
-        // Validate file type and size only
-        $valid = $this->validate([
-            'video' => "required|file|mimetypes:video/mp4,video/quicktime,video/x-msvideo,video/webm|max:{$maxKB}",
+        $this->validate([
+            'video' => 'required|file|mimetypes:'.$service->allowedMimetypes()."|max:{$maxKB}",
         ]);
 
-        if ($valid) {
-            // File is good — mark as ready, wait for user to click Upload
-            $this->videoUploadStatus = 'ready';
-            // Tell Alpine to show the Upload button
-            $this->dispatch('videoUploadStatus', status: 'ready', progress: 0);
-        }
+        $this->videoUploadStatus = 'ready';
+        $this->dispatch('videoUploadStatus', status: 'ready', progress: 0);
     }
 
     // ─────────────────────────────────────────────────────────

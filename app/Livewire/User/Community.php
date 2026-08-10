@@ -7,22 +7,24 @@ use App\Models\Community as CommunityModel;
 use App\Models\CommunityCategory;
 use App\Models\CommunityInvite;
 use App\Models\CommunitySubscription;
+use App\Support\CommunityFeeCalculator;
+use App\Services\CommunityMembershipService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 class Community extends Component
 {
+    use WithPagination;
+
     // ---- list filters ----
     public string $filter = 'all';
     public string $search = '';
     public $category;
 
-    // ---- "Load more" pagination window ----
     public int $perPage = 6;
-
-    private const PAGE_STEP = 6;
 
     // ---- create-community form state ----
     public string $name = '';
@@ -43,7 +45,7 @@ class Community extends Component
         $this->category = CommunityCategory::all();
         $this->filter = request()->query('filter', 'all');
         $this->search = request()->query('search', '');
-        $this->platformFeePercent = (int) config('community.platform_fee_percent', 25);
+        $this->platformFeePercent = (int) config('community.platform_fee_percent', 10);
          if (userBaseCurrency() === 'NGN') {
             $this->billing_type = 'one_off';
             $this->billing_interval = null;
@@ -57,7 +59,7 @@ class Community extends Component
             'description' => ['required', 'string', 'max:1000'],
             'community_categories_id' => ['required', 'exists:community_categories,id'],
             'type' => ['required', Rule::in(['public', 'private', 'paid', 'approval'])],
-            'monthly_fee' => ['required_if:type,paid', 'nullable', 'numeric', 'min:100'],
+            'monthly_fee' => ['required_if:type,paid', 'nullable', 'numeric', 'min:'.communityMinimumPrice()],
             'fee_payer' => ['required_if:type,paid', 'nullable', Rule::in(['creator', 'members'])],
             'billing_type' => ['required_if:type,paid', 'nullable', Rule::in(['one_off', 'subscription'])],
             'billing_interval' => [
@@ -116,18 +118,15 @@ class Community extends Component
         $userBaseCurrency = userBaseCurrency();
        
 
-        $rate = $this->platformFeePercent / 100;
+        $breakdown = CommunityFeeCalculator::breakdown(
+            (float) $this->monthly_fee,
+            $this->platformFeePercent,
+            $this->fee_payer,
+        );
 
-
-        $memberCharge = $this->fee_payer === 'members'
-            ? round($this->monthly_fee / (1 - $rate), 2)
-            : round((float) $this->monthly_fee, 2);
-
-
-        $platformCut = round($memberCharge * $rate, 2);
-        $creatorPayout = round($memberCharge - $platformCut, 2);
-
-        // dd($memberCharge, $platformCut, $creatorPayout);
+        $memberCharge = $breakdown['memberCharge'];
+        $platformCut = $breakdown['platformCut'];
+        $creatorPayout = $breakdown['creatorPayout'];
 
         $suffix = $this->billing_type === 'one_off'
             ? ' one-time'
@@ -216,25 +215,40 @@ class Community extends Component
         $this->resetList();
     }
 
-    public function loadMore(): void
-    {
-        $this->perPage += self::PAGE_STEP;
-    }
-
     private function resetList(): void
     {
-        $this->perPage = self::PAGE_STEP;
+        $this->resetPage();
     }
 
     // ---- membership actions ----
 
     public function join(string $communityId): void
     {
-        $community = CommunityModel::query()->where('type', 'public')->findOrFail($communityId);
+        $community = CommunityModel::query()
+            ->where('type', 'public')
+            ->whereNull('archived_at')
+            ->forUserCurrency()
+            ->findOrFail($communityId);
 
-        $community->members()->syncWithoutDetaching([
-            auth()->id() => ['id' => (string) Str::uuid(), 'role' => 'member', 'status' => 'active'],
-        ]);
+        if (app(CommunityMembershipService::class)->isBanned($community, auth()->id())) {
+            session()->flash('error', 'You cannot rejoin this community.');
+
+            return;
+        }
+
+        if (! $community->isInCurrency()) {
+            session()->flash('error', 'This community is not available in your currency.');
+
+            return;
+        }
+
+        if (! app(CommunityMembershipService::class)->attachMember($community, auth()->id())) {
+            session()->flash('error', 'Unable to join this community.');
+
+            return;
+        }
+
+        session()->flash('status', 'Joined ' . $community->name . '.');
     }
 
     public function hasPendingInvite(string $communityId): bool
@@ -275,6 +289,7 @@ class Community extends Component
         $query = CommunityModel::query()
             ->with('category')
             ->withCount('members')
+            ->whereNull('archived_at')
             ->withExists(['members as is_member' => fn($q) => $q->where('users.id', $userId)]);
 
         if ($this->filter === 'joined') {
@@ -290,6 +305,12 @@ class Community extends Component
                 $q->where('name', 'like', "%{$this->search}%")
                     ->orWhere('description', 'like', "%{$this->search}%");
             });
+        }
+
+        // Discovery tabs only show communities in the viewer's wallet currency.
+        // Joined/mine always include memberships regardless of currency.
+        if (! in_array($this->filter, ['joined', 'mine'], true)) {
+            $query->forUserCurrency();
         }
 
         // Private communities are hidden from discovery unless you own,
@@ -330,22 +351,22 @@ class Community extends Component
 
     public function render()
     {
-        // simplePaginate() skips the extra COUNT(*) query a normal paginator
-        // needs for page numbers — all a "Load more" button needs is
-        // hasMorePages(), so there's no reason to pay for that count.
-        $communities = $this->communitiesQuery()->simplePaginate($this->perPage);
+        // Paginated list — filters/search reset the page via resetList().
+        $communities = $this->communitiesQuery()->paginate($this->perPage);
 
         return view('livewire.user.community', [
             'communities' => $communities,
             'trending' => CommunityModel::query()
                 ->withCount('members')
                 ->where('type', '!=', 'private')
+                ->forUserCurrency()
                 ->orderByDesc('members_count')
                 ->limit(3)
                 ->get(),
             'suggested' => CommunityModel::query()
                 ->withCount('members')
                 ->where('type', 'public')
+                ->forUserCurrency()
                 ->whereDoesntHave('members', fn($q) => $q->where('users.id', auth()->id()))
                 ->inRandomOrder()
                 ->limit(2)

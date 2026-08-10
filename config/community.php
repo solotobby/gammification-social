@@ -57,4 +57,15 @@ return [
         'subscription' => ['label' => 'Subscription', 'suffix' => ''],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Minimum sticker price for paid communities (by currency)
+    |--------------------------------------------------------------------------
+    */
+
+    'minimum_prices' => [
+        'NGN' => 500,
+        'USD' => 5,
+    ],
+
 ];

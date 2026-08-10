@@ -10,6 +10,7 @@ use App\Models\Partner;
 use App\Models\PartnerSlot;
 use App\Models\Transaction;
 use App\Models\Webhook;
+use App\Services\CommunityFlutterwaveService;
 use App\Services\CommunitySubscriptionService;
 use App\Services\TransactionService;
 use App\Services\UpgradeSubscriptionService;
@@ -130,7 +131,7 @@ class WebhookController extends Controller
                     ], 404);
                 }
 
-                app(CommunitySubscriptionService::class)->initiate($community, $transaction->user, $transaction);
+                app(CommunitySubscriptionService::class)->processSuccessfulPayment($community, $transaction->user, $transaction);
 
 
                 $subject = 'Webhook Received: Upgrade Processed Successfully';
@@ -399,7 +400,16 @@ class WebhookController extends Controller
             ->lockForUpdate()
             ->first();
 
-        if (!$transaction) {
+        if (! $transaction && $gatewayStatus === 'successful') {
+            $transaction = app(CommunityFlutterwaveService::class)->resolveRenewalTransaction(
+                $txRef,
+                $gatewayAmount,
+                $gatewayCurrency,
+                $gatewayData ?? []
+            );
+        }
+
+        if (! $transaction) {
 
             Log::critical(
                 'Flutterwave webhook transaction not found',
@@ -508,48 +518,54 @@ class WebhookController extends Controller
                 $event
             ) {
 
-                /**
-                 * Refresh transaction
-                 */
                 $transaction->refresh();
 
-                /**
-                 * Double-check idempotency
-                 */
-                if (
-                    $transaction->status === 'successful'
-                ) {
+                if ($transaction->status === 'successful') {
                     return;
                 }
 
-                //perform the subscription upgrade
+                $reference = strtoupper((string) $txRef);
+                $isCommunity = str_starts_with($reference, 'COM-')
+                    || str_starts_with((string) $transaction->type, 'community_');
 
-                $level = Level::where('id', $transaction->meta['level_id'])
-                    ->first();
+                if ($isCommunity) {
+                    $this->processCommunityFlutterwavePayment($transaction, $payload);
+                } elseif (str_starts_with($reference, 'PKY-')) {
+                    $level = Level::where('id', $transaction->meta['level_id'] ?? null)->first();
 
-                //mark transaction successful now and then perform subscription upgrade in the service to ensure atomicity and prevent issues with failed upgrades after marking transaction successful
-                $this->upgradeSubscriptionService->upgradeSubscription(
-                    $transaction->user,
-                    $level,
-                    $transaction,
-                    $payload
-                );
+                    if (! $level) {
+                        Log::error('Level not found for PKY transaction', [
+                            'tx_ref' => $txRef,
+                            'transaction_id' => $transaction->id,
+                        ]);
 
-                $subject = 'Webhook Received: Upgrade Processed Successfully';
-                $content = "Upgrade processed successfully for event: {$event}. Transaction ref: {$txRef} has been marked successful and subscription upgraded.";
+                        throw new \RuntimeException('Subscription level not found');
+                    }
 
+                    $this->upgradeSubscriptionService->upgradeSubscription(
+                        $transaction->user,
+                        $level,
+                        $transaction,
+                        $payload
+                    );
+                } else {
+                    Log::error('Unknown Flutterwave transaction reference prefix', [
+                        'tx_ref' => $txRef,
+                        'transaction_id' => $transaction->id,
+                    ]);
+
+                    throw new \RuntimeException('Unknown transaction reference');
+                }
 
                 Mail::to('solotob3@gmail.com')
                     ->send(new GeneralMail(
-                        (object)[
+                        (object) [
                             'name' => 'Oluwatobi Solomon',
-                            'email' => 'solotob3@gmail.com'
+                            'email' => 'solotob3@gmail.com',
                         ],
-                        $subject,
-                        $content
+                        'Webhook Received: Payment Processed Successfully',
+                        "Payment processed for event: {$event}. Transaction ref: {$txRef}."
                     ));
-
-                // event(new PaymentSuccessful($transaction));
             });
 
             Log::info(
@@ -581,6 +597,40 @@ class WebhookController extends Controller
         return response(
             'Webhook processed',
             200
+        );
+    }
+
+    /**
+     * Activate or renew community membership from a Flutterwave COM- transaction.
+     */
+    private function processCommunityFlutterwavePayment(Transaction $transaction, array $payload): void
+    {
+        $communityId = $transaction->meta['community_id'] ?? null;
+
+        if (! $communityId) {
+            Log::error('Community ID missing from COM transaction metadata', [
+                'reference' => $transaction->ref,
+                'transaction_id' => $transaction->id,
+            ]);
+
+            throw new \RuntimeException('Community ID not found');
+        }
+
+        $community = Community::find($communityId);
+
+        if (! $community) {
+            Log::error('Community not found for Flutterwave payment', [
+                'community_id' => $communityId,
+                'reference' => $transaction->ref,
+            ]);
+
+            throw new \RuntimeException('Community not found');
+        }
+
+        $this->communitySubscriptionService->processSuccessfulPayment(
+            $community,
+            $transaction->user,
+            $transaction
         );
     }
 }
