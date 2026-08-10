@@ -661,6 +661,9 @@
                         @case('approval')
                             Request to join
                         @break
+                        @case('private')
+                            Open with invite
+                        @break
                         @default
                             Open in {{ config('app.name') }}
                     @endswitch
@@ -752,6 +755,7 @@
             @case('public') Join now @break
             @case('paid') Subscribe @break
             @case('approval') Request access @break
+            @case('private') Open with invite @break
             @default Open community
         @endswitch
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>

@@ -111,9 +111,6 @@
                     </p>
                 </div>
                 <div class="dash-actions">
-                    @if ($community->type === 'public')
-                        <a href="{{ route('community.public', $community) }}" class="dash-btn dash-btn--ghost" target="_blank">Public page</a>
-                    @endif
                     <a href="{{ route('community.show', $community) }}" class="dash-btn dash-btn--ghost" target="_blank">View live</a>
                     @if ($community->user)
                         <a href="{{ route('admin.users.show', $community->user) }}" class="dash-btn dash-btn--ghost">Owner profile</a>

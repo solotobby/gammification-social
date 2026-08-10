@@ -136,6 +136,20 @@ class Community extends Model
     }
 
     /**
+     * Shareable landing page at /c/{slug}.
+     * Available for every community type (public, private, paid, approval).
+     */
+    public function hasPublicPage(): bool
+    {
+        return ! $this->isArchived();
+    }
+
+    public function getPublicUrlAttribute(): string
+    {
+        return route('community.public', $this);
+    }
+
+    /**
      * Two-letter monogram for the community's icon tile, e.g.
      * "Side Hustle Naija" -> "SH".
      */

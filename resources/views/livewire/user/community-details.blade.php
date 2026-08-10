@@ -3,9 +3,8 @@
 
     @include('livewire.user.partials.community-ui')
 
-    <div class="community-show-page" x-data="{ tab: 'feed', shareOpen: false }"
-        @settings-saved.window="tab = 'feed'"
-        @keydown.escape.window="shareOpen = false">
+    <div class="community-show-page" x-data="{ tab: 'feed' }"
+        @settings-saved.window="tab = 'feed'">
 
         <div class="pk-ui-bg" aria-hidden="true"></div>
         <div class="pk-ui-inner">
@@ -1979,93 +1978,8 @@
                         <button type="button" class="pk-btn pk-btn-outline" disabled>Invite only</button>
                     @endif
 
-                    @php
-                        $publicShareUrl = route('community.public', $community);
-                        $shareText = 'Check out ' . $community->name . ' on ' . config('app.name');
-                        $encodedShareText = urlencode($shareText);
-                        $encodedShareUrl = urlencode($publicShareUrl);
-                    @endphp
-
-                    <div class="pk-share-wrap mx-auto mx-sm-0">
-                        <button type="button" class="pk-icon-btn"
-                            x-bind:class="{ 'pk-active': shareOpen }"
-                            aria-label="Share community"
-                            aria-expanded="false"
-                            x-bind:aria-expanded="shareOpen.toString()"
-                            x-on:click.stop="shareOpen = !shareOpen">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M16 6l-4-4-4 4M12 2v13"
-                                    stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                        </button>
-                        <div class="pk-share-menu"
-                            x-show="shareOpen"
-                            x-on:click.outside="shareOpen = false"
-                            style="display:none">
-                            <div class="pk-share-menu-header">Share community</div>
-                            <div class="pk-share-url-preview">{{ $publicShareUrl }}</div>
-
-                            <button type="button" class="pk-share-item"
-                                x-show="typeof navigator !== 'undefined' && !!navigator.share"
-                                x-on:click="
-                                    navigator.share(@js(['title' => $community->name, 'text' => $shareText, 'url' => $publicShareUrl]))
-                                        .then(() => shareOpen = false)
-                                        .catch(() => {});
-                                ">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
-                                    <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
-                                    <path d="m8.6 13.5 6.8 3.9M15.4 6.6 8.6 10.5" />
-                                </svg>
-                                <span>Share via device…</span>
-                            </button>
-
-                            <a class="pk-share-item pk-share-wa" target="_blank" rel="noopener"
-                                href="https://wa.me/?text={{ $encodedShareText }}%20{{ $encodedShareUrl }}"
-                                x-on:click="shareOpen = false">
-                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.28-1.39a9.9 9.9 0 0 0 4.76 1.21h.01c5.46 0 9.9-4.45 9.9-9.91C22 6.45 17.5 2 12.04 2Z"/></svg>
-                                WhatsApp
-                            </a>
-                            <a class="pk-share-item pk-share-x" target="_blank" rel="noopener"
-                                href="https://twitter.com/intent/tweet?text={{ $encodedShareText }}&url={{ $encodedShareUrl }}"
-                                x-on:click="shareOpen = false">
-                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 2H22l-7.2 8.2L23.3 22H16.6l-5.2-6.8L5.4 22H2.3l7.7-8.8L1 2h6.9l4.7 6.2L18.9 2Z"/></svg>
-                                X (Twitter)
-                            </a>
-                            <a class="pk-share-item pk-share-fb" target="_blank" rel="noopener"
-                                href="https://www.facebook.com/sharer/sharer.php?u={{ $encodedShareUrl }}"
-                                x-on:click="shareOpen = false">
-                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 21v-7.5H16l.4-3H13.5V8.4c0-.87.24-1.46 1.5-1.46H16.5V4.3c-.26-.03-1.14-.1-2.16-.1-2.14 0-3.6 1.3-3.6 3.7v2.6H8.5v3h2.24V21h2.76Z"/></svg>
-                                Facebook
-                            </a>
-                            <a class="pk-share-item pk-share-li" target="_blank" rel="noopener"
-                                href="https://www.linkedin.com/sharing/share-offsite/?url={{ $encodedShareUrl }}"
-                                x-on:click="shareOpen = false">
-                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.94 8.5H3.56V20h3.38V8.5ZM5.25 3.5A1.96 1.96 0 1 0 5.27 7.42 1.96 1.96 0 0 0 5.25 3.5ZM20.45 20h-3.37v-5.98c0-1.43-.03-3.26-1.99-3.26-2 0-2.3 1.56-2.3 3.16V20H9.42V8.5h3.24v1.57h.05c.45-.86 1.56-1.77 3.2-1.77 3.43 0 4.06 2.26 4.06 5.19V20Z"/></svg>
-                                LinkedIn
-                            </a>
-                            <a class="pk-share-item pk-share-tg" target="_blank" rel="noopener"
-                                href="https://t.me/share/url?url={{ $encodedShareUrl }}&text={{ $encodedShareText }}"
-                                x-on:click="shareOpen = false">
-                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="m21.9 4.3-3 15c-.2.9-.8 1.1-1.6.7l-4.5-3.3-2.2 2.1c-.2.2-.4.4-.8.4l.3-4.3 7.9-7.1c.3-.3-.1-.5-.5-.2l-9.7 6.1-4.2-1.3c-.9-.3-.9-.9.2-1.3L20.6 3.4c.8-.3 1.5.2 1.3.9Z"/></svg>
-                                Telegram
-                            </a>
-                            <button type="button" class="pk-share-item"
-                                x-on:click="
-                                    navigator.clipboard.writeText(@js($publicShareUrl));
-                                    $el.querySelector('.pk-copy-label').textContent = 'Copied!';
-                                    setTimeout(() => { $el.querySelector('.pk-copy-label').textContent = 'Copy public link'; shareOpen = false; }, 1200);
-                                ">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
-                                    <rect x="9" y="9" width="12" height="12" rx="2" />
-                                    <path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1" />
-                                </svg>
-                                <span class="pk-copy-label">Copy public link</span>
-                            </button>
-                        </div>
-                    </div>
-
                     @if ($this->isOwner())
-                        <button type="button" class="pk-icon-btn mx-auto mx-sm-0" x-on:click="tab = 'settings'; shareOpen = false"
+                        <button type="button" class="pk-icon-btn mx-auto mx-sm-0" x-on:click="tab = 'settings'"
                             x-bind:class="{ 'pk-active': tab === 'settings' }" aria-label="Community settings">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <circle cx="12" cy="12" r="3" />
@@ -2794,33 +2708,6 @@
                         @enderror
                     </div>
 
-                    <div class="pk-upload-hint" style="margin-top:4px">
-                        Renaming updates your public link slug automatically (currently <code>/c/{{ $community->slug }}</code>).
-                    </div>
-                </div>
-
-                {{-- shareable community link --}}
-                <div class="pk-card pk-settings-section pk-link-banner">
-                    <h3>Community link</h3>
-                    <div class="pk-sub">Anyone with this link can view the community's public info page — even if
-                        it's private, paid, or approval-based.</div>
-                    <div class="d-flex flex-column flex-sm-row gap-2">
-                        <div class="pk-copy-input flex-grow-1">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M10 13a5 5 0 0 0 7.5.5l2-2a5 5 0 0 0-7-7l-1.5 1.5" />
-                                <path d="M14 11a5 5 0 0 0-7.5-.5l-2 2a5 5 0 0 0 7 7l1.5-1.5" />
-                            </svg>
-                            <span>{{ route('community.public', $community) }}</span>
-                        </div>
-                        <button type="button" class="pk-btn pk-btn-violet pk-btn-sm"
-                            onclick="navigator.clipboard.writeText('{{ route('community.public', $community) }}'); this.textContent='Copied!'; setTimeout(() => this.textContent='Copy', 2000)">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="9" y="9" width="12" height="12" rx="2" />
-                                <path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1" />
-                            </svg>
-                            Copy
-                        </button>
-                    </div>
                 </div>
 
                 {{-- privacy & access --}}

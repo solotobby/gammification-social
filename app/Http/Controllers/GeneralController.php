@@ -116,19 +116,9 @@ class GeneralController extends Controller
     //     ]);
     // }
 
-    public function communityPublic($slug)
+    public function communityPublic(Community $community)
     {
-        $community = Community::where('slug', $slug)
-            ->where('type', 'public')
-            ->whereNull('archived_at')
-            ->firstOrFail();
-
-        if (
-            auth()->check()
-            && ! $community->isInCurrency()
-            && $community->user_id !== auth()->id()
-            && ! $community->members()->where('users.id', auth()->id())->exists()
-        ) {
+        if ($community->isArchived()) {
             abort(404);
         }
 

@@ -111,7 +111,7 @@ Route::group(['namespace' => 'auth'], function () {
     Route::post('process/access/code', [\App\Http\Controllers\GeneralController::class, 'processAccessCode']);
 
 
-    Route::get('/c/{community:slug}', [\App\Http\Controllers\GeneralController::class, 'communityPublic'])->name('community.public');
+    // Route::get('/c/{community:slug}', [\App\Http\Controllers\GeneralController::class, 'communityPublic'])->name('community.public');
 
     Route::get('success', [\App\Http\Controllers\GeneralController::class, 'success']);
     Route::get('error', [\App\Http\Controllers\GeneralController::class, 'error']);

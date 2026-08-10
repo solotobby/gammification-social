@@ -1057,6 +1057,7 @@
                                 <span class="pk-cc-members">{{ number_format($community->members_count) }}
                                     members</span>
 
+                                <div class="d-flex flex-wrap gap-2 justify-content-end">
                                 @if ($community->is_member)
                                     <button type="button" class="pk-btn pk-btn-outline pk-btn-sm" disabled>
                                         {{ $community->type === 'private' ? 'Invite only' : 'Joined' }}
@@ -1093,6 +1094,7 @@
                                         wire:loading.attr="disabled"
                                         wire:target="join('{{ $community->id }}')">Join</button>
                                 @endif
+                                </div>
                             </div>
                         </article>
                         @empty
