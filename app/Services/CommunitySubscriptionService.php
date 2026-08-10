@@ -259,6 +259,7 @@ class CommunitySubscriptionService
         $baseCurrency = userBaseCurrency();
         $basePrice = (float) $community->monthly_fee;
         $breakdown = CommunityFeeCalculator::breakdown(
+            $basePrice,
             (int) ($community->platform_fee_percent ?: 0),
             (string) $community->fee_payer,
         );
