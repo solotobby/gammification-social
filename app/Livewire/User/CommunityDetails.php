@@ -2,21 +2,25 @@
 
 namespace App\Livewire\User;
 
+use App\Http\Controllers\CommunityInviteController;
 use App\Mail\GeneralMail;
 use App\Models\Community;
 use App\Models\CommunityCategory;
+use App\Models\CommunityInvite;
 use App\Models\CommunityJoinRequest;
 use App\Models\CommunityPostComment;
+use App\Models\CommunityPostLike;
 use App\Models\CommunityPostView;
 use App\Models\CommunitySubscription;
+use App\Models\User;
 use App\Notifications\GeneralNotification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use App\Services\CommunitySubscriptionService;
 
 class CommunityDetails extends Component
 {
@@ -37,6 +41,7 @@ class CommunityDetails extends Component
     public int $postsPerPage = 10;
     public int $membersPerPage = 10;
     public string $memberSearch = '';
+    public string $postSearch = '';
     private const PAGE_STEP = 10;
 
     // ---- settings form ----
@@ -45,7 +50,7 @@ class CommunityDetails extends Component
     public string $settingsCategoryId = '';
     public string $settingsType = 'public';
     public string $settingsFeePayer = 'creator';
-    public ?float $settingsPrice = null;
+    public ?float $settingsMonthlyFee = null;
     public string $settingsBillingType = 'subscription';
     public ?string $settingsBillingInterval = 'monthly';
     public $settingsLogo;
@@ -53,9 +58,12 @@ class CommunityDetails extends Component
     public int $platformFeePercent;
     public array $billingIntervals = [];
 
+    // ---- private community invites ----
+    public string $inviteIdentifier = '';
+
     public function mount(Community $community): void
     {
-        $this->community = $community;
+        $this->community = $community->loadCount(['members', 'posts'])->load(['category', 'user']);
         $this->platformFeePercent = (int) config('community.platform_fee_percent', 25);
         $this->billingIntervals = config('community.billing_intervals', []);
 
@@ -64,7 +72,7 @@ class CommunityDetails extends Component
         $this->settingsCategoryId = (string) $community->community_categories_id;
         $this->settingsType = $community->type;
         $this->settingsFeePayer = $community->fee_payer ?? 'creator';
-        $this->settingsPrice = $community->monthly_fee ? (float) $community->monthly_fee : null;
+        $this->settingsMonthlyFee = $community->monthly_fee ? (float) $community->monthly_fee : null;
         $this->settingsBillingType = $community->billing_type ?? 'subscription';
         $this->settingsBillingInterval = $community->billing_interval ?? 'monthly';
     }
@@ -92,6 +100,34 @@ class CommunityDetails extends Component
         return $this->isOwner() || $this->isAdmin();
     }
 
+    public function ownerEarningsTotal(): float
+    {
+        if (! $this->isOwner() || $this->community->type !== 'paid') {
+            return 0.0;
+        }
+
+        return (float) CommunitySubscription::query()
+            ->where('community_id', $this->community->id)
+            ->whereIn('status', ['active', 'expired', 'cancelled'])
+            ->sum('creator_amount');
+    }
+
+    public function formatCommunityMoney(float $amount): string
+    {
+        $from = $this->community->currency ?? userBaseCurrency();
+        $to = userBaseCurrency();
+
+        try {
+            $converted = $from === $to
+                ? $amount
+                : convertCurrency($amount, $from, $to);
+        } catch (\Throwable) {
+            $converted = $amount;
+        }
+
+        return getCurrencyCode().number_format($converted, 2);
+    }
+
     public function isOwnerOrAdminOrMember(): bool
     {
         return $this->isOwner() || $this->isAdmin() || $this->isMember();
@@ -105,6 +141,51 @@ class CommunityDetails extends Component
     public function canViewMembers(): bool
     {
         return $this->community->type === 'public' || $this->isOwnerOrAdminOrMember();
+    }
+
+    /**
+     * Feed visibility rules by community type:
+     * - public: everyone can browse
+     * - private / paid / approval: members only
+     */
+    public function canViewFeed(): bool
+    {
+        return match ($this->community->type) {
+            'private', 'paid', 'approval' => $this->isMember(),
+            default => true,
+        };
+    }
+
+    public function feedGateMessage(): string
+    {
+        return match ($this->community->type) {
+            'paid' => 'Subscribe or pay to join before you can view posts in this community.',
+            'approval' => 'Your join request must be approved before you can view posts here.',
+            'private' => $this->hasPendingInvite()
+                ? 'You have been invited — accept the invitation above to see posts and participate.'
+                : 'Only invited members can view the feed. Ask the admin for an invite link.',
+            default => 'Join this community to view the feed.',
+        };
+    }
+
+    public function feedGateTitle(): string
+    {
+        return match ($this->community->type) {
+            'paid' => 'Members-only feed',
+            'approval' => 'Approval required',
+            'private' => 'This community is private',
+            default => 'Join to view',
+        };
+    }
+
+    public function hasPendingInvite(): bool
+    {
+        return CommunityInviteController::pendingDirectInviteFor($this->community, auth()->user()) !== null;
+    }
+
+    public function pendingInviteToken(): ?string
+    {
+        return CommunityInviteController::pendingDirectInviteFor($this->community, auth()->user())?->token;
     }
 
     // =========================================================
@@ -164,6 +245,11 @@ class CommunityDetails extends Component
         $this->postsPerPage = self::PAGE_STEP;
     }
 
+    public function updatedPostSearch(): void
+    {
+        $this->postsPerPage = self::PAGE_STEP;
+    }
+
     public function loadMorePosts(): void
     {
         $this->postsPerPage += self::PAGE_STEP;
@@ -171,18 +257,34 @@ class CommunityDetails extends Component
 
     public function toggleLike(string $postId): void
     {
-        $post = $this->community->posts()->findOrFail($postId);
-        $result = $post->likes()->toggle(auth()->id());
+        if (! $this->isMember()) {
+            return;
+        }
 
-        if (! empty($result['attached'])) {
-            $post->increment('likes_count');
-        } elseif (! empty($result['detached'])) {
+        $post = $this->community->posts()->findOrFail($postId);
+
+        $existing = CommunityPostLike::where('community_post_id', $post->id)
+            ->where('user_id', auth()->id())
+            ->first();
+
+        if ($existing) {
+            $existing->delete();
             $post->decrement('likes_count');
+        } else {
+            CommunityPostLike::create([
+                'community_post_id' => $post->id,
+                'user_id' => auth()->id(),
+            ]);
+            $post->increment('likes_count');
         }
     }
 
     public function addComment(string $postId): void
     {
+        if (! $this->isMember()) {
+            return;
+        }
+
         $text = trim($this->newComment[$postId] ?? '');
 
         if ($text === '' || mb_strlen($text) > 500) {
@@ -413,6 +515,131 @@ class CommunityDetails extends Component
         session()->flash('status', 'Request denied.');
     }
 
+    // =========================================================
+    // Private community invites
+    // =========================================================
+
+    public function inviteMember(): void
+    {
+        if (! $this->authorizeInvite() || $this->community->type !== 'private') {
+            return;
+        }
+
+        $this->validate([
+            'inviteIdentifier' => ['required', 'string', 'max:255'],
+        ]);
+
+        $identifier = trim($this->inviteIdentifier);
+
+        $user = User::query()
+            ->where('status', 'ACTIVE')
+            ->where(function ($q) use ($identifier) {
+                $q->where('username', $identifier)
+                    ->orWhere('email', $identifier);
+            })
+            ->first();
+
+        if (! $user) {
+            $this->addError('inviteIdentifier', 'No active user found with that username or email.');
+
+            return;
+        }
+
+        if ($user->id === auth()->id()) {
+            $this->addError('inviteIdentifier', 'You cannot invite yourself.');
+
+            return;
+        }
+
+        if ($this->community->members()->where('users.id', $user->id)->exists()) {
+            $this->addError('inviteIdentifier', 'That user is already a member.');
+
+            return;
+        }
+
+        CommunityInviteController::createDirectInvite($this->community, auth()->user(), $user);
+
+        $this->reset('inviteIdentifier');
+        $this->resetErrorBag('inviteIdentifier');
+        session()->flash('status', 'Invitation sent to ' . displayName($user->name) . '.');
+    }
+
+    public function generateInviteLink(): void
+    {
+        if (! $this->authorizeInvite() || $this->community->type !== 'private') {
+            return;
+        }
+
+        CommunityInviteController::regenerateLinkInvite($this->community, auth()->user());
+        session()->flash('status', 'Invite link ready — share it with people you want to join.');
+    }
+
+    public function revokeInviteLink(): void
+    {
+        if (! $this->authorizeInvite()) {
+            return;
+        }
+
+        CommunityInvite::where('community_id', $this->community->id)
+            ->where('type', 'link')
+            ->where('status', 'pending')
+            ->update(['status' => 'revoked']);
+
+        session()->flash('status', 'Invite link revoked.');
+    }
+
+    public function revokeDirectInvite(string $inviteId): void
+    {
+        if (! $this->authorizeInvite()) {
+            return;
+        }
+
+        CommunityInvite::where('community_id', $this->community->id)
+            ->where('id', $inviteId)
+            ->where('type', 'direct')
+            ->where('status', 'pending')
+            ->update(['status' => 'revoked']);
+
+        session()->flash('status', 'Invitation revoked.');
+    }
+
+    /**
+     * Accept a direct invitation from the community page (Livewire action).
+     * Link-based invites use the /community/invite/{token} route instead.
+     */
+    public function acceptInvite(): void
+    {
+        if ($this->community->type !== 'private' || $this->isMember()) {
+            return;
+        }
+
+        $invite = CommunityInviteController::pendingDirectInviteFor($this->community, auth()->user());
+
+        if (! $invite) {
+            session()->flash('error', 'You do not have a pending invitation for this community.');
+
+            return;
+        }
+
+        DB::transaction(function () use ($invite) {
+            $this->community->members()->syncWithoutDetaching([
+                auth()->id() => [
+                    'id' => (string) Str::uuid(),
+                    'role' => 'member',
+                    'status' => 'active',
+                ],
+            ]);
+
+            $invite->update([
+                'status' => 'accepted',
+                'accepted_at' => now(),
+            ]);
+        });
+
+        $this->community->refresh();
+        session()->flash('status', 'Welcome to ' . $this->community->name . '!');
+    }
+
     public function loadMoreMembers(): void
     {
         $this->membersPerPage += self::PAGE_STEP;
@@ -476,8 +703,30 @@ class CommunityDetails extends Component
 
     private function authorizeManage(): bool
     {
+        if (! $this->isOwnerOrAdmin()) {
+            session()->flash('error', 'Only the community owner or an admin can manage members.');
+
+            return false;
+        }
+
+        return true;
+    }
+
+    private function authorizeOwner(): bool
+    {
         if (! $this->isOwner()) {
-            session()->flash('error', 'Only the community owner can manage members.');
+            session()->flash('error', 'Only the community owner can change these settings.');
+
+            return false;
+        }
+
+        return true;
+    }
+
+    private function authorizeInvite(): bool
+    {
+        if (! $this->isOwnerOrAdmin()) {
+            session()->flash('error', 'Only the owner or an admin can manage invitations.');
 
             return false;
         }
@@ -492,7 +741,7 @@ class CommunityDetails extends Component
     public function updatedSettingsType(): void
     {
         if ($this->settingsType !== 'paid') {
-            $this->settingsPrice = null;
+            $this->settingsMonthlyFee = null;
             $this->settingsFeePayer = 'creator';
             $this->settingsBillingType = 'subscription';
             $this->settingsBillingInterval = 'monthly';
@@ -510,25 +759,148 @@ class CommunityDetails extends Component
 
     public function settingsFeePreview(): ?array
     {
-        if ($this->settingsType !== 'paid' || ! is_numeric($this->settingsPrice) || $this->settingsPrice <= 0) {
+        if ($this->settingsType !== 'paid' || ! is_numeric($this->settingsMonthlyFee) || $this->settingsMonthlyFee <= 0) {
             return null;
         }
 
         $rate = $this->platformFeePercent / 100;
 
         $memberCharge = $this->settingsFeePayer === 'members'
-            ? round($this->settingsPrice / (1 - $rate), 2)
-            : round((float) $this->settingsPrice, 2);
+            ? round($this->settingsMonthlyFee / (1 - $rate), 2)
+            : round((float) $this->settingsMonthlyFee, 2);
 
         $platformCut = round($memberCharge * $rate, 2);
         $creatorPayout = round($memberCharge - $platformCut, 2);
 
-        return compact('memberCharge', 'platformCut', 'creatorPayout');
+        $suffix = '';
+        if ($this->settingsBillingType === 'subscription' && $this->settingsBillingInterval) {
+            $suffix = config("community.billing_intervals.{$this->settingsBillingInterval}.suffix", '');
+        } elseif ($this->settingsBillingType === 'one_off') {
+            $suffix = config('community.billing_types.one_off.suffix', '');
+        }
+
+        return compact('memberCharge', 'platformCut', 'creatorPayout', 'suffix');
+    }
+
+    public function updatedSettingsLogo(): void
+    {
+        if (! $this->settingsLogo || ! $this->authorizeOwner()) {
+            return;
+        }
+
+        $this->validateOnly('settingsLogo', [
+            'settingsLogo' => ['nullable', 'image', 'max:4096'],
+        ]);
+
+        $this->deleteStoredAsset($this->community->image);
+        $path = $this->storeCommunityAsset($this->settingsLogo, 'logo');
+
+        $this->community->update(['image' => $path]);
+        $this->community->refresh();
+        $this->reset('settingsLogo');
+
+        session()->flash('status', 'Community logo updated.');
+    }
+
+    public function updatedSettingsBanner(): void
+    {
+        if (! $this->settingsBanner || ! $this->authorizeOwner()) {
+            return;
+        }
+
+        $this->validateOnly('settingsBanner', [
+            'settingsBanner' => ['nullable', 'image', 'max:6144'],
+        ]);
+
+        $this->deleteStoredAsset($this->community->banner);
+        $path = $this->storeCommunityAsset($this->settingsBanner, 'banner');
+
+        $this->community->update(['banner' => $path]);
+        $this->community->refresh();
+        $this->reset('settingsBanner');
+
+        session()->flash('status', 'Banner image updated.');
+    }
+
+    public function removeLogo(): void
+    {
+        if (! $this->authorizeOwner()) {
+            return;
+        }
+
+        $this->deleteStoredAsset($this->community->image);
+        $this->community->update(['image' => null]);
+        $this->community->refresh();
+        $this->reset('settingsLogo');
+
+        session()->flash('status', 'Community logo removed.');
+    }
+
+    public function removeBanner(): void
+    {
+        if (! $this->authorizeOwner()) {
+            return;
+        }
+
+        $this->deleteStoredAsset($this->community->banner);
+        $this->community->update(['banner' => null]);
+        $this->community->refresh();
+        $this->reset('settingsBanner');
+
+        session()->flash('status', 'Banner image removed.');
+    }
+
+    public function clearPendingLogo(): void
+    {
+        $this->reset('settingsLogo');
+    }
+
+    public function clearPendingBanner(): void
+    {
+        $this->reset('settingsBanner');
+    }
+
+    private function storeCommunityAsset($file, string $prefix): string
+    {
+        $extension = $file->getClientOriginalExtension() ?: 'jpg';
+        $filename = $prefix.'-'.Str::uuid().'.'.$extension;
+
+        return Storage::disk('spaces')->putFileAs(
+            'communities/'.$this->community->id,
+            $file,
+            $filename,
+            'public',
+        );
+    }
+
+    private function deleteStoredAsset(?string $path): void
+    {
+        if (! $path) {
+            return;
+        }
+
+        Storage::disk('spaces')->delete($path);
+    }
+
+    private function uniqueSlug(string $name, ?string $exceptId = null): string
+    {
+        $base = Str::slug($name) ?: 'community';
+        $slug = $base;
+        $suffix = 2;
+
+        while (Community::where('slug', $slug)
+            ->when($exceptId, fn ($q) => $q->where('id', '!=', $exceptId))
+            ->exists()) {
+            $slug = "{$base}-{$suffix}";
+            $suffix++;
+        }
+
+        return $slug;
     }
 
     public function saveSettings(): void
     {
-        if (! $this->authorizeManage()) {
+        if (! $this->authorizeOwner()) {
             return;
         }
 
@@ -540,7 +912,7 @@ class CommunityDetails extends Component
             'settingsDescription' => ['required', 'string', 'max:1000'],
             'settingsCategoryId' => ['required', 'exists:community_categories,id'],
             'settingsType' => ['required', Rule::in(['public', 'private', 'paid', 'approval'])],
-            'settingsPrice' => ['required_if:settingsType,paid', 'nullable', 'numeric', 'min:100'],
+            'settingsMonthlyFee' => ['required_if:settingsType,paid', 'nullable', 'numeric', 'min:100'],
             'settingsFeePayer' => ['required_if:settingsType,paid', 'nullable', Rule::in(['creator', 'members'])],
             'settingsBillingType' => ['required_if:settingsType,paid', 'nullable', Rule::in(['one_off', 'subscription'])],
             'settingsBillingInterval' => [
@@ -557,46 +929,71 @@ class CommunityDetails extends Component
             'description' => $validated['settingsDescription'],
             'community_categories_id' => $validated['settingsCategoryId'],
             'type' => $validated['settingsType'],
-            'monthly_fee' => $isPaid ? $validated['settingsPrice'] : null,
+            'monthly_fee' => $isPaid ? $validated['settingsMonthlyFee'] : null,
             'fee_payer' => $isPaid ? $validated['settingsFeePayer'] : null,
             'billing_type' => $isPaid ? $validated['settingsBillingType'] : null,
             'billing_interval' => $isSubscription ? $validated['settingsBillingInterval'] : null,
             'platform_fee_percent' => $isPaid ? ($this->community->platform_fee_percent ?? $this->platformFeePercent) : null,
         ];
 
+        if ($validated['settingsName'] !== $this->community->getOriginal('name')) {
+            $data['slug'] = $this->uniqueSlug($validated['settingsName'], $this->community->id);
+        }
+
         if ($this->settingsLogo) {
-            $data['image'] = $this->settingsLogo->store('communities/' . $this->community->id, 'spaces');
+            $this->deleteStoredAsset($this->community->image);
+            $data['image'] = $this->storeCommunityAsset($this->settingsLogo, 'logo');
         }
 
         if ($this->settingsBanner) {
-            $data['banner'] = $this->settingsBanner->store('communities/' . $this->community->id, 'spaces');
+            $this->deleteStoredAsset($this->community->banner);
+            $data['banner'] = $this->storeCommunityAsset($this->settingsBanner, 'banner');
         }
 
         $this->community->update($data);
         $this->community->refresh();
 
+        if ($validated['settingsType'] === 'private'
+            && ! CommunityInviteController::activeLinkInvite($this->community)) {
+            CommunityInviteController::regenerateLinkInvite($this->community, auth()->user());
+        }
+
         $this->reset(['settingsLogo', 'settingsBanner']);
-        $this->tab = 'about';
+        $this->dispatch('settings-saved');
+
         session()->flash('status', 'Community settings updated.');
     }
 
     public function archiveCommunity(): void
     {
-        if (! $this->authorizeManage()) {
+        if (! $this->authorizeOwner()) {
             return;
         }
 
         $this->community->update(['type' => 'private']);
+        $this->community->refresh();
         $this->settingsType = 'private';
+
+        if (! CommunityInviteController::activeLinkInvite($this->community)) {
+            CommunityInviteController::regenerateLinkInvite($this->community, auth()->user());
+        }
+
+        session()->flash('status', 'Community archived — it is now invite-only.');
     }
 
     public function deleteCommunity()
     {
-        if (! $this->authorizeManage()) {
+        if (! $this->authorizeOwner()) {
             return;
         }
 
+        $this->deleteStoredAsset($this->community->image);
+        $this->deleteStoredAsset($this->community->banner);
+
+        $communityId = $this->community->id;
         $this->community->delete();
+
+        Storage::disk('spaces')->deleteDirectory('communities/'.$communityId);
 
         return redirect('community');
     }
@@ -633,47 +1030,27 @@ class CommunityDetails extends Component
     }
 
 
-    public function subscribe(): void
-    {
-        if ($this->community->type !== 'paid' || $this->isMember()) {
-            return;
-        }
-
-        $service = app(CommunitySubscriptionService::class);
-        $existing = $service->pendingOrActiveFor($this->community, auth()->user());
-
-        if ($existing?->status === 'active') {
-            return;
-        }
-
-        $subscription = $existing ?? $service->initiate($this->community, auth()->user());
-
-        dd($subscription);
-
-        // -----------------------------------------------------------------
-        // TODO: payment gateway goes here, for BOTH billing types — the only
-        // difference between one_off and subscription is what you send the
-        // gateway (a single charge vs a plan/recurring authorization) and
-        // what expires_at ends up being once activate() runs. Typical shape:
-        //   $url = $this->paymentGateway->checkoutUrl($subscription);
-        //   return redirect()->away($url);
-        //
-        // On successful payment (webhook/callback controller, NOT this
-        // component instance — it won't exist when the webhook fires):
-        //   app(CommunitySubscriptionService::class)->activate($subscription);
-        // -----------------------------------------------------------------
-        $service->activate($subscription);
-        session()->flash('status', 'Payment step isn\'t wired up yet — this is a placeholder.');
-    }
-
-
     public function render()
     {
-        $posts = $this->community->posts()
+        $postsQuery = $this->community->posts()
             ->with(['user', 'media', 'comments.user'])
-            ->withExists(['likes as liked_by_me' => fn($q) => $q->where('users.id', auth()->id())])
-            ->latest()
-            ->simplePaginate($this->postsPerPage, ['*'], 'postsPage');
+            ->withExists(['likes as liked_by_me' => fn ($q) => $q->where('user_id', auth()->id())])
+            ->when($this->postSearch !== '', function ($q) {
+                $term = '%'.$this->postSearch.'%';
+                $q->where(function ($qq) use ($term) {
+                    $qq->where('content', 'like', $term)
+                        ->orWhereHas('user', fn ($u) => $u->where('name', 'like', $term)->orWhere('username', 'like', $term));
+                });
+            })
+            ->latest();
+
+        $posts = $this->canViewFeed()
+            ? $postsQuery->simplePaginate($this->postsPerPage, ['*'], 'postsPage')
+            : $postsQuery->whereRaw('0 = 1')->simplePaginate($this->postsPerPage, ['*'], 'postsPage');
+
+        $linkInvite = $this->community->type === 'private'
+            ? CommunityInviteController::activeLinkInvite($this->community)
+            : null;
 
         $members = $this->canViewMembers()
             ? $this->community->members()
@@ -690,11 +1067,20 @@ class CommunityDetails extends Component
         return view('livewire.user.community-details', [
             'posts' => $posts,
             'members' => $members,
-            'bannedMembers' => $this->isOwner() ? $this->community->bannedMembers()->get() : collect(),
-            'pendingRequests' => $this->isOwner()
+            'bannedMembers' => $this->isOwnerOrAdmin() ? $this->community->bannedMembers()->get() : collect(),
+            'pendingRequests' => $this->isOwnerOrAdmin()
                 ? $this->community->pendingJoinRequests()->with('user')->get()
                 : collect(),
             'categories' => CommunityCategory::all(),
+            'inviteLinkUrl' => $linkInvite ? route('community.invite.accept', $linkInvite->token) : null,
+            'pendingDirectInvites' => $this->isOwnerOrAdmin() && $this->community->type === 'private'
+                ? CommunityInvite::where('community_id', $this->community->id)
+                    ->where('type', 'direct')
+                    ->where('status', 'pending')
+                    ->with('user')
+                    ->latest()
+                    ->get()
+                : collect(),
         ]);
     }
 }

@@ -44,7 +44,16 @@ class CommunityPost extends Model
 
     public function likes()
     {
-        return $this->belongsToMany(User::class, 'community_post_likes')->withTimestamps();
+        return $this->hasMany(CommunityPostLike::class);
+    }
+
+    public function isLikedBy(?string $userId): bool
+    {
+        if (! $userId) {
+            return false;
+        }
+
+        return $this->likes()->where('user_id', $userId)->exists();
     }
 
     public function comments()

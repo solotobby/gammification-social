@@ -794,9 +794,9 @@
             <h1>{{ $blog->title }}</h1>
             <p>{!! $blog->excerpt !!}</p>
             <div class="art-byline">
-                <div class="avatar" style="background:var(--grad-brand)">AO</div>
-                <div class="who"><b>Anthony Sam</b><span>Creator · Jun 12, 2024 · <span
-                            data-readtime>{{ ceil(str_word_count($blog->content) / 200) ?: 0 }} min read</span></span></div>
+                <div class="avatar" style="background:var(--grad-brand)">PK</div>
+                <div class="who"><b>Payhankey</b><span>Team · {{ ($blog->published_at ?? $blog->created_at)?->format('M d, Y') }} · <span
+                            data-readtime>{{ max(1, (int) ceil(str_word_count(strip_tags($blog->content ?? '')) / 200)) }} min read</span></span></div>
                 <div class="stats">
                     <span title="Reads"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
@@ -807,6 +807,14 @@
             </div>
         </div>
     </section>
+
+    @if ($blog->cover_image)
+        <div class="wrap" style="margin-top:-32px;margin-bottom:8px;position:relative;z-index:2">
+            <div style="border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-lg);max-height:420px">
+                <img src="{{ $blog->cover_image }}" alt="" style="width:100%;height:min(420px,50vw);object-fit:cover;display:block">
+            </div>
+        </div>
+    @endif
 
 
     <!-- BODY -->
@@ -837,12 +845,11 @@
         </div> --}}
 
                     <div class="author-box">
-                        <div class="avatar" style="background:var(--grad-brand)">AS</div>
+                        <div class="avatar" style="background:var(--grad-brand)">PK</div>
                         <div>
                             <div class="role">Written by</div>
-                            <div class="nm">Anthony Sam</div>
-                            <p>Creator on Payhankey, sharing what he's learned turning everyday posts into a monthly income.
-                                Crossed his second $500 month in 2024.</p>
+                            <div class="nm">Payhankey Team</div>
+                            <p>Practical guides and creator stories from the Payhankey team — helping you earn more from every post, referral, and community you build.</p>
                         </div>
                     </div>
 
@@ -860,25 +867,9 @@
             <h2 style="margin-bottom:24px">More from the blog</h2>
             <div class="grid-3">
                 @foreach ($suggestions as $suggestion)
-                <a href="{{ url('blog/' . $suggestion->slug)}}">
-                    <article class="post-card reveal">
-                      
-                            <div class="post-card__img alt2"><span
-                                    class="post-card__cat">{{ $suggestion->blogCategory->name }}</span></div>
-                       
-                        <div class="post-card__body">
-                         
-                            <h3>{{ $suggestion->title }}</h3>
-                            <p>{!! Str::limit($suggestion->excerpt, 100) !!}</p>
-                            <div class="post-meta">
-                                <div class="avatar" style="background:linear-gradient(135deg,#12B886,#5A4FDC)">AS</div>
-                                <span>
-                                    Anthony Sam</span><span>·</span><span>{{ $suggestion->created_at->diffForHumans() }}</span>
-                            </div>
-                        </div>
-                    </article>
-                </a>
+                    @include('general.partials.post-card', ['blog' => $suggestion, 'reveal' => true])
                 @endforeach
+            </div>
                 {{-- <article class="post-card reveal">
         <div class="post-card__img alt2"><span class="post-card__cat">Guides</span></div>
         <div class="post-card__body"><h3>The complete beginner's guide to getting started</h3><p>From signup to your first withdrawal, step by step.</p><div class="post-meta"><div class="avatar" style="background:linear-gradient(135deg,#12B886,#5A4FDC)">TE</div><span>Team Payhankey</span><span>·</span><span>8 min</span></div></div>
@@ -900,7 +891,7 @@
             <div class="cta-band reveal">
                 <h2>Don't just read about earning — start.</h2>
                 <p>Put these habits into practice on a free Payhankey account and watch your first earnings roll in.</p>
-                <div class="hero__cta"><a class="btn btn--white btn--lg" href="register.html">Create free account <svg
+                <div class="hero__cta"><a class="btn btn--white btn--lg" href="{{ url('/register') }}">Create free account <svg
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
                             stroke-linecap="round" stroke-linejoin="round">
                             <line x1="5" y1="12" x2="19" y2="12" />

@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Auth;
 
 class PostComments extends Component
 {
-
     public Post $post;
     public $message = '';
     public $postId;
@@ -23,19 +22,14 @@ class PostComments extends Component
     public function mount(Post $post)
     {
         $this->post = $post;
-
-        
         $this->loadComments();
-            
-
-            // $this->commentsCount = $this->post->comments ?? $this->post->postComments()->count();
     }
 
-    public function loadComments(){
-
+    public function loadComments(): void
+    {
         $this->comments = $this->post->postComments()
             ->with('user')
-            ->latest()   // orders by created_at DESC (newest first)
+            ->latest()
             ->take(3)
             ->get()
             ->map(function ($comment) {
@@ -44,58 +38,34 @@ class PostComments extends Component
                     'user_id' => $comment->user_id,
                     'name' => $comment->user->name,
                     'username' => $comment->user->username,
-                    'avatar' => $comment->user->avatar,// ?? 'src/assets/media/avatars/avatar3.jpg',
+                    'avatar' => $comment->user->avatar,
                     'message' => $comment->message,
                     'created_at' => $comment->created_at->toDateTimeString(),
                 ];
             });
 
-            $this->commentsCount = $this->post->comments ?? $this->post->comment + $this->post->comments_external;
-
-            
-
-
+        $this->commentsCount = (int) sumCounter($this->post->comments, $this->post->comment_external);
     }
-
-
 
     public function commentFeed(CommentService $service)
     {
-
-         $this->validate([
+        $this->validate([
             'message' => 'required|string|max:500',
         ]);
 
-
-        if (trim($this->message) === '') return;
+        if (trim($this->message) === '') {
+            return;
+        }
 
         $user = Auth::user();
 
-        $service->addComment($this->post->id,  $user, $this->message); //to be converted to job later
-
-
-        $this->comments->prepend([
-            // // 'id' => $this->post->id, //'tmp-' . uniqid(),
-          
-            'user_id' => $user->id,
-            'name' => $user->name,
-            'username' => $user->username,
-            'avatar' => $user->avatar ?? 'src/assets/media/avatars/avatar3.jpg',
-            'message' => $this->message,
-            'created_at' => now()->toDateTimeString(),
-        ]);
-
-         // Notify parent (post card)
-        $this->dispatch('commentAdded');
+        $service->addComment($this->post->id, $user, $this->message);
 
         $this->message = '';
-        // $this->emit('refreshComments'); // optional for parent component
-
+        $this->post->refresh();
         $this->loadComments();
+        $this->dispatch('commentAdded');
     }
-
-
-
 
     public function render()
     {

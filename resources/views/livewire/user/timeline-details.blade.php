@@ -1,453 +1,554 @@
 <div>
-    {{-- The whole world belongs to you. --}}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=dm-mono@400,500&display=swap" rel="stylesheet">
+
+    @php
+        $level = userLevel($post->user->id);
+        $isVerified = in_array($level, ['Creator', 'Influencer']);
+        $shareUrl = url('timeline/' . $post->id);
+        $encodedShareUrl = urlencode($shareUrl);
+        $shareText = urlencode('Check this out on ' . config('app.name'));
+        $imgs = $post->images ?? collect();
+        $imgCount = $imgs->count();
+        $vid = $post->video;
+        $isOwner = auth()->id() === $post->user_id;
+    @endphp
 
     <style>
-        .link-preview-card {
+        .td-page {
+            --td-violet: #5A4FDC;
+            --td-violet-dark: #4338CA;
+            --td-violet-soft: rgba(90, 79, 220, .10);
+            --td-ink: #0F1117;
+            --td-muted: #8B90A5;
+            --td-line: rgba(15, 17, 23, .08);
+            --td-bg: #F8F9FC;
+            --td-card: #fff;
+            --td-fb: #F0F2F5;
+            font-family: 'Instrument Sans', 'Plus Jakarta Sans', system-ui, sans-serif;
+            color: var(--td-ink);
+            padding: 0 0 48px;
+            min-height: 60vh;
+        }
+
+        /* Rich content / link previews inside post body */
+        .td-body .link-preview-card,
+        .td-body .og-card {
             display: block;
-            margin-top: 8px;
-            border: 1px solid #e1e8ed;
-            border-radius: 12px;
-            padding: 12px;
-            text-decoration: none;
-            color: inherit;
-        }
-
-        .link-preview-host {
-            font-weight: 600;
-            color: #1d9bf0;
-        }
-
-        .link-preview-url {
-            font-size: 14px;
-            color: #536471;
-            word-break: break-all;
-        }
-
-        .og-card {
-            display: block;
-            border: 1px solid #e1e8ed;
+            margin-top: 12px;
+            border: 1px solid var(--td-line);
             border-radius: 12px;
             overflow: hidden;
             text-decoration: none;
             color: inherit;
-            margin-top: 8px;
         }
+        .td-body .link-preview-card { padding: 12px; }
+        .td-body .link-preview-host { font-weight: 600; color: var(--td-violet); }
+        .td-body .link-preview-url { font-size: .82rem; color: var(--td-muted); word-break: break-all; }
+        .td-body .og-image { width: 100%; max-height: 220px; object-fit: cover; display: block; }
+        .td-body .og-body { padding: 12px; }
+        .td-body .og-title { font-weight: 600; margin-bottom: 4px; }
+        .td-body .og-desc { font-size: .84rem; color: var(--td-muted); }
+        .td-body .og-host { font-size: .78rem; color: var(--td-muted); margin-top: 6px; }
 
-        .og-image {
-            width: 100%;
-            max-height: 220px;
-            object-fit: cover;
-        }
+        .td-page * { box-sizing: border-box; }
 
-        .og-body {
-            padding: 12px;
-        }
-
-        .og-title {
+        .td-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: .88rem;
             font-weight: 600;
-            margin-bottom: 4px;
+            color: var(--td-muted);
+            text-decoration: none;
+            padding: 16px 0 12px;
+            transition: color .15s;
+        }
+        .td-back:hover { color: var(--td-violet); }
+        .td-back svg { width: 18px; height: 18px; }
+
+        .td-card {
+            background: var(--td-card);
+            border: 1px solid var(--td-line);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(15, 17, 23, .06);
+            overflow: hidden;
         }
 
-        .og-desc {
-            font-size: 14px;
-            color: #536471;
+        /* Header */
+        .td-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 20px 20px 0;
+        }
+        .td-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 8px rgba(15,17,23,.10);
+        }
+        .td-avatar-ring {
+            box-shadow: 0 0 0 2px var(--td-violet);
+        }
+        .td-header-main { flex: 1; min-width: 0; }
+        .td-name-row {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .td-name {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--td-ink);
+            text-decoration: none;
+        }
+        .td-name:hover { text-decoration: underline; }
+        .td-tick { width: 16px; height: 16px; flex-shrink: 0; }
+        .td-meta {
+            font-size: .82rem;
+            color: var(--td-muted);
+            margin-top: 2px;
+        }
+        .td-meta a {
+            color: var(--td-muted);
+            text-decoration: none;
+        }
+        .td-meta a:hover { text-decoration: underline; }
+        .td-earn {
+            flex-shrink: 0;
+            font-family: 'DM Mono', ui-monospace, monospace;
+            font-size: .72rem;
+            font-weight: 600;
+            color: #0A7040;
+            background: rgba(31, 174, 100, .12);
+            padding: 6px 12px;
+            border-radius: 999px;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        .td-earn:hover { background: rgba(31, 174, 100, .18); color: #0A7040; }
+
+        /* Body */
+        .td-body {
+            padding: 16px 20px 0;
+            font-size: 1rem;
+            line-height: 1.6;
+            word-break: break-word;
+        }
+        .td-body a { color: var(--td-violet); }
+
+        /* Trends */
+        .td-trends {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+            padding-left: 10px;
+            border-left: 2px solid var(--td-violet);
+        }
+        .td-trend {
+            font-size: .82rem;
+            font-weight: 700;
+            color: var(--td-violet);
+            text-decoration: none;
         }
 
-        .og-host {
-            font-size: 13px;
-            color: #8899a6;
-            margin-top: 6px;
+        /* Media — Facebook full-bleed */
+        .td-media {
+            margin: 0;
+            border-radius: 0;
+            overflow: hidden;
+            border: none;
+            border-top: 1px solid #ced0d4;
+            border-bottom: 1px solid #ced0d4;
+        }
+        .fb-img-grid {
+            display: grid;
+            gap: 2px;
+            background: #000;
+        }
+        .fb-img-grid.n1 { grid-template-columns: 1fr; }
+        .fb-img-grid.n1 .fb-img-cell { height: min(520px, 75vw); max-height: 520px; }
+        .fb-img-grid.n2 { grid-template-columns: 1fr 1fr; }
+        .fb-img-grid.n2 .fb-img-cell { height: 320px; }
+        .fb-img-grid.n3 { grid-template-columns: 1fr 1fr; }
+        .fb-img-grid.n3 .fb-img-cell:first-child { grid-row: span 2; min-height: 320px; }
+        .fb-img-grid.n3 .fb-img-cell { height: 160px; }
+        .fb-img-grid.n4 { grid-template-columns: 1fr 1fr; }
+        .fb-img-grid.n4 .fb-img-cell { height: 240px; }
+        .fb-img-cell {
+            position: relative;
+            overflow: hidden;
+            background: #1c1e21;
+        }
+        .fb-img-cell img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .fb-img-more {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,.55);
+            color: #fff;
+            font-weight: 700;
+            font-size: 2rem;
+            display: grid;
+            place-items: center;
+            pointer-events: none;
+        }
+
+        /* FB video */
+        .fb-video {
+            display: block;
+            position: relative;
+            background: #1c1e21;
+            text-decoration: none;
+            overflow: hidden;
+            max-height: 520px;
+        }
+        .fb-video img {
+            width: 100%;
+            max-height: 520px;
+            object-fit: cover;
+            display: block;
+        }
+        .fb-video-play {
+            position: absolute;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            background: rgba(0,0,0,.22);
+        }
+        .fb-video-play span {
+            width: 64px;
+            height: 64px;
+            background: rgba(255,255,255,.95);
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            box-shadow: 0 2px 12px rgba(0,0,0,.35);
+        }
+        .fb-video-placeholder {
+            width: 100%;
+            height: 320px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #1c1e21;
+        }
+        .fb-video-pill {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            color: #fff;
+            background: rgba(0,0,0,.65);
+            padding: 4px 10px;
+            border-radius: 4px;
+        }
+        .fb-video-dur {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #fff;
+            background: rgba(0,0,0,.75);
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+
+        /* Reactions slot */
+        .td-reactions {
+            padding: 4px 12px 0;
+            border-top: 1px solid var(--td-line);
+            margin-top: 16px;
+        }
+
+        /* Comments slot */
+        .td-comments-wrap {
+            background: var(--td-fb);
+            border-top: 1px solid var(--td-line);
+            padding: 16px 20px 20px;
+        }
+
+        /* Share modal */
+        .td-share-modal .modal-content {
+            border: none;
+            border-radius: 18px;
+            overflow: hidden;
+        }
+        .td-share-head {
+            background: linear-gradient(135deg, var(--td-violet), var(--td-violet-dark));
+            color: #fff;
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .td-share-head h3 { margin: 0; font-size: 1rem; font-weight: 700; }
+        .td-share-body { padding: 20px; }
+        .td-share-url {
+            display: flex;
+            gap: 8px;
+            padding: 10px 12px;
+            background: var(--td-bg);
+            border: 1px solid var(--td-line);
+            border-radius: 10px;
+            font-size: .8rem;
+            margin: 12px 0 16px;
+        }
+        .td-share-url span {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-family: 'DM Mono', ui-monospace, monospace;
+        }
+        .td-share-url button {
+            border: none;
+            background: var(--td-violet-soft);
+            color: var(--td-violet-dark);
+            font-weight: 700;
+            font-size: .76rem;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .td-share-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .td-share-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            color: #fff;
+            text-decoration: none;
+        }
+        .td-share-fb { background: #1877F2; }
+        .td-share-x { background: #111; }
+        .td-share-li { background: #0A66C2; }
+        .td-share-wa { background: #25D366; }
+        .td-share-tg { background: #229ED9; }
+        .td-share-btn svg { width: 20px; height: 20px; }
+
+        @media (max-width: 575px) {
+            .td-page { padding-bottom: 32px; }
+            .td-header, .td-body, .td-comments-wrap { padding-left: 16px; padding-right: 16px; }
+            .td-media { margin-left: 16px; margin-right: 16px; }
+        }
+
+        @media (min-width: 992px) {
+            .td-layout-row > .col-md-4 {
+                position: sticky;
+                top: 80px;
+                align-self: flex-start;
+            }
         }
     </style>
 
-    </style>
-
-    <div class="row">
+    <div class="row td-layout-row">
         <div class="col-md-8">
-            <div class="block block-rounded block-bordered" id="timelines">
-                <div class="block-header block-header-default">
-                    {{-- <div>
-                        <a class="img-link me-1" href="javascript:void(0)">
-                            <img class="img-avatar img-avatar32 img-avatar-thumb"
-                                src="{{ $post->user->avatar ?? asset('src/assets/media/avatars/avatar13.jpg') }}"
-                                alt="">
-                        </a>
-                        <a class="fw-semibold" href="{{ url('profile/' . $post->user->username) }}"
-                            style="color: #5A4FDC">{{ displayName($post->user->name) }}</a>
-                        <span class="fs-sm text-muted">{{ $post->created_at?->shortAbsoluteDiffForHumans() }}
-                            </span>
-                    </div> --}}
+            <div class="td-page">
 
-                    <div class="d-flex align-items-center">
-                @if (userLevel($post->user->id) == 'Basic')
-                    <a class="img-link me-1" href="{{ url('profile/' . $post->user->username) }}">
-                        <img class="img-avatar img-avatar32 img-avatar-thumb"
-                            src="{{ $post->user->avatar ?? asset('src/assets/media/avatars/avatar13.jpg') }}"
-                            alt="Avatar">
+    <a href="{{ url('timeline') }}" class="td-back" wire:navigate>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Back to feed
+    </a>
+
+    <article class="td-card">
+
+        {{-- Author --}}
+        <header class="td-header">
+            <a href="{{ url('profile/' . $post->user->username) }}">
+                <img class="td-avatar @if($level === 'Influencer') td-avatar-ring @endif"
+                    src="{{ $post->user->avatar ?? asset('src/assets/media/avatars/avatar13.jpg') }}"
+                    alt="{{ $post->user->name }}">
+            </a>
+            <div class="td-header-main">
+                <div class="td-name-row">
+                    <a class="td-name" href="{{ url('profile/' . $post->user->username) }}">
+                        {{ displayName($post->user->name) }}
                     </a>
-
-                    <a class="fw-semibold" href="{{ url('profile/' . $post->user->username) }}"
-                        style="color: #5A4FDC">{{ displayName($post->user->name) }}</a>
-
-                    <a href="{{ url('profile/', $post->user->username) }}" class="fs-sm text-muted mx-1" title="{{ $post->user->username }}">
-                         @<span>{{ Str::limit($post->user->username, 10, '') }}</span>
-                    </a>
-                    <span class="mx-1 text-muted">&middot;</span>
-
-                    <span class="fs-sm text-muted ms-2">{{ $post->created_at?->shortAbsoluteDiffForHumans() }}
-                    </span>
-                @elseif (userLevel($post->user->id) == 'Creator')
-                    <a class="img-link me-1" href="{{ url('profile/' . $post->user->username) }}">
-                        <img class="img-avatar img-avatar32 img-avatar-thumb"
-                            src="{{ $post->user->avatar ?? asset('src/assets/media/avatars/avatar13.jpg') }}"
-                            alt="Avatar">
-                    </a>
-                    {{-- Username + Verified Tick --}}
-                    <div class="d-flex align-items-center">
-                        <a class="fw-semibold me-1" href="{{ url('profile/' . $post->user->username) }}"
-                            style="color: #5A4FDC">
-                            {{ displayName($post->user->name) }}
-                        </a>
-
-                        {{-- @if ($post->user->is_verified) --}}
-                        <!-- Twitter-style blue tick SVG -->
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                            fill="#1DA1F2" class="ms-1">
-                            <path d="M22.5 5.5l-12 12-5.5-5.5 1.5-1.5 4 4 10.5-10.5z" />
+                    @if ($isVerified)
+                        <svg class="td-tick" viewBox="0 0 22 22" fill="none" aria-label="Verified">
+                            <circle cx="11" cy="11" r="11" fill="#1d9bf0"/>
+                            <path d="M7 11l3 3 5-5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
-                        {{-- @endif --}}
+                    @endif
+                    @if ($level === 'Influencer')
+                        <span style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--td-violet);background:var(--td-violet-soft);padding:2px 6px;border-radius:4px;">Influencer</span>
+                    @endif
+                </div>
+                <div class="td-meta">
+                    <a href="{{ url('profile/' . $post->user->username) }}">@{{ $post->user->username }}</a>
+                    · {{ $post->created_at?->diffForHumans() }}
+                </div>
+            </div>
+            @if ($isOwner)
+                <a href="{{ url('post/timeline/' . $post->id . '/analytics') }}" class="td-earn" title="View earnings">
+                    {{ getCurrencyCode() }}{{ number_format($estimatedEarnings ?? 0, 2) }}
+                </a>
+            @else
+                <span class="td-earn" style="cursor:default">
+                    {{ getCurrencyCode() }}{{ number_format($estimatedEarnings ?? 0, 2) }}
+                </span>
+            @endif
+        </header>
+
+        {{-- Content --}}
+        @if ($post->content)
+            <div class="td-body">
+                {!! $post->content !!}
+                @if ($post->trends->isNotEmpty())
+                    <div class="td-trends">
+                        @foreach ($post->trends as $trend)
+                            <a href="javascript:void(0)" class="td-trend">#{{ $trend->name }}</a>
+                        @endforeach
                     </div>
-
-                    <a href="{{ url('profile/', $post->user->username) }}" class="fs-sm text-muted mx-1" title="{{ $post->user->username }}">
-                         @<span>{{ Str::limit($post->user->username, 10, '') }}</span>
-                    </a>
-                    <span class="mx-1 text-muted">&middot;</span>
-
-                    {{-- Timestamp --}}
-                    <span class="fs-sm text-muted ms-2">
-                        {{ $post->created_at?->shortAbsoluteDiffForHumans() }}
-                    </span>
-                @else
-                    {{-- Avatar --}}
-                    <a class="img-link me-2" href="{{ url('profile/' . $post->user->username) }}">
-                        <img class="img-avatar img-avatar32 img-avatar-thumb rounded-circle border border-primary border-2"
-                            src="{{ $post->user->avatar ?? asset('src/assets/media/avatars/avatar13.jpg') }}"
-                            alt="Avatar">
-                    </a>
-
-                    {{-- Username + Verified Tick --}}
-                    <div class="d-flex align-items-center">
-                        <a class="fw-semibold me-1" href="{{ url('profile/' . $post->user->username) }}"
-                            style="color: #5A4FDC">
-                            {{ displayName($post->user->name) }}
-                        </a>
-
-                        {{-- @if ($post->user->is_verified) --}}
-                        <!-- Twitter-style blue tick SVG -->
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                            fill="#1DA1F2">
-                            <path d="M22.5 5.5l-12 12-5.5-5.5 1.5-1.5 4 4 10.5-10.5z" />
-                        </svg>
-                        {{-- @endif --}}
-                    </div>
-
-                    <a href="{{ url('profile/', $post->user->username) }}" class="fs-sm text-muted mx-1" title="{{ $post->user->username }}">
-                        {{-- @<span>{{ $post->user->username }}</span> --}}
-                        @<span>{{ Str::limit($post->user->username, 10, '') }}</span>
-                    </a>
-                    <span class="mx-1 text-muted">&middot;</span>
-                    
-                    {{-- Timestamp --}}
-                    <span class="fs-sm text-muted">
-                        {{ $post->created_at?->shortAbsoluteDiffForHumans() }}
-                    </span>
                 @endif
             </div>
+        @endif
 
-
-                    {{-- <div class="block-options">
-
-                        @if ($user->id == $post->user_id)
-                            <div class="dropdown">
-                                <button type="button" class="btn-block-option dropdown-toggle text-muted fs-sm"
-                                    data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Est. Earning
-                                    {{ getCurrencyCode() }}{{ estimatedEarnings($post->id) }}
-                                </button>
-
-                                <div class="dropdown-menu dropdown-menu-end">
-
-                                    <a class="dropdown-item"
-                                        href="{{ url('post/timeline/' . $post->id . '/analytics') }}">
-                                        <i class="far fa-fw fa-eye text-success me-1"></i> View Posts Earnings
-                                    </a>
-
-                                     @if (userLevel(auth()->user()->id) == 'Creator' || userLevel(auth()->user()->id) == 'Influencer')
-                                        <a class="dropdown-item" href="javascript:void(0)">
-                                            <i class="far fa-fw fa-edit text-primary me-1"></i> Edit Post
-                                        </a>
-
-                                        <a class="dropdown-item" href="javascript:void(0)"
-                                            wire:click="deletePost({{ $post->unicode }})">
-                                            <i class="far fa-fw fa-trash-alt text-danger me-1"></i> Delete Post
-                                        </a>
-                                    @endif 
-
-
-                                   <a class="dropdown-item" href="javascript:void(0)">
-                                                <i class="far fa-fw fa-thumbs-down text-warning me-1"></i> Stop following this user
-                                                </a>
-                                                <div role="separator" class="dropdown-divider"></div>
-                                                <a class="dropdown-item" href="javascript:void(0)">
-                                                <i class="fa fa-fw fa-exclamation-triangle me-1"></i> Report this post
-                                                </a>
-                                                <a class="dropdown-item" href="javascript:void(0)">
-                                                <i class="fa fa-fw fa-bookmark me-1"></i> Bookmark this post
-                                                </a> 
-                                </div>
-                            </div>
-                        @else
-                            <div class="dropdown">
-                                <button type="button" class="btn-block-option  text-muted fs-sm" aria-haspopup="true"
-                                    aria-expanded="false">
-                                    Est. Earning {{ getCurrencyCode() }}{{ estimatedEarnings($post->id) }}
-                                </button>
-                            </div>
-                        @endif
-
-                    </div> --}}
-                    
+        {{-- Images --}}
+        @if ($imgCount > 0)
+            @php
+                $shown = $imgs->take(4);
+                $remaining = $imgCount - 4;
+                $gridClass = 'n' . min($imgCount, 4);
+            @endphp
+            <div class="td-media">
+                <div class="fb-img-grid {{ $gridClass }}">
+                    @foreach ($shown as $i => $image)
+                        <div class="fb-img-cell" wire:click="openPhotoViewer({{ $i }})" role="button" tabindex="0"
+                            @keydown.enter.prevent="$wire.openPhotoViewer({{ $i }})" aria-label="View photo {{ $i + 1 }}"
+                            style="cursor:pointer">
+                            <img src="{{ $image->path }}" alt="Post image" loading="lazy">
+                            @if ($i === 3 && $remaining > 0)
+                                <span class="fb-img-more">+{{ $remaining }}</span>
+                            @endif
+                        </div>
+                    @endforeach
                 </div>
+            </div>
+        @endif
 
-
-                @php
-                    $url = extractFirstUrl($post->content);
-                @endphp
-
-                <div class="block-content">
-
-                    {{-- <p style="color: dimgrey">
-                       
-                        {!! nl2br(e($post->content)) !!}
-                    </p> --}}
-
-                    <div class="post-content" data-full="{{ e(strip_tags($post->content)) }}"
-                        data-short="{{ e(Str::limit(strip_tags($post->content), 130)) }}" data-expanded="false">
-
-                        {{ Str::limit(strip_tags($post->content), 130) }}
-
-                        @if (Str::length(strip_tags($post->content)) > 130)
-                            <a href="#" class="see-more">See more</a>
-                        @endif
-                    </div>
-
-
-                    @php
-                        $count = $post->images->count();
-                    @endphp
-
-                    @if ($count)
-                        <div class="row g-sm js-gallery img-fluid-100">
-
-                            @php
-                                $col = match ($count) {
-                                    1 => 'col-12',
-                                    2 => 'col-6',
-                                    3 => 'col-4',
-                                    4 => 'col-3',
-                                };
-                            @endphp
-
-
-                            @foreach ($post->images as $image)
-                                <div class="{{ $col }} mb-2">
-                                    <a class="img-link img-link-simple img-link-zoom-in img-lightbox"
-                                        href="{{ asset($image->path) }}">
-                                        <img class="img-fluid rounded" loading="lazy" src="{{ asset($image->path) }}"
-                                            alt="Post image">
-                                    </a>
-                                </div>
-                            @endforeach
-
+        {{-- Video --}}
+        @if ($vid)
+            @php
+                $poster = $vid->thumbnail_path ?? ($vid->public_id ? $vid->poster_url ?? null : null);
+                $playerUrl = route('rolls.show', ['video' => $vid->id]);
+            @endphp
+            <div class="td-media">
+                <a href="{{ $playerUrl }}" class="fb-video">
+                    @if ($poster)
+                        <img src="{{ $poster }}" alt="Video" loading="lazy"
+                            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                        <div class="fb-video-placeholder" style="display:none">
+                            <svg width="40" height="40" fill="none" stroke="#fff" stroke-width="1.5" opacity=".4" viewBox="0 0 24 24">
+                                <path d="M15 10l4.553-2.532A1 1 0 0121 8.382v7.236a1 1 0 01-1.447.894L15 14"/><rect x="2" y="6" width="13" height="12" rx="2"/>
+                            </svg>
+                        </div>
+                    @else
+                        <div class="fb-video-placeholder">
+                            <svg width="40" height="40" fill="none" stroke="#fff" stroke-width="1.5" opacity=".4" viewBox="0 0 24 24">
+                                <path d="M15 10l4.553-2.532A1 1 0 0121 8.382v7.236a1 1 0 01-1.447.894L15 14"/><rect x="2" y="6" width="13" height="12" rx="2"/>
+                            </svg>
                         </div>
                     @endif
-                    <hr>
-
-                    {{-- @php
-                        $url = extractFirstUrl($post->content);
-                        $preview = $url ? getLinkPreview($url) : null;
-                    @endphp
-
-                    @if ($preview)
-                        <a href="{{ $preview['url'] }}" target="_blank" class="og-card">
-                            @if ($preview['image'])
-                                <img src="{{ $preview['image'] }}" class="og-image">
-                            @endif
-
-                            <div class="og-body">
-                                <div class="og-title">{{ $preview['title'] }}</div>
-                                <div class="og-desc">{{ $preview['description'] }}</div>
-                                <div class="og-host">{{ @$preview['host'] }}</div>
-                            </div>
-                        </a>
+                    <div class="fb-video-play">
+                        <span>
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="#1c1e21"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        </span>
+                    </div>
+                    <span class="fb-video-pill">Roll</span>
+                    @if (!empty($vid->duration))
+                        <span class="fb-video-dur">{{ gmdate('i:s', $vid->duration) }}</span>
                     @endif
-
-
-                    @php
-                        $url = extractFirstUrl($post->content);
-                        $preview = $url ? getLinkPreview($url) : null;
-                    @endphp --}}
-
-                    {{-- @if ($preview && !isEmbeddablePlatform($url))
-                        <a href="{{ $preview['url'] }}" target="_blank" rel="noopener" class="og-card">
-
-                            @if (!empty($preview['image']))
-                                <div class="og-image-wrapper">
-                                    <img src="{{ $preview['image'] }}"
-                                        alt="{{ $preview['title'] ?? 'Link preview image' }}" loading="lazy">
-                                </div>
-                            @endif
-
-                            <div class="og-body">
-                                @if (!empty($preview['title']))
-                                    <div class="og-title">
-                                        {{ Str::limit($preview['title'], 80) }}
-                                    </div>
-                                @endif
-
-                                @if (!empty($preview['description']))
-                                    <div class="og-description">
-                                        {{ Str::limit($preview['description'], 140) }}
-                                    </div>
-                                @endif
-
-                                <div class="og-host">
-                                    {{ @$preview['host'] }}
-                                </div>
-                            </div>
-                        </a>
-                    @endif --}}
-
-
-
-                    {{-- Reactions --}}
-                    <livewire:user.timeline-details-reaction :post="$post" :wire:key="'reactions-'.$post->id" />
-
-                    {{-- Comments --}}
-                    <livewire:user.timeline-details-comments :post="$post" :wire:key="'comments-'.$post->id" />
-
-                </div>
-
+                </a>
             </div>
-            <a href="javascript:void(0)" class="btn btn-secondary btn-sm mb-4" onclick="history.back();">
-                <i class="fa fa-arrow-left opacity-50 me-1"></i> Back
-            </a>
+        @endif
 
+        {{-- Reactions --}}
+        <div class="td-reactions">
+            <livewire:user.timeline-details-reaction
+                :post="$post"
+                :estimated-earnings="$estimatedEarnings ?? 0"
+                :wire:key="'reactions-'.$post->id" />
         </div>
+
+        {{-- Comments --}}
+        <div class="td-comments-wrap">
+            <livewire:user.timeline-details-comments :post="$post" :wire:key="'comments-'.$post->id" />
+        </div>
+
+    </article>
+
+    {{-- Share modal --}}
+    <div class="modal fade td-share-modal" id="modal-block-fromright-{{ $post->id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="td-share-head">
+                    <h3>Share this post</h3>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="td-share-body">
+                    <p style="font-size:.88rem;color:var(--td-muted);margin:0 0 4px">Share and earn when people engage with this post.</p>
+                    <div class="td-share-url">
+                        <span id="td-share-url-{{ $post->id }}">{{ $shareUrl }}</span>
+                        <button type="button" onclick="navigator.clipboard.writeText('{{ $shareUrl }}');this.textContent='Copied!'">Copy</button>
+                    </div>
+                    <div class="td-share-grid">
+                        <a class="td-share-btn td-share-wa" target="_blank" rel="noopener"
+                            href="https://wa.me/?text={{ $shareText }}%20{{ $encodedShareUrl }}" aria-label="WhatsApp">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.28-1.39a9.9 9.9 0 0 0 4.76 1.21h.01c5.46 0 9.9-4.45 9.9-9.91C22 6.45 17.5 2 12.04 2Z"/></svg>
+                        </a>
+                        <a class="td-share-btn td-share-x" target="_blank" rel="noopener"
+                            href="https://twitter.com/intent/tweet?url={{ $encodedShareUrl }}&text={{ $shareText }}" aria-label="X">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 2H22l-7.2 8.2L23.3 22H16.6l-5.2-6.8L5.4 22H2.3l7.7-8.8L1 2h6.9l4.7 6.2L18.9 2Z"/></svg>
+                        </a>
+                        <a class="td-share-btn td-share-fb" target="_blank" rel="noopener"
+                            href="https://www.facebook.com/sharer/sharer.php?u={{ $encodedShareUrl }}" aria-label="Facebook">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 21v-7.5H16l.4-3H13.5V8.4c0-.87.24-1.46 1.5-1.46H16.5V4.3c-.26-.03-1.14-.1-2.16-.1-2.14 0-3.6 1.3-3.6 3.7v2.6H8.5v3h2.24V21h2.76Z"/></svg>
+                        </a>
+                        <a class="td-share-btn td-share-li" target="_blank" rel="noopener"
+                            href="https://www.linkedin.com/sharing/share-offsite/?url={{ $encodedShareUrl }}" aria-label="LinkedIn">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.94 8.5H3.56V20h3.38V8.5ZM5.25 3.5A1.96 1.96 0 1 0 5.27 7.42 1.96 1.96 0 0 0 5.25 3.5ZM20.45 20h-3.37v-5.98c0-1.43-.03-3.26-1.99-3.26-2 0-2.3 1.56-2.3 3.16V20H9.42V8.5h3.24v1.57h.05c.45-.86 1.56-1.77 3.2-1.77 3.43 0 4.06 2.26 4.06 5.19V20Z"/></svg>
+                        </a>
+                        <a class="td-share-btn td-share-tg" target="_blank" rel="noopener"
+                            href="https://t.me/share/url?url={{ $encodedShareUrl }}&text={{ $shareText }}" aria-label="Telegram">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="m21.9 4.3-3 15c-.2.9-.8 1.1-1.6.7l-4.5-3.3-2.2 2.1c-.2.2-.4.4-.8.4l.3-4.3 7.9-7.1c.3-.3-.1-.5-.5-.2l-9.7 6.1-4.2-1.3c-.9-.3-.9-.9.2-1.3L20.6 3.4c.8-.3 1.5.2 1.3.9Z"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+            </div>{{-- /.td-page --}}
+        </div>{{-- /.col-md-8 --}}
 
         @include('layouts.engagement')
+    </div>{{-- /.row --}}
 
-    </div>
-
-    <!-- From Right Block Modal -->
-    <div class="modal fade" id="modal-block-fromright-{{ $post->id }}" tabindex="-1" role="dialog"
-        aria-labelledby="modal-block-fromright" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-fromright" role="document">
-            <div class="modal-content">
-                <div class="block block-rounded block-themed block-transparent mb-0">
-                    <div class="block-header bg-primary-dark">
-                        <h3 class="block-title">Share Post</h3>
-                        <div class="block-options">
-                            <button type="button" class="btn-block-option" data-bs-dismiss="modal" aria-label="Close">
-                                <i class="fa fa-fw fa-times"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="block-content">
-                        <p>
-                            Share this Post on all social media and make money when people view, like or comment on
-                            the post
-                        </p>
-                        <p>
-                            {{ url('timeline/' . $post->id) }}
-                        </p>
-
-                        <?php
-                        
-                        $url = url('timeline/' . $post->id);
-                        ?>
-
-
-                        <button type="button" onclick="copyToClipboard('{{ $url }}')"
-                            class="btn btn-sm btn-alt-secondary" data-bs-dismiss="modal">Copy Link</button>
-                        <hr>
-                        <ul class="nav nav-pills fs-sm push">
-                            <li class="nav-item me-1">
-
-
-                                <a class="nav-link"
-                                    href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode($url) }}"
-                                    target="_blank">
-                                    <i class="fab fa-facebook fa-2x opacity-50 me-1"></i>
-                                </a>
-
-
-                            </li>
-                            <li class="nav-item me-1">
-                                <a class="nav-link"
-                                    href="https://twitter.com/intent/tweet?url={{ urlencode($url) }}&text=Check%20this%20out!"
-                                    target="_blank">
-                                    <i class="fab fa-square-x-twitter fa-2x opacity-50 me-1"></i>
-                                </a>
-                            </li>
-                            <li class="nav-item me-1">
-                                <a class="nav-link" href="https://www.instagram.com/?url={{ urlencode($url) }}"
-                                    target="_blank">
-                                    <i class="fab fa-instagram fa-2x opacity-50 me-1"></i>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link"
-                                    href="https://www.linkedin.com/shareArticle?mini=true&url={{ urlencode($url) }}"
-                                    target="_blank">
-                                    <i class="fab fa-linkedin-in fa-2x opacity-50 me-1"></i>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link"
-                                    href="https://pinterest.com/pin/create/button/?url={{ urlencode($url) }}"
-                                    target="_blank">
-                                    <i class="fab fa-pinterest-p fa-2x opacity-50 me-1"></i>
-                                </a>
-                            </li>
-                            {{-- <button type="button" class="btn btn-primary push mb-md-0" data-bs-toggle="modal" data-bs-target="#modal-block-fromright">Block Design</button> --}}
-                            {{-- <button type="button" class="btn btn-alt-primary push mb-md-0" data-bs-toggle="modal" data-bs-target="#modal-default-fromright">Default</button> --}}
-                        </ul>
-
-                    </div>
-                    <div class="block-content block-content-full text-end bg-body">
-                        {{-- <button type="button" class="btn btn-sm btn-alt-secondary" data-bs-dismiss="modal">Close</button> --}}
-                        <button type="button" class="btn btn-sm btn-primary" data-bs-dismiss="modal">Close</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- END From Right Block Modal -->
-
-    <script>
-        document.addEventListener('click', function(e) {
-            if (!e.target.classList.contains('see-more')) return;
-
-            e.preventDefault();
-
-            const container = e.target.closest('.post-content');
-            if (!container) return;
-
-            container.innerText = container.dataset.full;
-        });
-    </script>
-
-
+    <livewire:user.post-photo-viewer />
 
     @include('layouts.onboarding')
 </div>

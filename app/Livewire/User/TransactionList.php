@@ -42,6 +42,7 @@ class TransactionList extends Component
     public function updatingStatusFilter(): void { $this->resetPage(); }
     public function updatingDateFrom(): void { $this->resetPage(); }
     public function updatingDateTo(): void { $this->resetPage(); }
+    public function updatingPerPage(): void { $this->resetPage(); }
 
     public function sortBy(string $field): void
     {

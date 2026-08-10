@@ -365,6 +365,8 @@ class CommunitySubscriptionService
                 'billing_interval' => $subscription->billing_interval,
             ]
         );
+
+        app(CommunityPayoutService::class)->recordFromSubscription($subscription, $transaction);
     }
 
     public function markFailed(CommunitySubscription $subscription): void

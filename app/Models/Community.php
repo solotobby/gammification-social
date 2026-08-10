@@ -90,6 +90,26 @@ class Community extends Model
         return $this->joinRequests()->where('status', 'pending')->latest();
     }
 
+    public function invites()
+    {
+        return $this->hasMany(CommunityInvite::class);
+    }
+
+    public function payouts()
+    {
+        return $this->hasMany(CommunityPayout::class);
+    }
+
+    public function subscriptions()
+    {
+        return $this->hasMany(CommunitySubscription::class);
+    }
+
+    public function isPrivate(): bool
+    {
+        return $this->type === 'private';
+    }
+
     /**
      * Two-letter monogram for the community's icon tile, e.g.
      * "Side Hustle Naija" -> "SH".

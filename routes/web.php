@@ -106,6 +106,7 @@ Route::group(['namespace' => 'auth'], function () {
     Route::post('process/access/code', [\App\Http\Controllers\GeneralController::class, 'processAccessCode']);
 
 
+    Route::get('/c/{community:slug}', [\App\Http\Controllers\GeneralController::class, 'communityPublic'])->name('community.public');
 
     Route::get('success', [\App\Http\Controllers\GeneralController::class, 'success']);
     Route::get('error', [\App\Http\Controllers\GeneralController::class, 'error']);
@@ -184,10 +185,12 @@ Route::middleware([
         Route::get('verify/community/subscription/payment/', [\App\Http\Controllers\PaymentController::class, 'verifyKoraCommunitySubscriptionPayment'])->name('verify.korapay.community.subscription');
 
         Route::get('community/payment/{communityId}', [PaymentController::class, 'paidCommunityPayment'])->name('community.payment');
+        Route::get('community/invite/{token}', [\App\Http\Controllers\CommunityInviteController::class, 'accept'])->name('community.invite.accept');
 
         //video player analytics route
         Route::post('api/videos/{video}/watch-time', [VideoAnalyticsController::class, 'trackWatchTime']);
         Route::post('api/videos/{video}/record-play', [VideoAnalyticsController::class, 'recordPlay']);
+        Route::post('api/rolls/watch', [RollsWatchController::class, 'store'])->name('api.rolls.watch');
 
 
         Route::get('timeline', Timeline::class);
@@ -215,7 +218,8 @@ Route::middleware([
 
 
         //VIDEO PLAYER ROUTE
-        Route::get('rolls/{videoId}', Rolls::class);
+        Route::get('rolls', Rolls::class)->name('rolls.random');
+        Route::get('rolls/{video}', Rolls::class)->name('rolls.show');
         // Route::get('earners/list', EarningList::class);
         Route::get('earner/list', EarningList::class);
         Route::get('user/blog', Blog::class);

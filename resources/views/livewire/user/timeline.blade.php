@@ -1,7 +1,5 @@
 <div>
-    {{-- GLightbox (used by post-content lightbox) --}}
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
+    {{-- GLightbox removed — Facebook-style photo viewer handles images --}}
 
     {{-- Fonts — ideally move these <link>s to your layout <head> so they aren't re-touched on Livewire re-renders --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -262,54 +260,178 @@
                 color: var(--ph-mint)
             }
 
-            /* image upload */
-            .ph-imgwrap {
-                margin-top: 14px
+            /* Facebook-style composer media */
+            .ph-fb-preview {
+                margin: 12px 20px 0;
+                border: 1px solid #ced0d4;
+                border-radius: 8px;
+                overflow: hidden;
+                background: #f0f2f5
             }
 
-            .ph-imgbtn {
-                display: inline-flex;
-                align-items: center;
-                gap: 8px;
-                cursor: pointer;
-                border: 1.5px dashed var(--ph-line-strong);
-                border-radius: 13px;
-                padding: 10px 16px;
-                font-weight: 600;
-                font-size: .88rem;
-                color: var(--ph-violet);
-                transition: .2s
-            }
-
-            .ph-imgbtn:hover {
-                background: var(--ph-surface)
-            }
-
-            .ph-imgbtn i {
-                font-size: 1rem
-            }
-
-            .ph-imghint {
-                display: block;
-                margin-top: 7px;
-                font-size: .78rem;
-                color: var(--ph-slate-light)
-            }
-
-            .ph-previews {
+            .ph-fb-preview-bar {
                 display: flex;
-                flex-wrap: wrap;
-                gap: 10px;
+                align-items: center;
+                justify-content: space-between;
+                padding: 8px 12px;
+                background: #fff;
+                border-bottom: 1px solid #e4e6eb;
+                font-size: .8rem;
+                font-weight: 600;
+                color: #65676b
+            }
+
+            .ph-fb-preview-bar button {
+                border: none;
+                background: #e4e6eb;
+                color: #050505;
+                font-size: .75rem;
+                font-weight: 600;
+                padding: 4px 10px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-family: inherit
+            }
+
+            .ph-fb-preview-bar button:hover { background: #d8dadf }
+
+            /* FB image collage — composer + feed */
+            .fb-img-grid {
+                display: grid;
+                gap: 2px;
+                background: #000
+            }
+
+            .fb-img-grid.n1 { grid-template-columns: 1fr }
+            .fb-img-grid.n1 .fb-img-cell { height: 280px }
+            .fb-img-grid.n2 { grid-template-columns: 1fr 1fr }
+            .fb-img-grid.n2 .fb-img-cell { height: 220px }
+            .fb-img-grid.n3 { grid-template-columns: 1fr 1fr }
+            .fb-img-grid.n3 .fb-img-cell:first-child { grid-row: span 2; min-height: 220px }
+            .fb-img-grid.n3 .fb-img-cell { height: 110px }
+            .fb-img-grid.n4 { grid-template-columns: 1fr 1fr }
+            .fb-img-grid.n4 .fb-img-cell { height: 140px }
+
+            .fb-img-cell {
+                position: relative;
+                overflow: hidden;
+                background: #1c1e21
+            }
+
+            .fb-img-cell img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                display: block
+            }
+
+            .fb-img-remove {
+                position: absolute;
+                top: 6px;
+                right: 6px;
+                width: 28px;
+                height: 28px;
+                border-radius: 50%;
+                border: none;
+                background: rgba(0, 0, 0, .65);
+                color: #fff;
+                font-size: 1rem;
+                cursor: pointer;
+                display: grid;
+                place-items: center;
+                z-index: 2
+            }
+
+            .fb-img-more {
+                position: absolute;
+                inset: 0;
+                background: rgba(0, 0, 0, .55);
+                color: #fff;
+                font-size: 1.5rem;
+                font-weight: 700;
+                display: grid;
+                place-items: center;
+                text-decoration: none
+            }
+
+            /* FB video preview in composer */
+            .ph-fb-vid {
+                position: relative;
+                background: #1c1e21;
+                aspect-ratio: 9/16;
+                max-height: 360px;
+                margin: 0 auto
+            }
+
+            .ph-fb-vid video {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                display: block
+            }
+
+            .ph-fb-vid-status {
+                padding: 12px;
+                font-size: .82rem;
+                color: #65676b;
+                text-align: center
+            }
+
+            /* FB toolbar — Photo | Roll side by side */
+            .ph-fb-toolbar {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+                padding: 12px 20px;
+                border-top: 1px solid #e4e6eb;
                 margin-top: 12px
+            }
+
+            .ph-fb-tool {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                padding: 10px 12px;
+                border: none;
+                border-radius: 8px;
+                background: #f0f2f5;
+                font-family: inherit;
+                font-size: .88rem;
+                font-weight: 600;
+                color: #050505;
+                cursor: pointer;
+                transition: background .15s
+            }
+
+            .ph-fb-tool:hover:not(:disabled) { background: #e4e6eb }
+            .ph-fb-tool:disabled { opacity: .4; cursor: not-allowed }
+
+            .ph-fb-tool-ic {
+                width: 28px;
+                height: 28px;
+                border-radius: 50%;
+                display: grid;
+                place-items: center;
+                font-size: .8rem;
+                color: #fff;
+                flex-shrink: 0
+            }
+
+            .ph-fb-tool--photo .ph-fb-tool-ic { background: #45bd62 }
+            .ph-fb-tool--roll .ph-fb-tool-ic { background: #f02849 }
+
+            .ph-fb-tool small {
+                display: block;
+                font-size: .65rem;
+                font-weight: 500;
+                color: #65676b;
+                margin-top: 1px
             }
 
             .ph-prev {
                 position: relative;
-                width: 88px;
-                height: 88px;
-                border-radius: 14px;
-                overflow: hidden;
-                border: 1px solid var(--ph-line)
+                overflow: hidden
             }
 
             .ph-prev img {
@@ -319,21 +441,97 @@
                 display: block
             }
 
-            .ph-prev .ph-prev-x {
-                position: absolute;
-                top: 5px;
-                right: 5px;
-                width: 24px;
-                height: 24px;
-                border-radius: 50%;
+            /* video upload states */
+            .ph-vprog {
+                margin-top: 0;
+                padding: 12px
+            }
+
+            .ph-vprog-meta {
+                display: flex;
+                justify-content: space-between;
+                font-size: .78rem;
+                color: var(--ph-slate);
+                margin-bottom: 6px
+            }
+
+            .ph-vprog-track {
+                height: 6px;
+                background: var(--ph-line);
+                border-radius: 99px;
+                overflow: hidden
+            }
+
+            .ph-vprog-fill {
+                height: 100%;
+                background: linear-gradient(90deg, var(--ph-pink), var(--ph-violet));
+                border-radius: 99px;
+                transition: width .4s
+            }
+
+            .ph-vthumb {
+                margin-top: 0;
+                border-radius: 0;
+                overflow: hidden;
+                background: #000;
+                aspect-ratio: 9/16;
+                max-height: 360px;
+                position: relative
+            }
+
+            .ph-vthumb video {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                display: block
+            }
+
+            .ph-vdone {
+                margin-top: 12px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 10px 14px;
+                background: rgba(16, 185, 129, .08);
+                border: 1px solid rgba(16, 185, 129, .2);
+                border-radius: 12px;
+                font-size: .82rem;
+                color: #0c8a64
+            }
+
+            .ph-vcancel {
+                margin-left: auto;
                 border: none;
-                background: rgba(12, 8, 38, .62);
-                color: #fff;
-                font-size: 1rem;
-                line-height: 1;
-                display: grid;
-                place-items: center;
-                cursor: pointer
+                background: none;
+                color: var(--ph-slate);
+                font-size: .78rem;
+                cursor: pointer;
+                text-decoration: underline;
+                font-family: inherit
+            }
+
+            .ph-vidbtn {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                cursor: pointer;
+                border: none;
+                background: rgba(244, 70, 126, .08);
+                border-radius: 13px;
+                padding: 10px 16px;
+                font-weight: 600;
+                font-size: .88rem;
+                color: var(--ph-pink);
+                font-family: inherit;
+                transition: .2s
+            }
+
+            .ph-vidbtn:hover {
+                background: rgba(244, 70, 126, .14)
+            }
+
+            .ph-comp-actions {
+                display: none
             }
 
             /* trends */
@@ -436,9 +634,19 @@
             /* footer / post button */
             .ph-comp-foot {
                 padding: 14px 20px;
-                border-top: 1px solid var(--ph-line);
+                border-top: 1px solid #e4e6eb;
                 display: flex;
-                justify-content: flex-end
+                justify-content: flex-end;
+                align-items: center;
+                gap: 12px;
+                margin-top: 0
+            }
+
+            .ph-comp-foot-note {
+                flex: 1;
+                font-size: .78rem;
+                color: #65676b;
+                text-align: left
             }
 
             .ph-post-btn {
@@ -610,18 +818,41 @@
             @error('images.*')
                 <div class="ph-flash ph-flash--danger" role="alert">{{ $message }}</div>
             @enderror
+            @error('video')
+                <div class="ph-flash ph-flash--danger" role="alert">{{ $message }}</div>
+            @enderror
 
             {{-- ===== Composer ===== --}}
-            <div class="ph-composer">
-                <form wire:submit.prevent="createPost">
+            <div class="ph-composer" x-data="timelineComposer()" x-init="boot()">
+                <form @submit.prevent="videoMode && vStatus === 'done' ? $wire.publishVideo() : (!videoMode ? $wire.createPost() : null)">
                     <div class="ph-comp-body">
+
+                        @if (in_array($userLevel, ['Creator', 'Influencer']))
+                            <input type="file"
+                                x-ref="imgInput"
+                                wire:model="images"
+                                accept="image/*"
+                                multiple
+                                style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none"
+                                tabindex="-1"
+                                @if ($userLevel === 'Creator') x-bind:disabled="images.length >= 1" @endif
+                                @if ($userLevel === 'Influencer') x-bind:disabled="images.length >= 4" @endif>
+
+                            <input type="file"
+                                x-ref="vidInput"
+                                wire:model="video"
+                                accept="video/*"
+                                style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none"
+                                tabindex="-1">
+                        @endif
 
                         <div class="ph-comp-top">
                             <div class="ph-avatar">
                                 {{ strtoupper(substr(auth()->user()->username ?? (auth()->user()->name ?? 'U'), 0, 1)) }}
                             </div>
                             <div class="ph-field" x-data="{ content: @entangle('content') }">
-                                <textarea x-model="content" rows="2" placeholder="Say something amazing — every post can earn"
+                                <textarea x-model="content" rows="2"
+                                    :placeholder="videoMode ? 'Say something about your roll…' : 'What\'s on your mind?'"
                                     x-on:input="$el.style.height='auto'; $el.style.height = $el.scrollHeight + 'px'"
                                     @if (!in_array(@$userLevel, ['Creator', 'Influencer'])) maxlength="160" @endif required></textarea>
                                 @if (!in_array(@$userLevel, ['Creator', 'Influencer']))
@@ -632,85 +863,112 @@
                             </div>
                         </div>
 
-                        {{-- <span class="ph-nudge"><i class="fa fa-bolt"></i> Every like, comment &amp; view on this post
-                            earns you money, Add hashtags for more visiblity</span> --}}
-
-                        {{-- Images (Creator / Influencer only) --}}
+                        {{-- Facebook-style media preview + toolbar --}}
                         @if (in_array($userLevel, ['Creator', 'Influencer']))
-                            <div class="ph-imgwrap" x-data="{ images: @entangle('images') }">
-                                <label class="ph-imgbtn">
-                                    <i class="fas fa-image"></i> Add photo
-                                    <input type="file" wire:model="images" multiple accept="image/*" hidden
-                                        @if (@$userLevel === 'Creator') x-bind:disabled="images.length >= 1" @endif
-                                        @if (@$userLevel === 'Influencer') x-bind:disabled="images.length >= 4" @endif>
-                                </label>
-                                <small
-                                    class="ph-imghint">{{ $userLevel === 'Creator' ? 'Up to 1 image' : 'Up to 4 images' }}</small>
+                            @php
+                                $maxImages = $userLevel === 'Creator' ? 1 : 4;
+                                $imgPreviewCount = count($images);
+                                $imgGridClass = 'n' . min(max($imgPreviewCount, 1), 4);
+                            @endphp
 
-                                {{-- Preview + Remove --}}
-                                <div class="ph-previews">
+                            {{-- Photo preview (FB collage) --}}
+                            <div class="ph-fb-preview" x-show="!videoMode && images.length > 0" x-cloak>
+                                <div class="ph-fb-preview-bar">
+                                    <span><i class="fas fa-image" style="color:#45bd62;margin-right:4px"></i> Photos</span>
+                                    <button type="button" @click="$wire.clearImages()">Remove all</button>
+                                </div>
+                                <div class="fb-img-grid {{ $imgGridClass }}">
                                     @foreach ($images as $index => $image)
-                                        <div class="ph-prev">
-                                            <img src="{{ $image->temporaryUrl() }}" alt="preview">
-                                            <button type="button" class="ph-prev-x"
+                                        <div class="fb-img-cell">
+                                            <img src="{{ $image->temporaryUrl() }}" alt="Preview">
+                                            <button type="button" class="fb-img-remove"
                                                 wire:click="removeImage({{ $index }})"
-                                                aria-label="Remove">&times;</button>
+                                                @click.stop aria-label="Remove">&times;</button>
                                         </div>
                                     @endforeach
                                 </div>
                             </div>
+
+                            {{-- Roll preview --}}
+                            <div class="ph-fb-preview" x-show="videoMode && vStatus !== 'idle'" x-cloak>
+                                <div class="ph-fb-preview-bar">
+                                    <span><i class="fas fa-video" style="color:#f02849;margin-right:4px"></i> Roll</span>
+                                    <button type="button" @click="resetVideo(); $wire.cancelVideoUpload()">Remove</button>
+                                </div>
+
+                                <div class="ph-vprog" x-show="vStatus === 'uploading'">
+                                    <div class="ph-vprog-meta">
+                                        <span>Uploading to Spaces…</span>
+                                        <span x-text="vPct + '%'"></span>
+                                    </div>
+                                    <div class="ph-vprog-track">
+                                        <div class="ph-vprog-fill" :style="'width:' + vPct + '%'"></div>
+                                    </div>
+                                </div>
+
+
+                                @if ($cloudinaryVideoUrl)
+                                    <div class="ph-fb-vid" x-show="vStatus === 'done'">
+                                        <video src="{{ $cloudinaryVideoUrl }}" muted playsinline controls></video>
+                                    </div>
+                                @endif
+
+                                <div class="ph-fb-vid-status" x-show="vStatus === 'done'">
+                                    <i class="fas fa-check-circle" style="color:#45bd62"></i> Ready — add a caption and post
+                                </div>
+
+                                <div class="ph-fb-vid-status" x-show="vStatus === 'error'" style="color:#f02849">
+                                    Upload failed. Tap Roll below to try again.
+                                </div>
+                            </div>
+
+                            <div wire:loading wire:target="video" class="ph-fb-preview" style="margin-top:12px" x-show="videoMode">
+                                <div class="ph-fb-vid-status"><span class="ph-spin"></span> Staging video…</div>
+                            </div>
+
+                            {{-- FB toolbar: Photo | Roll --}}
+                            <div class="ph-fb-toolbar">
+                                <button type="button" class="ph-fb-tool ph-fb-tool--photo"
+                                    @click="openPhoto()"
+                                    :disabled="videoMode && vStatus !== 'idle'">
+                                    <span class="ph-fb-tool-ic"><i class="fas fa-image"></i></span>
+                                    <span>Photo<small>{{ $maxImages === 1 ? '1 max' : 'Up to '.$maxImages }}</small></span>
+                                </button>
+                                <button type="button" class="ph-fb-tool ph-fb-tool--roll"
+                                    @click="openVideo()"
+                                    :disabled="images.length > 0 && !videoMode">
+                                    <span class="ph-fb-tool-ic"><i class="fas fa-video"></i></span>
+                                    <span>Roll<small>{{ $userLevel === 'Creator' ? '60 sec' : '3 min' }}</small></span>
+                                </button>
+                            </div>
                         @endif
 
-                        {{-- Selected trends --}}
-                        {{-- @if (count($selectedTrends) > 0)
-                            <div class="ph-trends-sel">
-                                @foreach (activeTrends()->whereIn('id', $selectedTrends) as $trend)
-                                    <span class="ph-chip">#{{ $trend->name }}
-                                        <button type="button" class="ph-chip-x" wire:click="removeTrend('{{ $trend->id }}')" aria-label="Remove">&times;</button>
-                                    </span>
-                                @endforeach
-                            </div>
-                        @endif --}}
-
-                        {{-- Trend picker (unselected only) --}}
-                        {{-- <small class="ph-pick-label">Add trending topics <span class="req">(min. 2 required)</span></small>
-                        <div>
-                            @foreach (activeTrends()->whereNotIn('id', $selectedTrends) as $trend)
-                                <button type="button" class="ph-pick" wire:click="addTrend('{{ $trend->id }}')">#{{ $trend->name }}</button>
-                            @endforeach
-                        </div> --}}
-
-                        {{-- Counter --}}
-                        {{-- <div class="ph-counter {{ count($selectedTrends) >= 2 ? 'ok' : '' }}">
-                            {{ count($selectedTrends) }} selected
-                            @if (count($selectedTrends) >= 2)
-                                <i class="fa fa-check-circle"></i> ready to post
-                            @else
-                                · pick {{ 2 - count($selectedTrends) }} more
-                            @endif
-                        </div> --}}
-
                         <div class="ph-comp-foot">
-                            <button class="ph-post-btn" type="submit" wire:loading.attr="disabled"
-                                wire:target="createPost">
-                                <span wire:loading.remove wire:target="createPost"><i class="fa fa-paper-plane"></i>
-                                    Post</span>
-                                <span wire:loading wire:target="createPost"><span class="ph-spin"></span>
-                                    Posting…</span>
+                            <span class="ph-comp-foot-note" x-show="videoMode && vStatus !== 'done'" x-cloak>
+                                Finish uploading your roll before posting.
+                            </span>
+                            <span class="ph-comp-foot-note" x-show="!videoMode" wire:loading.remove wire:target="createPost">
+                                @if (in_array($userLevel, ['Creator', 'Influencer']))
+                                    Photo post or roll — pick one above.
+                                @else
+                                    Basic posts · 160 characters max.
+                                @endif
+                            </span>
+                            <button class="ph-post-btn" type="submit"
+                                wire:loading.attr="disabled"
+                                wire:target="createPost,publishVideo,uploadVideo,video,uploadToCloudinary"
+                                :disabled="videoMode && vStatus !== 'done'">
+                                <span wire:loading.remove wire:target="createPost,publishVideo">
+                                    <i class="fa fa-paper-plane"></i>
+                                    <span x-text="videoMode ? 'Publish Roll' : 'Post'"></span>
+                                </span>
+                                <span wire:loading wire:target="createPost,publishVideo,video,uploadVideo,uploadToCloudinary">
+                                    <span class="ph-spin"></span> Working…
+                                </span>
                             </button>
                         </div>
 
-
                     </div>
-
-                    {{-- <div class="ph-comp-foot">
-                        <button class="ph-post-btn" type="submit" wire:loading.attr="disabled"
-                            wire:target="createPost">
-                            <span wire:loading.remove wire:target="createPost"><i class="fa fa-paper-plane"></i>
-                                Post</span>
-                            <span wire:loading wire:target="createPost"><span class="ph-spin"></span> Posting…</span>
-                        </button>
-                    </div> --}}
                 </form>
             </div>
 
@@ -718,7 +976,10 @@
             <div class="ph-feed-head">Your feed</div>
 
             @forelse (@$posts as $post)
-                <livewire:user.post-content :post="$post" :wire:key="'post-'.$post->id" />
+                <livewire:user.post-content
+                    :post="$post"
+                    :estimated-earnings="$earnings[$post->id] ?? 0"
+                    :wire:key="'post-'.$post->id" />
             @empty
                 <div class="ph-empty">
                     <div class="ph-empty-ic"><i class="fa fa-feather-alt"></i></div>
@@ -727,7 +988,7 @@
                 </div>
             @endforelse
 
-            {{-- Global video player --}}
+            {{-- Global video player — redirects to /rolls/{id} --}}
             @if (@$isVideoOpen)
                 <livewire:user.video-player :videoId="$activeVideoId" wire:key="video-player-{{ @$activeVideoId }}" />
             @endif
@@ -750,5 +1011,55 @@
         @include('layouts.engagement')
     </div>
 
+    <livewire:user.post-photo-viewer />
+
     @include('layouts.onboarding')
+
+    <script>
+        function timelineComposer() {
+            return {
+                videoMode: @js($composerVideoMode ?? false),
+                vStatus: @js($videoUploadStatus ?: 'idle'),
+                vPct: @js($videoUploadProgress ?? 0),
+                images: @entangle('images'),
+                boot() {
+                    Livewire.on('videoUploadStatus', ({ status, progress }) => {
+                        this.vStatus = status;
+                        this.vPct = progress ?? 0;
+                        if (status === 'uploading' || status === 'ready') {
+                            this.videoMode = true;
+                        }
+                    });
+                },
+                photoBlocked() {
+                    return this.videoMode && this.vStatus !== 'idle';
+                },
+                videoBlocked() {
+                    return this.images.length > 0 && !this.videoMode;
+                },
+                openPhoto() {
+                    if (this.photoBlocked()) return;
+                    if (this.videoMode && this.vStatus === 'idle') {
+                        this.resetVideo();
+                        this.$wire.cancelVideoUpload();
+                    }
+                    this.$refs.imgInput?.click();
+                },
+                openVideo() {
+                    if (this.videoBlocked()) return;
+                    if (this.vStatus === 'idle' && !this.videoMode) {
+                        this.videoMode = true;
+                        this.$refs.vidInput?.click();
+                    } else if (this.videoMode && this.vStatus === 'idle') {
+                        this.$refs.vidInput?.click();
+                    }
+                },
+                resetVideo() {
+                    this.videoMode = false;
+                    this.vStatus = 'idle';
+                    this.vPct = 0;
+                }
+            };
+        }
+    </script>
 </div>

@@ -337,7 +337,7 @@ body { background: var(--ph-bg); font-family: 'Inter', system-ui, sans-serif; }
                         ✅ File ready
                     </div>
                     <p class="ph-vready-sub">
-                        Your video is staged. Click <strong>Upload to Cloudinary</strong> to process it.
+                        Your video is staged. Click <strong>Process &amp; Upload</strong> to compress and upload it.
                         This may take up to a minute depending on file size.
                     </p>
                     <button type="button"
@@ -351,7 +351,7 @@ body { background: var(--ph-bg); font-family: 'Inter', system-ui, sans-serif; }
                                 <polyline points="17 8 12 3 7 8"/>
                                 <line x1="12" y1="3" x2="12" y2="15"/>
                             </svg>
-                            Upload to Cloudinary
+                            Process &amp; Upload
                         </span>
                         <span wire:loading wire:target="uploadToCloudinary">
                             <span class="spinner-border spinner-border-sm me-1"></span>
@@ -368,7 +368,7 @@ body { background: var(--ph-bg); font-family: 'Inter', system-ui, sans-serif; }
                 {{-- ── STEP 3: Uploading — progress bar ──────── --}}
                 <div class="ph-prog-wrap" x-show="mode==='video' && vStatus==='uploading'" x-cloak>
                     <div class="ph-prog-meta">
-                        <span>Uploading to Cloudinary — please don't close this page</span>
+                        <span>Processing &amp; uploading — please don't close this page</span>
                         <span x-text="vPct+'%'"></span>
                     </div>
                     <div class="ph-prog-track">

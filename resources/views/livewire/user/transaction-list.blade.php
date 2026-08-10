@@ -650,7 +650,9 @@
                     </thead>
                     <tbody>
                         @forelse ($transactions as $tx)
-                            @php($meta = $this->statusMeta($tx->status))
+                            @php
+                                $meta = $this->statusMeta($tx->status);
+                            @endphp
                             <tr wire:key="tx-{{ $tx->id }}">
                                 <td data-label="Reference"><span class="pk-ref">{{ $tx->ref }}</span></td>
                                 <td data-label="Amount">
@@ -690,8 +692,73 @@
                 </table>
             </div>
 
-           
-          
+            @if ($transactions->hasPages())
+                @php
+                    $current = $transactions->currentPage();
+                    $last = $transactions->lastPage();
+                    $start = max(1, $current - 2);
+                    $end = min($last, $current + 2);
+                @endphp
+                <div class="pk-pagination">
+                    <div class="pk-pg-info">
+                        @if ($transactions->total() > 0)
+                            Showing {{ number_format($transactions->firstItem()) }}–{{ number_format($transactions->lastItem()) }}
+                            of {{ number_format($transactions->total()) }}
+                        @else
+                            No results
+                        @endif
+                    </div>
+                    <div class="pk-pg-btns">
+                        <button type="button" class="pk-pg-btn" wire:click="previousPage"
+                            wire:loading.attr="disabled" @disabled($transactions->onFirstPage())
+                            aria-label="Previous page">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <path d="m15 18-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+
+                        @if ($start > 1)
+                            <button type="button" class="pk-pg-btn" wire:click="gotoPage(1)">1</button>
+                            @if ($start > 2)
+                                <span class="pk-pg-info" style="padding:0 2px">…</span>
+                            @endif
+                        @endif
+
+                        @for ($page = $start; $page <= $end; $page++)
+                            <button type="button"
+                                class="pk-pg-btn {{ $page === $current ? 'pk-pg-active' : '' }}"
+                                wire:click="gotoPage({{ $page }})"
+                                wire:loading.attr="disabled"
+                                aria-label="Page {{ $page }}"
+                                @if ($page === $current) aria-current="page" @endif>
+                                {{ $page }}
+                            </button>
+                        @endfor
+
+                        @if ($end < $last)
+                            @if ($end < $last - 1)
+                                <span class="pk-pg-info" style="padding:0 2px">…</span>
+                            @endif
+                            <button type="button" class="pk-pg-btn" wire:click="gotoPage({{ $last }})">{{ $last }}</button>
+                        @endif
+
+                        <button type="button" class="pk-pg-btn" wire:click="nextPage"
+                            wire:loading.attr="disabled" @disabled(! $transactions->hasMorePages())
+                            aria-label="Next page">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <path d="m9 18 6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            @elseif ($transactions->total() > 0)
+                <div class="pk-pagination">
+                    <div class="pk-pg-info">
+                        Showing {{ number_format($transactions->total()) }}
+                        transaction{{ $transactions->total() === 1 ? '' : 's' }}
+                    </div>
+                </div>
+            @endif
         </div>
 
     </div>

@@ -21,6 +21,9 @@ use App\Models\UserView;
 use App\Models\Wallet;
 use App\Notifications\GeneralNotification;
 use App\Services\HashtagService;
+use App\Models\PostVideo;
+use App\Services\PostEarningsService;
+use App\Services\VideoUploadService;
 // use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -51,7 +54,7 @@ class Timeline extends Component
 
     protected $rules = [
         'content' => 'required|string',
-        'images.*' => 'nullable|image|max:1024', // 1MB Max per image
+        'images.*' => 'nullable|image|max:2048',
     ];
 
     public $access_code = '';
@@ -86,14 +89,25 @@ class Timeline extends Component
     public $isVideoOpen = false;
     public $activeVideoId = null;
 
+    // ── Video upload (Creator / Influencer) ───────────────────
+    public $video = null;
+    public string $videoUploadStatus = '';
+    public int $videoUploadProgress = 0;
+    public ?string $cloudinaryVideoUrl = null;
+    public ?string $cloudinaryVideoPublicId = null;
+    public ?string $cloudinaryThumbnailUrl = null;
+    public ?int $videoDuration = null;
+    public ?int $videoWidth = null;
+    public ?int $videoHeight = null;
+    public ?string $videoFormat = null;
+    public ?int $videoFileSize = null;
+    public array $videoQualityVersions = [];
+    public bool $composerVideoMode = false;
+
 
     public function openVideoPlayer($videoId)
     {
-        $this->dispatch('openVideoPlayer', videoId: $videoId)
-            ->to(\App\Livewire\User\VideoPlayer::class);
-        $this->activeVideoId = $videoId;
-        $this->isVideoOpen = true;
-        dd("Opening video player for video ID: $videoId");
+        return redirect()->route('rolls.show', ['video' => $videoId]);
     }
 
     public function closeVideoPlayer()
@@ -121,8 +135,10 @@ class Timeline extends Component
 
     public function loadPosts()
     {
-        // Step 1: get latest posts per user (interleaving)
-        $query = Post::with(['user', 'trends'])
+        $userId = auth()->id();
+
+        $query = Post::with(['user', 'trends', 'images', 'video'])
+            ->withExists(['likes as liked_by_me' => fn ($q) => $q->where('user_id', $userId)])
             ->where('status', 'LIVE')
             ->latest('created_at');
 
@@ -299,6 +315,8 @@ class Timeline extends Component
         session()->flash('success', 'Your post was successful!');
 
         $this->reset('content', 'images');
+        $this->page = 1;
+        $this->loadPosts();
     }
 
 
@@ -325,10 +343,14 @@ class Timeline extends Component
         return false;
     }
 
-    public function updatedImages()
+    public function updatedImages(): void
     {
+        if (! empty($this->images) && $this->composerVideoMode) {
+            $this->cancelVideoUpload();
+        }
+
         $this->validate([
-            'images.*' => 'image|max:1024', // 1MB Max per image
+            'images.*' => 'image|max:2048',
         ]);
 
         $this->imagePreviews = [];
@@ -347,6 +369,175 @@ class Timeline extends Component
         }
     }
 
+    public function clearImages(): void
+    {
+        $this->reset('images');
+    }
+
+    // ── Video upload ──────────────────────────────────────────
+    public function updatedVideo(): void
+    {
+        if (! $this->video) {
+            return;
+        }
+
+        $level = userLevel();
+        $service = app(VideoUploadService::class);
+        $maxKb = $service->maxFileKb($level);
+
+        if ($maxKb === 0) {
+            $this->videoUploadStatus = 'error';
+            $this->addError('video', 'Your account level cannot upload videos.');
+            return;
+        }
+
+        $this->validate([
+            'video' => 'required|file|mimetypes:'.$service->allowedMimetypes()."|max:{$maxKb}",
+        ]);
+
+        $this->composerVideoMode = true;
+        $this->images = [];
+        $this->uploadVideo();
+    }
+
+    public function uploadVideo(): void
+    {
+        if (! $this->video) {
+            return;
+        }
+
+        $level = userLevel();
+        if (! in_array($level, ['Creator', 'Influencer'])) {
+            $this->videoUploadStatus = 'error';
+            session()->flash('error', 'Permission denied.');
+            return;
+        }
+
+        $this->videoUploadStatus = 'uploading';
+        $this->videoUploadProgress = 15;
+        $this->dispatch('videoUploadStatus', status: 'uploading', progress: 15);
+
+        try {
+            $result = app(VideoUploadService::class)->upload(
+                $this->video->getRealPath(),
+                $level
+            );
+
+            $this->cloudinaryVideoUrl = $result['url'];
+            $this->cloudinaryVideoPublicId = $result['public_id'];
+            $this->cloudinaryThumbnailUrl = $result['thumbnail'];
+            $this->videoDuration = $result['duration'];
+            $this->videoWidth = $result['width'];
+            $this->videoHeight = $result['height'];
+            $this->videoFormat = $result['format'];
+            $this->videoFileSize = $result['file_size'];
+            $this->videoQualityVersions = $result['quality_versions'];
+
+            $this->videoUploadProgress = 100;
+            $this->videoUploadStatus = 'done';
+            $this->dispatch('videoUploadStatus', status: 'done', progress: 100);
+        } catch (\Throwable $e) {
+            $this->videoUploadStatus = 'error';
+            $this->videoUploadProgress = 0;
+            $this->dispatch('videoUploadStatus', status: 'error', progress: 0);
+            session()->flash('error', 'Video upload failed: '.$e->getMessage());
+        }
+    }
+
+    /** @deprecated alias */
+    public function uploadToCloudinary(): void
+    {
+        $this->uploadVideo();
+    }
+
+    public function publishVideo(): void
+    {
+        $level = userLevel();
+
+        if (! in_array($level, ['Creator', 'Influencer'])) {
+            session()->flash('error', 'Permission denied.');
+            return;
+        }
+
+        if ($this->videoUploadStatus !== 'done' || ! $this->cloudinaryVideoUrl) {
+            session()->flash('error', 'Please wait for your video to finish processing.');
+            return;
+        }
+
+        $this->validate(['content' => 'required|string']);
+
+        $user = Auth::user();
+        $content = $this->convertUrlsToLinks(strip_tags($this->content));
+
+        $existing = Post::where('user_id', $user->id)->pluck('content')->toArray();
+        if (isSimilar($content, $existing, 4)) {
+            session()->flash('info', 'This content is too similar to an existing post.');
+            return;
+        }
+
+        $post = Post::create([
+            'user_id' => $user->id,
+            'content' => $content,
+            'unicode' => rand(1000, 9999).time(),
+            'comment_external' => 0,
+            'status' => $user->status === 'ACTIVE' ? 'LIVE' : 'SHADOW_BANNED',
+            'has_video' => true,
+        ]);
+
+        PostVideo::create([
+            'user_id' => $user->id,
+            'post_id' => $post->id,
+            'path' => $this->cloudinaryVideoUrl,
+            'public_id' => $this->cloudinaryVideoPublicId,
+            'thumbnail_path' => $this->cloudinaryThumbnailUrl,
+            'duration' => $this->videoDuration,
+            'width' => $this->videoWidth,
+            'height' => $this->videoHeight,
+            'format' => $this->videoFormat,
+            'file_size' => $this->videoFileSize,
+            'quality_versions' => $this->videoQualityVersions ?: null,
+            'processing_status' => 'completed',
+        ]);
+
+        app(HashtagService::class)->attach($post, $post->content);
+
+        session()->flash('success', 'Your video was posted!');
+        $this->reset('content');
+        $this->resetVideoState();
+        $this->page = 1;
+        $this->loadPosts();
+    }
+
+    public function cancelVideoUpload(): void
+    {
+        if ($this->cloudinaryVideoPublicId) {
+            try {
+                app(VideoUploadService::class)->delete($this->cloudinaryVideoPublicId);
+            } catch (\Exception $e) {
+                // ignore cleanup failures
+            }
+        }
+        $this->resetVideoState();
+    }
+
+    protected function resetVideoState(): void
+    {
+        $this->video = null;
+        $this->composerVideoMode = false;
+        $this->videoUploadProgress = 0;
+        $this->cloudinaryVideoUrl = null;
+        $this->cloudinaryVideoPublicId = null;
+        $this->cloudinaryThumbnailUrl = null;
+        $this->videoDuration = null;
+        $this->videoWidth = null;
+        $this->videoHeight = null;
+        $this->videoFormat = null;
+        $this->videoFileSize = null;
+        $this->videoQualityVersions = [];
+        $this->videoUploadStatus = '';
+        $this->dispatch('videoUploadStatus', status: 'idle', progress: 0);
+    }
+
 
 
     public function loadMore()
@@ -356,7 +547,11 @@ class Timeline extends Component
 
     public function render()
     {
-        return view('livewire.user.timeline')->layout('layouts.app');
+        $earnings = app(PostEarningsService::class)->forPosts($this->posts->pluck('id'));
+
+        return view('livewire.user.timeline', [
+            'earnings' => $earnings,
+        ])->layout('layouts.app');
     }
 
 

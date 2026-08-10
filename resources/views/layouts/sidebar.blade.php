@@ -102,10 +102,15 @@
                     </a>
                 @endif
 
-                {{-- <a class="nav-main-link" href="{{ url('community') }}">
+                <a class="nav-main-link" href="{{ url('community') }}">
                     <i class="nav-main-link-icon fa fa-users"></i>
                     <span class="nav-main-link-name">Community</span>
-                </a> --}}
+                </a>
+
+                <a class="nav-main-link" href="{{ route('rolls.random') }}">
+                    <i class="nav-main-link-icon fa fa-play-circle"></i>
+                    <span class="nav-main-link-name">Rolls</span>
+                </a>
 
                 <a class="nav-main-link" href="{{ url('upgrade') }}">
                     <i class="nav-main-link-icon fa fa-level-up-alt"></i>

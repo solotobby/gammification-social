@@ -1,9 +1,510 @@
 <div>
     {{-- Nothing in the world is as soft and yielding as water. --}}
 
-    <div class="community-show-page" x-data="{ tab: 'feed' }">
+    @include('livewire.user.partials.community-ui')
+
+    <div class="community-show-page" x-data="{ tab: 'feed', shareOpen: false }"
+        @settings-saved.window="tab = 'feed'"
+        @keydown.escape.window="shareOpen = false">
+
+        <div class="pk-ui-bg" aria-hidden="true"></div>
+        <div class="pk-ui-inner">
 
         @verbatim
+
+            <style>
+                /* ── Reset / scope ──────────────────────────────────────── */
+                .pk-card *,
+                .pk-card *::before,
+                .pk-card *::after {
+                    box-sizing: border-box;
+                }
+
+                /* ── Card shell ─────────────────────────────────────────── */
+                .pk-card {
+                    background: #fff;
+                    border: 1px solid #eff3f4;
+                    border-radius: 0;
+                    /* X-style: no radius on feed cards */
+                    margin-bottom: 1px;
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                }
+
+                .pk-card+.pk-card {
+                    border-top: none;
+                }
+
+                /* Round only when it's a standalone detail card */
+                .pk-card.pk-standalone {
+                    border-radius: 12px;
+                    margin-bottom: 12px;
+                    border: 1px solid #eff3f4;
+                }
+
+                /* ── Header ─────────────────────────────────────────────── */
+                .pk-header {
+                    display: flex;
+                    align-items: flex-start;
+                    gap: 12px;
+                    padding: 14px 16px 0;
+                }
+
+                .pk-avatar-col {
+                    flex-shrink: 0;
+                }
+
+                .pk-avatar {
+                    width: 44px;
+                    height: 44px;
+                    border-radius: 50%;
+                    object-fit: cover;
+                    display: block;
+                }
+
+                .pk-name-row {
+                    display: flex;
+                    align-items: center;
+                    flex-wrap: wrap;
+                    gap: 4px;
+                    line-height: 1.2;
+                }
+
+                .pk-name {
+                    font-size: 15px;
+                    font-weight: 700;
+                    color: #0f1419;
+                    text-decoration: none;
+                }
+
+                .pk-name:hover {
+                    text-decoration: underline;
+                    color: #0f1419;
+                }
+
+                /* Verified badge — creator = blue, influencer = brand purple */
+                .pk-tick {
+                    width: 18px;
+                    height: 18px;
+                    flex-shrink: 0;
+                }
+
+                /* Influencer crown label */
+                .pk-influencer-label {
+                    font-size: 10px;
+                    font-weight: 700;
+                    letter-spacing: .05em;
+                    text-transform: uppercase;
+                    color: #5A4FDC;
+                    background: rgba(90, 79, 220, .08);
+                    border-radius: 4px;
+                    padding: 1px 5px;
+                }
+
+                .pk-handle-row {
+                    display: flex;
+                    align-items: center;
+                    gap: 4px;
+                    margin-top: 1px;
+                }
+
+                .pk-handle {
+                    font-size: 14px;
+                    color: #536471;
+                    text-decoration: none;
+                }
+
+                .pk-handle:hover {
+                    text-decoration: underline;
+                    color: #536471;
+                }
+
+                .pk-sep {
+                    color: #ccd3d8;
+                    font-size: 13px;
+                }
+
+                .pk-time {
+                    font-size: 14px;
+                    color: #536471;
+                }
+
+                /* Earnings pill — owner only */
+                .pk-earn {
+                    font-size: 12px;
+                    font-weight: 600;
+                    color: #00ba7c;
+                    background: rgba(0, 186, 124, .08);
+                    border-radius: 20px;
+                    padding: 2px 8px;
+                    white-space: nowrap;
+                    text-decoration: none;
+                    border: none;
+                    cursor: pointer;
+                    font-family: inherit;
+                    line-height: 1.4;
+                }
+
+                .pk-earn:hover {
+                    background: rgba(0, 186, 124, .15);
+                    color: #00ba7c;
+                }
+
+                /* Options kebab */
+                .pk-options-btn {
+                    background: none;
+                    border: none;
+                    padding: 6px;
+                    border-radius: 50%;
+                    color: #536471;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: *background* .15s, color .15s;
+                    margin-left: auto;
+                    flex-shrink: 0;
+                }
+
+                .pk-options-btn:hover {
+                    background: rgba(90, 79, 220, .08);
+                    color: #5A4FDC;
+                }
+
+                /* ── Body ───────────────────────────────────────────────── */
+                .pk-body {
+                    padding: 10px 16px 0 72px;
+                }
+
+                /* 72px = 44px avatar + 12px gap + 16px left pad */
+
+                .pk-text {
+                    font-size: 15px;
+                    line-height: 1.55;
+                    color: #0f1419;
+                    white-space: pre-wrap;
+                    word-break: break-word;
+                    margin: 0;
+                }
+
+                .pk-text a {
+                    color: #1d9bf0;
+                    text-decoration: none;
+                }
+
+                .pk-text a:hover {
+                    text-decoration: underline;
+                }
+
+                .pk-see-more {
+                    background: none;
+                    border: none;
+                    padding: 0;
+                    color: #1d9bf0;
+                    font-size: 14px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    font-family: inherit;
+                    margin-left: 4px;
+                }
+
+                .pk-see-more:hover {
+                    text-decoration: underline;
+                }
+
+                /* ── Trend tags ─────────────────────────────────────────── */
+                /* Signature: left-border rule — editorial eyebrow, not a chip cloud */
+                .pk-trends {
+                    margin-top: 10px;
+                    padding-left: 10px;
+                    border-left: 2px solid #5A4FDC;
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 6px;
+                    align-items: center;
+                }
+
+                .pk-trend {
+                    font-size: 13px;
+                    font-weight: 700;
+                    color: #5A4FDC;
+                    text-decoration: none;
+                    letter-spacing: -.01em;
+                }
+
+                .pk-trend:hover {
+                    text-decoration: underline;
+                    color: #5A4FDC;
+                }
+
+                /* ── Media ──────────────────────────────────────────────── */
+                /* Sits edge-to-edge below the indented body */
+                .pk-media {
+                    margin: 12px 16px 0 72px;
+                    border-radius: 14px;
+                    overflow: hidden;
+                    border: 1px solid #eff3f4;
+                }
+
+                /* Image grid — Facebook-style */
+                .pk-img-grid {
+                    display: grid;
+                    gap: 2px;
+                    background: #000;
+                }
+
+                .pk-img-grid.n1 {
+                    grid-template-columns: 1fr;
+                }
+
+                .pk-img-grid.n1 .pk-img-cell {
+                    height: 360px;
+                }
+
+                .pk-img-grid.n2 {
+                    grid-template-columns: 1fr 1fr;
+                }
+
+                .pk-img-grid.n2 .pk-img-cell {
+                    height: 280px;
+                }
+
+                .pk-img-grid.n3 {
+                    grid-template-columns: 1fr 1fr;
+                }
+
+                .pk-img-grid.n3 .pk-img-cell:first-child {
+                    grid-row: span 2;
+                    height: 100%;
+                    min-height: 280px;
+                }
+
+                .pk-img-grid.n3 .pk-img-cell {
+                    height: 200px;
+                }
+
+                .pk-img-grid.n4 {
+                    grid-template-columns: 1fr 1fr;
+                }
+
+                .pk-img-grid.n4 .pk-img-cell {
+                    height: 200px;
+                }
+
+                .pk-img-cell {
+                    position: relative;
+                    overflow: hidden;
+                    background: #0f1419;
+                    cursor: pointer;
+                }
+
+                .pk-img-cell img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    display: block;
+                    transition: transform .25s ease;
+                }
+
+                .pk-img-cell:hover img {
+                    transform: scale(1.03);
+                }
+
+                .pk-img-more {
+                    position: absolute;
+                    inset: 0;
+                    background: rgba(0, 0, 0, .55);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: #fff;
+                    font-size: 26px;
+                    font-weight: 700;
+                    text-decoration: none;
+                    letter-spacing: -.02em;
+                }
+
+                /* Video thumbnail */
+                .pk-video {
+                    position: relative;
+                    background: #000;
+                    cursor: pointer;
+                    overflow: hidden;
+                    display: block;
+                    text-decoration: none;
+                }
+
+                .pk-video img {
+                    width: 100%;
+                    max-height: 380px;
+                    object-fit: cover;
+                    display: block;
+                    transition: transform .25s;
+                }
+
+                .pk-video:hover img {
+                    transform: scale(1.02);
+                }
+
+                .pk-video-placeholder {
+                    height: 280px;
+                    background: #111827;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                .pk-video-overlay {
+                    position: absolute;
+                    inset: 0;
+                    background: rgba(0, 0, 0, .25);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: *background* .2s;
+                }
+
+                .pk-video:hover .pk-video-overlay {
+                    background: rgba(0, 0, 0, .42);
+                }
+
+                .pk-play {
+                    width: 60px;
+                    height: 60px;
+                    background: rgba(255, 255, 255, .93);
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: transform .15s;
+                    box-shadow: 0 2px 12px rgba(0, 0, 0, .3);
+                }
+
+                .pk-video:hover .pk-play {
+                    transform: scale(1.08);
+                }
+
+                .pk-video-pill {
+                    position: absolute;
+                    top: 10px;
+                    left: 10px;
+                    background: #f02849;
+                    color: #fff;
+                    font-size: 10px;
+                    font-weight: 800;
+                    padding: 3px 8px;
+                    border-radius: 4px;
+                    text-transform: uppercase;
+                    letter-spacing: .06em;
+                }
+
+                .pk-video-dur {
+                    position: absolute;
+                    bottom: 10px;
+                    right: 10px;
+                    background: rgba(0, 0, 0, .7);
+                    color: #fff;
+                    font-size: 12px;
+                    font-weight: 600;
+                    padding: 2px 7px;
+                    border-radius: 4px;
+                }
+
+                /* ── Action bar ─────────────────────────────────────────── */
+                .pk-actions {
+                    display: flex;
+                    padding: 4px 8px 4px 64px;
+                    gap: 0;
+                    margin-top: 8px;
+                    border-top: 1px solid #eff3f4;
+                }
+
+                .pk-action {
+                    flex: 1;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 6px;
+                    padding: 9px 6px;
+                    border: none;
+                    background: transparent;
+                    border-radius: 99px;
+                    font-size: 13px;
+                    font-weight: 400;
+                    color: #536471;
+                    cursor: pointer;
+                    transition: *background* .15s, color .15s;
+                    font-family: inherit;
+                    text-decoration: none;
+                    min-width: 0;
+                    white-space: nowrap;
+                }
+
+                .pk-action:hover {
+                    color: #1d9bf0;
+                    background: rgba(29, 155, 240, .08);
+                }
+
+                .pk-action.pk-like:hover {
+                    color: #f91880;
+                    background: rgba(249, 24, 128, .08);
+                }
+
+                .pk-action.pk-share:hover {
+                    color: #5A4FDC;
+                    background: rgba(90, 79, 220, .08);
+                }
+
+                .pk-action.pk-view {
+                    cursor: default;
+                }
+
+                .pk-action.pk-view:hover {
+                    background: rgba(0, 186, 124, .08);
+                    color: #00ba7c;
+                }
+
+                .pk-action.pk-liked {
+                    color: #f91880;
+                }
+
+                .pk-action.pk-liked svg {
+                    fill: #f91880;
+                    stroke: #f91880;
+                }
+
+                /* ── Comments ───────────────────────────────────────────── */
+                .pk-comments {
+                    padding: 10px 16px 14px;
+                    border-top: 1px solid #eff3f4;
+                    background: #f7f8fa;
+                }
+
+                /* ── Share modal overrides ──────────────────────────────── */
+                .pk-modal-header {
+                    background: linear-gradient(120deg, #5A4FDC 0%, #7c6ef0 100%);
+                    border: none;
+                    border-radius: 0;
+                    padding: 16px 20px;
+                }
+
+                .pk-share-btn {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    padding: 8px 14px;
+                    border-radius: 8px;
+                    font-size: 13px;
+                    font-weight: 600;
+                    text-decoration: none;
+                    border: none;
+                    cursor: pointer;
+                    transition: opacity .15s;
+                }
+
+                .pk-share-btn:hover {
+                    opacity: .85;
+                }
+            </style>
             <style>
                 .community-show-page {
                     --pk-violet: #5A4FDC;
@@ -43,16 +544,27 @@
 
                 /* ---- hero: banner + logo ---- */
                 .community-show-page .pk-hero {
-                    overflow: hidden;
+                    overflow: visible;
                     margin-bottom: 16px
                 }
 
                 .community-show-page .pk-hero-banner {
+                    overflow: hidden;
+                    border-radius: var(--pk-r-lg) var(--pk-r-lg) 0 0;
                     height: 170px;
                     position: relative;
                     background: linear-gradient(120deg, #15103A, #5A4FDC 55%, #1FAE64 140%);
                     background-size: cover;
                     background-position: center
+                }
+
+                .community-show-page .pk-hero-actions {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    flex-wrap: wrap;
+                    position: relative;
+                    z-index: 2;
                 }
 
                 .community-show-page .pk-hero-banner::after {
@@ -465,6 +977,93 @@
                     font-weight: 700;
                     font-size: .82rem;
                     flex: none
+                }
+                .community-show-page .pk-stat-card {
+                    padding: 16px 18px;
+                    height: 100%;
+                }
+
+                .community-show-page .pk-stat-lbl {
+                    font-size: .78rem;
+                    color: var(--pk-gray-500);
+                    margin-bottom: 4px;
+                }
+
+                .community-show-page .pk-stat-val {
+                    font-size: 1.35rem;
+                    font-weight: 800;
+                    line-height: 1.2;
+                }
+
+                .community-show-page .pk-stat-good { color: #0D7A45; }
+                .community-show-page .pk-stat-warn { color: #946409; }
+
+                .community-show-page .pk-stat-sub {
+                    font-size: .76rem;
+                    color: var(--pk-gray-500);
+                    margin-top: 4px;
+                }
+
+                .community-show-page .pk-f-chip {
+                    flex: none;
+                    font-size: .8rem;
+                    font-weight: 700;
+                    padding: 8px 14px;
+                    border-radius: var(--pk-r-pill);
+                    background: #fff;
+                    border: 1px solid var(--pk-line);
+                    color: var(--pk-gray-700);
+                    transition: .15s;
+                    cursor: pointer;
+                    font-family: inherit
+                }
+
+                .community-show-page .pk-f-chip:hover {
+                    border-color: var(--pk-violet)
+                }
+
+                .community-show-page .pk-f-chip.pk-sel {
+                    background: var(--pk-violet);
+                    border-color: var(--pk-violet);
+                    color: #fff
+                }
+
+                .community-show-page .pk-pay-col {
+                    flex: none;
+                    min-width: 140px
+                }
+
+                .community-show-page .pk-pay-amt {
+                    font-family: 'Space Mono', ui-monospace, monospace;
+                    font-weight: 700;
+                    font-size: .92rem;
+                    line-height: 1.3
+                }
+
+                .community-show-page .pk-pay-meta {
+                    font-size: .74rem;
+                    color: var(--pk-gray-500);
+                    line-height: 1.45
+                }
+
+                .community-show-page .pk-sub-status {
+                    display: inline-block;
+                    font-size: .68rem;
+                    font-weight: 700;
+                    padding: 3px 9px;
+                    border-radius: var(--pk-r-pill);
+                    margin-top: 4px
+                }
+
+                .community-show-page .pk-sub-status.pk-sub-active {
+                    background: var(--pk-mint-tint);
+                    color: #0D7A45
+                }
+
+                .community-show-page .pk-payout-table th {
+                    font-size: .78rem;
+                    color: var(--pk-gray-500);
+                    font-weight: 600;
                 }
 
                 .community-show-page .pk-ph-name {
@@ -886,6 +1485,162 @@
                     width: 100%
                 }
 
+                .community-show-page .pk-billing-toggle {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 8px;
+                    margin-bottom: 12px
+                }
+
+                .community-show-page .pk-billing-opt {
+                    flex: 1;
+                    min-width: 130px;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    padding: 10px 12px;
+                    border: 1.3px solid var(--pk-line-strong);
+                    border-radius: var(--pk-r-sm);
+                    font-size: .82rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: .15s;
+                    background: #fff
+                }
+
+                .community-show-page .pk-billing-opt input {
+                    accent-color: #0D7A45;
+                    flex: none
+                }
+
+                .community-show-page .pk-billing-opt.pk-sel {
+                    border-color: #0D7A45;
+                    background: #fff;
+                    box-shadow: inset 0 0 0 1px #0D7A45
+                }
+
+                .community-show-page .pk-fee-note {
+                    display: flex;
+                    align-items: flex-start;
+                    gap: 8px;
+                    margin-top: 10px;
+                    font-size: .78rem;
+                    color: var(--pk-gray-600);
+                    line-height: 1.45
+                }
+
+                .community-show-page .pk-fee-note svg {
+                    width: 16px;
+                    height: 16px;
+                    flex: none;
+                    margin-top: 1px;
+                    color: #0D7A45
+                }
+
+                .community-show-page .pk-upload-actions {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 8px;
+                    align-items: center
+                }
+
+                .community-show-page .pk-upload-btn {
+                    position: relative;
+                    overflow: hidden;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px
+                }
+
+                .community-show-page .pk-upload-btn input[type=file] {
+                    position: absolute;
+                    inset: 0;
+                    opacity: 0;
+                    cursor: pointer;
+                    width: 100%
+                }
+
+                .community-show-page .pk-upload-hint {
+                    font-size: .76rem;
+                    color: var(--pk-gray-500);
+                    margin-top: 6px
+                }
+
+                .community-show-page .pk-upload-loading {
+                    font-size: .78rem;
+                    color: var(--pk-violet);
+                    font-weight: 600
+                }
+
+                .community-show-page .pk-share-wrap {
+                    position: relative
+                }
+
+                .community-show-page .pk-share-menu {
+                    position: absolute;
+                    top: calc(100% + 8px);
+                    right: 0;
+                    min-width: 240px;
+                    background: #fff;
+                    border: 1px solid var(--pk-line);
+                    border-radius: var(--pk-r-md);
+                    box-shadow: 0 12px 32px rgba(23, 27, 36, .12);
+                    padding: 8px;
+                    z-index: 100;
+                    transform-origin: top right;
+                }
+
+                .community-show-page .pk-share-menu-header {
+                    font-size: .72rem;
+                    font-weight: 700;
+                    color: var(--pk-gray-500);
+                    padding: 4px 10px 8px;
+                    text-transform: uppercase;
+                    letter-spacing: .04em;
+                }
+
+                .community-show-page .pk-share-url-preview {
+                    font-size: .72rem;
+                    color: var(--pk-gray-500);
+                    padding: 0 10px 8px;
+                    word-break: break-all;
+                    line-height: 1.4;
+                }
+
+                .community-show-page .pk-share-item {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    width: 100%;
+                    padding: 9px 10px;
+                    border: none;
+                    background: none;
+                    border-radius: var(--pk-r-sm);
+                    font-size: .84rem;
+                    font-weight: 600;
+                    color: var(--pk-ink);
+                    text-decoration: none;
+                    cursor: pointer;
+                    font-family: inherit;
+                    text-align: left
+                }
+
+                .community-show-page .pk-share-item:hover {
+                    background: var(--pk-violet-tint)
+                }
+
+                .community-show-page .pk-share-item svg {
+                    width: 18px;
+                    height: 18px;
+                    flex: none
+                }
+
+                .community-show-page .pk-share-item.pk-share-wa { color: #25D366 }
+                .community-show-page .pk-share-item.pk-share-x { color: #0f1419 }
+                .community-show-page .pk-share-item.pk-share-fb { color: #1877F2 }
+                .community-show-page .pk-share-item.pk-share-li { color: #0A66C2 }
+                .community-show-page .pk-share-item.pk-share-tg { color: #229ED9 }
+
                 .community-show-page .pk-fee-payer-row {
                     display: flex;
                     flex-direction: column;
@@ -1148,13 +1903,34 @@
                         @endswitch
                     </div>
                     <div class="pk-hero-meta">{{ $community->category->name ?? 'Uncategorised' }} ·
-                        {{ number_format($community->members()->count()) }} members ·
                         Admin: {{ $community->user->name ?? 'Unknown' }}</div>
-                    <p class="pk-hero-desc mx-auto mx-sm-0">{{ $community->description }}</p>
+                    <div class="pk-hero-stats">
+                        <div class="pk-hero-stat">
+                            <b>{{ number_format($community->members_count) }}</b>
+                            <span>Members</span>
+                        </div>
+                        <div class="pk-hero-stat">
+                            <b>{{ number_format($community->posts_count ?? 0) }}</b>
+                            <span>Posts</span>
+                        </div>
+                        <div class="pk-hero-stat">
+                            <b>{{ $community->created_at->format('M Y') }}</b>
+                            <span>Founded</span>
+                        </div>
+                    </div>
+                    @if ($community->description)
+                        <p class="pk-hero-desc mx-auto mx-sm-0">{{ $community->description }}</p>
+                    @endif
                 </div>
-                <div class="d-grid d-sm-flex gap-2 align-items-sm-center pt-sm-2">
+                <div class="pk-hero-actions d-grid d-sm-flex gap-2 align-items-sm-center pt-sm-2 ms-sm-auto">
                     @if ($this->isOwner())
                         <button type="button" class="pk-btn pk-btn-outline" disabled>You own this</button>
+                        @if ($community->type === 'paid')
+                            <button type="button" class="pk-earn" x-on:click="tab = 'earnings'"
+                                title="View earnings dashboard">
+                                {{ $this->formatCommunityMoney($this->ownerEarningsTotal()) }}
+                            </button>
+                        @endif
                     @elseif ($this->isMember())
                         <button type="button" class="pk-btn pk-btn-violet" disabled>
                             {{ $community->type === 'paid' ? 'Subscribed' : 'Joined' }}</button>
@@ -1181,20 +1957,104 @@
                                 wire:loading.attr="disabled" wire:target="requestToJoin">Request to
                                 join</button>
                         @endif
+                    @elseif ($community->type === 'private')
+                        @if ($this->hasPendingInvite())
+                            <button type="button" class="pk-btn pk-btn-violet" wire:click="acceptInvite"
+                                wire:loading.attr="disabled" wire:target="acceptInvite">Accept invitation</button>
+                        @else
+                            <button type="button" class="pk-btn pk-btn-outline" disabled>Invite only</button>
+                        @endif
                     @else
                         <button type="button" class="pk-btn pk-btn-outline" disabled>Invite only</button>
                     @endif
 
-                    <button type="button" class="pk-icon-btn mx-auto mx-sm-0" aria-label="Share community"
-                        onclick="navigator.clipboard.writeText('{{ url('/c/' . $community->slug) }}'); this.dataset.copied = 'true';">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M16 6l-4-4-4 4M12 2v13"
-                                stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                    </button>
+                    @php
+                        $publicShareUrl = route('community.public', $community);
+                        $shareText = 'Check out ' . $community->name . ' on ' . config('app.name');
+                        $encodedShareText = urlencode($shareText);
+                        $encodedShareUrl = urlencode($publicShareUrl);
+                    @endphp
+
+                    <div class="pk-share-wrap mx-auto mx-sm-0">
+                        <button type="button" class="pk-icon-btn"
+                            x-bind:class="{ 'pk-active': shareOpen }"
+                            aria-label="Share community"
+                            aria-expanded="false"
+                            x-bind:aria-expanded="shareOpen.toString()"
+                            x-on:click.stop="shareOpen = !shareOpen">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M16 6l-4-4-4 4M12 2v13"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </button>
+                        <div class="pk-share-menu"
+                            x-show="shareOpen"
+                            x-on:click.outside="shareOpen = false"
+                            style="display:none">
+                            <div class="pk-share-menu-header">Share community</div>
+                            <div class="pk-share-url-preview">{{ $publicShareUrl }}</div>
+
+                            <button type="button" class="pk-share-item"
+                                x-show="typeof navigator !== 'undefined' && !!navigator.share"
+                                x-on:click="
+                                    navigator.share(@js(['title' => $community->name, 'text' => $shareText, 'url' => $publicShareUrl]))
+                                        .then(() => shareOpen = false)
+                                        .catch(() => {});
+                                ">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                                    <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
+                                    <path d="m8.6 13.5 6.8 3.9M15.4 6.6 8.6 10.5" />
+                                </svg>
+                                <span>Share via device…</span>
+                            </button>
+
+                            <a class="pk-share-item pk-share-wa" target="_blank" rel="noopener"
+                                href="https://wa.me/?text={{ $encodedShareText }}%20{{ $encodedShareUrl }}"
+                                x-on:click="shareOpen = false">
+                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.28-1.39a9.9 9.9 0 0 0 4.76 1.21h.01c5.46 0 9.9-4.45 9.9-9.91C22 6.45 17.5 2 12.04 2Z"/></svg>
+                                WhatsApp
+                            </a>
+                            <a class="pk-share-item pk-share-x" target="_blank" rel="noopener"
+                                href="https://twitter.com/intent/tweet?text={{ $encodedShareText }}&url={{ $encodedShareUrl }}"
+                                x-on:click="shareOpen = false">
+                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 2H22l-7.2 8.2L23.3 22H16.6l-5.2-6.8L5.4 22H2.3l7.7-8.8L1 2h6.9l4.7 6.2L18.9 2Z"/></svg>
+                                X (Twitter)
+                            </a>
+                            <a class="pk-share-item pk-share-fb" target="_blank" rel="noopener"
+                                href="https://www.facebook.com/sharer/sharer.php?u={{ $encodedShareUrl }}"
+                                x-on:click="shareOpen = false">
+                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 21v-7.5H16l.4-3H13.5V8.4c0-.87.24-1.46 1.5-1.46H16.5V4.3c-.26-.03-1.14-.1-2.16-.1-2.14 0-3.6 1.3-3.6 3.7v2.6H8.5v3h2.24V21h2.76Z"/></svg>
+                                Facebook
+                            </a>
+                            <a class="pk-share-item pk-share-li" target="_blank" rel="noopener"
+                                href="https://www.linkedin.com/sharing/share-offsite/?url={{ $encodedShareUrl }}"
+                                x-on:click="shareOpen = false">
+                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.94 8.5H3.56V20h3.38V8.5ZM5.25 3.5A1.96 1.96 0 1 0 5.27 7.42 1.96 1.96 0 0 0 5.25 3.5ZM20.45 20h-3.37v-5.98c0-1.43-.03-3.26-1.99-3.26-2 0-2.3 1.56-2.3 3.16V20H9.42V8.5h3.24v1.57h.05c.45-.86 1.56-1.77 3.2-1.77 3.43 0 4.06 2.26 4.06 5.19V20Z"/></svg>
+                                LinkedIn
+                            </a>
+                            <a class="pk-share-item pk-share-tg" target="_blank" rel="noopener"
+                                href="https://t.me/share/url?url={{ $encodedShareUrl }}&text={{ $encodedShareText }}"
+                                x-on:click="shareOpen = false">
+                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="m21.9 4.3-3 15c-.2.9-.8 1.1-1.6.7l-4.5-3.3-2.2 2.1c-.2.2-.4.4-.8.4l.3-4.3 7.9-7.1c.3-.3-.1-.5-.5-.2l-9.7 6.1-4.2-1.3c-.9-.3-.9-.9.2-1.3L20.6 3.4c.8-.3 1.5.2 1.3.9Z"/></svg>
+                                Telegram
+                            </a>
+                            <button type="button" class="pk-share-item"
+                                x-on:click="
+                                    navigator.clipboard.writeText(@js($publicShareUrl));
+                                    $el.querySelector('.pk-copy-label').textContent = 'Copied!';
+                                    setTimeout(() => { $el.querySelector('.pk-copy-label').textContent = 'Copy public link'; shareOpen = false; }, 1200);
+                                ">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                                    <rect x="9" y="9" width="12" height="12" rx="2" />
+                                    <path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1" />
+                                </svg>
+                                <span class="pk-copy-label">Copy public link</span>
+                            </button>
+                        </div>
+                    </div>
 
                     @if ($this->isOwner())
-                        <button type="button" class="pk-icon-btn mx-auto mx-sm-0" x-on:click="tab = 'settings'"
+                        <button type="button" class="pk-icon-btn mx-auto mx-sm-0" x-on:click="tab = 'settings'; shareOpen = false"
                             x-bind:class="{ 'pk-active': tab === 'settings' }" aria-label="Community settings">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <circle cx="12" cy="12" r="3" />
@@ -1208,6 +2068,7 @@
         </div>
 
         {{-- ============ TABS ============ --}}
+        <div class="pk-tabs-wrap">
         <div class="pk-tabs d-flex flex-nowrap overflow-auto">
             <button type="button" class="pk-tab" x-on:click="tab = 'feed'"
                 x-bind:class="{ 'pk-sel': tab === 'feed' }">Feed</button>
@@ -1215,10 +2076,19 @@
                 x-bind:class="{ 'pk-sel': tab === 'about' }">About</button>
             <button type="button" class="pk-tab" x-on:click="tab = 'members'"
                 x-bind:class="{ 'pk-sel': tab === 'members' }">Members</button>
+            @if ($this->isOwner() && $community->type === 'paid')
+                <button type="button" class="pk-tab" x-on:click="tab = 'earnings'"
+                    x-bind:class="{ 'pk-sel': tab === 'earnings' }">Earnings</button>
+            @endif
+            @if ($this->isOwnerOrAdmin())
+                <button type="button" class="pk-tab" x-on:click="tab = 'analytics'"
+                    x-bind:class="{ 'pk-sel': tab === 'analytics' }">Analytics</button>
+            @endif
             @if ($this->isOwner())
                 <button type="button" class="pk-tab" x-on:click="tab = 'settings'"
                     x-bind:class="{ 'pk-sel': tab === 'settings' }">Settings</button>
             @endif
+        </div>
         </div>
 
         {{-- ============ FEED TAB ============ --}}
@@ -1230,7 +2100,7 @@
                         <div class="pk-ph-av" style="background:{{ $community->color }}">
                             {{ mb_strtoupper(mb_substr(auth()->user()->name ?? 'U', 0, 1)) }}</div>
                         <div class="pk-comp-field">
-                            <textarea rows="2" wire:model.live="content" placeholder="Share something with {{ $community->name }}…"></textarea>
+                            <textarea rows="2" wire:model.live="content" placeholder="What's on your mind? Share with {{ $community->name }}…"></textarea>
                             @error('content')
                                 <div class="pk-field-error">{{ $message }}</div>
                             @enderror
@@ -1285,7 +2155,229 @@
                 </div>
             @endif
 
+            @if ($this->canViewFeed())
+                <div class="pk-search-row" style="margin-bottom:14px">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8" />
+                        <path d="m21 21-4.3-4.3" />
+                    </svg>
+                    <input type="text" wire:model.live.debounce.300ms="postSearch"
+                        placeholder="Search posts by content or author…">
+                </div>
+            @endif
+
+            @if (! $this->canViewFeed())
+                <div class="pk-card pk-settings-section text-center py-4">
+                    <div class="pk-sub" style="margin-bottom:0">
+                        <b>{{ $this->feedGateTitle() }}</b><br>
+                        {{ $this->feedGateMessage() }}
+                    </div>
+                </div>
+            @elseif ($posts->isEmpty() && $postSearch !== '')
+                <div class="pk-empty">
+                    <b>No posts match "{{ $postSearch }}"</b>
+                    Try a different search term.
+                </div>
+            @else
             @forelse ($posts as $post)
+                <div class="pk-card pk-standalone" wire:init="recordView('{{ $post->id }}')">
+
+                    <div class="pk-header">
+                        <div class="pk-avatar-col">
+                            <a href="#">
+                                <img class="pk-avatar" src="{{$post->user->avatar ?? ''}}"
+                                    alt="{{ $post->user->name ?? 'Deleted user' }}">
+                            </a>
+                        </div>
+
+                        <div style="flex:1;min-width:0">
+                            <div class="pk-name-row">
+                                <a class="pk-name" href="#">{{ $post->user->name ?? 'Deleted user' }}</a>
+                                {{-- <svg class="pk-tick" viewBox="0 0 22 22" fill="none" aria-label="Verified">
+                                    <circle cx="11" cy="11" r="11" fill="#1d9bf0" />
+                                    <path d="M7 11l3 3 5-5" stroke="#fff" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                </svg> --}}
+                            </div>
+
+                            <div class="pk-handle-row">
+                                <a class="pk-handle"
+                                    href="#">@<span>{{ $post->user->username ?? 'Deleted user' }}</span></a>
+                                <span class="pk-sep">·</span>
+                                <span class="pk-time">{{ $post->created_at->diffForHumans() }}</span>
+                            </div>
+                        </div>
+
+                        @if ($this->isOwnerOrAdmin())
+                            <button type="button" class="pk-icon-btn pk-icon-btn-sm pk-icon-danger"
+                                wire:click="deletePost('{{ $post->id }}')"
+                                onclick="return confirm('Delete this post? This can\'t be undone.')"
+                                aria-label="Delete post" title="Delete post">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path
+                                        d="M4 7h16M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3m-7 0 1 13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1l1-13"
+                                        stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </button>
+                        @endif
+
+                        {{-- <div class="dropdown">
+                            <a href="#" class="pk-earn">₦2,500.00</a>
+                        </div> --}}
+                    </div>
+
+                    <div class="pk-body">
+                        <p class="pk-texth">
+                            {!! $post->content !!}
+                        </p>
+
+                    </div>
+
+                    @if ($post->media->count())
+                        @php $count = $post->media->count(); @endphp
+                        <div class="pk-media pk-m{{ min($count, 4) }}">
+                            @foreach ($post->media->take(4) as $i => $item)
+                                <div class="pk-media-item">
+                                    @if ($item->is_video)
+                                        <video src="{{ $item->url }}" controls></video>
+                                    @else
+                                        <img src="{{ $item->url }}" alt="">
+                                    @endif
+                                    @if ($i === 3 && $count > 4)
+                                        <div class="pk-media-more">+{{ $count - 4 }}</div>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+
+                    {{-- <div class="pk-media">
+                        <div class="pk-img-grid n4">
+                            <div class="pk-img-cell">
+                                <a href="#">
+                                    <img src="https://picsum.photos/900/700?random=21" alt="Post image">
+                                </a>
+                            </div>
+                            <div class="pk-img-cell">
+                                <a href="#">
+                                    <img src="https://picsum.photos/900/700?random=22" alt="Post image">
+                                </a>
+                            </div>
+                            <div class="pk-img-cell">
+                                <a href="#">
+                                    <img src="https://picsum.photos/900/700?random=23" alt="Post image">
+                                </a>
+                            </div>
+                            <div class="pk-img-cell">
+                                <a href="#">
+                                    <img src="https://picsum.photos/900/700?random=24" alt="Post image">
+                                </a>
+                            </div>
+                        </div>
+                    </div> --}}
+
+                    <div class="pk-actions">
+                        <button class="pk-action pk-like @if ($post->liked_by_me) pk-liked @endif"
+                            wire:click="toggleLike('{{ $post->id }}')">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path
+                                    d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+                            </svg>
+                            {{ number_format($post->likes_count) }}
+                        </button>
+
+                        <a class="pk-action" href="#">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+                            </svg>
+                            {{ number_format($post->comments_count) }}
+                        </a>
+
+                        <span class="pk-action pk-view">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                <circle cx="12" cy="12" r="3" />
+                            </svg>
+                            {{ number_format($post->views_count) }}
+                        </span>
+
+                        {{-- <button class="pk-action pk-share" data-bs-toggle="modal" data-bs-target="#pk-share-demo">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <circle cx="18" cy="5" r="3" />
+                                <circle cx="6" cy="12" r="3" />
+                                <circle cx="18" cy="19" r="3" />
+                                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+                                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+                            </svg>
+                            Share
+                        </button> --}}
+                    </div>
+
+                    <div class="pk-comments">
+
+                        @if ($this->isMember())
+                            <div class="pk-comment-input-row">
+                                <input type="text" maxlength="500" wire:model="newComment.{{ $post->id }}"
+                                    wire:keydown.enter="addComment('{{ $post->id }}')"
+                                    placeholder="Write a comment…">
+                                <button type="button" class="pk-btn pk-btn-outline pk-btn-sm"
+                                    wire:click="addComment('{{ $post->id }}')">Send</button>
+                            </div>
+                        @endif
+
+
+                        <!-- Comment Section -->
+                        <div class="pt-1">
+                            @foreach ($post->comments->take(3) as $comment)
+                                <div class="pk-fb-comment">
+                                    <img class="pk-fb-comment-av"
+                                        src="{{ $comment->user->avatar ?? '' }}"
+                                        alt="{{ $comment->user->name ?? 'User' }}">
+                                    <div class="pk-fb-comment-bubble">
+                                        <a class="pk-fb-comment-name" href="#">
+                                            {{ $comment->user->name ?? 'Deleted user' }}
+                                        </a>
+                                        <span class="pk-fb-comment-time">
+                                            {{ $comment->created_at->diffForHumans() }}
+                                        </span>
+                                        <p class="pk-fb-comment-text mb-0">{{ $comment->content }}</p>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+
+
+                    </div>
+                </div>
+
+               
+            @empty
+                <div class="pk-empty">
+                    <b>No posts yet.</b>
+                    {{ $this->isMember() ? 'Be the first to share something.' : 'Join to start the conversation.' }}
+                </div>
+            @endforelse
+
+            @if ($posts->hasMorePages())
+                <div class="pk-load-more-row">
+                    <button type="button" class="pk-btn pk-btn-outline" wire:click="loadMorePosts"
+                        wire:loading.attr="disabled" wire:target="loadMorePosts">
+                        <span wire:loading.remove wire:target="loadMorePosts">Load more posts</span>
+                        <span wire:loading wire:target="loadMorePosts">Loading…</span>
+                    </button>
+                </div>
+            @endif
+            @endif
+
+            {{-- @forelse ($posts as $post)
                 <article class="pk-card pk-post-card" wire:key="post-{{ $post->id }}"
                     wire:init="recordView('{{ $post->id }}')">
                     <div class="pk-post-head">
@@ -1384,18 +2476,23 @@
                     <b>No posts yet.</b>
                     {{ $this->isMember() ? 'Be the first to share something.' : 'Join to start the conversation.' }}
                 </div>
-            @endforelse
+            @endforelse --}}
 
-            @if ($posts->hasMorePages())
-                <div class="pk-load-more-row">
-                    <button type="button" class="pk-btn pk-btn-outline" wire:click="loadMorePosts"
-                        wire:loading.attr="disabled" wire:target="loadMorePosts">
-                        <span wire:loading.remove wire:target="loadMorePosts">Load more posts</span>
-                        <span wire:loading wire:target="loadMorePosts">Loading…</span>
-                    </button>
-                </div>
-            @endif
         </div>
+
+        {{-- ============ ANALYTICS TAB (owner/admin) ============ --}}
+        @if ($this->isOwnerOrAdmin())
+            <div x-show="tab === 'analytics'">
+                @livewire('user.community-analytics-dashboard', ['community' => $community], key('community-analytics-' . $community->id))
+            </div>
+        @endif
+
+        {{-- ============ EARNINGS TAB (paid communities, owner only) ============ --}}
+        @if ($this->isOwner() && $community->type === 'paid')
+            <div x-show="tab === 'earnings'">
+                @livewire('user.community-payout-dashboard', ['community' => $community], key('community-payout-' . $community->id))
+            </div>
+        @endif
 
         {{-- ============ ABOUT TAB ============ --}}
         <div x-show="tab === 'about'">
@@ -1411,7 +2508,7 @@
                     <span>
                         {{ ucfirst($community->type) }}
                         @if ($community->type === 'paid')
-                            · &#8358;{{ number_format($community->member_charge, 2) }}/mo
+                            · {{ getCurrencyCode() }}{{ number_format(convertCurrency($community->member_charge, $community->currency, auth()->user()->wallet->currency), 2) }}{{ $community->price_suffix }}
                         @endif
                     </span>
                 </div>
@@ -1433,7 +2530,7 @@
         {{-- ============ MEMBERS TAB ============ --}}
         <div x-show="tab === 'members'">
 
-            @if ($this->isOwner())
+            @if ($this->isOwnerOrAdmin())
                 @if ($community->type == 'approval')
                     <div class="pk-card pk-settings-section">
                         <h3>Pending join requests</h3>
@@ -1478,13 +2575,82 @@
                 @endif
             @endif
 
+            @if ($this->isOwnerOrAdmin() && $community->type === 'private')
+                <div class="pk-card pk-settings-section">
+                    <h3>Invite members</h3>
+                    <div class="pk-sub" style="margin-bottom:14px">
+                        Private communities are hidden from search. Invite people by username or email, or share an invite link.
+                    </div>
+
+                    <div class="pk-field" style="margin-bottom:16px">
+                        <label for="inviteIdentifier">Invite by username or email</label>
+                        <div class="d-flex flex-wrap gap-2">
+                            <input type="text" id="inviteIdentifier" wire:model="inviteIdentifier"
+                                placeholder="e.g. johndoe or user@email.com"
+                                class="flex-grow-1"
+                                style="min-width:200px;border:1.3px solid var(--pk-line-strong);border-radius:var(--pk-r-sm);padding:10px 12px;font-size:.88rem;font-family:inherit">
+                            <button type="button" class="pk-btn pk-btn-violet pk-btn-sm" wire:click="inviteMember"
+                                wire:loading.attr="disabled" wire:target="inviteMember">Send invite</button>
+                        </div>
+                        @error('inviteIdentifier')
+                            <div class="pk-field-error">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="pk-field" style="margin-bottom:8px">
+                        <label>Invite link</label>
+                        @if ($inviteLinkUrl)
+                            <div class="pk-copy-input d-flex flex-wrap align-items-center gap-2"
+                                style="border:1.3px solid var(--pk-line-strong);border-radius:var(--pk-r-sm);padding:8px 12px;margin-top:6px">
+                                <span class="flex-grow-1 text-break" style="font-size:.82rem;color:var(--pk-gray-700)"
+                                    id="pk-invite-url">{{ $inviteLinkUrl }}</span>
+                                <button type="button" class="pk-btn pk-btn-outline pk-btn-sm"
+                                    onclick="navigator.clipboard.writeText(document.getElementById('pk-invite-url').textContent); this.textContent='Copied!'; setTimeout(() => this.textContent='Copy', 2000)">Copy</button>
+                            </div>
+                            <div class="d-flex flex-wrap gap-2" style="margin-top:10px">
+                                <button type="button" class="pk-btn pk-btn-outline pk-btn-sm" wire:click="generateInviteLink"
+                                    wire:loading.attr="disabled" wire:target="generateInviteLink">Regenerate link</button>
+                                <button type="button" class="pk-btn pk-btn-outline pk-btn-sm" wire:click="revokeInviteLink"
+                                    wire:loading.attr="disabled" wire:target="revokeInviteLink"
+                                    onclick="return confirm('Revoke this invite link? Existing links will stop working.')">Revoke link</button>
+                            </div>
+                        @else
+                            <button type="button" class="pk-btn pk-btn-violet pk-btn-sm" style="margin-top:6px"
+                                wire:click="generateInviteLink" wire:loading.attr="disabled"
+                                wire:target="generateInviteLink">Generate invite link</button>
+                        @endif
+                    </div>
+
+                    @if ($pendingDirectInvites->isNotEmpty())
+                        <div style="margin-top:18px">
+                            <div class="pk-sub" style="margin-bottom:8px"><b>Pending invitations</b></div>
+                            @foreach ($pendingDirectInvites as $inv)
+                                <div class="pk-member-row d-flex flex-wrap align-items-center gap-2"
+                                    wire:key="invite-{{ $inv->id }}">
+                                    <div class="pk-ph-av" style="background:{{ $community->color }}">
+                                        {{ mb_strtoupper(mb_substr($inv->user->name ?? '?', 0, 1)) }}</div>
+                                    <div class="flex-grow-1" style="min-width:140px">
+                                        <div class="pk-n">{{ $inv->user->name ?? 'Unknown' }}</div>
+                                        <div class="pk-h">{{ $inv->user->email ?? '' }} · sent {{ $inv->created_at->diffForHumans() }}</div>
+                                    </div>
+                                    <button type="button" class="pk-btn pk-btn-outline pk-btn-sm"
+                                        wire:click="revokeDirectInvite('{{ $inv->id }}')"
+                                        wire:loading.attr="disabled"
+                                        wire:target="revokeDirectInvite('{{ $inv->id }}')">Revoke</button>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+            @endif
+
             <div class="pk-card pk-settings-section">
                 <h3>Members</h3>
 
                 @if ($this->canViewMembers())
                     <div class="pk-sub" style="margin-bottom:6px">
                         {{ number_format($community->members()->count()) }} people
-                        @if ($this->isOwner())
+                        @if ($this->isOwnerOrAdmin())
                             · admin actions below
                         @endif
                     </div>
@@ -1510,22 +2676,18 @@
                             <span class="pk-role-badge @if ($member->pivot->role === 'member') pk-member-role @endif">
                                 {{ ucfirst($member->pivot->role) }}</span>
 
-                            @if ($this->isOwner() && $member->id !== $community->user_id)
+                            @if ($member->id !== $community->user_id)
                                 <div class="d-flex gap-2">
-                                    @if ($member->pivot->role === 'admin')
-                                        <button type="button" class="pk-btn pk-btn-outline pk-btn-sm"
-                                            wire:click="demoteToMember('{{ $member->id }}')">Remove admin</button>
-                                    @else
-                                        <button type="button" class="pk-btn pk-btn-outline pk-btn-sm"
-                                            wire:click="promoteToAdmin('{{ $member->id }}')">Make admin</button>
+                                    @if ($this->isOwner())
+                                        @if ($member->pivot->role === 'admin')
+                                            <button type="button" class="pk-btn pk-btn-outline pk-btn-sm"
+                                                wire:click="demoteToMember('{{ $member->id }}')">Remove admin</button>
+                                        @else
+                                            <button type="button" class="pk-btn pk-btn-outline pk-btn-sm"
+                                                wire:click="promoteToAdmin('{{ $member->id }}')">Make admin</button>
+                                        @endif
                                     @endif
-                                    {{-- <button type="button" class="pk-icon-btn pk-icon-btn-sm"
-                                        wire:click="removeMember('{{ $member->id }}')"
-                                        aria-label="Remove {{ $member->name }}" title="Remove from community">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <path d="M18 6 6 18M6 6l12 12" stroke-linecap="round" />
-                                        </svg>
-                                    </button> --}}
+                                    @if ($this->isOwnerOrAdmin())
                                     <button type="button" class="pk-icon-btn pk-icon-btn-sm pk-icon-danger"
                                         wire:click="banMember('{{ $member->id }}')"
                                         aria-label="Ban {{ $member->name }}" title="Ban from community">
@@ -1535,6 +2697,7 @@
                                             <path d="m6 6 12 12" stroke-linecap="round" />
                                         </svg>
                                     </button>
+                                    @endif
                                 </div>
                             @endif
                         </div>
@@ -1564,7 +2727,7 @@
                 @endif
             </div>
 
-            @if ($this->isOwner())
+            @if ($this->isOwnerOrAdmin())
                 <div class="pk-card pk-settings-section">
                     <h3>Banned members</h3>
                     <div class="pk-sub" style="margin-bottom:6px">People removed from this community can't rejoin
@@ -1596,20 +2759,39 @@
                 {{-- logo --}}
                 <div class="pk-card pk-settings-section">
                     <h3>Community logo</h3>
-                    <div class="pk-sub">Square image, shown in cards, search, and the top of this page.</div>
+                    <div class="pk-sub">Square image, shown in cards, search, and the top of this page. JPG, PNG or WebP · max 4 MB.</div>
                     <div class="d-flex flex-column flex-sm-row align-items-sm-center gap-3">
                         <div class="pk-logo-preview mx-auto mx-sm-0" style="background:{{ $community->color }}">
                             @if ($settingsLogo)
-                                <img src="{{ $settingsLogo->temporaryUrl() }}" alt="">
+                                <img src="{{ $settingsLogo->temporaryUrl() }}" alt="Logo preview">
                             @elseif ($community->image)
                                 <img src="{{ Illuminate\Support\Facades\Storage::disk('spaces')->url($community->image) }}"
-                                    alt="">
+                                    alt="{{ $community->name }} logo">
                             @else
                                 {{ $community->initials }}
                             @endif
                         </div>
-                        <div class="d-flex flex-column gap-2 flex-grow-1">
-                            <input type="file" wire:model="settingsLogo" accept="image/*">
+                        <div class="flex-grow-1">
+                            <div class="pk-upload-actions">
+                                <label class="pk-btn pk-btn-violet pk-btn-sm pk-upload-btn">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                                        <path d="M12 5v14M5 12h14" stroke-linecap="round" />
+                                    </svg>
+                                    {{ $community->image ? 'Replace logo' : 'Upload logo' }}
+                                    <input type="file" wire:model="settingsLogo" accept="image/jpeg,image/png,image/webp,image/gif">
+                                </label>
+                                @if ($settingsLogo)
+                                    <button type="button" class="pk-btn pk-btn-outline pk-btn-sm"
+                                        wire:click="clearPendingLogo">Cancel</button>
+                                @elseif ($community->image)
+                                    <button type="button" class="pk-btn pk-btn-outline pk-btn-sm"
+                                        wire:click="removeLogo"
+                                        wire:confirm="Remove the community logo?">Remove</button>
+                                @endif
+                            </div>
+                            <div class="pk-upload-hint" wire:loading wire:target="settingsLogo">
+                                <span class="pk-upload-loading">Uploading logo…</span>
+                            </div>
                             @error('settingsLogo')
                                 <div class="pk-field-error">{{ $message }}</div>
                             @enderror
@@ -1620,12 +2802,30 @@
                 {{-- banner --}}
                 <div class="pk-card pk-settings-section">
                     <h3>Banner image</h3>
-                    <div class="pk-sub">Wide cover photo shown at the top of the community page. Recommended
-                        1200×360.</div>
+                    <div class="pk-sub">Wide cover photo shown at the top of the community page. Recommended 1200×360 · max 6 MB.</div>
                     <div class="pk-banner-preview"
                         style="background-image:url('{{ $settingsBanner ? $settingsBanner->temporaryUrl() : ($community->banner ? Illuminate\Support\Facades\Storage::disk('spaces')->url($community->banner) : '') }}'); background-color:#15103A">
                     </div>
-                    <input type="file" wire:model="settingsBanner" accept="image/*">
+                    <div class="pk-upload-actions">
+                        <label class="pk-btn pk-btn-violet pk-btn-sm pk-upload-btn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                                <path d="M12 5v14M5 12h14" stroke-linecap="round" />
+                            </svg>
+                            {{ $community->banner ? 'Replace banner' : 'Upload banner' }}
+                            <input type="file" wire:model="settingsBanner" accept="image/jpeg,image/png,image/webp,image/gif">
+                        </label>
+                        @if ($settingsBanner)
+                            <button type="button" class="pk-btn pk-btn-outline pk-btn-sm"
+                                wire:click="clearPendingBanner">Cancel</button>
+                        @elseif ($community->banner)
+                            <button type="button" class="pk-btn pk-btn-outline pk-btn-sm"
+                                wire:click="removeBanner"
+                                wire:confirm="Remove the banner image?">Remove</button>
+                        @endif
+                    </div>
+                    <div class="pk-upload-hint" wire:loading wire:target="settingsBanner">
+                        <span class="pk-upload-loading">Uploading banner…</span>
+                    </div>
                     @error('settingsBanner')
                         <div class="pk-field-error">{{ $message }}</div>
                     @enderror
@@ -1669,6 +2869,10 @@
                             <div class="pk-field-error">{{ $message }}</div>
                         @enderror
                     </div>
+
+                    <div class="pk-upload-hint" style="margin-top:4px">
+                        Renaming updates your public link slug automatically (currently <code>/c/{{ $community->slug }}</code>).
+                    </div>
                 </div>
 
                 {{-- shareable community link --}}
@@ -1682,10 +2886,10 @@
                                 <path d="M10 13a5 5 0 0 0 7.5.5l2-2a5 5 0 0 0-7-7l-1.5 1.5" />
                                 <path d="M14 11a5 5 0 0 0-7.5-.5l-2 2a5 5 0 0 0 7 7l1.5-1.5" />
                             </svg>
-                            <span>{{ url('/c/' . $community->slug) }}</span>
+                            <span>{{ route('community.public', $community) }}</span>
                         </div>
                         <button type="button" class="pk-btn pk-btn-violet pk-btn-sm"
-                            onclick="navigator.clipboard.writeText('{{ url('/c/' . $community->slug) }}')">
+                            onclick="navigator.clipboard.writeText('{{ route('community.public', $community) }}'); this.textContent='Copied!'; setTimeout(() => this.textContent='Copy', 2000)">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <rect x="9" y="9" width="12" height="12" rx="2" />
                                 <path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1" />
@@ -1736,15 +2940,59 @@
 
                     @if ($settingsType === 'paid')
                         <div class="pk-price-field">
-                            <label for="sPrice">Monthly fee</label>
+                            <label>How should members pay?</label>
+                            <div class="pk-billing-toggle">
+                                <label class="pk-billing-opt @if ($settingsBillingType === 'one_off') pk-sel @endif">
+                                    <input type="radio" name="sBillingType" value="one_off"
+                                        wire:model.live="settingsBillingType">
+                                    One-off payment
+                                </label>
+                                @if (userBaseCurrency() !== 'NGN' || $community->billing_type === 'subscription')
+                                    <label class="pk-billing-opt @if ($settingsBillingType === 'subscription') pk-sel @endif">
+                                        <input type="radio" name="sBillingType" value="subscription"
+                                            wire:model.live="settingsBillingType">
+                                        Subscription
+                                    </label>
+                                @endif
+                            </div>
+                            @error('settingsBillingType')
+                                <div class="pk-field-error">{{ $message }}</div>
+                            @enderror
+
+                            @if ($settingsBillingType === 'subscription' && (userBaseCurrency() !== 'NGN' || $community->billing_type === 'subscription'))
+                                <div class="pk-field" style="margin-bottom:12px">
+                                    <label for="sInterval">Billing interval</label>
+                                    <select id="sInterval" wire:model.live="settingsBillingInterval">
+                                        @foreach ($billingIntervals as $key => $meta)
+                                            <option value="{{ $key }}">{{ $meta['label'] }}</option>
+                                        @endforeach
+                                    </select>
+                                    @error('settingsBillingInterval')
+                                        <div class="pk-field-error">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            @endif
+
+                            <label for="sPrice">
+                                {{ $settingsBillingType === 'one_off' ? 'Price (one-time)' : 'Price per billing cycle' }}
+                            </label>
                             <div class="pk-currency-input">
-                                <span>&#8358;</span>
+                                <span>{{ getCurrencyCode() }}</span>
                                 <input type="number" id="sPrice" min="100" step="50"
                                     wire:model.live.debounce.400ms="settingsMonthlyFee">
                             </div>
                             @error('settingsMonthlyFee')
                                 <div class="pk-field-error">{{ $message }}</div>
                             @enderror
+
+                            <div class="pk-fee-note">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <path d="M12 16v-4M12 8h.01" />
+                                </svg>
+                                <span>{{ config('app.name') }} charges a <strong>{{ $platformFeePercent }}%</strong>
+                                    platform fee on every payment into this community.</span>
+                            </div>
 
                             <div class="pk-fee-payer-row">
                                 <label class="pk-fee-payer-opt @if ($settingsFeePayer === 'creator') pk-sel @endif">
@@ -1767,14 +3015,14 @@
                             @php($preview = $this->settingsFeePreview())
                             @if ($preview)
                                 <div class="pk-fee-preview">
-                                    <div class="pk-fp-row"><span>Members pay</span>
-                                        <b>&#8358;{{ number_format($preview['memberCharge'], 2) }}</b>
+                                    <div class="pk-fp-row"><span>Members pay{{ $preview['suffix'] }}</span>
+                                        <b>{{ getCurrencyCode() }}{{ number_format($preview['memberCharge'], 2) }}</b>
                                     </div>
-                                    <div class="pk-fp-row"><span>Payhankey fee ({{ $platformFeePercent }}%)</span>
-                                        <b>&#8358;{{ number_format($preview['platformCut'], 2) }}</b>
+                                    <div class="pk-fp-row"><span>{{ config('app.name') }} fee ({{ $platformFeePercent }}%)</span>
+                                        <b>{{ getCurrencyCode() }}{{ number_format($preview['platformCut'], 2) }}</b>
                                     </div>
-                                    <div class="pk-fp-row pk-fp-total"><span>You receive, per member/month</span>
-                                        <b>&#8358;{{ number_format($preview['creatorPayout'], 2) }}</b>
+                                    <div class="pk-fp-row pk-fp-total"><span>You receive{{ $preview['suffix'] }}</span>
+                                        <b>{{ getCurrencyCode() }}{{ number_format($preview['creatorPayout'], 2) }}</b>
                                     </div>
                                 </div>
                             @endif
@@ -1826,5 +3074,6 @@
             </div>
         @endif
 
+        </div>{{-- /.pk-ui-inner --}}
     </div>
 </div>

@@ -2,13 +2,14 @@
 
 namespace App\Livewire\User;
 
+use App\Http\Controllers\CommunityInviteController;
 use App\Models\Community as CommunityModel;
 use App\Models\CommunityCategory;
+use App\Models\CommunityInvite;
 use App\Models\CommunitySubscription;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
-use App\Services\CommunitySubscriptionService;
 use Livewire\Component;
 
 class Community extends Component
@@ -152,11 +153,11 @@ class Community extends Component
                 'community_categories_id' => $validated['community_categories_id'],
                 'type' => $validated['type'],
                 'currency' => $currency,
-                'monthly_fee' => $isPaid ? $validated['monthly_fee'] : 0.00,
-                'fee_payer' => $isPaid ? $validated['fee_payer'] : 0.00,
-                'billing_type' => $isPaid ? $validated['billing_type'] : 0.00,
-                'billing_interval' => $isSubscription ? $validated['billing_interval'] : 0.00,
-                'platform_fee_percent' => $isPaid ? $this->platformFeePercent : 0.00,
+                'monthly_fee' => $isPaid ? $validated['monthly_fee'] : null,
+                'fee_payer' => $isPaid ? $validated['fee_payer'] : null,
+                'billing_type' => $isPaid ? $validated['billing_type'] : null,
+                'billing_interval' => $isSubscription ? $validated['billing_interval'] : null,
+                'platform_fee_percent' => $isPaid ? $this->platformFeePercent : null,
                 'user_id' => auth()->id(),
             ]);
 
@@ -167,7 +168,12 @@ class Community extends Component
             $community->members()->attach(auth()->id(), [
                 'id' => (string) Str::uuid(),
                 'role' => 'owner',
+                'status' => 'active',
             ]);
+
+            if ($validated['type'] === 'private') {
+                CommunityInviteController::regenerateLinkInvite($community, auth()->user());
+            }
 
             return $community;
         });
@@ -227,8 +233,20 @@ class Community extends Component
         $community = CommunityModel::query()->where('type', 'public')->findOrFail($communityId);
 
         $community->members()->syncWithoutDetaching([
-            auth()->id() => ['id' => (string) Str::uuid(), 'role' => 'member'],
+            auth()->id() => ['id' => (string) Str::uuid(), 'role' => 'member', 'status' => 'active'],
         ]);
+    }
+
+    public function hasPendingInvite(string $communityId): bool
+    {
+        return CommunityInvite::where('community_id', $communityId)
+            ->where('user_id', auth()->id())
+            ->where('type', 'direct')
+            ->where('status', 'pending')
+            ->where(function ($q) {
+                $q->whereNull('expires_at')->orWhere('expires_at', '>', now());
+            })
+            ->exists();
     }
 
     private function uniqueSlug(string $name): string
@@ -274,6 +292,24 @@ class Community extends Component
             });
         }
 
+        // Private communities are hidden from discovery unless you own,
+        // belong to, or have a pending direct invitation.
+        if ($this->filter === 'all' || ($this->filter !== 'joined' && $this->filter !== 'mine')) {
+            $query->where(function ($q) use ($userId) {
+                $q->where('type', '!=', 'private')
+                    ->orWhere('user_id', $userId)
+                    ->orWhereHas('members', fn ($m) => $m->where('users.id', $userId))
+                    ->orWhereHas('invites', function ($inv) use ($userId) {
+                        $inv->where('user_id', $userId)
+                            ->where('type', 'direct')
+                            ->where('status', 'pending')
+                            ->where(function ($exp) {
+                                $exp->whereNull('expires_at')->orWhere('expires_at', '>', now());
+                            });
+                    });
+            });
+        }
+
         return $query->latest();
     }
 
@@ -289,41 +325,7 @@ class Community extends Component
     public function userSubscriptionStatus(string $communityId ){
          return CommunitySubscription::where('community_id', $communityId)
             ->where('user_id', auth()->id())
-            // ->where('status', 'pending')
             ->first()?->status;
-    }
-
-    public function subscribe(string $communityId)
-    {
-        $community = CommunityModel::where('type', 'paid')->findOrFail($communityId);
-
-        if ($community->members()->where('users.id', auth()->id())->exists()) {
-            return;
-        }
-
-        $service = app(CommunitySubscriptionService::class);
-        $existing = $service->pendingOrActiveFor($community, auth()->user());
-
-        if ($existing?->status === 'active') {
-            return;
-        }
-
-        $subscription = $existing ?? $service->initiate($community, auth()->user());
-      
-        // TODO: payment gateway — see the same note in CommunityDetails::subscribe()
-
-        try {
-            $checkoutUrl = $service->checkoutUrl($subscription);
-        } catch (\Throwable $e) {
-            report($e);
-            session()->flash('error', "We couldn't start your payment. Please try again shortly.");
-            return;
-        }
-        // dd($checkoutUrl);
-        return redirect($checkoutUrl);
-
-        // $service->activate($subscription);
-        // session()->flash('status', 'Payment step isn\'t wired up yet — this is a placeholder.');
     }
 
     public function render()
@@ -337,6 +339,7 @@ class Community extends Component
             'communities' => $communities,
             'trending' => CommunityModel::query()
                 ->withCount('members')
+                ->where('type', '!=', 'private')
                 ->orderByDesc('members_count')
                 ->limit(3)
                 ->get(),

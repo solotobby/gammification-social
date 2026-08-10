@@ -14,7 +14,6 @@ use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\On;
 use Illuminate\Support\Facades\DB;
 use Livewire\WithFileUploads;
-use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -27,9 +26,14 @@ class ViewProfile extends Component
     public User $user;
 
     public $perpage = 10;
-    public $avatar = null;
+
+    public $avatarUpload = null;
+
+    public $bannerUpload = null;
 
     public bool $isFollowing = false;
+
+    public bool $isOwner = false;
 
     #[On('view-profile.{user.username}')]
 
@@ -40,8 +44,8 @@ class ViewProfile extends Component
 
         $this->timeline($username);
         $this->isFollowing = Auth::user()?->isFollowing($this->user) ?? false;
+        $this->isOwner = Auth::id() === $this->user->id;
         $this->recordProfileViews();
-        $this->avatar = $this->user->avatar;
     }
 
     private function recordProfileViews(): void
@@ -79,7 +83,9 @@ class ViewProfile extends Component
     {
         $this->username = $username;
         // dd($this->username);
-        $this->user = User::withPostStatsByUsername($this->username)->firstOrFail();
+        $this->user = User::withPostStatsByUsername($this->username)
+            ->with('profile')
+            ->firstOrFail();
         $this->timelines = $this->user->posts()->where(['status' => 'LIVE', 'user_id' =>  $this->user->id])->orderBy('created_at', 'desc')->take($this->perpage)->get(); //$this->timelines();
 
     }
@@ -125,35 +131,68 @@ class ViewProfile extends Component
         $this->timeline($this->username);
     }
 
-    public function updatedAvatar()
+    public function updatedAvatarUpload(): void
     {
+        if (! $this->isOwner || ! $this->avatarUpload) {
+            return;
+        }
+
         $this->validate([
-            'avatar' => 'image|max:2048', // 2MB
+            'avatarUpload' => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
+
+        $url = $this->storeProfileImage($this->avatarUpload, 'avatar');
+
+        auth()->user()->update(['avatar' => $url]);
+
+        $this->reset('avatarUpload');
+        $this->timeline($this->username);
+        session()->flash('success', 'Profile photo updated!');
+    }
+
+    public function updatedBannerUpload(): void
+    {
+        if (! $this->isOwner || ! $this->bannerUpload) {
+            return;
+        }
+
+        $this->validate([
+            'bannerUpload' => 'required|image|mimes:jpg,jpeg,png,webp|max:4096',
+        ]);
+
+        $url = $this->storeProfileImage($this->bannerUpload, 'banner');
+
+        auth()->user()->update(['banner' => $url]);
+
+        $this->reset('bannerUpload');
+        $this->timeline($this->username);
+        session()->flash('success', 'Cover photo updated!');
+    }
+
+    public function removeBanner(): void
+    {
+        if (! $this->isOwner) {
+            return;
+        }
+
+        auth()->user()->update(['banner' => null]);
+        $this->timeline($this->username);
+        session()->flash('success', 'Cover photo removed.');
+    }
+
+    private function storeProfileImage($file, string $prefix): string
+    {
+        $extension = $file->getClientOriginalExtension() ?: 'jpg';
+        $filename = $prefix . '-' . Str::uuid() . '-' . auth()->id() . '.' . $extension;
 
         $path = Storage::disk('spaces')->putFileAs(
-            'payhankey_media/profiles', // folder inside bucket
-            $this->avatar, // the uploaded file
-            Str::uuid() . '-' . auth()->id(), // unique filename
-            'public'
+            'payhankey_media/profiles',
+            $file,
+            $filename,
+            'public',
         );
-        $url = config('filesystems.disks.spaces.url') . '/' . $path;
 
-
-        // $uploaded = Cloudinary::upload($this->avatar->getRealPath(), [
-        //     'folder' => 'payhankey_avatars',
-        //     'public_id' => 'user_' . auth()->id(),
-        //     'overwrite' => true,
-        // ]);
-
-
-        auth()->user()->update([
-            'avatar' => $url,
-        ]);
-
-        $this->reset('avatar');
-        $this->timeline($this->username);
-        session()->flash('success', 'Profile avatar updated!');
+        return rtrim((string) config('filesystems.disks.spaces.url'), '/') . '/' . ltrim($path, '/');
     }
 
 

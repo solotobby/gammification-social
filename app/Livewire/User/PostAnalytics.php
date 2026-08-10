@@ -7,32 +7,19 @@ use Livewire\Component;
 
 class PostAnalytics extends Component
 {
+    public $id;
 
-    public $id, $post;
+    public $post;
 
-    public function mount($id){
-        $this->id = $id;
-        $this->post = Post::find($this->id);
+    public function mount($id)
+    {
+        $this->post = Post::findOrFail($id);
 
-        //unpaid likes
-        // $this->unpaidLikes = $this->post->unpaidLikes();
-        //paid likes
-
-
-        //unpaid views
-        // $this->unpaidViews = $this->post->unpaidViews();
-        //paid views
-
-        //unpaid comments
-        // $this->unpaidComments = $this->post->unpaidComments();
-        // $this->unpaidExternalComments = $this->post->unpaidExternalComments();
-
-
-
-        //unpaid external Views
-        // $this->unpaidExternalViews = $this->post->unpaidExternalViews();
-
+        if ($this->post->user_id !== auth()->id()) {
+            abort(403);
+        }
     }
+
     public function render()
     {
         return view('livewire.user.post-analytics');

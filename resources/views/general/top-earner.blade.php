@@ -185,9 +185,7 @@
 
 
 
-                                <div class="avatar avatar--lg" style="background:linear-gradient(135deg,#7C6FF2,#F25C8A)">
-                                    {{ $initials }}
-                                </div>
+                                @include('general.partials.leader-avatar', ['user' => $user])
 
 
 
@@ -280,12 +278,7 @@
                                         <div class="lb-user">
 
 
-                                            <div class="avatar"
-                                                style="width:40px;height:40px;font-size:.85rem;background:linear-gradient(135deg,#5A4FDC,#7C6FF2)">
-
-                                                {{ $initials }}
-
-                                            </div>
+                                            @include('general.partials.leader-avatar', ['user' => $user, 'size' => 'sm'])
 
 
 
@@ -418,11 +411,7 @@
 
 
 
-                                <div class="avatar avatar--lg" style="background:linear-gradient(135deg,#F5B73C,#F25C8A)">
-
-                                    {{ $initials }}
-
-                                </div>
+                                @include('general.partials.leader-avatar', ['user' => $user])
 
 
 
@@ -512,12 +501,7 @@
                                         <div class="lb-user">
 
 
-                                            <div class="avatar"
-                                                style="width:40px;height:40px;font-size:.85rem;background:linear-gradient(135deg,#12B886,#5A4FDC)">
-
-                                                {{ $initials }}
-
-                                            </div>
+                                            @include('general.partials.leader-avatar', ['user' => $user, 'size' => 'sm'])
 
 
 

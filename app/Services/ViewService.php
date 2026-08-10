@@ -9,15 +9,19 @@ use Illuminate\Support\Facades\DB;
 
 class ViewService
 {
-    public function recordView(Post $post, $userId): void
+    public function recordView(?Post $post, $userId): void
     {
-        //   $userId = auth()->id();
-        // $post = Post::whereKey($this->postQuery)->firstOrFail();
+        if (! $post || ! $userId) {
+            return;
+        }
 
-    
         DB::transaction(function () use ($post, $userId) {
 
             $user = User::find($userId);
+
+            if (! $user) {
+                return;
+            }
 
             $isSelfView = $userId === $post->user_id;
 

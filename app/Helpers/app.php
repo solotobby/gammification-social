@@ -177,7 +177,7 @@ if (!function_exists('userLevel')) {
     {
 
         $userId ??= auth()->id();
-        return UserLevel::where('user_id', $userId)->first()->plan_name;
+        return UserLevel::where('user_id', $userId)->first()?->plan_name ?? 'Basic';
 
         // return $user?->activeLevel?->plan_name ;//?? 'Basic';
 
@@ -1548,16 +1548,7 @@ if (!function_exists('rolls_url')) {
      */
     function rolls_url($videoId, $context = 'global', $userId = null)
     {
-        $params = [
-            'videoId' => $videoId,
-            'context' => $context,
-        ];
-
-        if ($userId) {
-            $params['userId'] = $userId;
-        }
-
-        return route('rolls.show', $params);
+        return route('rolls.show', ['video' => $videoId]);
     }
 }
 

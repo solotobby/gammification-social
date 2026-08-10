@@ -4,216 +4,167 @@ namespace App\Livewire\User;
 
 use App\Models\Profile;
 use App\Models\Social;
-use App\Models\User;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Url;
 use Livewire\Component;
-use Livewire\Attributes\Validate;
 
 class Settings extends Component
 {
-    public $socials;
-    #[Validate('string')]
-    public $facebook = '';
-    public $twitter = '';
+    #[Url(history: true, as: 'tab')]
+    public string $activeTab = 'profile';
 
-    public $instagram = '';
-    public $tiktok = '';
-    public $pinterest = '';
-    public $linkedin = '';
+    public string $facebook = '';
+    public string $twitter = '';
+    public string $instagram = '';
+    public string $tiktok = '';
+    public string $pinterest = '';
+    public string $linkedin = '';
 
-    public $upgrade = '';
-    public $currency = '';
-    public $user;
+    public string $username = '';
+    public string $about = '';
+    public ?string $date_of_birth = null;
+    public string $gender = '';
+    public string $location = '';
 
-    public $username;
-    public $about;
-    public $date_of_birth;
-    public $gender;
-    public $location;
-    public $username_updated_at;
+    public bool $canEditUsername = false;
+    public ?string $usernameNextEditDate = null;
 
-    public $canEditUsername = false;
-    public $usernameNextEditDate;
+    public string $userName = '';
+    public string $userEmail = '';
+    public string $userLevel = '';
+    public string $referralCode = '';
+    public string $profileUrl = '';
 
-    protected $messages = [
-        'date_of_birth.before_or_equal' => 'You must be at least 13 years old to use Payhankey.',
-    ];
-
-
-    public function mount()
+    protected function messages(): array
     {
-
-        $user = Auth::user();
-
-        $this->facebook = @$user->social->facebook;
-        $this->twitter = @$user->social->twitter;
-        $this->instagram = @$user->social->instagram;
-        $this->linkedin = @$user->social->linkedin;
-        $this->pinterest = @$user->social->pinterest;
-        $this->tiktok = @$user->social->tiktok;
-
-        //profile
-
-        $this->username = $user->username;
-        $this->about = @$user->profile->about;
-        $this->date_of_birth = @$user->profile->date_of_birth;
-        $this->gender = @$user->profile->gender;
-        $this->location = @$user->profile->location;
-
-        $this->canEditUsername = !@$user->profile->username_updated_at
-            || @$user->profile->username_updated_at->addMonths(6)->isPast();
-
-        $this->usernameNextEditDate = @$user->profile->username_updated_at
-            ? @$user->profile->username_updated_at->addMonths(6)->toFormattedDateString()
-            : null;
-    }
-
-    protected function rules()
-    {
-
-        // return [
-        //     'username' => 'required|string|min:3|max:20|alpha_dash|unique:users,username,' . auth()->id(),
-        //     'about' => 'nullable|string|max:40',
-        // //     'date_of_birth' => [
-        // //     'nullable',
-        // //     'date',
-        // //     // 'before_or_equal:' . Carbon::now()->subYears(13)->toDateString(),
-        // // ],
-        //     'gender' => 'nullable|in:male,female',
-        //     'location' => 'nullable|string|max:50',
-        // ];
-
         return [
-            'username' => 'required|string|min:3|max:20|alpha_dash|unique:users,username,' . auth()->id(),
-            'about'    => 'nullable|string|max:40',
-            'gender'   => 'nullable|in:male,female',
-            'location' => 'nullable|string|max:50',
-            'date_of_birth' => 'nullable|date'
+            'date_of_birth.before_or_equal' => 'You must be at least 13 years old to use Payhankey.',
         ];
     }
 
-    public function updateSocial()
+    public function mount(): void
     {
+        $user = Auth::user()->load(['social', 'profile']);
 
-        Social::updateOrCreate(
-            ['user_id' => auth()->user()->id],
-            ['facebook' => $this->facebook, 'instagram' => $this->instagram, 'twitter' => $this->twitter, 'tiktok' => $this->tiktok, 'linkedin' => $this->linkedin, 'pinterest' => $this->pinterest]
-        );
-        // $this->reset(['facebook', 'twitter', 'tiktok', 'instagram', 'linkedin', 'pinterest']);
-        session()->flash('success', 'Socials Updated Successfully');
-        // $this->timelines->push($timelines);
-        // $this->dispatch()
+        $social = $user->social;
+        $profile = $user->profile;
 
+        $this->facebook = (string) ($social?->facebook ?? '');
+        $this->twitter = (string) ($social?->twitter ?? '');
+        $this->instagram = (string) ($social?->instagram ?? '');
+        $this->linkedin = (string) ($social?->linkedin ?? '');
+        $this->pinterest = (string) ($social?->pinterest ?? '');
+        $this->tiktok = (string) ($social?->tiktok ?? '');
+
+        $this->username = $user->username;
+        $this->about = (string) ($profile?->about ?? '');
+        $this->date_of_birth = $profile?->date_of_birth;
+        $this->gender = (string) ($profile?->gender ?? '');
+        $this->location = (string) ($profile?->location ?? '');
+
+        $lastUsernameChange = $profile?->username_updated_at;
+        $this->canEditUsername = ! $lastUsernameChange || $lastUsernameChange->copy()->addMonths(6)->isPast();
+        $this->usernameNextEditDate = $lastUsernameChange
+            ? $lastUsernameChange->copy()->addMonths(6)->toFormattedDateString()
+            : null;
+
+        $this->userName = $user->name;
+        $this->userEmail = $user->email;
+        $this->userLevel = userLevel($user->id);
+        $this->referralCode = (string) $user->referral_code;
+        $this->profileUrl = url('profile/' . $user->username);
+
+        if (! in_array($this->activeTab, ['profile', 'social'], true)) {
+            $this->activeTab = 'profile';
+        }
     }
 
-    public function updateProfile()
+    public function switchTab(string $tab): void
     {
-        $user = auth()->user();
+        if (! in_array($tab, ['profile', 'social'], true)) {
+            return;
+        }
 
-        if (!$this->canEditUsername && $this->username !== $user->username) {
+        $this->activeTab = $tab;
+    }
+
+    protected function profileRules(): array
+    {
+        return [
+            'username' => 'required|string|min:3|max:20|alpha_dash|unique:users,username,' . Auth::id(),
+            'about' => 'nullable|string|max:40',
+            'gender' => 'nullable|in:male,female',
+            'location' => 'nullable|string|max:50',
+            'date_of_birth' => ['nullable', 'date', 'before_or_equal:' . now()->subYears(13)->toDateString()],
+        ];
+    }
+
+    protected function socialRules(): array
+    {
+        $handle = 'nullable|string|max:100';
+
+        return [
+            'facebook' => $handle,
+            'twitter' => $handle,
+            'instagram' => $handle,
+            'tiktok' => $handle,
+            'linkedin' => $handle,
+            'pinterest' => $handle,
+        ];
+    }
+
+    public function updateProfile(): void
+    {
+        $user = Auth::user();
+        $usernameChanged = $this->username !== $user->username;
+
+        if ($usernameChanged && ! $this->canEditUsername) {
             $this->addError('username', 'Username can only be changed once every 6 months.');
             return;
         }
 
-        //  $this->validate();
+        $this->validate($this->profileRules());
 
-        if ($this->username !== $user->username) {
-            $user->username_updated_at = now();
+        if ($usernameChanged) {
+            $user->update(['username' => $this->username]);
         }
-        $userInfor = User::find($user->id);
-        $userInfor->username = $this->username;
-        $userInfor->save();
 
+        $profileData = [
+            'about' => $this->about !== '' ? $this->about : null,
+            'date_of_birth' => $this->date_of_birth ?: null,
+            'gender' => $this->gender !== '' ? $this->gender : null,
+            'location' => $this->location !== '' ? $this->location : null,
+        ];
 
+        if ($usernameChanged) {
+            $profileData['username_updated_at'] = now();
+            $this->canEditUsername = false;
+            $this->usernameNextEditDate = now()->addMonths(6)->toFormattedDateString();
+            $this->profileUrl = url('profile/' . $this->username);
+        }
 
-        Profile::updateOrCreate(
-            ['user_id' => $user->id],
+        Profile::updateOrCreate(['user_id' => $user->id], $profileData);
+
+        session()->flash('settings_success', 'Profile updated successfully.');
+    }
+
+    public function updateSocial(): void
+    {
+        $this->validate($this->socialRules());
+
+        Social::updateOrCreate(
+            ['user_id' => Auth::id()],
             [
-                'about' => $this->about,
-                'date_of_birth' => $this->date_of_birth,
-                'gender' => $this->gender,
-                'location' => $this->location,
-                'username_updated_at' => now() //$this->username_updated_at
-            ]
+                'facebook' => $this->facebook !== '' ? $this->facebook : null,
+                'instagram' => $this->instagram !== '' ? $this->instagram : null,
+                'twitter' => $this->twitter !== '' ? $this->twitter : null,
+                'tiktok' => $this->tiktok !== '' ? $this->tiktok : null,
+                'linkedin' => $this->linkedin !== '' ? $this->linkedin : null,
+                'pinterest' => $this->pinterest !== '' ? $this->pinterest : null,
+            ],
         );
 
-        session()->flash('success', 'Profile updated successfully.');
-    }
-
-    public function upgradeAccount()
-    {
-        $upgrade = $this->upgrade;
-        $currency = $this->currency;
-        $currentLevel = auth()->user()->activeLevel->plan_name;
-
-        $price = $this->pricingList($currentLevel, $upgrade);
-
-        switch ($upgrade) {
-
-            case "Creator":
-
-                if ($currency == 'USD') {
-                    $link = upgradePayment($price, $currency, $upgrade);
-                    return redirect($link);
-                } else {
-                    $link = upgradePayment($price * 1500, 'NGN', $upgrade);
-                    return redirect($link);
-                }
-
-                break;
-
-            case "Influencer":
-
-                if ($currency == 'USD') {
-                    $link = upgradePayment($price, $currency, $upgrade);
-                    return redirect($link);
-                } else {
-                    $link = upgradePayment($price * 1500, 'NGN', $upgrade);
-                    return redirect($link);
-                }
-
-                break;
-
-            default:
-                dd("invalid");
-        }
-
-
-
-        // if($validated['currency'] == 'USDT'){
-        //     // return 
-        // }elseif($validated['currency'] == 'USD'){
-        //     $payment =  processPayment($finalAmount, 'USD', $validated['package'], $level, $quantity);
-        //     return redirect($payment);
-        // }else{
-        //     $payment =  processPayment($finalAmount*1500,  'NGN', $validated['package'], $level, $quantity);
-        //     return redirect($payment);
-        // }
-
-    }
-
-
-    private function pricingList($level, $upgrade)
-    {
-
-        $price = '';
-        $newLevel = $upgrade;
-
-        if ($level == 'Beginner') {
-            if ($newLevel == 'Creator') {
-                $price = 5;
-            } elseif ($newLevel == 'Influencer') {
-                $price = 15;
-            }
-        } else {
-
-            if ($newLevel == 'Influencer') {
-                $price = 10;
-            }
-        }
-
-        return $price;
+        session()->flash('settings_success', 'Social links updated successfully.');
     }
 
     public function render()

@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Community;
 use App\Models\Transaction;
 use App\Models\User;
-// use App\Services\CommunityPaymentService;
 use App\Services\CommunitySubscriptionService;
 use App\Services\FlutterwavePaymentService;
 use App\Services\KorapayService;
@@ -28,7 +27,6 @@ class PaymentController extends Controller
         FlutterwavePaymentService $flutterwavePaymentService, 
         TransactionService $transactionService, 
         KorapayService $korapayService, 
-        // CommunityPaymentService $communityPaymentService, 
         CommunitySubscriptionService $communitySubscriptionService)
     {
         $this->middleware('auth');

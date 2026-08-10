@@ -10,6 +10,7 @@ use Livewire\Attributes\On;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use App\Services\VideoUploadService;
 
 #[On('user.timeline')]
 #[On('openVideoPlayer')]
@@ -243,90 +244,46 @@ class DashboardTimeline extends Component
     // ─────────────────────────────────────────────────────────
     public function uploadToCloudinary(): void
     {
-        if (!$this->video || $this->videoUploadStatus !== 'ready') {
+        if (! $this->video || $this->videoUploadStatus !== 'ready') {
             return;
         }
 
         $level = userLevel();
 
-        if (!in_array($level, ['Creator', 'Influencer'])) {
+        if (! in_array($level, ['Creator', 'Influencer'])) {
             $this->videoUploadStatus = 'error';
             session()->flash('error', 'Permission denied.');
             return;
         }
 
-        // Remove PHP execution time limit for this request only
-        // so Cloudinary upload doesn't get killed mid-way
-        set_time_limit(0);
-
-        $maxSeconds = match ($level) {
-            'Creator'    => 60,
-            'Influencer' => 180,
-            default      => 60,
-        };
-
-        $this->videoUploadStatus   = 'uploading';
+        $this->videoUploadStatus = 'uploading';
         $this->videoUploadProgress = 10;
         $this->dispatch('videoUploadStatus', status: 'uploading', progress: 10);
 
         try {
-            $result = cloudinary()->uploadVideo($this->video->getRealPath(), [
-                'folder'         => 'payhankey_videos',
-                'resource_type'  => 'video',
-                'transformation' => [['duration' => $maxSeconds]],
-                'eager'          => [
-                    ['format' => 'mp4', 'quality' => 'auto:low',  'width' => 480,  'crop' => 'scale'],
-                    ['format' => 'mp4', 'quality' => 'auto:good', 'width' => 720,  'crop' => 'scale'],
-                    ['format' => 'mp4', 'quality' => 'auto:best', 'width' => 1080, 'crop' => 'scale'],
-                ],
-                'eager_async' => true,
-            ]);
+            $result = app(VideoUploadService::class)->upload(
+                $this->video->getRealPath(),
+                $level
+            );
 
-            $this->cloudinaryVideoUrl      = $result->getSecurePath();
-            $this->cloudinaryVideoPublicId = $result->getPublicId();
-
-            // ── Extract metadata from Cloudinary response ─────────
-            // getResponse() returns the full raw array Cloudinary sends back
-            $raw = $result->getResponse();
-
-            $this->videoDuration = isset($raw['duration'])
-                ? (int) round((float) $raw['duration'])
-                : null;
-
-            $this->videoWidth    = $raw['width']    ?? null;
-            $this->videoHeight   = $raw['height']   ?? null;
-            $this->videoFormat   = $raw['format']   ?? null;
-            $this->videoFileSize = $raw['bytes']    ?? null;
-
-            // Build quality version URLs from eager results
-            // Cloudinary returns eager[] with the transformed URLs
-            $this->videoQualityVersions = [];
-            if (!empty($raw['eager'])) {
-                $qualityLabels = ['low', 'medium', 'high'];
-                foreach ($raw['eager'] as $i => $eager) {
-                    $label = $qualityLabels[$i] ?? 'q' . $i;
-                    $this->videoQualityVersions[$label] = $eager['secure_url'] ?? null;
-                }
-            }
-
-            // ── Build thumbnail URL from public_id ─────────────────
-            $cloudName = config('cloudinary.cloud_name')
-                ?? $this->extractCloudName(config('cloudinary.cloud_url', ''));
-
-            $this->cloudinaryThumbnailUrl = $cloudName
-                ? "https://res.cloudinary.com/{$cloudName}/video/upload/so_0,f_jpg,w_640,h_360,c_fill,q_auto/{$this->cloudinaryVideoPublicId}.jpg"
-                : null;
+            $this->cloudinaryVideoUrl = $result['url'];
+            $this->cloudinaryVideoPublicId = $result['public_id'];
+            $this->cloudinaryThumbnailUrl = $result['thumbnail'];
+            $this->videoDuration = $result['duration'];
+            $this->videoWidth = $result['width'];
+            $this->videoHeight = $result['height'];
+            $this->videoFormat = $result['format'];
+            $this->videoFileSize = $result['file_size'];
+            $this->videoQualityVersions = $result['quality_versions'];
 
             $this->videoUploadProgress = 100;
-            $this->videoUploadStatus   = 'done';
-
+            $this->videoUploadStatus = 'done';
             $this->dispatch('videoUploadStatus', status: 'done', progress: 100);
-
         } catch (\Exception $e) {
-            $this->videoUploadStatus   = 'error';
+            $this->videoUploadStatus = 'error';
             $this->videoUploadProgress = 0;
             $this->dispatch('videoUploadStatus', status: 'error', progress: 0);
-            session()->flash('error', 'Cloudinary upload failed: ' . $e->getMessage());
+            session()->flash('error', 'Video upload failed: '.$e->getMessage());
         }
     }
 
@@ -357,7 +314,7 @@ class DashboardTimeline extends Component
             'unicode'          => rand(1000, 9999) . time(),
             'comment_external' => 0,
             'status'           => $user->status === 'ACTIVE' ? 'LIVE' : 'SHADOW_BANNED',
-            'post_type'        => 'video',
+            'has_video' => true,
         ]);
 
         PostVideo::create([
@@ -388,7 +345,7 @@ class DashboardTimeline extends Component
         // Delete from Cloudinary only if fully uploaded
         if ($this->cloudinaryVideoPublicId) {
             try {
-                cloudinary()->destroy($this->cloudinaryVideoPublicId, ['resource_type' => 'video']);
+                app(VideoUploadService::class)->delete($this->cloudinaryVideoPublicId);
             } catch (\Exception) {}
         }
         $this->resetVideoState();

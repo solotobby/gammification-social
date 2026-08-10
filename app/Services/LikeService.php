@@ -21,6 +21,8 @@ class LikeService
 
         DB::transaction(function () use ($post, $user) {
 
+            $post = Post::whereKey($post->id)->lockForUpdate()->firstOrFail();
+
             $isSelfLike = $user->id === $post->user_id;
 
             $existingLike = $post->likes()

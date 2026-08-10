@@ -32,11 +32,11 @@ class RollsWatchController extends Controller
             $data = $request->all();
         }
 
-        $postId      = (int)   ($data['post_id']       ?? 0);
-        $watchSecs   = (float) ($data['watch_seconds'] ?? 0);
-        $isFirstPlay = (bool)  ($data['is_first_play'] ?? false);
+        $postId      = (string) ($data['post_id']       ?? '');
+        $watchSecs   = (float)  ($data['watch_seconds'] ?? 0);
+        $isFirstPlay = (bool)   ($data['is_first_play'] ?? false);
 
-        if (!$postId || !Auth::check()) {
+        if ($postId === '' || ! Auth::check()) {
             return response()->json(['ok' => false], 401);
         }
 

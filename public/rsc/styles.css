@@ -404,7 +404,7 @@ h3 { font-size: clamp(1.25rem, 2vw, 1.55rem); }
 .chip.is-active, .chip:hover { background: var(--violet); color: #fff; }
 .post-card { background: #fff; border: 1px solid var(--lilac); border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; transition: transform .2s, box-shadow .2s; }
 .post-card:hover { transform: translateY(-6px); box-shadow: var(--shadow); }
-.post-card__img { height: 190px; background: var(--grad-brand); position: relative; }
+.post-card__img { height: 190px; background: var(--grad-brand); position: relative; background-size: cover; background-position: center; }
 .post-card__img.alt2 { background: linear-gradient(135deg,#12B886,#5A4FDC); }
 .post-card__img.alt3 { background: linear-gradient(135deg,#F5B73C,#F25C8A); }
 .post-card__img.alt4 { background: linear-gradient(135deg,#7C6FF2,#F25C8A); }

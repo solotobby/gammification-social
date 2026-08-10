@@ -229,80 +229,51 @@
             color: #5A4FDC;
         }
 
-        /* ── Media ──────────────────────────────────────────────── */
-        /* Sits edge-to-edge below the indented body */
+        /* ── Media — Facebook full-bleed ─────────────────────────── */
         .pk-media {
-            margin: 12px 16px 0 72px;
-            border-radius: 14px;
+            margin: 8px 0 0;
+            border-radius: 0;
             overflow: hidden;
-            border: 1px solid #eff3f4;
+            border: none;
+            border-top: 1px solid #ced0d4;
+            border-bottom: 1px solid #ced0d4;
         }
 
-        /* Image grid — Facebook-style */
-        .pk-img-grid {
+        .fb-img-grid {
             display: grid;
             gap: 2px;
             background: #000;
         }
 
-        .pk-img-grid.n1 {
-            grid-template-columns: 1fr;
-        }
+        .fb-img-grid.n1 { grid-template-columns: 1fr; }
+        .fb-img-grid.n1 .fb-img-cell { height: min(500px, 70vw); max-height: 500px; }
+        .fb-img-grid.n2 { grid-template-columns: 1fr 1fr; }
+        .fb-img-grid.n2 .fb-img-cell { height: 300px; }
+        .fb-img-grid.n3 { grid-template-columns: 1fr 1fr; }
+        .fb-img-grid.n3 .fb-img-cell:first-child { grid-row: span 2; min-height: 300px; }
+        .fb-img-grid.n3 .fb-img-cell { height: 150px; }
+        .fb-img-grid.n4 { grid-template-columns: 1fr 1fr; }
+        .fb-img-grid.n4 .fb-img-cell { height: 220px; }
 
-        .pk-img-grid.n1 .pk-img-cell {
-            height: 360px;
-        }
-
-        .pk-img-grid.n2 {
-            grid-template-columns: 1fr 1fr;
-        }
-
-        .pk-img-grid.n2 .pk-img-cell {
-            height: 280px;
-        }
-
-        .pk-img-grid.n3 {
-            grid-template-columns: 1fr 1fr;
-        }
-
-        .pk-img-grid.n3 .pk-img-cell:first-child {
-            grid-row: span 2;
-            height: 100%;
-            min-height: 280px;
-        }
-
-        .pk-img-grid.n3 .pk-img-cell {
-            height: 200px;
-        }
-
-        .pk-img-grid.n4 {
-            grid-template-columns: 1fr 1fr;
-        }
-
-        .pk-img-grid.n4 .pk-img-cell {
-            height: 200px;
-        }
-
-        .pk-img-cell {
+        .fb-img-cell {
             position: relative;
             overflow: hidden;
-            background: #0f1419;
+            background: #1c1e21;
             cursor: pointer;
         }
+        .fb-img-cell:focus-visible { outline: 2px solid #1877f2; outline-offset: -2px; }
 
-        .pk-img-cell img {
+        .fb-img-cell img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             display: block;
-            transition: transform .25s ease;
+            transition: filter .2s;
         }
 
-        .pk-img-cell:hover img {
-            transform: scale(1.03);
-        }
+        .fb-img-cell:hover img { filter: brightness(.92); }
 
-        .pk-img-more {
+        .fb-img-more {
             position: absolute;
             inset: 0;
             background: rgba(0, 0, 0, .55);
@@ -310,95 +281,88 @@
             align-items: center;
             justify-content: center;
             color: #fff;
-            font-size: 26px;
+            font-size: 2rem;
             font-weight: 700;
-            text-decoration: none;
-            letter-spacing: -.02em;
+            pointer-events: none;
         }
 
-        /* Video thumbnail */
-        .pk-video {
+        /* FB video attachment */
+        .fb-video {
             position: relative;
-            background: #000;
-            cursor: pointer;
-            overflow: hidden;
             display: block;
+            background: #1c1e21;
             text-decoration: none;
+            overflow: hidden;
+            max-height: 500px;
         }
 
-        .pk-video img {
+        .fb-video img {
             width: 100%;
-            max-height: 380px;
+            max-height: 500px;
             object-fit: cover;
             display: block;
-            transition: transform .25s;
+            transition: filter .2s;
         }
 
-        .pk-video:hover img {
-            transform: scale(1.02);
-        }
+        .fb-video:hover img { filter: brightness(.85); }
 
-        .pk-video-placeholder {
-            height: 280px;
-            background: #111827;
+        .fb-video-placeholder {
+            height: 320px;
+            background: #1c1e21;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        .pk-video-overlay {
+        .fb-video-overlay {
             position: absolute;
             inset: 0;
-            background: rgba(0, 0, 0, .25);
+            background: rgba(0, 0, 0, .2);
             display: flex;
             align-items: center;
             justify-content: center;
             transition: background .2s;
         }
 
-        .pk-video:hover .pk-video-overlay {
-            background: rgba(0, 0, 0, .42);
-        }
+        .fb-video:hover .fb-video-overlay { background: rgba(0, 0, 0, .35); }
 
-        .pk-play {
-            width: 60px;
-            height: 60px;
-            background: rgba(255, 255, 255, .93);
+        .fb-play {
+            width: 64px;
+            height: 64px;
+            background: rgba(255, 255, 255, .95);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, .35);
             transition: transform .15s;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, .3);
         }
 
-        .pk-video:hover .pk-play {
-            transform: scale(1.08);
-        }
+        .fb-video:hover .fb-play { transform: scale(1.06); }
 
-        .pk-video-pill {
+        .fb-video-pill {
             position: absolute;
-            top: 10px;
-            left: 10px;
-            background: #f02849;
+            top: 12px;
+            left: 12px;
+            background: rgba(0, 0, 0, .65);
             color: #fff;
-            font-size: 10px;
-            font-weight: 800;
-            padding: 3px 8px;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
             border-radius: 4px;
             text-transform: uppercase;
-            letter-spacing: .06em;
+            letter-spacing: .04em;
         }
 
-        .pk-video-dur {
+        .fb-video-dur {
             position: absolute;
-            bottom: 10px;
-            right: 10px;
-            background: rgba(0, 0, 0, .7);
+            bottom: 12px;
+            right: 12px;
+            background: rgba(0, 0, 0, .75);
             color: #fff;
             font-size: 12px;
             font-weight: 600;
-            padding: 2px 7px;
+            padding: 3px 8px;
             border-radius: 4px;
         }
 
@@ -525,7 +489,7 @@
         $shareUrl = url('timeline/' . $post->id);
     @endphp
 
-    <div class="pk-card">
+    <div class="pk-card" wire:init="recordView">
 
         {{-- ══════════════════════════════════════════
          HEADER
@@ -580,7 +544,7 @@
             {{-- Options --}}
             <div class="dropdown">
                 <a href="{{ url('post/timeline/' . $post->id . '/analytics') }}" class="pk-earns ms-1">
-                    {{ getCurrencyCode() }}{{ estimatedEarnings($post->id) }}
+                    {{ getCurrencyCode() }}{{ number_format($estimatedEarnings, 2) }}
                 </a>
 
                 {{-- <button class="pk-options-btn" data-bs-toggle="dropdown" aria-expanded="false">
@@ -666,17 +630,13 @@
                 $gridClass = 'n' . min($imgCount, 4);
             @endphp
             <div class="pk-media">
-                <div class="pk-img-grid {{ $gridClass }}">
+                <div class="fb-img-grid {{ $gridClass }}">
                     @foreach ($shown as $i => $image)
-                        <div class="pk-img-cell">
-                            <a href="{{ $image->path }}" data-fslightbox="gal-{{ $post->id }}">
-                                <img src="{{ $image->path }}" alt="Post image" loading="lazy">
-                            </a>
+                        <div class="fb-img-cell" wire:click="openPhotoViewer({{ $i }})" role="button" tabindex="0"
+                            @keydown.enter.prevent="$wire.openPhotoViewer({{ $i }})" aria-label="View photo {{ $i + 1 }}">
+                            <img src="{{ $image->path }}" alt="Post image" loading="lazy">
                             @if ($i === 3 && $remaining > 0)
-                                <a href="{{ $image->path }}" data-fslightbox="gal-{{ $post->id }}"
-                                    class="pk-img-more">
-                                    +{{ $remaining }}
-                                </a>
+                                <span class="fb-img-more">+{{ $remaining }}</span>
                             @endif
                         </div>
                     @endforeach
@@ -690,15 +650,15 @@
         @if ($vid)
             @php
                 $poster = $vid->thumbnail_path ?? ($vid->public_id ? $vid->poster_url ?? null : null);
-                $playerUrl = url('rolls/' . $vid->id);
+                $playerUrl = route('rolls.show', ['video' => $vid->id]);
             @endphp
             <div class="pk-media">
-                <a href="{{ $playerUrl }}" class="pk-video">
+                <a href="{{ $playerUrl }}" class="fb-video">
 
                     @if ($poster)
                         <img src="{{ $poster }}" alt="Video" loading="lazy"
                             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-                        <div class="pk-video-placeholder" style="display:none">
+                        <div class="fb-video-placeholder" style="display:none">
                             <svg width="40" height="40" fill="none" stroke="#fff" stroke-width="1.5"
                                 opacity=".4" viewBox="0 0 24 24">
                                 <path d="M15 10l4.553-2.532A1 1 0 0121 8.382v7.236a1 1 0 01-1.447.894L15 14" />
@@ -706,7 +666,7 @@
                             </svg>
                         </div>
                     @else
-                        <div class="pk-video-placeholder">
+                        <div class="fb-video-placeholder">
                             <svg width="40" height="40" fill="none" stroke="#fff" stroke-width="1.5"
                                 opacity=".4" viewBox="0 0 24 24">
                                 <path d="M15 10l4.553-2.532A1 1 0 0121 8.382v7.236a1 1 0 01-1.447.894L15 14" />
@@ -715,18 +675,18 @@
                         </div>
                     @endif
 
-                    <div class="pk-video-overlay">
-                        <div class="pk-play">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="#0f1419">
+                    <div class="fb-video-overlay">
+                        <div class="fb-play">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="#1c1e21">
                                 <polygon points="5 3 19 12 5 21 5 3" />
                             </svg>
                         </div>
                     </div>
 
-                    <span class="pk-video-pill">● Video</span>
+                    <span class="fb-video-pill">Roll</span>
 
                     @if (!empty($vid->duration))
-                        <span class="pk-video-dur">{{ gmdate('i:s', $vid->duration) }}</span>
+                        <span class="fb-video-dur">{{ gmdate('i:s', $vid->duration) }}</span>
                     @endif
 
                 </a>
@@ -739,7 +699,10 @@
         <div class="pk-actions">
 
             {{-- Like --}}
-            <button class="pk-action pk-like {{ $likedByMe ? 'pk-liked' : '' }}" wire:click="toggleLike">
+            <button class="pk-action pk-like {{ $likedByMe ? 'pk-liked' : '' }}"
+                wire:click="toggleLike"
+                wire:loading.attr="disabled"
+                wire:target="toggleLike">
                 <svg width="18" height="18" viewBox="0 0 24 24"
                     fill="{{ $likedByMe ? 'currentColor' : 'none' }}" stroke="currentColor" stroke-width="2"
                     stroke-linecap="round" stroke-linejoin="round">

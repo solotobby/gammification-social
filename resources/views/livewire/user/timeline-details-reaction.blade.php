@@ -1,71 +1,73 @@
-<div>
-    {{-- Do your work, then step back. --}}
+<div class="td-actions">
+    <style>
+        .td-actions {
+            display: flex;
+            align-items: center;
+            padding: 8px 8px 10px;
+            gap: 4px;
+        }
+        .td-action {
+            flex: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 10px 8px;
+            border: none;
+            background: transparent;
+            border-radius: 999px;
+            font-family: inherit;
+            font-size: .84rem;
+            font-weight: 600;
+            color: #536471;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background .15s, color .15s;
+        }
+        .td-action:hover { background: rgba(15,17,23,.05); }
+        .td-action svg { width: 18px; height: 18px; flex-shrink: 0; }
+        .td-action.td-liked { color: #f91880; }
+        .td-action.td-liked svg { fill: #f91880; stroke: #f91880; }
+        .td-action.td-like:hover { color: #f91880; background: rgba(249,24,128,.08); }
+        .td-action.td-view { cursor: default; }
+        .td-action.td-view:hover { background: rgba(0,186,124,.08); color: #00ba7c; }
+        .td-action.td-share:hover { color: var(--td-violet, #5A4FDC); background: rgba(90,79,220,.08); }
+        .td-action:disabled { opacity: .6; cursor: not-allowed; }
+    </style>
 
-    <ul class="nav nav-pills fs-sm align-items-center">
+    <button type="button"
+        class="td-action td-like {{ $likedByMe ? 'td-liked' : '' }}"
+        wire:click="toggleLike"
+        wire:loading.attr="disabled"
+        wire:target="toggleLike">
+        <svg viewBox="0 0 24 24" fill="{{ $likedByMe ? 'currentColor' : 'none' }}" stroke="currentColor" stroke-width="2">
+            <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+        </svg>
+        {{ number_format($likesCount) }}
+    </button>
 
-        {{-- ❤️ Like --}}
-        <li class="nav-item me-3" x-data="{ burst: false }">
-            <a class="nav-link d-flex align-items-center gap-1" href="javascript:void(0)"
-                @click="burst=true; setTimeout(()=>burst=false,300)" wire:click="toggleLike">
+    <span class="td-action td-view">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+        </svg>
+        {{ number_format($commentsCount) }}
+    </span>
 
-                <i class="fa fa-heart" :class="burst ? 'scale-150' : ''"
-                    style="
-                   color: {{ $likedByMe ? '#e0245e' : '#6c757d' }};
-                   opacity: {{ $likedByMe ? 1 : 0.6 }};
-               ">
-                </i>
+    <span class="td-action td-view">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+        </svg>
+        {{ number_format($viewsCount) }}
+    </span>
 
-                <span>{{ number_format($likesCount) }}</span>
-            </a>
-        </li>
-
-        {{-- 💬 Comments --}}
-        <li class="nav-item me-3">
-            <span class="nav-link">
-                <i class="fa fa-comment-alt opacity-50 me-1"></i>
-                {{ number_format($commentsCount) }}
-            </span>
-        </li>
-
-        {{-- 👁 Views --}}
-        <li class="nav-item">
-            <span class="nav-link">
-                <i class="fa fa-eye opacity-50 me-1"></i>
-                {{ number_format($viewsCount) }}
-            </span>
-        </li>
-
-        <li class="nav-item">
-            <a class="nav-link" href="javascript:void(0)" data-bs-toggle="modal"
-                data-bs-target="#modal-block-fromright-{{ $post->id }}">
-                <i class="fa fa-share opacity-50 me-1"></i>
-            </a>
-        </li>
-        {{-- 📊 Analytics (owner only) --}}
-        @if (auth()->id() === $post->user_id)
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url('post/timeline/' . $post->id . '/analytics') }}">
-                    <i class="si si-bar-chart opacity-50"></i> {{ getCurrencyCode() }}{{ estimatedEarnings($post->id) }}
-                </a>
-            </li>
-        @else
-            <li class="nav-item">
-                <a class="nav-link" href="javascript:void(0)">
-                    <i class="si si-bar-chart opacity-50"></i>
-                    {{ getCurrencyCode() }}{{ estimatedEarnings($post->id) }}
-                </a>
-            </li>
-        @endif
-        {{-- @if ($user->id == $post->user_id)
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url('post/timeline/' . $post->id . '/analytics') }}">
-                    <i class="si si-bar-chart opacity-50 me-1"></i>
-                </a>
-            </li>
-        @endif --}}
-
-    </ul>
-
-
-
+    <button type="button" class="td-action td-share"
+        data-bs-toggle="modal"
+        data-bs-target="#modal-block-fromright-{{ $post->id }}"
+        aria-label="Share">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+            <path d="M8.59 13.51l6.82 3.98M15.41 6.51l-6.82 3.98"/>
+        </svg>
+        Share
+    </button>
 </div>

@@ -9,6 +9,7 @@ use App\Models\AdminLogin;
 use App\Models\Comment;
 use App\Models\CommentExternal;
 use App\Models\CommentExternalMessage;
+use App\Models\Community;
 use App\Models\EngagementDailyStat;
 use App\Models\EngagementMonthlyStat;
 use App\Models\FremiumEngagementStat;
@@ -86,6 +87,22 @@ class GeneralController extends Controller
     public function test()
     {
         return ipLocation();
+    }
+
+    //  public function __invoke(Community $community)
+    // {
+    //     $community->loadCount('members')->load(['category', 'user']);
+
+    //     return view('public.community-show', [
+    //         'community' => $community,
+    //     ]);
+    // }
+
+    public function communityPublic( $slug)
+    {
+        $community = Community::where('slug', $slug)->firstOrFail();
+        $community->loadCount(['members', 'posts'])->load(['category', 'user']);
+        return view('community.publics', ['community' => $community]);
     }
 
     public function topEarners()

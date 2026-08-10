@@ -13,6 +13,10 @@ class Blog extends Model
 
     protected $fillable = ['user_id', 'blog_category_id', 'title', 'slug', 'content', 'excerpt', 'cover_image', 'status', 'published_at', 'views', 'ext_views'];
 
+    protected $casts = [
+        'published_at' => 'datetime',
+    ];
+
     protected static function boot()
     {
         parent::boot();

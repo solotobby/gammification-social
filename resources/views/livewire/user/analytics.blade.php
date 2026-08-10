@@ -1,326 +1,78 @@
-<div>
+<div class="pk-app">
+    @include('livewire.user.partials.pk-app-ui')
 
-
-
-    <div class="alert alert-info">
-        🚀 Every <strong>1,000 engagements</strong> puts
-        <strong>{{ getCurrencyCode() }}{{ convertToBaseCurrency(1, auth()->user()->wallet->currency) }}</strong>
-        straight into your wallet. Keep engaging!
-    </div>
-
-    <h2 class="content-heading">Analytics for {{ $month }}</h2>
-    <div class="row">
-        <div class="col-md-6 col-xl-3">
-            <a class="block block-rounded block-link-pop" href="javascript:void(0)">
-                <div class="block-content block-content-full d-flex align-items-center justify-content-between">
-                    <div>
-                        <i class="fa fa-2x fa-list text-primary"></i>
-                    </div>
-                    <div class="ms-3 text-end">
-                        <p class="fs-3 fw-medium mb-0">
-                            {{ $post->count() }}
-                        </p>
-                        <p class="text-muted mb-0">
-                            Posts
-                        </p>
-                    </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-6 col-xl-3">
-            <a class="block block-rounded block-link-pop" href="javascript:void(0)">
-                <div class="block-content block-content-full d-flex align-items-center justify-content-between">
-                    <div>
-                        <i class="fa fa-2x fa-eye text-primary"></i>
-                    </div>
-                    <div class="ms-3 text-end">
-                        <p class="fs-3 fw-medium mb-0">
-                            {{ sumCounter($post->sum('views'), $post->sum('views_external')) }}
-                        </p>
-                        <p class="text-muted mb-0">
-                            Total Views
-                        </p>
-                    </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-6 col-xl-3">
-            <a class="block block-rounded block-link-pop" href="javascript:void(0)">
-                <div class="block-content block-content-full d-flex align-items-center justify-content-between">
-                    <div>
-                        <i class="fa fa-2x fa-thumbs-up text-primary"></i>
-                    </div>
-                    <div class="ms-3 text-end">
-                        <p class="fs-3 fw-medium mb-0">
-                            {{ $post->sum('likes') }}
-                        </p>
-                        <p class="text-muted mb-0">
-                            Likes
-                        </p>
-                    </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-6 col-xl-3">
-            <a class="block block-rounded block-link-pop" href="javascript:void(0)">
-                <div class="block-content block-content-full d-flex align-items-center justify-content-between">
-                    <div>
-                        <i class="fa fa-2x fa-comments text-primary"></i>
-                    </div>
-                    <div class="ms-3 text-end">
-                        <p class="fs-3 fw-medium mb-0">
-                            {{ sumCounter($post->sum('comments'), $post->sum('comment_external')) }}
-                        </p>
-                        <p class="text-muted mb-0">
-                            Total Comments
-                        </p>
-                    </div>
-                </div>
-            </a>
-        </div>
-    </div>
-    <h2 class="content-heading">Engagement from your Posts</h2>
-    <div class="row">
-        <div class="col-md-6 col-xl-3">
-            <a class="block block-rounded block-link-pop" href="javascript:void(0)">
-                <div class="block-content block-content-full d-flex align-items-center justify-content-between">
-                    <div>
-                        <i class="fa fa-2x fa-eye text-primary"></i>
-                    </div>
-                    <div class="ms-3 text-end">
-                        <p class="fs-3 fw-medium mb-0">
-                            {{ $post->sum('views') }}
-                        </p>
-                        <p class="text-muted mb-0">
-                            Monetized Views
-                        </p>
-                    </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-6 col-xl-3">
-            <a class="block block-rounded block-link-pop" href="javascript:void(0)">
-                <div class="block-content block-content-full d-flex align-items-center justify-content-between">
-                    <div>
-                        <i class="fa fa-2x fa-thumbs-up text-primary"></i>
-                    </div>
-                    <div class="ms-3 text-end">
-                        <p class="fs-3 fw-medium mb-0">
-                            {{ $post->sum('likes') }}
-                        </p>
-                        <p class="text-muted mb-0">
-                            Monetized Likes
-                        </p>
-                    </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-6 col-xl-3">
-            <a class="block block-rounded block-link-pop" href="javascript:void(0)">
-                <div class="block-content block-content-full d-flex align-items-center justify-content-between">
-                    <div>
-                        <i class="fa fa-2x fa-comments text-primary"></i>
-                    </div>
-                    <div class="ms-3 text-end">
-                        <p class="fs-3 fw-medium mb-0">
-                            {{ $post->sum('comments') }}
-                        </p>
-                        <p class="text-muted mb-0">
-                            Monetized Comments
-                        </p>
-                    </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-6 col-xl-3">
-            <a class="block block-rounded block-link-pop" href="javascript:void(0)">
-                <div class="block-content block-content-full d-flex align-items-center justify-content-between">
-                    <div>
-                        <i class="fa fa-2x fa-list text-primary"></i>
-                    </div>
-                    <?php
-                    $total = $post->sum('likes') + $post->sum('comments') + $post->sum('views');
-                    ?>
-                    <div class="ms-3 text-end">
-                        <p class="fs-3 fw-medium mb-0">
-                            {{ $total }}
-                        </p>
-                        <p class="text-muted mb-0">
-                            Total Engagement
-                        </p>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-    </div>
-
-    {{-- <h2 class="content-heading">Your Engagement (Total engagement you give)</h2>
-    <div class="row">
-      <div class="col-md-6 col-xl-3">
-        <a class="block block-rounded block-link-pop" href="javascript:void(0)">
-          <div class="block-content block-content-full d-flex align-items-center justify-content-between">
-            <div>
-              <i class="fa fa-2x fa-eye text-primary"></i>
-            </div>
-            <div class="ms-3 text-end">
-              <p class="fs-3 fw-medium mb-0">
-                {{ $post->sum('views') }}
-              </p>
-              <p class="text-muted mb-0">
-                Monetized Views
-              </p>
-            </div>
-          </div>
-        </a>
-      </div>
-      <div class="col-md-6 col-xl-3">
-        <a class="block block-rounded block-link-pop" href="javascript:void(0)">
-          <div class="block-content block-content-full d-flex align-items-center justify-content-between">
-            <div>
-              <i class="fa fa-2x fa-thumbs-up text-primary"></i>
-            </div>
-            <div class="ms-3 text-end">
-              <p class="fs-3 fw-medium mb-0">
-                {{ $post->sum('likes') }}
-              </p>
-              <p class="text-muted mb-0">
-                Monetized Likes
-              </p>
-            </div>
-          </div>
-        </a>
-      </div>
-      <div class="col-md-6 col-xl-3">
-        <a class="block block-rounded block-link-pop" href="javascript:void(0)">
-          <div class="block-content block-content-full d-flex align-items-center justify-content-between">
-            <div>
-              <i class="fa fa-2x fa-comments text-primary"></i>
-            </div>
-            <div class="ms-3 text-end">
-              <p class="fs-3 fw-medium mb-0">
-                {{ $post->sum('comments') }}
-              </p>
-              <p class="text-muted mb-0">
-                Monetized Comments
-              </p>
-            </div>
-          </div>
-        </a>
-      </div>
-      <div class="col-md-6 col-xl-3">
-        <a class="block block-rounded block-link-pop" href="javascript:void(0)">
-          <div class="block-content block-content-full d-flex align-items-center justify-content-between">
-            <div>
-              <i class="fa fa-2x fa-list text-primary"></i>
-            </div>
-            
-            <div class="ms-3 text-end">
-              <p class="fs-3 fw-medium mb-0">
-                {{ $total }}
-              </p>
-              <p class="text-muted mb-0">
-                Total Engagement
-              </p>
-            </div>
-          </div>
-        </a>
-      </div>
-
-    </div> --}}
-
-    <?php
-    $totalEng = $post->sum('likes') + $post->sum('comments') + $post->sum('views');
-    
-    $total = $totalEng / 4;
-
-    ?>
-
-    <h2 class="content-heading">Potential Earnings</h2>
-    <div class="row">
-        <div class="col-md-12 col-xl-12">
-            <a class="block block-rounded block-link-pop" href="javascript:void(0)">
-                <div class="block-content block-content-full d-flex align-items-center justify-content-between">
-                    <div>
-                        <i class="fa fa-2x fa-usd text-primary"></i>
-                    </div>
-                    <?php $amountUSD = engagementEarnings($total); ?>
-                    <div class="ms-3 text-end">
-                        <p class="fs-3 fw-medium mb-0">
-                            {{ getCurrencyCode() }} {{ convertToBaseCurrency($amountUSD, auth()->user()->wallet->currency) }}
-                        </p>
-                        <p class="text-muted mb-0">
-                            Estimated. Earning
-                        </p>
-                        <small><i>-Note that this is not your real payout. Payout is calculated at the end of the month after validation of Real engagement</i></small>
-                    </div>
-                </div>
-            </a>
+    <div class="pk-app-hero">
+        <div class="pk-app-hero-inner">
+            <span class="pk-app-kicker">Performance</span>
+            <h1>Analytics · {{ $month }}</h1>
+            <p>Track posts, engagement, and estimated earnings for this month. Payouts are validated and processed at month end.</p>
         </div>
     </div>
 
-    {{-- <h2 class="content-heading">Engagement Breakdown</h2> --}}
+    <div class="pk-alert pk-alert--info">
+        Every <strong>1,000 engagements</strong> can put
+        <strong>{{ getCurrencyCode() }}{{ number_format(convertToBaseCurrency(1, auth()->user()->wallet->currency), 2) }}</strong>
+        in your wallet — keep creating and engaging.
+    </div>
 
-    {{-- <div class="block block-rounded">
-            <div class="block-header block-header-default">
-                <h3 class="block-title">
-                    Daily Breakdown of your engaments for {{ $this->month }}
-                </h3>
+    <div class="pk-stat-grid">
+        <article class="pk-stat-card">
+            <div class="pk-stat-card-icon" style="background:#EEF2FF;color:#4F46E5;"><i class="fa fa-file-text"></i></div>
+            <p class="pk-stat-card-value">{{ number_format($postsCount) }}</p>
+            <p class="pk-stat-card-label">Posts this month</p>
+        </article>
+        <article class="pk-stat-card">
+            <div class="pk-stat-card-icon" style="background:#ECFDF5;color:#059669;"><i class="fa fa-eye"></i></div>
+            <p class="pk-stat-card-value">{{ number_format($totalViews) }}</p>
+            <p class="pk-stat-card-label">Total views</p>
+        </article>
+        <article class="pk-stat-card">
+            <div class="pk-stat-card-icon" style="background:#FEF3C7;color:#D97706;"><i class="fa fa-thumbs-up"></i></div>
+            <p class="pk-stat-card-value">{{ number_format($totalLikes) }}</p>
+            <p class="pk-stat-card-label">Likes</p>
+        </article>
+        <article class="pk-stat-card">
+            <div class="pk-stat-card-icon" style="background:var(--pk-violet-soft);color:var(--pk-violet);"><i class="fa fa-comments"></i></div>
+            <p class="pk-stat-card-value">{{ number_format($totalComments) }}</p>
+            <p class="pk-stat-card-label">Comments</p>
+        </article>
+    </div>
+
+    <div class="pk-panel">
+        <div class="pk-panel-head"><h2>Monetized engagement</h2></div>
+        <div class="pk-panel-body">
+            <div class="pk-stat-grid" style="margin-bottom:0">
+                <article class="pk-stat-card">
+                    <p class="pk-stat-card-value">{{ number_format($monetizedViews) }}</p>
+                    <p class="pk-stat-card-label">Monetized views</p>
+                </article>
+                <article class="pk-stat-card">
+                    <p class="pk-stat-card-value">{{ number_format($monetizedLikes) }}</p>
+                    <p class="pk-stat-card-label">Monetized likes</p>
+                </article>
+                <article class="pk-stat-card">
+                    <p class="pk-stat-card-value">{{ number_format($monetizedComments) }}</p>
+                    <p class="pk-stat-card-label">Monetized comments</p>
+                </article>
+                <article class="pk-stat-card">
+                    <p class="pk-stat-card-value">{{ number_format($totalEngagement) }}</p>
+                    <p class="pk-stat-card-label">Total engagement</p>
+                </article>
             </div>
-            <div class="block-content block-content-full">
+        </div>
+    </div>
 
-              <table class="table table-bordered table-striped table-vcenter js-dataTable-buttons">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Views</th>
-                <th>Likes</th>
-                <th>Comments</th>
-                <th>Total</th>
-              </tr>
-            </thead>
-            <tbody>
-                <?php
-                $totalViews = 0;
-                $totalLikes = 0;
-                $totalComments = 0;
-                $totalPoints = 0;
-                ?>
-                @foreach ($dailyEngagement as $engagement)
-                <tr>
-                    <td>
-                     {{ \Carbon\Carbon::parse($engagement->date)->translatedFormat('jS F, Y') }}
-                    </td>
-                    <td>
-                        {{ $engagement->views }}
-                    </td>
-                    <td>
-                        {{ $engagement->likes }}
-                    </td>
-                    <td >
-                      {{ $engagement->comments }}
-                    </td>
-                    <td>
-                        {{ $engagement->points }}
-                      </td>
-                  </tr>
-                  <?php
-                  $totalViews += $engagement->views;
-                  $totalLikes += $engagement->likes;
-                  $totalComments += $engagement->comments;
-                  $totalPoints += $engagement->points;
-                  ?>
-                @endforeach
-            </tbody>
-          </table>
-
-
-
-            </div>
-     </div> --}}
-
-
-
+    <div class="pk-panel">
+        <div class="pk-panel-head"><h2>Estimated earnings</h2></div>
+        <div class="pk-panel-body">
+            <p class="pk-stat-card-value" style="font-size:2rem;margin-bottom:8px;">
+                {{ getCurrencyCode() }}{{ number_format(convertToBaseCurrency($estimatedEarnings, auth()->user()->wallet->currency), 2) }}
+            </p>
+            <p class="pk-hint" style="margin:0">
+                Estimate only — final payout is calculated after validation of real engagement at month end.
+            </p>
+        </div>
+    </div>
 
     @if (auth()->user()->email_verified_at == null)
         @include('layouts.accesscode_verification')

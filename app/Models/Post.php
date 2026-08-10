@@ -164,4 +164,24 @@ class Post extends Model
             'hashtag_id'
         );
     }
+
+    public function counterColumn(string $column): int
+    {
+        return (int) ($this->attributes[$column] ?? 0);
+    }
+
+    public function totalLikes(): int
+    {
+        return (int) sumCounter($this->counterColumn('likes'), $this->likes_external);
+    }
+
+    public function totalComments(): int
+    {
+        return (int) sumCounter($this->counterColumn('comments'), $this->comment_external);
+    }
+
+    public function totalViews(): int
+    {
+        return (int) sumCounter($this->counterColumn('views'), $this->views_external);
+    }
 }

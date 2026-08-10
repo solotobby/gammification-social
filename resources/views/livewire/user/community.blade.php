@@ -1,7 +1,11 @@
 <div>
     {{-- Because she competes with no one, no one can compete with her. --}}
 
-    <div class="communities-page">
+    @include('livewire.user.partials.community-ui')
+
+    <div class="communities-page position-relative">
+        <div class="pk-ui-bg" aria-hidden="true"></div>
+        <div class="pk-ui-inner">
 
         @verbatim
             <style>
@@ -880,7 +884,7 @@
                         wire:click="setFilter('mine')">My Communities</button>
 
                     @foreach ($category as $cat)
-                        <button type="button" class="pk-f-chip @if ($filter === $cat->id) pk-sel @endif"
+                        <button type="button" class="pk-f-chip @if ($filter == $cat->id) pk-sel @endif"
                             wire:click="setFilter('{{ $cat->id }}')">{{ $cat->name }}</button>
                     @endforeach
                 </div>
@@ -958,11 +962,16 @@
                                         {{ $community->type === 'private' ? 'Invite only' : 'Joined' }}
                                     </button>
                                 @elseif ($community->type === 'private')
-                                    <button type="button" class="pk-btn pk-btn-outline pk-btn-sm" disabled>Invite
-                                        only</button>
+                                    @if ($this->hasPendingInvite($community->id))
+                                        <a href="{{ route('community.show', $community) }}"
+                                            class="pk-btn pk-btn-violet pk-btn-sm">Accept invite</a>
+                                    @else
+                                        <button type="button" class="pk-btn pk-btn-outline pk-btn-sm" disabled>Invite
+                                            only</button>
+                                    @endif
                                 @elseif ($community->type === 'approval')
-                                    <button type="button" class="pk-btn pk-btn-outline pk-btn-sm">Request to
-                                        join</button>
+                                    <a href="{{ route('community.show', $community) }}"
+                                        class="pk-btn pk-btn-outline pk-btn-sm">Request to join</a>
                                 @elseif ($community->type === 'paid')
                                     {{-- {{ $this->userSubscriptionStatus($community->id) }} --}}
 
@@ -974,37 +983,16 @@
                                             disabled>Pending</button>
                                     @else
                                         <a href="{{ url('community/payment/' . $community->id) }}"
-                                            class="pk-btn pk-btn-violet pk-btn-sm" {{-- wire:click.prevent="subscribe('{{ $community->id }}')"
-                                            wire:loading.attr="disabled"
-                                            wire:target="subscribe('{{ $community->id }}') --}} ">
+                                            class="pk-btn pk-btn-violet pk-btn-sm">
                                             {{ $community->billing_type === 'one_off' ? 'Pay once' : 'Subscribe' }}
                                         </a>
-                                        {{-- <button type="button" class="pk-btn pk-btn-violet pk-btn-sm"
-                                            wire:click="subscribe('{{ $community->id }}')"
-                                            wire:loading.attr="disabled"
-                                            wire:target="subscribe('{{ $community->id }}')">
-                                            {{ $community->billing_type === 'one_off' ? 'Pay once' : 'Subscribe' }}
-                                        </button> --}}
- @endif
-
-                                            {{-- @if ($this->hasPendingSubscription($community->id))
-                                        <button type="button" class="pk-btn pk-btn-outline pk-btn-sm"
-                                            disabled>Pending</button>
-                                    @else
-                                        <button type="button" class="pk-btn pk-btn-violet pk-btn-sm"
-                                            wire:click="subscribe('{{ $community->id }}')"
-                                            wire:loading.attr="disabled"
-                                            wire:target="subscribe('{{ $community->id }}')">
-                                            {{ $community->billing_type === 'one_off' ? 'Pay once' : 'Subscribe' }}
-                                        </button>
-                                    @endif --}}
-                                            {{-- <button type="button" class="pk-btn pk-btn-violet pk-btn-sm">Subscribe</button> --}}
-                                        @else
-                                            <button type="button" class="pk-btn pk-btn-violet pk-btn-sm"
-                                                wire:click="join('{{ $community->id }}')"
-                                                wire:loading.attr="disabled"
-                                                wire:target="join('{{ $community->id }}')">Join</button>
                                     @endif
+                                @else
+                                    <button type="button" class="pk-btn pk-btn-violet pk-btn-sm"
+                                        wire:click="join('{{ $community->id }}')"
+                                        wire:loading.attr="disabled"
+                                        wire:target="join('{{ $community->id }}')">Join</button>
+                                @endif
                             </div>
                         </article>
                         @empty
@@ -1541,3 +1529,4 @@
 
         </div>
     </div>
+</div>

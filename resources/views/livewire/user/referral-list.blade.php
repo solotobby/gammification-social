@@ -1,190 +1,115 @@
-<div>
-    <style>
-        #referralLink {
-            word-break: break-all;
-        }
-    </style>
-    {{-- Stop trying to control. --}}
-    <div class="content content-full content-boxed">
+<div class="pk-app">
+    @include('livewire.user.partials.pk-app-ui')
 
-        <h2 class="content-heading">Referral List</h2>
-
-        <div class="row">
-            @if ($monthlyReferralsCount > 500)
-                <div class="alert alert-success align-items-center mb-2">
-                    <i class="fa fa-check-circle me-2"></i>
-                    <strong>Congratulations! You've qualified for content monetization this month!</strong><br>
-
-                    You have successfully invited <b>{{ $monthlyReferralsCount }}</b> friends to Payhankey this month,
-                    surpassing the requirement of 500 referrals. Enjoy your free access to content monetization and
-                    start earning from your content today!
-                    <br>
-                    <button class="btn btn-sm btn-primary mt-2"
-                        onclick="window.location.href='{{ url('/monetization') }}'">
-                        <i class="fa fa-dollar-sign me-1"></i> Claim your Monetization
-                    </button>
-                </div>
-            @endif
-
-            <div class="alert alert-success align-items-center mb-2">
-                <i class="fa fa-info-circle me-2"></i>
-                <strong>{{ __('Invite your Friends to Payhankey and enjoy Free Access to Monetization!') }}</strong><br>
-
-                You now qualify for content monetization without paying an upgrade free once you invite 500 friends this
-                month.
-                <br>
-                <strong>Earn rewards:</strong> Get 2 free months if 10 of your friends upgrade to Creator, plus $1 for
-                every influencer you refer.<br>
-                Copy your referral link below to get started...
-
-            </div>
-
-            <br>
-            <div class="alert alert-info d-flex justify-content-between align-items-center">
-
-
-                <div class="d-flex align-items-center">
-                    <i class="fa fa-link me-2"></i>
-                    <span id="referralLink">
-                        {{ url('/reg?referral_code=' . $user->referral_code) }}
-                    </span>
-                </div>
-
-                <button class="btn btn-sm btn-primary" onclick="copyReferralLink(this)">
-                    <i class="fa fa-copy me-1"></i> Copy
-                </button>
-
-            </div>
-
-            @if (session()->has('status_refresh'))
-                <div class="alert alert-success" role="alert">
-                    {{ session('status_refresh') }}
-                </div>
-            @endif
-
-            <div class="col-md-6 col-xl-6">
-
-                <a class="block block-rounded block-link-pop" href="javascript:void(0)">
-                    <div class="block-content block-content-full d-flex align-items-center justify-content-between">
-                        <div>
-                            <i class="fa fa-2x fa-list text-primary"></i>
-                        </div>
-                        <div class="ms-3 text-end">
-                            <p class="fs-3 fw-medium mb-0">
-                                {{ $totalReferrals }}
-                            </p>
-                            <p class="text-muted mb-0">
-                                Total Referrals
-                                {{-- <span><small>(Earnings from signup bonus and content
-                                    monetization)</small></span> --}}
-                            </p>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            <div class="col-md-6 col-xl-6">
-                <a class="block block-rounded block-link-pop" href="javascript:void(0)">
-                    <div class="block-content block-content-full d-flex align-items-center justify-content-between">
-                        <div>
-                            <i class="fa fa-2x fa-users text-primary"></i>
-                        </div>
-                        <div class="ms-3 text-end">
-                            <p class="fs-3 fw-medium mb-0">
-                                {{ $monthlyReferralsCount }}
-                            </p>
-                            <p class="text-muted mb-0">
-                                Referral This Month
-                                {{-- <span><small>(Earnings from inviting friends on Payhankey)</small></span> --}}
-                            </p>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
+    <div class="pk-app-hero">
+        <div class="pk-app-hero-inner">
+            <span class="pk-app-kicker">Grow together</span>
+            <h1>My referrals</h1>
+            <p>Invite friends, track signups, and unlock monetization perks when you hit referral milestones.</p>
         </div>
+    </div>
 
+    @if ($qualifiedForMonetization)
+        <div class="pk-alert pk-alert--success">
+            <strong>Congratulations!</strong> You invited {{ number_format($monthlyReferralsCount) }} friends this month and qualified for free content monetization.
+        </div>
+    @else
+        <div class="pk-alert pk-alert--info">
+            Invite <strong>500 friends this month</strong> to unlock free monetization access. You currently have
+            <strong>{{ number_format($monthlyReferralsCount) }}</strong> this month.
+            Earn rewards when referrals upgrade — including bonuses for influencer referrals.
+        </div>
+    @endif
 
-        @if (count($referralList) > 0)
-            <!-- Dynamic Table with Export Buttons -->
-            <div class="block block-rounded">
+    <div class="pk-copy-bar">
+        <code id="referralLink">{{ $referralLink }}</code>
+        <button type="button" class="pk-btn pk-btn--primary" onclick="copyReferralLink(this)">
+            <i class="fa fa-copy"></i> Copy link
+        </button>
+    </div>
 
-                <div class="block-content block-content-full">
+    <div class="pk-stat-grid">
+        <article class="pk-stat-card">
+            <div class="pk-stat-card-icon" style="background:var(--pk-violet-soft);color:var(--pk-violet);"><i class="fa fa-users"></i></div>
+            <p class="pk-stat-card-value">{{ number_format($totalReferrals) }}</p>
+            <p class="pk-stat-card-label">Total referrals</p>
+        </article>
+        <article class="pk-stat-card">
+            <div class="pk-stat-card-icon" style="background:var(--pk-mint-soft);color:var(--pk-mint);"><i class="fa fa-calendar"></i></div>
+            <p class="pk-stat-card-value">{{ number_format($monthlyReferralsCount) }}</p>
+            <p class="pk-stat-card-label">This month</p>
+        </article>
+    </div>
 
-
-                    <table class="table table-hover table-striped table-borderless table-vcenter mb-0 table-responsive">
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th>Name</th>
-                                <th>Following</th>
-                                <th>Followers</th>
-                                <th>Date Registered</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-
-                            @foreach ($referralList as $user)
-                                <tr>
-                                    <td class="text-center" style="width: 140px;">
-                                        <img class="img-avatar img-avatar-thumb"
-                                            src="{{ $user->avatar ?? asset('src/assets/media/avatars/avatar10.jpg') }}"
-                                            alt="">
-                                    </td>
-                                    <td style="min-width: 200px;">
-                                        <div class="py-4">
-                                            <p class="mb-0">
-                                                <a class="link-fx fw-bold d-inline-block"
-                                                    href="{{ url('profile/' . $user->username) }}">
-                                                    {{ $user->name }}</a>
-                                            </p>
-                                            <p class="mb-0">
-                                                <a class="fs-sm fw-bold text-lowercase text-muted me-3"
-                                                    href="javascript:void(0)">@<span>{{ $user->username }}</span></a>
-                                            </p>
+    <div class="pk-panel">
+        <div class="pk-panel-head"><h2>Referred users</h2></div>
+        @if ($referralList->count())
+            <div class="pk-table-wrap">
+                <table class="pk-table">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Followers</th>
+                            <th>Following</th>
+                            <th>Joined</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($referralList as $person)
+                            <tr wire:key="ref-{{ $person->id }}">
+                                <td>
+                                    <a href="{{ url('profile/' . $person->username) }}" class="pk-user-row" style="text-decoration:none;color:inherit">
+                                        <img src="{{ $person->avatar ?: asset('src/assets/media/avatars/avatar13.jpg') }}" alt="">
+                                        <div>
+                                            <b>{{ displayName($person->name) }}</b>
+                                            <small>@{{ $person->username }}</small>
                                         </div>
-                                    </td>
-                                    <td style="min-width: 200px;">
-                                        Following: {{ $user->following }}
-                                    </td>
-                                    <td class="text-end" style="min-width: 160px;">
-                                        Followers: {{ $user->followers }}
-                                    </td>
-                                    <td> {{ \Carbon\Carbon::parse($user->created_at)->format('F d, Y') }}</td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
+                                    </a>
+                                </td>
+                                <td>{{ number_format($person->followers) }}</td>
+                                <td>{{ number_format($person->following) }}</td>
+                                <td>{{ \Carbon\Carbon::parse($person->created_at)->format('M j, Y') }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
+            @if ($referralList->hasPages())
+                <div class="pk-pagination">
+                    <div class="pk-pg-info">{{ $referralList->total() }} total</div>
+                    <div class="pk-pg-btns">
+                        <button type="button" class="pk-pg-btn" wire:click="previousPage" @disabled($referralList->onFirstPage())>Prev</button>
+                        <button type="button" class="pk-pg-btn" wire:click="nextPage" @disabled(! $referralList->hasMorePages())>Next</button>
+                    </div>
+                </div>
+            @endif
         @else
-            <div class="alert alert-warning">
-                You don't have referrals yet
+            <div class="pk-empty">
+                <h3>No referrals yet</h3>
+                <p>Share your link above — when friends join, they'll appear here.</p>
             </div>
         @endif
-
-        <script>
-            function copyReferralLink(button) {
-                const text = document.getElementById("referralLink").innerText;
-
-                if (!navigator.clipboard) {
-                    // Fallback for older browsers
-                    const tempInput = document.createElement("input");
-                    tempInput.value = text;
-                    document.body.appendChild(tempInput);
-                    tempInput.select();
-                    document.execCommand("copy");
-                    document.body.removeChild(tempInput);
-                } else {
-                    navigator.clipboard.writeText(text);
-                }
-
-                // Change button text
-                button.innerHTML = '<i class="fa fa-check me-1"></i> Copied';
-
-                setTimeout(() => {
-                    button.innerHTML = '<i class="fa fa-copy me-1"></i> Copy';
-                }, 2000);
-            }
-        </script>
-
     </div>
+
+    <script>
+        function copyReferralLink(btn) {
+            const text = document.getElementById('referralLink').innerText.trim();
+            navigator.clipboard?.writeText(text).catch(() => {
+                const t = document.createElement('input');
+                t.value = text;
+                document.body.appendChild(t);
+                t.select();
+                document.execCommand('copy');
+                document.body.removeChild(t);
+            });
+            btn.innerHTML = '<i class="fa fa-check"></i> Copied';
+            setTimeout(() => btn.innerHTML = '<i class="fa fa-copy"></i> Copy link', 2000);
+        }
+    </script>
+
+    @if (auth()->user()->email_verified_at == null)
+        @include('layouts.accesscode_verification')
+    @else
+        @include('layouts.onboarding')
+    @endif
+</div>

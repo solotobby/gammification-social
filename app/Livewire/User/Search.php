@@ -2,134 +2,136 @@
 
 namespace App\Livewire\User;
 
-use App\Models\Post;
+use App\Models\Follow;
 use App\Models\User;
+use App\Notifications\GeneralNotification;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 class Search extends Component
 {
+    use WithPagination;
 
     public string $query = '';
-    public $result = [];
 
-    public function search()
+    protected $queryString = [
+        'query' => ['except' => ''],
+    ];
+
+    public function updatingQuery(): void
     {
-       
-        if (strlen($this->query) < 2) {
-            $this->reset('result');
+        $this->resetPage();
+    }
+
+    public function clearSearch(): void
+    {
+        $this->query = '';
+        $this->resetPage();
+    }
+
+    public function toggleFollow(string $userId): void
+    {
+        if (! Auth::check()) {
             return;
         }
 
-        $this->result = User::where('status', 'ACTIVE')
-            ->where(
-                fn($q) =>
-                $q->where('name', 'like', "%{$this->query}%")
-                    ->orWhere('username', 'like', "%{$this->query}%")
-            )
-            ->limit(10)
-            ->get();
+        $authUser = Auth::user();
 
-            // dd($this->result);
-    }
-
-
-
-    public function updated()
-    {
-
-        if (strlen($this->query) < 2) {
-            $this->reset('result');
+        if ($authUser->id === $userId) {
             return;
         }
 
-        $this->result = User::query()
-            ->where('status', 'ACTIVE')
-            ->where(function ($q) {
-                $q->where('name', 'like', "%{$this->query}%")
-                    ->orWhere('username', 'like', "%{$this->query}%");
-            })
-            ->limit(10)
-            ->get();
+        $targetUser = User::find($userId);
+
+        if (! $targetUser) {
+            return;
+        }
+
+        if ($authUser->isFollowing($targetUser)) {
+            Follow::where([
+                'follower_id' => $authUser->id,
+                'following_id' => $targetUser->id,
+            ])->delete();
+
+            if ($authUser->following > 0) {
+                $authUser->decrement('following');
+            }
+
+            if ($targetUser->followers > 0) {
+                $targetUser->decrement('followers');
+            }
+        } else {
+            $created = Follow::firstOrCreate([
+                'follower_id' => $authUser->id,
+                'following_id' => $targetUser->id,
+            ]);
+
+            if ($created->wasRecentlyCreated) {
+                $authUser->increment('following');
+                $targetUser->increment('followers');
+
+                $targetUser->notify(new GeneralNotification([
+                    'title' => displayName($authUser->name) . ' followed you',
+                    'message' => displayName($authUser->name) . ' followed you',
+                    'icon' => 'fa-user-plus text-primary',
+                    'url' => url('profile/' . $authUser->username),
+                ]));
+            }
+        }
+
+        $this->clearUserFeedCache($authUser->id);
+        $this->clearUserFeedCache($targetUser->id);
+        $this->dispatch('refreshFeed');
     }
 
-    // public array $results = [
-    //     'users' => [],
-    //     'posts' => [],
-    // ];
+    private function clearUserFeedCache(string $userId): void
+    {
+        $indexKey = "feed:keys:user:{$userId}";
+        $keys = Cache::get($indexKey, []);
 
-    // public function mount()
-    // {
-    //      $this->result = User::query()
-    //         ->where('status', 'ACTIVE')
-    //         ->where(function ($q) {
-    //             $q->where('name', 'like', "%{$this->query}%")
-    //               ->orWhere('username', 'like', "%{$this->query}%");
-    //         })
-    //         ->limit(10)
-    //         ->get();
-    // }
+        foreach ($keys as $key) {
+            Cache::forget($key);
+        }
 
-    // public function updatedQuery()
-    // {
-    //     if (strlen($this->query) < 2) {
-    //         $this->reset('results');
-    //         return;
-    //     }
-
-    //     dd($this->query);
-
-    //    $this->result = User::query()
-    //         ->where('status', 'ACTIVE')
-    //         ->where(function ($q) {
-    //             $q->where('name', 'like', "%{$this->query}%")
-    //               ->orWhere('username', 'like', "%{$this->query}%");
-    //         })
-    //         ->limit(10)
-    //         ->get();
-
-    //     // $this->search();
-    // }
-
-    // protected function search()
-    // {
-
-    //     $user = Auth::user();
-
-    //     // 🔍 USERS
-    //     $this->results['users'] = User::query()
-    //         ->where('status', 'ACTIVE')
-    //         ->where(function ($q) {
-    //             $q->where('name', 'like', "%{$this->query}%")
-    //               ->orWhere('username', 'like', "%{$this->query}%");
-    //         })
-    //         ->limit(10)
-    //         ->get();
-
-    //     // 🔍 POSTS
-    //     $this->results['posts'] = Post::query()
-    //         ->where('status', 'LIVE')
-    //         ->whereHas('user', function ($q) use ($user) {
-    //             // Hide shadow-banned users except self
-    //             $q->where(function ($q2) use ($user) {
-    //                 $q2->where('status', 'ACTIVE');
-
-    //                 if ($user) {
-    //                     $q2->orWhere('id', $user->id);
-    //                 }
-    //             });
-    //         })
-    //         ->where('content', 'like', "%{$this->query}%")
-    //         ->latest()
-    //         ->limit(10)
-    //         ->get();
-
-
-
-    // }
+        Cache::forget($indexKey);
+    }
 
     public function render()
     {
-        return view('livewire.user.search');
+        $trimmed = trim($this->query);
+        $followingIds = [];
+        $users = null;
+
+        if (strlen($trimmed) >= 2) {
+            $users = User::query()
+                ->where('status', 'ACTIVE')
+                ->where('id', '!=', Auth::id())
+                ->where(function ($q) use ($trimmed) {
+                    $q->where('name', 'like', "%{$trimmed}%")
+                        ->orWhere('username', 'like', "%{$trimmed}%");
+                })
+                ->orderByRaw(
+                    'CASE WHEN username LIKE ? THEN 0 WHEN name LIKE ? THEN 1 ELSE 2 END',
+                    ["{$trimmed}%", "{$trimmed}%"]
+                )
+                ->orderByDesc('followers')
+                ->paginate(20);
+
+            if (Auth::check() && $users->isNotEmpty()) {
+                $followingIds = Follow::query()
+                    ->where('follower_id', Auth::id())
+                    ->whereIn('following_id', $users->pluck('id'))
+                    ->pluck('following_id')
+                    ->all();
+            }
+        }
+
+        return view('livewire.user.search', [
+            'users' => $users,
+            'followingIds' => $followingIds,
+            'trimmedQuery' => $trimmed,
+        ]);
     }
 }
