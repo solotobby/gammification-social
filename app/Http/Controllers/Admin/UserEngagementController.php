@@ -3,19 +3,17 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\EngagementDailyStat;
 use App\Models\User;
-use Illuminate\Http\Request;
+use App\Services\Admin\AdminUserService;
 
 class UserEngagementController extends Controller
 {
+    public function __construct(
+        protected AdminUserService $users,
+    ) {}
+
     public function engagementAnalytics(User $user)
     {
-        
-        $dailyEngagements = EngagementDailyStat::where('user_id', $user->id)
-            ->orderBy('date', 'desc')
-            ->get();
-
-        return view('admin.engagement.analytics', ['user' => $user, 'dailyEngagements' => $dailyEngagements]);
+        return view('admin.user.engagement', $this->users->engagementAnalyticsData($user));
     }
 }

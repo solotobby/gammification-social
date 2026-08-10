@@ -146,6 +146,10 @@
         $currency = $user->wallet?->currency ?? 'USD';
         $currencySymbol = getCurrencyCode($currency);
         $planName = $level ?? 'Basic';
+        $subscriptionActive = $subscription
+            && $subscription->status === 'active'
+            && $subscription->next_payment_date
+            && $subscription->next_payment_date->isFuture();
         $statusClass = match ($user->status) {
             'ACTIVE' => 'dash-badge--emerald',
             'SHADOW_BANNED' => 'dash-badge--amber',
@@ -162,6 +166,11 @@
                     <p>{{ '@' . $user->username }} · {{ $user->email }}</p>
                     <div class="dash-meta">
                         <span class="dash-badge dash-badge--indigo">{{ $planName }}</span>
+                        @if ($subscription && ! $subscriptionActive)
+                            <span class="dash-badge dash-badge--amber">Subscription expired</span>
+                        @elseif ($subscriptionActive)
+                            <span class="dash-badge dash-badge--emerald">Subscription active</span>
+                        @endif
                         <span class="dash-badge {{ $statusClass }}">{{ str_replace('_', ' ', $user->status) }}</span>
                         @if ($user->email_verified_at)
                             <span class="dash-badge dash-badge--emerald">Verified</span>
@@ -235,6 +244,20 @@
                             <dd>{{ $user->email }}</dd>
                             <dt>Entry channel</dt>
                             <dd>{{ $user->heard ?: '—' }}</dd>
+                            <dt>Plan</dt>
+                            <dd>{{ $planName }}</dd>
+                            <dt>Subscription</dt>
+                            <dd>
+                                @if ($subscription)
+                                    {{ ucfirst($subscription->status) }}
+                                    @if ($subscription->next_payment_date)
+                                        · {{ $subscriptionActive ? 'Renews' : 'Expired' }}
+                                        {{ $subscription->next_payment_date->format('M j, Y') }}
+                                    @endif
+                                @else
+                                    Basic (no paid plan on file)
+                                @endif
+                            </dd>
                             <dt>Base currency</dt>
                             <dd>{{ $currency }}</dd>
                             <dt>Access code</dt>
@@ -358,7 +381,9 @@
                                 <select id="level" name="level" class="dash-select" required>
                                     <option value="">Select level</option>
                                     @foreach ($levels as $planOption)
-                                        <option value="{{ $planOption->id }}">{{ $planOption->name }}</option>
+                                        <option value="{{ $planOption->id }}" @selected($planOption->name === $planName)>
+                                            {{ $planOption->name }}
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>

@@ -3,6 +3,8 @@
 namespace App\Services\Admin;
 
 use App\Models\AccessCode;
+use App\Models\EngagementDailyStat;
+use App\Models\EngagementMonthlyStat;
 use App\Models\Level;
 use App\Models\Payout;
 use App\Models\Post;
@@ -15,6 +17,7 @@ use App\Models\WithdrawalMethod;
 use App\Models\Withdrawals;
 use App\Services\AdminAuditService;
 use App\Services\FundTransferService;
+use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
@@ -59,10 +62,13 @@ class AdminUserService
     public function profileData(string $userId): array
     {
         $user = User::query()
-            ->with(['wallet', 'activeLevel'])
+            ->with(['wallet', 'userLevel.level'])
             ->findOrFail($userId);
 
-        $level = $user?->activeLevel?->plan_name;
+        $subscription = $user->userLevel;
+        $planName = $subscription?->plan_name ?? $subscription?->level?->name;
+        $levelPlan = $subscription?->level
+            ?? ($planName ? Level::query()->where('name', $planName)->first() : null);
 
         return [
             'user' => $user,
@@ -74,9 +80,10 @@ class AdminUserService
                 ->limit(20)
                 ->get(),
             'postsCount' => Post::query()->where('user_id', $user->id)->count(),
-            'level' => $level,
+            'level' => $planName,
+            'subscription' => $subscription,
             'access' => AccessCode::query()->where('email', $user->email)->latest()->first(),
-            'userLevel' => Level::query()->where('name', $level)->first(),
+            'userLevel' => $levelPlan,
             'withdrawalMethod' => WithdrawalMethod::query()->where('user_id', $user->id)->first(),
             'payouts' => Payout::query()
                 ->where('user_id', $user->id)
@@ -86,6 +93,94 @@ class AdminUserService
                 ->where('user_id', $user->id)
                 ->where('status', 'Paid')
                 ->sum('amount'),
+        ];
+    }
+
+    public function engagementAnalyticsData(User $user): array
+    {
+        $user->loadMissing('userLevel.level', 'wallet');
+
+        $planName = $user->userLevel?->plan_name ?? $user->userLevel?->level?->name ?? 'Basic';
+
+        $totals = EngagementDailyStat::query()
+            ->where('user_id', $user->id)
+            ->selectRaw('COALESCE(SUM(views), 0) as views')
+            ->selectRaw('COALESCE(SUM(likes), 0) as likes')
+            ->selectRaw('COALESCE(SUM(comments), 0) as comments')
+            ->selectRaw('COALESCE(SUM(points), 0) as points')
+            ->selectRaw('COUNT(DISTINCT date) as active_days')
+            ->first();
+
+        $monthlyTotals = EngagementMonthlyStat::query()
+            ->where('user_id', $user->id)
+            ->selectRaw('COALESCE(SUM(views), 0) as views')
+            ->selectRaw('COALESCE(SUM(likes), 0) as likes')
+            ->selectRaw('COALESCE(SUM(comments), 0) as comments')
+            ->selectRaw('COALESCE(SUM(points), 0) as points')
+            ->selectRaw('COALESCE(SUM(amount), 0) as amount')
+            ->first();
+
+        return [
+            'user' => $user,
+            'planName' => $planName,
+            'totals' => $totals,
+            'monthlyTotals' => $monthlyTotals,
+            'dailyEngagements' => EngagementDailyStat::query()
+                ->where('user_id', $user->id)
+                ->orderByDesc('date')
+                ->orderBy('level')
+                ->paginate(50),
+            'monthlyStats' => EngagementMonthlyStat::query()
+                ->where('user_id', $user->id)
+                ->orderByDesc('month')
+                ->limit(24)
+                ->get(),
+            'chart' => $this->userEngagementChart($user->id),
+        ];
+    }
+
+    protected function userEngagementChart(string $userId, int $days = 30): array
+    {
+        $start = now()->subDays($days - 1)->startOfDay();
+
+        $rows = EngagementDailyStat::query()
+            ->where('user_id', $userId)
+            ->where('date', '>=', $start->toDateString())
+            ->selectRaw('DATE(date) as day')
+            ->selectRaw('SUM(views) as views')
+            ->selectRaw('SUM(likes) as likes')
+            ->selectRaw('SUM(comments) as comments')
+            ->selectRaw('SUM(points) as points')
+            ->groupBy('day')
+            ->orderBy('day')
+            ->get()
+            ->keyBy(fn ($row) => Carbon::parse($row->day)->format('Y-m-d'));
+
+        $labels = [];
+        $views = [];
+        $likes = [];
+        $comments = [];
+        $points = [];
+
+        for ($i = 0; $i < $days; $i++) {
+            $date = $start->copy()->addDays($i);
+            $key = $date->format('Y-m-d');
+            $row = $rows->get($key);
+
+            $labels[] = $date->format('M j');
+            $views[] = (int) ($row->views ?? 0);
+            $likes[] = (int) ($row->likes ?? 0);
+            $comments[] = (int) ($row->comments ?? 0);
+            $points[] = (int) ($row->points ?? 0);
+        }
+
+        return [
+            'labels' => $labels,
+            'views' => $views,
+            'likes' => $likes,
+            'comments' => $comments,
+            'points' => $points,
+            'total' => array_sum($points),
         ];
     }
 
