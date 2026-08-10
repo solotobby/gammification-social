@@ -1,81 +1,103 @@
 @extends('layouts.admin')
-@section('styles')
-<link rel="stylesheet" href="{{asset('src/assets/js/plugins/datatables-bs5/css/dataTables.bootstrap5.min.css')}}">
-<link rel="stylesheet" href="{{asset('src/assets/js/plugins/datatables-buttons-bs5/css/buttons.bootstrap5.min.css')}}">
-<link rel="stylesheet" href="{{asset('src/assets/js/plugins/datatables-responsive-bs5/css/responsive.bootstrap5.min.css')}}">
 
+@section('styles')
+    @include('admin.partials.dash-styles')
+    <style>
+        .dash-user__name {
+            font-weight: 600;
+            color: var(--dash-accent);
+            text-decoration: none;
+        }
+
+        .dash-user__name:hover { text-decoration: underline; }
+        .dash-user__meta { font-size: 0.75rem; color: var(--dash-muted); }
+    </style>
 @endsection
 
 @section('content')
+    <div class="content p-0">
+        <div class="dash">
+            <header class="dash-header">
+                <div>
+                    <h1>Bank accounts</h1>
+                    <p>User withdrawal methods and payout details</p>
+                </div>
+                <a href="{{ route('admin.home') }}" class="dash-btn dash-btn--ghost">
+                    <i class="fa fa-arrow-left"></i> Dashboard
+                </a>
+            </header>
 
-<div class="content">
-        <div class="block block-rounded">
-            <div class="block-header block-header-default">
-                <h3 class="block-title">
-                   Users Payout Information
-                </h3>
-            </div>
-
-            <div class="block-content block-content-full">
-                <!-- DataTables init on table by adding .js-dataTable-buttons class, functionality is initialized in js/pages/be_tables_datatables.min.js which was auto compiled from _js/pages/be_tables_datatables.js -->
-                <table class="table table-bordered table-striped table-vcenter js-dataTable-buttons">
-
-                    <thead>
-                        <th>Content</th>
-                        <th>Payout Method</th>
-                        <th>Bank Name</th>
-                        <th>Acc Number</th>
-                        <th>currency</th>
-                        {{-- <th>Total Comment</th> --}}
-                        <th>When Posted</th>
-                    </thead>
-
-                    <tbody>
-                        @foreach ($withdrawals as $post)
-                            <tr>
-                                {{-- <td class="text-center">1</td> --}}
-                                <td>
-                                    
-                                    {{-- {{ $post->content }} --}}
-                                    <a href="{{ url('user/info/'.$post->user->id) }}">{{ $post->user->name }}</a>
-                                </td>
-                                <td>
-                                    {{ $post->payment_method }}
-                                </td>
-                                <td>
-                                    {{ $post->bank_name }}
-                                </td>
-                                <td>
-                                    {{ $post->account_number }}
-                                </td>
-                               
-                                <td>
-                                    {{ $post->currency}}
-                                </td>
-
-                                <td>
-                                    <em class="text-muted">{{ $post->created_at }}</em>
-                                    {{-- {{   $post->created_at?->shortAbsoluteDiffForHumans() }}  --}}
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-
-                <div class="d-flex justify-content-center mt-4">
-                        {!! $withdrawals->links('pagination::bootstrap-4') !!} 
+            <div class="dash-card">
+                <div class="dash-card__head">
+                    <div>
+                        <h2 class="dash-card__title">Saved withdrawal methods</h2>
+                        <p class="dash-muted" style="margin:0.25rem 0 0;">
+                            {{ number_format($withdrawals->total()) }} total · showing {{ $withdrawals->firstItem() ?? 0 }}–{{ $withdrawals->lastItem() ?? 0 }}
+                        </p>
+                    </div>
                 </div>
 
-                 
+                <div class="dash-card__body--flush">
+                    <div class="dash-table-wrap">
+                        <table class="dash-table">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Method</th>
+                                    <th>Details</th>
+                                    <th>Currency</th>
+                                    <th>Added</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse ($withdrawals as $method)
+                                    <tr>
+                                        <td>
+                                            <div class="dash-user">
+                                                <a href="{{ route('admin.users.show', $method->user_id) }}" class="dash-user__name">
+                                                    {{ $method->user?->name ?? 'Unknown' }}
+                                                </a>
+                                                <span class="dash-user__meta">{{ $method->user?->email }}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="dash-badge dash-badge--indigo">{{ strtoupper($method->payment_method ?: 'bank') }}</span>
+                                        </td>
+                                        <td class="dash-muted">
+                                            @if ($method->payment_method === 'usdt')
+                                                {{ maskCode($method->usdt_wallet) }}
+                                            @elseif ($method->payment_method === 'paypal')
+                                                {{ maskCode($method->paypal_email) }}
+                                            @else
+                                                {{ $method->account_name }} · {{ $method->bank_name }} · {{ $method->account_number }}
+                                            @endif
+                                        </td>
+                                        <td class="dash-muted">{{ $method->currency ?: '—' }}</td>
+                                        <td class="dash-muted">
+                                            {{ $method->created_at?->format('M j, Y') }}
+                                            <span style="display:block; font-size:0.75rem;">
+                                                {{ $method->created_at?->diffForHumans() }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="5">
+                                            <div class="dash-empty">No bank accounts or withdrawal methods saved yet.</div>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
 
-                
-
-
-                {{-- <a href="{{ url('user/info/' . $user->id) }}" class="btn btn-secondary mt-3"> Back to Users </a> --}}
+                    @if ($withdrawals->hasPages())
+                        <div class="dash-pagination">
+                            {{ $withdrawals->links('pagination::bootstrap-5') }}
+                        </div>
+                    @endif
+                </div>
             </div>
-
         </div>
     </div>
-
-
 @endsection

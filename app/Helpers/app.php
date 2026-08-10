@@ -17,6 +17,7 @@ use App\Models\UserLike;
 use App\Models\UserView;
 use App\Models\ViewsExternal;
 use App\Models\Wallet;
+use App\Services\AdminGateService;
 use App\Services\TrendingHashTags;
 use Brick\Math\BigInteger;
 use Illuminate\Support\Facades\Auth;
@@ -600,7 +601,18 @@ if (!function_exists('sumCounter')) {
 if (!function_exists('ipLocation')) {
     function ipLocation()
     {
-        if (env('APP_DEBUG') == true) {
+        if (app()->environment('local') && config('admin.bypass_ip_check_on_local', true)) {
+            $ip = (string) config('admin.local_client_ip', '127.0.0.1');
+
+            return [
+                'ip' => $ip,
+                'country' => 'Local',
+                'region' => '',
+                'city' => 'Local',
+            ];
+        }
+
+        if (config('app.debug')) {
             $ip = '31.205.133.91';
         } else {
             $ip = request()->getClientIp();
@@ -608,13 +620,36 @@ if (!function_exists('ipLocation')) {
 
         $location = Location::get($ip);
 
-        return ['ip' => $location->ip, 'country' => $location->countryName, 'region' => $location->regionName, 'city' => $location->cityName];
+        if (! $location) {
+            return [
+                'ip' => $ip,
+                'country' => '',
+                'region' => '',
+                'city' => '',
+            ];
+        }
+
+        return [
+            'ip' => $location->ip ?? $ip,
+            'country' => $location->countryName ?? '',
+            'region' => $location->regionName ?? '',
+            'city' => $location->cityName ?? '',
+        ];
     }
 }
 ////SECURITY VERIFICATION HELPERS////
 if (!function_exists('securityVerification')) {
     function securityVerification()
     {
+        if (app()->environment('local') && config('admin.bypass_ip_check_on_local', true)) {
+            return 'OK';
+        }
+
+        $user = Auth::user();
+
+        if ($user && $user->hasRole('admin') && session(AdminGateService::SESSION_PANEL_ACCESS)) {
+            return 'OK';
+        }
 
         $myLocation = ipLocation();
 

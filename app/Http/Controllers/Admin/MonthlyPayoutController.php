@@ -30,6 +30,7 @@ class MonthlyPayoutController extends Controller
 
         // Paginated Results
         $substat = (clone $baseQuery)
+            ->with('user:id,name')
             ->orderByDesc('created_at')
             ->paginate(20);
 
@@ -101,9 +102,9 @@ class MonthlyPayoutController extends Controller
             );
         }
 
-
-
-        return $monthlyEngament;
+        return redirect()
+            ->route('admin.payouts.monthly.users', $level)
+            ->with('success', 'Engagement stats processed for ' . $level . ' (' . $month . ').');
     }
 
 

@@ -5,46 +5,46 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Blog;
 use App\Models\BlogCategory;
+use App\Services\AdminAuditService;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
-use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class BlogController extends Controller
 {
+    public function __construct(private AdminAuditService $audit) {}
+
     public function create()
     {
         $category = BlogCategory::all();
+
         return view('admin.blog.create', ['category' => $category]);
     }
 
     public function list()
     {
-        // $blogs = Blog::where('status','PUBLISHED')
-        //     ->latest()
-        //     ->paginate(10);
+        $baseQuery = Blog::query()->with('blogCategory:id,name');
 
-        $blogs = Blog::with('blogCategory:id,name');
-        $totalPosts     = $blogs->count();
-        $totalPublished = (clone $blogs)->where('status', 'PUBLISHED')->count();
-        $totalDrafts    = (clone $blogs)->where('status', 'DRAFT')->count();
+        $totalPosts = (clone $baseQuery)->count();
+        $totalPublished = (clone $baseQuery)->where('status', 'PUBLISHED')->count();
+        $totalDrafts = (clone $baseQuery)->where('status', 'DRAFT')->count();
 
-        $paginatedBlogs = (clone $blogs)->latest()
-            ->select('id', 'title', 'status', 'slug', 'published_at')
+        $paginatedBlogs = (clone $baseQuery)
+            ->latest()
+            ->select('id', 'title', 'status', 'slug', 'published_at', 'created_at')
             ->paginate(10);
 
         return view('admin.blog.index', [
-            'totalPosts'     => $totalPosts,
+            'totalPosts' => $totalPosts,
             'totalPublished' => $totalPublished,
-            'totalDrafts'    => $totalDrafts,
-            'blogs'          => $paginatedBlogs,
+            'totalDrafts' => $totalDrafts,
+            'blogs' => $paginatedBlogs,
         ]);
     }
 
     public function store(Request $request)
     {
-        // return $request;
-
         $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|min:300',
@@ -54,26 +54,24 @@ class BlogController extends Controller
         $coverPath = null;
 
         if ($request->hasFile('cover_image')) {
-
             $uploadedFile = Cloudinary::upload(
                 $request->file('cover_image')->getRealPath(),
                 [
                     'folder' => 'payhankey/blogs',
                     'transformation' => [
-                        'width'  => 1200,
+                        'width' => 1200,
                         'height' => 630,
-                        'crop'   => 'fill',
+                        'crop' => 'fill',
                         'quality' => 'auto',
-                        'fetch_format' => 'auto'
-                    ]
+                        'fetch_format' => 'auto',
+                    ],
                 ]
             );
 
             $coverPath = $uploadedFile->getSecurePath();
         }
 
-
-        Blog::create([
+        $blog = Blog::create([
             'user_id' => Auth::id(),
             'title' => $request->title,
             'blog_category_id' => $request->blog_category_id,
@@ -84,11 +82,20 @@ class BlogController extends Controller
             'published_at' => now(),
         ]);
 
-        return back()->with('success', 'Blog Posted and published Successfully');
+        $this->audit->log('blog.created', $blog);
+
+        return back()->with('success', 'Blog posted and published successfully.');
     }
 
-    public function deletePost($slug){
-        Blog::where('slug', $slug)->delete();
-        return back()->with('success', 'Blog Posted and Deleted Successfully');
+    public function deletePost($slug)
+    {
+        $blog = Blog::query()->where('slug', $slug)->firstOrFail();
+        $blog->delete();
+
+        $this->audit->log('blog.deleted', $blog, [
+            'slug' => $slug,
+        ]);
+
+        return back()->with('success', 'Blog post deleted successfully.');
     }
 }

@@ -1,213 +1,189 @@
 @extends('layouts.admin')
 
+@section('styles')
+    @include('admin.partials.dash-styles')
+    <style>
+        .dash-grid--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+        .dash-kpi {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            padding: 1.25rem;
+            background: var(--dash-surface);
+            border: 1px solid var(--dash-border);
+            border-radius: var(--dash-radius);
+            box-shadow: var(--dash-shadow);
+            height: 100%;
+        }
+
+        .dash-kpi__label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--dash-muted);
+        }
+
+        .dash-kpi__value {
+            font-size: 1.375rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+        }
+
+        .dash-num { font-weight: 600; font-variant-numeric: tabular-nums; }
+        .dash-badge--amber { background: #fffbeb; color: #b45309; }
+
+        @media (max-width: 1200px) {
+            .dash-grid--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+
+        @media (max-width: 640px) {
+            .dash-grid--4 { grid-template-columns: 1fr; }
+        }
+    </style>
+@endsection
+
 @section('content')
-    <div class="content content-full content-boxed">
-        <!-- Dynamic Table with Export Buttons -->
-        <div class="block block-rounded">
-            <div class="block-header block-header-default">
-                <h3 class="block-title">
-                    Pro-Rata Payout Overview </i>
-                </h3>
+    @php
+        $tabs = $levelTabs ?? ['Influencer', 'Creator', 'Basic'];
+        $currentLevel = $level ?? 'Influencer';
+        $monthLabel = \Carbon\Carbon::createFromFormat('Y-m', $lastmonth ?? now()->subMonth()->format('Y-m'))->format('F Y');
+    @endphp
+
+    <div class="content p-0">
+        <div class="dash">
+            <header class="dash-header">
+                <div>
+                    <h1>Level payouts</h1>
+                    <p>Pro-rata distribution · {{ $monthLabel }}</p>
+                </div>
+                <a href="{{ route('admin.payouts.pro-rata') }}" class="dash-btn dash-btn--ghost">
+                    <i class="fa fa-arrow-left"></i> Pro-rata overview
+                </a>
+            </header>
+
+            @if (session('success'))
+                <div class="dash-alert dash-alert--success">{{ session('success') }}</div>
+            @endif
+
+            <div class="dash-tabs">
+                @foreach ($tabs as $tab)
+                    <a href="{{ route('admin.payouts.levels.show', $tab) }}"
+                        class="dash-tab {{ $currentLevel === $tab ? 'is-active' : '' }}">
+                        {{ $tab }}
+                    </a>
+                @endforeach
             </div>
 
-            <div class="card mb-4">
-
-                {{-- =========================
-        ERROR / EMPTY HANDLING
-    ========================== --}}
-                @if (empty($payouts) || !is_iterable($payouts))
-
-                    <div class="card-body">
-                        <div class="alert alert-warning mb-0">
-                            No payout data available for {{ $level }} – {{ $lastmonth }}.
+            @if (($status ?? '') === 'error')
+                <div class="dash-alert dash-alert--error">{{ $message ?? 'Unable to load payout data.' }}</div>
+                @if ($currentLevel !== 'Basic')
+                    <p class="dash-muted">
+                        Run engagement processing from the
+                        <a href="{{ route('admin.payouts.monthly.users', $currentLevel) }}" class="dash-link">monthly breakdown</a>
+                        page first.
+                    </p>
+                @endif
+            @else
+                <section class="dash-section">
+                    <div class="dash-grid dash-grid--4">
+                        <div class="dash-kpi">
+                            <span class="dash-kpi__label">Level</span>
+                            <div class="dash-kpi__value">{{ $currentLevel }}</div>
+                        </div>
+                        <div class="dash-kpi">
+                            <span class="dash-kpi__label">Members</span>
+                            <div class="dash-kpi__value">{{ number_format($memberCount ?? 0) }}</div>
+                        </div>
+                        <div class="dash-kpi">
+                            <span class="dash-kpi__label">Total engagement</span>
+                            <div class="dash-kpi__value">{{ number_format($totalEngagement ?? 0) }}</div>
+                        </div>
+                        <div class="dash-kpi">
+                            <span class="dash-kpi__label">{{ $poolLabel ?? 'Level pool' }}</span>
+                            <div class="dash-kpi__value">₦{{ number_format(convertToBaseCurrency($levelPool ?? 0, 'NGN'), 2) }}</div>
                         </div>
                     </div>
-                @else
-                    {{-- =========================
-            SUMMARY
-        ========================== --}}
-                    <div class="card-body">
-                        <h6 class="card-title mb-3">
-                            {{ $level }} – Monthly Payout Summary
-                        </h6>
+                </section>
 
-                        <div class="row">
-                            <div class="col-md-6">
-                                <p><strong>Month:</strong> {{ $lastmonth }}</p>
-                                <p><strong>Members:</strong> {{ $memberCount ?? 0 }}</p>
-                                <p><strong>Total Engagement:</strong> {{ number_format($totalEngagement ?? 0) }}</p>
-                                <p>
-                                    <strong>Level Pool:</strong>
-                                    &#8358;{{ number_format(convertToBaseCurrency($levelPool ?? 0, 'NGN'), 2) }}
-                                </p>
-                            </div>
+                <div class="dash-card">
+                    <div class="dash-card__head">
+                        <div>
+                            <h2 class="dash-card__title">{{ $currentLevel }} member payouts</h2>
+                            <p class="dash-muted" style="margin:0.25rem 0 0;">
+                                {{ is_countable($payouts) ? count($payouts) : 0 }} eligible member(s)
+                            </p>
                         </div>
+                        @if ($currentLevel !== 'Basic')
+                            <a href="{{ route('admin.payouts.monthly.users', $currentLevel) }}" class="dash-link">Monthly breakdown</a>
+                        @endif
                     </div>
 
-                    {{-- =========================
-            TABLE
-        ========================== --}}
-                    <div class="block-content block-content-full">
-
-                        @if (count($payouts) === 0)
-                            <div class="alert alert-info">
-                                No eligible users for payout this month.
-                            </div>
-                        @else
-                            <table class="table table-bordered table-striped mt-3">
-                                <thead class="table-dark">
+                    <div class="dash-card__body--flush">
+                        <div class="dash-table-wrap">
+                            <table class="dash-table">
+                                <thead>
                                     <tr>
-                                        {{-- <th>ID</th> --}}
-                                        <th>Name</th>
+                                        <th>Member</th>
                                         <th>Engagement</th>
-                                        <th>Adj. Engagement</th>
-                                        <th>Engagement %</th>
+                                        <th>Adj. engagement</th>
+                                        <th>Share</th>
                                         <th>Currency</th>
                                         <th>Payout</th>
-                                        <th>Est. Earnings</th>
+                                        <th>Est. earnings</th>
                                         <th>Status</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
-
                                 <tbody>
-                                    @foreach ($payouts as $user)
-                                        <?php
-                                    //    $date = now()->subMonth();
-                                        // $month = now()->subMonth()->format('Y-m');
-                                        // $posts = \App\Models\Post::where('user_id', $user['user_id'])
-                                        //     ->where('created_at', 'like', $month . '%')
-                                        //     ->get();
-
-                                        // // Post::where('user_id', $user['user_id'])
-                                        // //     ->whereYear('created_at', $date->year)
-                                        // //     ->whereMonth('created_at', $date->month)
-                                        // //     ->get();
-                                        
-                                        
-                                        
-                                        // $totalEng = $posts->sum('likes') + $posts->sum('comments') + $posts->sum('views');
-                                        
-                                        $engValue = $user['engagement'] / 4;
-                                        ?>
-
+                                    @forelse ($payouts ?? [] as $user)
+                                        @php
+                                            $engValue = ($user['engagement'] ?? 0) / 4;
+                                            $payoutStatus = $user['status'] ?? 'Pending';
+                                            $statusClass = $payoutStatus === 'Paid' ? 'dash-badge--gray' : ($payoutStatus === 'Queued' ? 'dash-badge--amber' : 'dash-badge--indigo');
+                                        @endphp
                                         <tr>
-                                            {{-- <td>
-                                                {{ $user['user_id'] ?? 'N/A' }} | {{ $posts->count() }} 
-
-
-                                            </td> --}}
                                             <td>{{ $user['name'] ?? 'N/A' }}</td>
-                                            <td>{{ number_format($user['engagement'] ?? 0) }}</td>
-
-                                            <td>{{ number_format($engValue) }}</td>
-                                            <td>{{ $user['userPercentage'] ?? 0 }}%</td>
-                                            <td>{{ $user['userWallet'] ?? 'N/A' }}</td>
+                                            <td class="dash-num">{{ number_format($user['engagement'] ?? 0) }}</td>
+                                            <td class="dash-num">{{ number_format($engValue) }}</td>
+                                            <td><span class="dash-badge dash-badge--indigo">{{ $user['userPercentage'] ?? 0 }}%</span></td>
+                                            <td class="dash-muted">{{ $user['userWallet'] ?? '—' }}</td>
+                                            <td class="dash-num">₦{{ number_format(convertToBaseCurrency($user['userPayout'] ?? 0, 'NGN'), 2) }}</td>
+                                            <td class="dash-num">₦{{ number_format(convertToBaseCurrency(engagementEarnings($engValue), 'NGN'), 2) }}</td>
+                                            <td><span class="dash-badge {{ $statusClass }}">{{ $payoutStatus }}</span></td>
                                             <td>
-                                                &#8358;{{ number_format(convertToBaseCurrency($user['userPayout'] ?? 0, 'NGN'), 2) }}
-                                            </td>
-                                            <td>
-
-                                                 &#8358;{{ number_format(convertToBaseCurrency(engagementEarnings($engValue), 'NGN'), 2) }}
-                                                {{-- &#8358;{{ number_format(
-                                                    engagementEarnings($engValue),
-                                                    2,
-                                                ) }} --}}
-                                            </td>
-                                            <td>
-                                                <span
-                                                    class="badge bg-{{ ($user['status'] ?? '') === 'Paid' ? 'secondary' : 'warning' }}">
-                                                    {{ $user['status'] ?? 'Pending' }}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                @if (($user['status'] ?? '') == 'Pending')
-                                                    <a href="{{ url('user/queue/payout/' . $user['id']) }}"
-                                                        class="btn btn-sm btn-primary">
-                                                        Queue Payout
-                                                    </a>
-                                                @elseif(($user['status'] ?? '') == 'Paid')
-                                                    <span class="text-muted">Processed</span>
+                                                @if ($payoutStatus === 'Pending')
+                                                    <form method="POST" action="{{ route('admin.payouts.queue', $user['id']) }}"
+                                                        onsubmit="return confirm('Queue payout for {{ $user['name'] }}?');">
+                                                        @csrf
+                                                        <button type="submit" class="dash-btn dash-btn--primary" style="padding:0.5rem 0.75rem;">
+                                                            Queue
+                                                        </button>
+                                                    </form>
+                                                @elseif ($payoutStatus === 'Paid')
+                                                    <span class="dash-muted">Processed</span>
                                                 @else
-                                                    <a href="{{ url('view/payout/info/' . $user['id']) }}"
-                                                        class="btn btn-sm btn-secondary">
-                                                        View Info
+                                                    <a href="{{ route('admin.payouts.show', $user['id']) }}" class="dash-btn dash-btn--ghost" style="padding:0.5rem 0.75rem;">
+                                                        View
                                                     </a>
                                                 @endif
                                             </td>
                                         </tr>
-                                    @endforeach
+                                    @empty
+                                        <tr>
+                                            <td colspan="9">
+                                                <div class="dash-empty">No eligible users for payout this month.</div>
+                                            </td>
+                                        </tr>
+                                    @endforelse
                                 </tbody>
                             </table>
-                        @endif
-                    </div>
-
-                @endif
-            </div>
-
-
-
-            {{-- <div class="card mb-4">
-                <div class="card-body">
-                    <h6 class="card-title mb-3">
-                        {{ $level }} – Monthly Payout Summary
-                    </h6>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p><strong>Month:</strong> {{ $lastmonth }}</p>
-                            <p><strong>Members:</strong> {{ $memberCount }}</p>
-                            <p><strong>Total Engagement:</strong> {{ number_format($totalEngagement) }}</p>
-                            <p><strong>Level Pool:</strong> {{ number_format(convertToBaseCurrency($levelPool, 'NGN'), 2) }}
-                            </p>
                         </div>
-
                     </div>
                 </div>
-
-                <div class="block-content block-content-full">
-
-                    <table class="table table-bordered table-striped mt-3">
-                        <thead class="table-dark">
-                            <tr>
-                                <th>Name</th>
-                                <th>Engagement</th>
-                                <th>Engagement %</th>
-                                <th>Currency</th>
-                                <th>Payout ($)</th>
-                                 <th>Status </th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            @foreach ($payouts as $user)
-                                <tr>
-                                    <td>{{ $user['name'] }}</td>
-                                    <td>{{ number_format($user['engagement']) }}</td>
-                                    <td>{{ $user['userPercentage'] }}%</td>
-                                    <td>{{ $user['userWallet'] }}</td>
-                                    <td>
-                                       
-                                        &#8358;{{ number_format(convertToBaseCurrency($user['userPayout'], 'NGN'), 2) }}
-                                    </td>
-                                    <td>{{ $user['status'] }}</td>
-                                    <td>
-                                        <a href="{{ url('user/queue/payout/' . $user['id']) }}"
-                                            class="btn btn-sm btn-primary"> Queue Payout </a> 
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-
-
-
-
-                </div>
-
-
-
-
-            </div> --}}
+            @endif
         </div>
-    @endsection
+    </div>
+@endsection

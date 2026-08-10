@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Mail\AccessCodeMail;
 use App\Mail\GeneralMail;
 use App\Models\AccessCode;
-use App\Models\AdminLogin;
 use App\Models\Comment;
 use App\Models\CommentExternal;
 use App\Models\CommentExternalMessage;
@@ -77,11 +76,6 @@ class GeneralController extends Controller
     public function howToEarn()
     {
         return view('general.earn');
-    }
-
-    public function admin()
-    {
-        return view('admin.home');
     }
 
     public function test()
@@ -415,23 +409,6 @@ class GeneralController extends Controller
 
 
     // }
-
-    public function dinkyLogin()
-    {
-
-        $res = securityVerification();
-
-        if ($res == 'OK') {
-            $loc = ipLocation();
-            $code = Str::random(128);
-            AdminLogin::create(['ip' => $loc['ip'], 'country' => $loc['country'], 'city' => $loc['city'], 'code' => $code, 'status' => true]);
-            return redirect('registration/' . $code);
-        } else {
-            return 'Access Denied';
-        }
-    }
-
-
 
     public function validateCode()
     {

@@ -3,51 +3,50 @@
     @if (auth()->user()->hasRole('admin'))
         <ul class="nav-main">
             <li class="nav-main-item">
-                <a class="nav-main-link" href="{{ url('admin/home') }}">
+                <a class="nav-main-link" href="{{ route('admin.home') }}">
                     <i class="nav-main-link-icon fa fa-home"></i>
                     <span class="nav-main-link-name">Dashboard</span>
                 </a>
-                <a class="nav-main-link" href="{{ url('user/list/all') }}">
-                    <i class="nav-main-link-icon fa fa-list"></i>
+                <a class="nav-main-link" href="{{ route('admin.users.index') }}">
+                    <i class="nav-main-link-icon fa fa-users"></i>
                     <span class="nav-main-link-name">User List</span>
                 </a>
-                <a class="nav-main-link" href="{{ url('currency/list') }}">
-                    <i class="nav-main-link-icon fa fa-list"></i>
+                <a class="nav-main-link" href="{{ route('admin.currencies.index') }}">
+                    <i class="nav-main-link-icon fa fa-coins"></i>
                     <span class="nav-main-link-name">Currency</span>
                 </a>
-                <a class="nav-main-link" href="{{ url('level/management') }}">
-                    <i class="nav-main-link-icon fa fa-list"></i>
+                <a class="nav-main-link" href="{{ route('admin.levels.index') }}">
+                    <i class="nav-main-link-icon fa fa-layer-group"></i>
                     <span class="nav-main-link-name">Level Management</span>
                 </a>
-
-                <a class="nav-main-link" href="{{ url('payouts') }}">
-                    <i class="nav-main-link-icon fa fa-list"></i>
+                <a class="nav-main-link" href="{{ route('admin.payouts.pro-rata') }}">
+                    <i class="nav-main-link-icon fa fa-chart-pie"></i>
                     <span class="nav-main-link-name">Pro-Rata</span>
                 </a>
-                <a class="nav-main-link" href="{{ url('current/payouts') }}">
-                    <i class="nav-main-link-icon fa fa-list"></i>
+                <a class="nav-main-link" href="{{ route('admin.payouts.current') }}">
+                    <i class="nav-main-link-icon fa fa-calendar-check"></i>
                     <span class="nav-main-link-name">Current Payout</span>
                 </a>
 
             <li class="nav-main-item">
                 <a class="nav-main-link nav-main-link-submenu" data-toggle="submenu" aria-haspopup="true"
                     aria-expanded="false" href="#">
-                    <i class="nav-main-link-icon fa fa-usd"></i>
+                    <i class="nav-main-link-icon fa fa-hand-holding-dollar"></i>
                     <span class="nav-main-link-name">Payouts</span>
                 </a>
                 <ul class="nav-main-submenu">
                     <li class="nav-main-item">
-                        <a class="nav-main-link" href="{{ url('monthly/payout/Influencer') }}">
-                            <span class="nav-main-link-name">Influncers</span>
+                        <a class="nav-main-link" href="{{ route('admin.payouts.levels.show', 'Influencer') }}">
+                            <span class="nav-main-link-name">Influencers</span>
                         </a>
                     </li>
                     <li class="nav-main-item">
-                        <a class="nav-main-link" href="{{ url('monthly/payout/Creator') }}">
+                        <a class="nav-main-link" href="{{ route('admin.payouts.levels.show', 'Creator') }}">
                             <span class="nav-main-link-name">Creators</span>
                         </a>
                     </li>
                     <li class="nav-main-item">
-                        <a class="nav-main-link" href="{{ url('monthly/payout/Basic') }}">
+                        <a class="nav-main-link" href="{{ route('admin.payouts.levels.show', 'Basic') }}">
                             <span class="nav-main-link-name">Basic</span>
                         </a>
                     </li>
@@ -57,32 +56,26 @@
             <li class="nav-main-item">
                 <a class="nav-main-link nav-main-link-submenu" data-toggle="submenu" aria-haspopup="true"
                     aria-expanded="false" href="#">
-                    <i class="nav-main-link-icon fa fa-usd"></i>
+                    <i class="nav-main-link-icon fa fa-blog"></i>
                     <span class="nav-main-link-name">Blog</span>
                 </a>
                 <ul class="nav-main-submenu">
                     <li class="nav-main-item">
-                        <a class="nav-main-link" href="{{ url('create/blog/post') }}">
+                        <a class="nav-main-link" href="{{ route('admin.blog.create') }}">
                             <span class="nav-main-link-name">Create</span>
                         </a>
                     </li>
                     <li class="nav-main-item">
-                        <a class="nav-main-link" href="{{ url('view/blog/list') }}">
+                        <a class="nav-main-link" href="{{ route('admin.blog.index') }}">
                             <span class="nav-main-link-name">View</span>
                         </a>
                     </li>
-
                 </ul>
             </li>
 
-            <a class="nav-main-link" href="{{ url('user/bank/information') }}">
-                <i class="nav-main-link-icon fa fa-list"></i>
+            <a class="nav-main-link" href="{{ route('admin.bank-accounts.index') }}">
+                <i class="nav-main-link-icon fa fa-building-columns"></i>
                 <span class="nav-main-link-name">Bank Account</span>
-            </a>
-
-            <a class="nav-main-link" href="{{ url('trend/management') }}">
-                <i class="nav-main-link-icon fa fa-list"></i>
-                <span class="nav-main-link-name">Trend Mgt.</span>
             </a>
 
             </li>

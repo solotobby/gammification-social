@@ -9,9 +9,8 @@ use Illuminate\Http\Request;
 
 class UserEngagementController extends Controller
 {
-    public function engagementAnalytics($id)
+    public function engagementAnalytics(User $user)
     {
-        $user = User::findOrFail($id);
         
         $dailyEngagements = EngagementDailyStat::where('user_id', $user->id)
             ->orderBy('date', 'desc')

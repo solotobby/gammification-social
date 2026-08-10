@@ -85,15 +85,24 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function scopeByLevel($query, $level)
     {
-        if ($level === 'all') {
+        if ($level === null || $level === '' || $level === 'all') {
             return $query;
         }
 
-        return $query->whereHas('activeLevel', function ($q) use ($level) {
-            $q->where('plan_name', $level);
-        });
+        if ($level === 'Basic') {
+            return $query->where(function ($q) {
+                $q->whereDoesntHave('userLevel')
+                    ->orWhereHas('userLevel', fn ($sub) => $sub->where('plan_name', 'Basic'));
+            });
+        }
+
+        return $query->whereHas('userLevel', fn ($q) => $q->where('plan_name', $level));
     }
 
+    public function userLevel()
+    {
+        return $this->hasOne(UserLevel::class, 'user_id');
+    }
 
     public function activeLevel()
     {

@@ -4,20 +4,17 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Trend;
+use App\Services\AdminAuditService;
 use Illuminate\Http\Request;
 
 class TrendController extends Controller
 {
-     public function __construct()
-    {
-        $this->middleware('auth');
-        // $this->middleware('admin');
-    }
-
+    public function __construct(private AdminAuditService $audit) {}
 
     public function index()
     {
-        $trends = Trend::all();
+        $trends = Trend::query()->latest()->get();
+
         return view('admin.trends.index', compact('trends'));
     }
 
@@ -34,15 +31,20 @@ class TrendController extends Controller
             'status' => 'active',
         ]);
 
-        return redirect()->route('trend.management')->with('success', 'Trend created successfully.');
-     }
+        $this->audit->log('trend.created', $trend);
 
-     public function toggleStatus($id)
+        return redirect()->route('admin.trends.index')->with('success', 'Trend created successfully.');
+    }
+
+    public function toggleStatus(Trend $trend)
     {
-        
-       $trend = Trend::findOrFail($id);
         $trend->status = $trend->status === 'active' ? 'inactive' : 'active';
         $trend->save();
-        return redirect()->route('trend.management')->with('success', 'Trend status updated successfully.');
+
+        $this->audit->log('trend.status_toggled', $trend, [
+            'status' => $trend->status,
+        ]);
+
+        return redirect()->route('admin.trends.index')->with('success', 'Trend status updated successfully.');
     }
 }

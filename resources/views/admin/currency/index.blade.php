@@ -1,371 +1,233 @@
 @extends('layouts.admin')
 
 @section('styles')
-    <link rel="stylesheet" href="{{ asset('src/assets/js/plugins/datatables-bs5/css/dataTables.bootstrap5.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('src/assets/js/plugins/datatables-buttons-bs5/css/buttons.bootstrap5.min.css') }}">
-    <link rel="stylesheet"
-        href="{{ asset('src/assets/js/plugins/datatables-responsive-bs5/css/responsive.bootstrap5.min.css') }}">
+    @include('admin.partials.dash-styles')
+    <style>
+        .dash-grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+        .dash-kpi {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            padding: 1.25rem;
+            background: var(--dash-surface);
+            border: 1px solid var(--dash-border);
+            border-radius: var(--dash-radius);
+            box-shadow: var(--dash-shadow);
+            height: 100%;
+        }
+
+        .dash-kpi__label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--dash-muted);
+        }
+
+        .dash-kpi__value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+        }
+
+        .dash-badge--rose { background: #fff1f2; color: #be123c; }
+        .dash-code { font-family: ui-monospace, monospace; font-weight: 600; }
+
+        .dash-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+        .dash-btn--danger { background: #e11d48; color: #fff; }
+        .dash-btn--success { background: #059669; color: #fff; }
+
+        .dash-dialog {
+            border: none;
+            border-radius: var(--dash-radius);
+            padding: 0;
+            width: min(480px, calc(100vw - 2rem));
+            box-shadow: 0 24px 48px rgba(15, 23, 42, .18);
+        }
+
+        .dash-dialog::backdrop { background: rgba(15, 23, 42, .45); }
+
+        .dash-dialog__head {
+            padding: 1.125rem 1.25rem;
+            border-bottom: 1px solid var(--dash-border);
+        }
+
+        .dash-dialog__title {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .dash-dialog__body { padding: 1.25rem; }
+
+        .dash-dialog__foot {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            padding: 1rem 1.25rem;
+            border-top: 1px solid var(--dash-border);
+        }
+
+        .dash-field label {
+            display: block;
+            margin-bottom: 0.375rem;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: var(--dash-muted);
+        }
+
+        .dash-field + .dash-field { margin-top: 1rem; }
+
+        @media (max-width: 960px) {
+            .dash-grid--3 { grid-template-columns: 1fr; }
+        }
+    </style>
 @endsection
 
 @section('content')
-    <div class="content">
-        {{-- <div class="block block-rounded">
-            <div class="block-header block-header-default">
-                <h3 class="block-title">
-                    Currency Management
-                </h3>
+    @php
+        $activeCount = $currencies->where('is_active', true)->count();
+        $inactiveCount = $currencies->count() - $activeCount;
+    @endphp
+
+    <div class="content p-0">
+        <div class="dash">
+            <header class="dash-header">
+                <div>
+                    <h1>Currencies</h1>
+                    <p>Manage exchange rates and availability by country</p>
+                </div>
+                <a href="{{ route('admin.home') }}" class="dash-btn dash-btn--ghost">
+                    <i class="fa fa-arrow-left"></i> Dashboard
+                </a>
+            </header>
+
+            @if (session('success'))
+                <div class="dash-alert dash-alert--success">{{ session('success') }}</div>
+            @endif
+            @if (session('error'))
+                <div class="dash-alert dash-alert--error">{{ session('error') }}</div>
+            @endif
+
+            <section class="dash-section">
+                <div class="dash-grid dash-grid--3">
+                    <div class="dash-kpi">
+                        <span class="dash-kpi__label">Total currencies</span>
+                        <div class="dash-kpi__value">{{ number_format($currencies->count()) }}</div>
+                    </div>
+                    <div class="dash-kpi">
+                        <span class="dash-kpi__label">Active</span>
+                        <div class="dash-kpi__value">{{ number_format($activeCount) }}</div>
+                    </div>
+                    <div class="dash-kpi">
+                        <span class="dash-kpi__label">Inactive</span>
+                        <div class="dash-kpi__value">{{ number_format($inactiveCount) }}</div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="dash-card">
+                <div class="dash-card__head">
+                    <div>
+                        <h2 class="dash-card__title">Currency list</h2>
+                        <p class="dash-muted" style="margin:0.25rem 0 0;">Base rates relative to USD</p>
+                    </div>
+                </div>
+
+                <div class="dash-card__body--flush">
+                    <div class="dash-table-wrap">
+                        <table class="dash-table">
+                            <thead>
+                                <tr>
+                                    <th>Country</th>
+                                    <th>Currency</th>
+                                    <th>Code</th>
+                                    <th>Symbol</th>
+                                    <th>Base rate</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse ($currencies as $currency)
+                                    <tr>
+                                        <td>{{ $currency->country }}</td>
+                                        <td>{{ $currency->name }}</td>
+                                        <td><span class="dash-badge dash-badge--indigo dash-code">{{ $currency->code }}</span></td>
+                                        <td class="dash-muted">{{ $currency->symbol ?? '—' }}</td>
+                                        <td class="dash-code">{{ number_format((float) $currency->base_rate, 4) }}</td>
+                                        <td>
+                                            @if ($currency->is_active)
+                                                <span class="dash-badge dash-badge--emerald">Active</span>
+                                            @else
+                                                <span class="dash-badge dash-badge--rose">Inactive</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <div class="dash-actions">
+                                                <form method="POST" action="{{ route('admin.currencies.status', $currency) }}"
+                                                    onsubmit="return confirm('{{ $currency->is_active ? 'Deactivate' : 'Activate' }} {{ $currency->code }}?');">
+                                                    @csrf
+                                                    <button type="submit" class="dash-btn dash-btn--ghost" style="padding:0.5rem 0.75rem;">
+                                                        {{ $currency->is_active ? 'Deactivate' : 'Activate' }}
+                                                    </button>
+                                                </form>
+                                                <button type="button" class="dash-btn dash-btn--primary" style="padding:0.5rem 0.75rem;"
+                                                    onclick="document.getElementById('currency-dialog-{{ $currency->id }}').showModal()">
+                                                    Edit rate
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="7">
+                                            <div class="dash-empty">No currencies configured yet.</div>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
 
-            <div class="block-content block-content-full">
-                <div class="block-content">
-                    <form method="POST" action="{{ route('immaculate') }}">
+            @foreach ($currencies as $currency)
+                <dialog id="currency-dialog-{{ $currency->id }}" class="dash-dialog">
+                    <div class="dash-dialog__head">
+                        <h3 class="dash-dialog__title">Edit base rate — {{ $currency->code }}</h3>
+                    </div>
+                    <form method="POST" action="{{ route('admin.currencies.update', $currency) }}">
                         @csrf
-
-                        <!-- Text -->
-                        {{-- <h2 class="content-heading pt-0">Send Access Code</h2> --
-                        <div class="row">
-                            <div class="col-lg-4">
-                                <p class="text-muted">
-                                    {{-- Prepend or Append Text next to your inputs, useful if you you would like to add extra info --
-                                </p>
+                        @method('PUT')
+                        <div class="dash-dialog__body">
+                            <div class="dash-field">
+                                <label>Country</label>
+                                <input type="text" class="dash-input" value="{{ $currency->country }}" readonly>
                             </div>
-                            <div class="col-lg-8 col-xl-5">
-                                @if (session('success'))
-                                    <div class="alert alert-success" role="alert">
-                                        {{ session('success') }}
-                                    </div>
-                                @endif
-
-                                @if (session('error'))
-                                    <div class="alert alert-danger" role="alert">
-                                        {{ session('error') }}
-                                    </div>
-                                @endif
-                                <div class="mb-4">
-                                    <div class="input-group">
-                                        <span class="input-group-text">
-                                           Country
-                                        </span>
-                                        <select name="country" class="form-control" required>
-                                            <option value="">Select Country</option>
-                                            {{-- @foreach ($countries as $country)
-                                                <option value="{{ $country->id }}">{{ $country->name }}</option>
-                                            @endforeach --}}
-        </select>
-        {{-- <input type="text" class="form-control" name="country" id="example-group1-input1"
-                                            name="example-group1-input1"> --
-                                    </div>
-                                </div>
-                                <div class="mb-4">
-                                    <div class="input-group">
-                                        <span class="input-group-text">
-                                            Level
-                                        </span>
-                                        <select name="level" class="form-control" required>
-
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="mb-4">
-                                    <div class="input-group">
-                                        <span class="input-group-text">
-                                            Validate
-                                        </span>
-                                        <input type="text" class="form-control" name="validationCode" id="validationCode"
-                                            placeholder="Enter validation code" required>
-                                    </div>
-                                </div>
-
-
-                                <div class="mb-4">
-                                    <button type="submit" class="btn btn-sm btn-primary">Send Code</button>
-                                </div>
-
+                            <div class="dash-field">
+                                <label>Currency</label>
+                                <input type="text" class="dash-input"
+                                    value="{{ $currency->name }} ({{ $currency->code }})" readonly>
+                            </div>
+                            <div class="dash-field">
+                                <label for="base_rate_{{ $currency->id }}">Base rate</label>
+                                <input type="number" step="0.0001" min="0" name="base_rate"
+                                    id="base_rate_{{ $currency->id }}" class="dash-input"
+                                    value="{{ $currency->base_rate }}" required>
                             </div>
                         </div>
-                        <!-- END Text -->
-
-
+                        <div class="dash-dialog__foot">
+                            <button type="button" class="dash-btn dash-btn--ghost"
+                                onclick="this.closest('dialog').close()">Cancel</button>
+                            <button type="submit" class="dash-btn dash-btn--primary">Save rate</button>
+                        </div>
                     </form>
-                </div>
-
-
-            </div>
-        </div> --}}
-
-        <div class="block block-rounded">
-            <div class="block-header block-header-default">
-                <h3 class="block-title">
-                    Currency List
-                </h3>
-            </div>
-
-
-            <div class="block-content block-content-full">
-                {{-- error --}}
-                @if (session('error'))
-                    <div class="alert alert-danger">
-                        {{ session('error') }}
-                    </div>
-                @endif
-                {{-- success --}}
-                @if (session('success'))
-                    <div class="alert alert-success">
-                        {{ session('success') }}
-                    </div>
-                @endif
-                <!-- DataTables init on table by adding .js-dataTable-buttons class, functionality is initialized in js/pages/be_tables_datatables.min.js which was auto compiled from _js/pages/be_tables_datatables.js -->
-                <table class="table table-bordered table-striped table-vcenter js-dataTable-buttons">
-                    <thead>
-                        <tr>
-                            <th>Country</th>
-                            <th> Name</th>
-                            <th> Code</th>
-                            <th> Symbol</th>
-                            <th>Base Rate</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    {{-- <tbody>
-
-                        @foreach ($currencies as $currency)
-                            <tr>
-                                <td>
-
-                                    {{ $currency->country }}
-                                    </a>
-                                </td>
-                                <td>
-                                    {{ $currency->name }}
-                                </td>
-                                <td>
-                                    {{ $currency->code }}
-                                </td>
-                                <td>
-                                    {{ $currency->symbol }}
-                                </td>
-                                <td>
-                                    {{ $currency->base_rate }}
-                                </td>
-                                <td>
-                                    <a href="{{ url('currency/status/' . $currency->id) }}"
-                                        class="btn btn-sm {{ $currency->is_active ? 'btn-danger' : 'btn-success' }}">
-                                        {{ $currency->is_active ? 'Deactivate' : 'Activate' }}
-                                    </a>
-                                    {{ $currency->is_active ? 'Active' : 'Inactive' }}
-                                </td>
-                                <td>
-                                    <button type="button" class="btn btn-primary" data-toggle="modal"
-                                        data-target="#exampleModal-{{ $currency->id }}">
-                                        View Details
-                                    </button>
-                                </td>
-                            </tr>
-
-                            
-
-                        @endforeach
-                    </tbody> --}}
-
-                    <tbody>
-
-    @foreach ($currencies as $currency)
-
-        <tr>
-
-            <td>{{ $currency->country }}</td>
-
-            <td>{{ $currency->name }}</td>
-
-            <td>
-                <span class="badge bg-primary">
-                    {{ $currency->code }}
-                </span>
-            </td>
-
-            <td>{{ $currency->symbol }}</td>
-
-            <td>{{ number_format($currency->base_rate, 2) }}</td>
-
-            <td>
-
-                @if ($currency->is_active)
-
-                    <span class="badge bg-success">
-                        Active
-                    </span>
-
-                @else
-
-                    <span class="badge bg-danger">
-                        Inactive
-                    </span>
-
-                @endif
-
-            </td>
-
-            <td>
-
-                <div class="d-flex gap-2">
-
-                    {{-- Activate / Deactivate --}}
-                    <a href="{{ url('currency/status/' . $currency->id) }}"
-                        class="btn btn-sm {{ $currency->is_active ? 'btn-danger' : 'btn-success' }}">
-
-                        {{ $currency->is_active ? 'Deactivate' : 'Activate' }}
-                    </a>
-
-                    {{-- Edit Base Rate --}}
-                    <button type="button"
-                        class="btn btn-sm btn-primary"
-                        data-bs-toggle="modal"
-                        data-bs-target="#currencyModal-{{ $currency->id }}">
-
-                        Edit Rate
-                    </button>
-
-                </div>
-
-            </td>
-
-        </tr>
-
-    @endforeach
-
-</tbody>
-</table>
-
-{{-- MODALS MUST BE OUTSIDE TABLE --}}
-@foreach ($currencies as $currency)
-
-    <div class="modal fade"
-        id="currencyModal-{{ $currency->id }}"
-        tabindex="-1"
-        aria-labelledby="currencyModalLabel-{{ $currency->id }}"
-        aria-hidden="true">
-
-        <div class="modal-dialog modal-dialog-centered">
-
-            <div class="modal-content">
-
-                <div class="modal-header">
-
-                    <h5 class="modal-title"
-                        id="currencyModalLabel-{{ $currency->id }}">
-
-                        Edit Base Rate - {{ $currency->code }}
-                    </h5>
-
-                    <button type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal"
-                        aria-label="Close">
-                    </button>
-
-                </div>
-
-                <form action="{{ url('currency/update/' . $currency->id) }}"
-                    method="POST">
-
-                    @csrf
-                    @method('PUT')
-
-                    <div class="modal-body">
-
-                        <div class="mb-3">
-
-                            <label class="form-label">
-                                Country
-                            </label>
-
-                            <input type="text"
-                                class="form-control"
-                                value="{{ $currency->country }}"
-                                readonly>
-
-                        </div>
-
-                        <div class="mb-3">
-
-                            <label class="form-label">
-                                Currency
-                            </label>
-
-                            <input type="text"
-                                class="form-control"
-                                value="{{ $currency->name }} ({{ $currency->code }})"
-                                readonly>
-
-                        </div>
-
-                        <div class="mb-3">
-
-                            <label class="form-label">
-                                Base Rate
-                            </label>
-
-                            <input type="number"
-                                step="0.0001"
-                                name="base_rate"
-                                class="form-control"
-                                value="{{ $currency->base_rate }}"
-                                required>
-
-                        </div>
-
-                    </div>
-
-                    <div class="modal-footer">
-
-                        <button type="button"
-                            class="btn btn-secondary"
-                            data-bs-dismiss="modal">
-
-                            Close
-                        </button>
-
-                        <button type="submit"
-                            class="btn btn-primary">
-
-                            Update Rate
-                        </button>
-
-                    </div>
-
-                </form>
-
-            </div>
-
+                </dialog>
+            @endforeach
         </div>
-
     </div>
-
-@endforeach
-
-                </table>
-            </div>
-        </div>
-
-
-
-    </div>
-@endsection
-
-@section('script')
-    <script src="{{ asset('src/assets/js/plugins/datatables/jquery.dataTables.min.js') }}"></script>
-    <script src="{{ asset('src/assets/js/plugins/datatables-bs5/js/dataTables.bootstrap5.min.js') }}"></script>
-    <script src="{{ asset('src/assets/js/plugins/datatables-responsive/js/dataTables.responsive.min.js') }}"></script>
-    <script src="{{ asset('src/assets/js/plugins/datatables-responsive-bs5/js/responsive.bootstrap5.min.js') }}"></script>
-    <script src="{{ asset('src/assets/js/plugins/datatables-buttons/dataTables.buttons.min.js') }}"></script>
-    <script src="{{ asset('src/assets/js/plugins/datatables-buttons-bs5/js/buttons.bootstrap5.min.js') }}"></script>
-    <script src="{{ asset('src/assets/js/plugins/datatables-buttons-jszip/jszip.min.js') }}"></script>
-    <script src="{{ asset('src/assets/js/plugins/datatables-buttons-pdfmake/pdfmake.min.js') }}"></script>
-    <script src="{{ asset('src/assets/js/plugins/datatables-buttons-pdfmake/vfs_fonts.js') }}"></script>
-    <script src="{{ asset('src/assets/js/plugins/datatables-buttons/buttons.print.min.js') }}"></script>
-    <script src="{{ asset('src/assets/js/plugins/datatables-buttons/buttons.html5.min.js') }}"></script>
-
-    <!-- Page JS Code -->
-    <script src="{{ asset('src/assets/js/pages/be_tables_datatables.min.js') }}"></script>
 @endsection

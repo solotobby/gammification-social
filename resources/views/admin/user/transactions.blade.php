@@ -1,55 +1,100 @@
 @extends('layouts.admin')
+
 @section('styles')
-    <link rel="stylesheet" href="{{ asset('src/assets/js/plugins/datatables-bs5/css/dataTables.bootstrap5.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('src/assets/js/plugins/datatables-buttons-bs5/css/buttons.bootstrap5.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('src/assets/js/plugins/datatables-responsive-bs5/css/responsive.bootstrap5.min.css') }}">
+    @include('admin.partials.dash-styles')
+    <style>
+        .dash-badge--rose { background: #fff1f2; color: #be123c; }
+        .dash-ref { font-family: ui-monospace, monospace; font-size: 0.8125rem; color: var(--dash-text); }
+        .dash-amount { font-weight: 600; white-space: nowrap; }
+        .dash-desc { max-width: 280px; color: var(--dash-muted); font-size: 0.8125rem; }
+    </style>
 @endsection
 
 @section('content')
-    <div class="content">
-        <div class="block block-rounded">
-            <div class="block-header block-header-default">
-                <h3 class="block-title">
-                    TRANSACTION LIST FOR {{ $user->name }}
-                </h3>
+    <div class="content p-0">
+        <div class="dash">
+            <header class="dash-header">
+                <div>
+                    <h1>Transactions</h1>
+                    <p>{{ $user->name }} · {{ $user->email }}</p>
+                </div>
+                <a href="{{ route('admin.users.show', $user) }}" class="dash-btn dash-btn--ghost">
+                    <i class="fa fa-arrow-left"></i> User profile
+                </a>
+            </header>
+
+            <div class="dash-card">
+                <div class="dash-card__head">
+                    <div>
+                        <h2 class="dash-card__title">Payment history</h2>
+                        <p class="dash-muted" style="margin:0.25rem 0 0;">
+                            {{ number_format($transactions->total()) }} total · showing {{ $transactions->firstItem() ?? 0 }}–{{ $transactions->lastItem() ?? 0 }}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="dash-card__body--flush">
+                    <div class="dash-table-wrap">
+                        <table class="dash-table">
+                            <thead>
+                                <tr>
+                                    <th>Reference</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Type</th>
+                                    <th>Action</th>
+                                    <th>Description</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse ($transactions as $transaction)
+                                    @php
+                                        $status = strtolower((string) $transaction->status);
+                                        $statusClass = match (true) {
+                                            in_array($status, ['successful', 'allocated', 'success', 'paid'], true) => 'dash-badge--emerald',
+                                            in_array($status, ['failed', 'cancelled', 'canceled', 'declined'], true) => 'dash-badge--rose',
+                                            in_array($status, ['pending', 'queued', 'processing'], true) => 'dash-badge--amber',
+                                            default => 'dash-badge--gray',
+                                        };
+                                    @endphp
+                                    <tr>
+                                        <td><span class="dash-ref">{{ $transaction->ref ?: '—' }}</span></td>
+                                        <td class="dash-amount">
+                                            {{ getCurrencyCode($transaction->currency) }}{{ number_format((float) $transaction->amount, 2) }}
+                                            <span class="dash-muted" style="display:block; font-size:0.75rem;">{{ $transaction->currency }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="dash-badge {{ $statusClass }}">{{ $transaction->status }}</span>
+                                        </td>
+                                        <td class="dash-muted">{{ $transaction->type ?: '—' }}</td>
+                                        <td class="dash-muted">{{ $transaction->action ?: '—' }}</td>
+                                        <td class="dash-desc">{{ $transaction->description ?: '—' }}</td>
+                                        <td class="dash-muted">
+                                            {{ $transaction->created_at?->format('M j, Y') }}
+                                            <span style="display:block; font-size:0.75rem;">
+                                                {{ $transaction->created_at?->format('g:i A') }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="7">
+                                            <div class="dash-empty">No transactions recorded for this user.</div>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+
+                    @if ($transactions->hasPages())
+                        <div class="dash-pagination">
+                            {{ $transactions->links('pagination::bootstrap-5') }}
+                        </div>
+                    @endif
+                </div>
             </div>
-
-            <div class="block-content block-content-full">
-                <!-- DataTables init on table by adding .js-dataTable-buttons class, functionality is initialized in js/pages/be_tables_datatables.min.js which was auto compiled from _js/pages/be_tables_datatables.js -->
-                <table class="table table-bordered table-striped table-vcenter js-dataTable-buttons">
-
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Amount</th>
-                            <th>Currency</th>
-                            <th>Status</th>
-                            <th>Type</th>
-                            <th>Action</th>
-                            <th>Description</th>
-                            <th>Created At</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($transactions as $transaction)
-                            <tr>
-                                <td>{{ $transaction->ref }}</td>
-                                <td>{{ $transaction->amount }}</td>
-                                <td>{{ $transaction->currency }}</td>
-                                <td>{{ $transaction->status }}</td>
-                                <td>{{ $transaction->type }}</td>
-                                <td>{{ $transaction->action }}</td>
-                                <td>{{ $transaction->description }}</td>
-                                <td>{{ $transaction->created_at }}</td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-
-
-                <a href="{{ url('user/info/' . $user->id) }}" class="btn btn-secondary mt-3"> Back to Users </a>
-            </div>
-
         </div>
     </div>
 @endsection

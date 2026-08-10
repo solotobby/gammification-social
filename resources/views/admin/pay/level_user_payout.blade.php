@@ -1,83 +1,179 @@
 @extends('layouts.admin')
 
+@section('styles')
+    @include('admin.partials.dash-styles')
+    <style>
+        .dash-grid--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+        .dash-grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+        .dash-kpi {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            padding: 1.25rem;
+            background: var(--dash-surface);
+            border: 1px solid var(--dash-border);
+            border-radius: var(--dash-radius);
+            box-shadow: var(--dash-shadow);
+            height: 100%;
+        }
+
+        .dash-kpi__label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--dash-muted);
+        }
+
+        .dash-kpi__value {
+            font-size: 1.375rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+        }
+
+        .dash-kpi__hint { font-size: 0.8125rem; color: var(--dash-muted); }
+        .dash-num { font-weight: 600; font-variant-numeric: tabular-nums; }
+
+        .dash-dl {
+            display: grid;
+            grid-template-columns: minmax(140px, 42%) 1fr;
+            gap: 0.75rem 1rem;
+            margin: 0;
+            font-size: 0.875rem;
+        }
+
+        .dash-dl dt { margin: 0; font-weight: 600; color: var(--dash-muted); }
+        .dash-dl dd { margin: 0; }
+
+        @media (max-width: 1200px) {
+            .dash-grid--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+
+        @media (max-width: 640px) {
+            .dash-grid--4, .dash-grid--2 { grid-template-columns: 1fr; }
+            .dash-dl { grid-template-columns: 1fr; gap: 0.25rem; }
+        }
+    </style>
+@endsection
 
 @section('content')
-    <div class="content content-full content-boxed">
-        <!-- Dynamic Table with Export Buttons -->
-        <div class="block block-rounded">
-            <div class="block-header block-header-default">
-                <h3 class="block-title">
-                    Monthly Payout Overview (Pro-rata) </i>
-                </h3>
-            </div>
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h4 class="card-title mb-3">
-                        {{ $level }} – Monthly Payout Summary
-                    </h4>
+    <div class="content p-0">
+        <div class="dash">
+            <header class="dash-header">
+                <div>
+                    <h1>{{ $level }} payouts</h1>
+                    <p>Pro-rata member breakdown · {{ $month }}</p>
+                </div>
+                <a href="{{ route('admin.payouts.pro-rata') }}" class="dash-btn dash-btn--ghost">
+                    <i class="fa fa-arrow-left"></i> Pro-rata overview
+                </a>
+            </header>
 
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p><strong>Month:</strong> {{ $month }}</p>
-                            <p><strong>Members:</strong> {{ $memberCount }}</p>
-                            <p><strong>Total Engagement:</strong> {{ number_format($totalEngagement) }}</p>
-                        </div>
-                        <?php
-                        $revTotal = $totalRevenue;
-                        $pltpool = $platformPool;
-                        $tpool = $tierPool;
-                        $spool = $savingsPool;
-                        $fpool = $fremiumPool;
-                        ?>
-                        <div class="col-md-6">
-                            <p><strong>Total Revenue:</strong>
-                                &#8358;{{ number_format(convertToBaseCurrency($revTotal, 'NGN'), 2) }}</p>
-                            <p><strong>Platform Cut (30%):</strong>
-                                &#8358;{{ number_format(convertToBaseCurrency($pltpool, 'NGN'), 2) }}</p>
-                            <p><strong>Tier Pool (50%):</strong>
-                                &#8358;{{ number_format(convertToBaseCurrency($tpool, 'NGN'), 2) }}</p>
-                            <p><strong>Savings Pool (10%):</strong>
-                                &#8358;{{ number_format(convertToBaseCurrency($spool, 'NGN'), 2) }}</p>
-                            <p><strong>Fremium Pool (10%):</strong>
-                                &#8358;{{ number_format(convertToBaseCurrency($fpool, 'NGN'), 2) }}</p>
+            @if (session('success'))
+                <div class="dash-alert dash-alert--success">{{ session('success') }}</div>
+            @endif
+            @if (session('error'))
+                <div class="dash-alert dash-alert--error">{{ session('error') }}</div>
+            @endif
 
-                        </div>
-
-
+            <section class="dash-section">
+                <div class="dash-grid dash-grid--4">
+                    <div class="dash-kpi">
+                        <span class="dash-kpi__label">Members</span>
+                        <div class="dash-kpi__value">{{ number_format($memberCount) }}</div>
+                    </div>
+                    <div class="dash-kpi">
+                        <span class="dash-kpi__label">Total engagement</span>
+                        <div class="dash-kpi__value">{{ number_format($totalEngagement) }}</div>
+                    </div>
+                    <div class="dash-kpi">
+                        <span class="dash-kpi__label">Tier pool (50%)</span>
+                        <div class="dash-kpi__value">₦{{ number_format(convertToBaseCurrency($tierPool, 'NGN'), 2) }}</div>
+                        <div class="dash-kpi__hint">Distributed pro-rata</div>
+                    </div>
+                    <div class="dash-kpi">
+                        <span class="dash-kpi__label">Total revenue</span>
+                        <div class="dash-kpi__value">₦{{ number_format(convertToBaseCurrency($totalRevenue, 'NGN'), 2) }}</div>
                     </div>
                 </div>
-            </div>
+            </section>
 
+            <section class="dash-section dash-grid dash-grid--2">
+                <div class="dash-card">
+                    <div class="dash-card__head">
+                        <h2 class="dash-card__title">Pool allocation</h2>
+                    </div>
+                    <div class="dash-card__body">
+                        <dl class="dash-dl">
+                            <dt>Platform cut</dt>
+                            <dd class="dash-num">₦{{ number_format(convertToBaseCurrency($platformPool, 'NGN'), 2) }} <span class="dash-muted">(30%)</span></dd>
+                            <dt>Tier pool</dt>
+                            <dd class="dash-num">₦{{ number_format(convertToBaseCurrency($tierPool, 'NGN'), 2) }} <span class="dash-muted">(50%)</span></dd>
+                            <dt>Savings pool</dt>
+                            <dd class="dash-num">₦{{ number_format(convertToBaseCurrency($savingsPool, 'NGN'), 2) }} <span class="dash-muted">(10%)</span></dd>
+                            <dt>Freemium pool</dt>
+                            <dd class="dash-num">₦{{ number_format(convertToBaseCurrency($fremiumPool, 'NGN'), 2) }} <span class="dash-muted">(10%)</span></dd>
+                        </dl>
+                    </div>
+                </div>
 
-            <div class="block-content block-content-full">
+                <div class="dash-card">
+                    <div class="dash-card__head">
+                        <h2 class="dash-card__title">Process engagement</h2>
+                    </div>
+                    <div class="dash-card__body">
+                        <p class="dash-muted" style="margin:0 0 1rem;">
+                            Aggregate daily engagement stats into monthly records before final payout processing.
+                        </p>
+                        <form method="POST" action="{{ route('admin.payouts.process-level', $level) }}"
+                            onsubmit="return confirm('Process monthly engagement stats for {{ $level }}?');">
+                            @csrf
+                            <button type="submit" class="dash-btn dash-btn--primary">
+                                <i class="fa fa-calculator"></i> Process engagement stats
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </section>
 
-                <table class="table table-bordered table-striped mt-3">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>Name</th>
-                            <th>Engagement</th>
-                            <th>Engagement %</th>
-                            <th>Payout ($)</th>
-                        </tr>
-                    </thead>
+            <div class="dash-card">
+                <div class="dash-card__head">
+                    <div>
+                        <h2 class="dash-card__title">Member payouts</h2>
+                        <p class="dash-muted" style="margin:0.25rem 0 0;">
+                            {{ count($users) }} member{{ count($users) === 1 ? '' : 's' }} · tier pool ₦{{ number_format(convertToBaseCurrency($tierPool, 'NGN'), 2) }}
+                        </p>
+                    </div>
+                </div>
 
-                    <tbody>
-                        @foreach ($users as $user)
-                            <tr>
-                                <td>{{ $user['name'] }}</td>
-                                <td>{{ number_format($user['engagement']) }}</td>
-                                <td>{{ $user['percentage'] }}%</td>
-                                <td>
-                                    &#8358;{{ number_format(convertToBaseCurrency($user['payout'], 'NGN'), 2) }}
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-
-
-
-
+                <div class="dash-card__body--flush">
+                    <div class="dash-table-wrap">
+                        <table class="dash-table">
+                            <thead>
+                                <tr>
+                                    <th>Member</th>
+                                    <th>Engagement</th>
+                                    <th>Share</th>
+                                    <th>Payout</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($users as $user)
+                                    <tr>
+                                        <td>{{ $user['name'] }}</td>
+                                        <td class="dash-num">{{ number_format($user['engagement']) }}</td>
+                                        <td>
+                                            <span class="dash-badge dash-badge--indigo">{{ $user['percentage'] }}%</span>
+                                        </td>
+                                        <td class="dash-num">₦{{ number_format(convertToBaseCurrency($user['payout'], 'NGN'), 2) }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
