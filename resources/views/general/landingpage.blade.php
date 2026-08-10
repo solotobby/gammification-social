@@ -19,7 +19,8 @@
 
   <section class="apl-hero">
     <p class="apl-hero__kicker reveal">Payhankey</p>
-    <h1 class="reveal">Post once.<br>Get paid.</h1>
+    {{-- <h1 class="reveal">Post once.<br>Get paid.</h1> --}}
+     <h1 class="reveal">Your contents deserves<br>a paycheck.</h1>
     <p class="apl-hero__sub reveal">The creator platform where likes, comments, and views turn into real earnings — no follower count, no watch hours.</p>
     <div class="apl-hero__links reveal">
       <a class="apl-link" href="{{ url('/register') }}">Start free <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></a>
@@ -220,7 +221,7 @@
 
   {{-- CLOSE --}}
   <section class="apl-close">
-    <h2 class="reveal">Your content deserves a paycheck.</h2>
+    <h2 class="reveal">Post Once and Get Paid</h2>
     <p class="reveal">Join {{ config('payhankey.stats.creators', '32K+') }} creators across Africa. Free to start.</p>
     <div class="apl-close__cta reveal">
       <a class="apl-btn apl-btn--fill" href="{{ url('/register') }}">Create free account</a>
