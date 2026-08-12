@@ -516,6 +516,9 @@
 
             <div class="pf-tabs" role="tablist">
                 <span class="pf-tab pf-tab--active" role="tab" aria-selected="true">Posts</span>
+                @if ($isOwner)
+                    <a href="{{ route('bookmarks') }}" class="pf-tab" role="tab" style="text-decoration:none">Bookmarked</a>
+                @endif
                 <a href="{{ url('profile/' . $user->username . '/connection') }}" class="pf-tab" role="tab" style="text-decoration:none">Connections</a>
             </div>
         </div>
@@ -537,7 +540,12 @@
             @endif
 
             @forelse ($posts as $post)
-                <livewire:user.post-content :post="$post" :wire:key="'post-' . $post->id" />
+                <livewire:user.post-content
+                    :post="$post"
+                    :estimated-earnings="$earnings[$post->id] ?? 0"
+                    :format-text="true"
+                    :show-post-menu="true"
+                    wire:key="post-{{ $post->id }}" />
             @empty
                 <div class="ph-empty">
                     <div class="ph-empty-ic"><i class="fa fa-feather-alt"></i></div>
@@ -559,4 +567,6 @@
     @else
         @include('layouts.onboarding')
     @endif
+
+    <livewire:user.post-photo-viewer />
 </div>

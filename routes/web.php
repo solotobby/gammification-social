@@ -27,6 +27,7 @@ use App\Livewire\Level;
 use App\Livewire\User\Analytics;
 use App\Livewire\User\BankInformation;
 use App\Livewire\User\Blog;
+use App\Livewire\User\BookmarkedPosts;
 use App\Livewire\User\Community;
 use App\Livewire\User\CommunityDetails;
 use App\Livewire\User\DashboardTimeline;
@@ -35,7 +36,6 @@ use App\Livewire\User\Hashtag;
 use App\Livewire\User\HowItWorks;
 use App\Livewire\User\HowToEarn;
 use App\Livewire\User\NewTimeline;
-use App\Livewire\User\Partners;
 use App\Livewire\User\Payout;
 use App\Livewire\User\PostAnalytics;
 use App\Livewire\User\Posts;
@@ -106,12 +106,17 @@ Route::group(['namespace' => 'auth'], function () {
     Route::post('user/login', [\App\Http\Controllers\Auth\RegisterController::class, 'loginUser'])
         ->middleware('throttle:5,1')->name('login.user');
 
+    // Fresh CSRF token for long-lived auth forms (login/register).
+    Route::get('csrf-token', function () {
+        return response()->json(['token' => csrf_token()]);
+    })->middleware('throttle:30,1')->name('csrf.token');
+
 
     Route::get('access/code/{level}', [\App\Http\Controllers\GeneralController::class, 'accessCode']);
     Route::post('process/access/code', [\App\Http\Controllers\GeneralController::class, 'processAccessCode']);
 
 
-    // Route::get('/c/{community:slug}', [\App\Http\Controllers\GeneralController::class, 'communityPublic'])->name('community.public');
+    Route::get('/c/{community:slug}', [\App\Http\Controllers\GeneralController::class, 'communityPublic'])->name('community.public');
 
     Route::get('success', [\App\Http\Controllers\GeneralController::class, 'success']);
     Route::get('error', [\App\Http\Controllers\GeneralController::class, 'error']);
@@ -203,7 +208,8 @@ Route::middleware([
 
 
         Route::get('timeline', Timeline::class);
-        Route::get('timeline/{post}', TimelineDetails::class);
+        Route::get('timeline/{post}', TimelineDetails::class)->name('timeline.show');
+        Route::get('bookmarks', BookmarkedPosts::class)->name('bookmarks');
         Route::get('new-timeline', NewTimeline::class);
         Route::get('dashboard-timeline', DashboardTimeline::class);
 
@@ -212,7 +218,6 @@ Route::middleware([
         Route::get('analytics', Analytics::class);
         Route::get('settings', Settings::class);
         Route::get('wallets', Wallets::class);
-        Route::get('partner', Partners::class);
         Route::get('how/to/earn', HowToEarn::class);
         Route::get('upgrade', UpgradeAccount::class);
         Route::get('promotions', PromotionalContent::class);

@@ -28,11 +28,6 @@
             <i class="nav-main-link-icon fa fa-wallet"></i>
             <span class="nav-main-link-name">Wallets</span>
           </a>
-          <a class="nav-main-link" href="{{ url('partner') }}">
-            <i class="nav-main-link-icon fa fa-briefcase"></i>
-            <span class="nav-main-link-name">Become a Partner</span>
-          </a>
-  
           <a class="nav-main-link" href="{{ url('how/to/earn') }}">
             <i class="nav-main-link-icon fa fa-usd"></i>
             <span class="nav-main-link-name">How to Earn</span>

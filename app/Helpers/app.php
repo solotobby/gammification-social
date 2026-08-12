@@ -5,7 +5,6 @@ use App\Models\CommentExternal;
 use App\Models\Currency;
 use App\Models\Level;
 use App\Models\LevelPlanId;
-use App\Models\Partner;
 use App\Models\Post;
 use App\Models\Trend;
 use App\Models\TrendingTopic;
@@ -168,17 +167,78 @@ if (!function_exists('userBaseCurrency')) {
     {
         $userId ??= auth()->id();
 
-        return Wallet::where('user_id', $userId)->value('currency');
+        $currency = Wallet::where('user_id', $userId)->value('currency');
+
+        return $currency ? strtoupper((string) $currency) : null;
+    }
+}
+
+if (!function_exists('creatorCommunityCurrency')) {
+    /**
+     * Currency used when a user creates a community — their active wallet currency.
+     */
+    function creatorCommunityCurrency($userId = null): ?string
+    {
+        $currency = userBaseCurrency($userId);
+
+        if (! $currency) {
+            return null;
+        }
+
+        $isActive = Currency::query()
+            ->where('is_active', true)
+            ->where('code', $currency)
+            ->exists();
+
+        return $isActive ? $currency : null;
     }
 }
 
 if (!function_exists('communityMinimumPrice')) {
     function communityMinimumPrice(?string $currency = null): float
     {
-        $currency = strtoupper((string) ($currency ?? userBaseCurrency() ?? 'NGN'));
+        $currency = strtoupper((string) ($currency ?? userBaseCurrency() ?? 'USD'));
         $minimums = config('community.minimum_prices', []);
 
-        return (float) ($minimums[$currency] ?? $minimums['NGN'] ?? 500);
+        if (isset($minimums[$currency])) {
+            return (float) $minimums[$currency];
+        }
+
+        $baseUsd = (float) config('community.default_minimum_usd', 5);
+
+        if ($currency === 'USD') {
+            return $baseUsd;
+        }
+
+        try {
+            return (float) convertCurrency($baseUsd, 'USD', $currency);
+        } catch (\Throwable) {
+            return (float) ($minimums['USD'] ?? $baseUsd);
+        }
+    }
+}
+
+if (!function_exists('communityPriceDecimals')) {
+    function communityPriceDecimals(?string $currency = null): int
+    {
+        return communityMinimumPrice($currency) >= 10 ? 0 : 2;
+    }
+}
+
+if (!function_exists('communityPriceStep')) {
+    function communityPriceStep(?string $currency = null): int|float
+    {
+        $minimum = communityMinimumPrice($currency);
+
+        if ($minimum >= 1000) {
+            return 100;
+        }
+
+        if ($minimum >= 100) {
+            return 10;
+        }
+
+        return $minimum >= 10 ? 1 : 0.01;
     }
 }
 
@@ -793,145 +853,6 @@ if (!function_exists('bankList')) {
     }
 }
 
-if (!function_exists('generateVirtualAccount')) {
-    function generateVirtualAccount($partner)
-    {
-
-        //check if user exist, if yes, update information
-        //$fetchCustomer = fetchCustomer($partner->email);
-
-        // if($fetchCustomer['status'] == true){
-
-        //     //update customer
-        //     $customerPayload = [
-        //         "first_name"=> $partner->name,//auth()->user()->name,
-        //         "last_name"=> 'Payhankey',
-        //         "phone"=> "+".$phone_number
-        //     ];
-
-        //     $updateCustomer = updateCustomer($user->email, $customerPayload);
-
-        //     if($updateCustomer['status'] == true){
-
-        //         $data = [
-        //             "customer"=> $updateCustomer['data']['customer_code'], 
-        //             "preferred_bank"=>env('PAYSTACK_BANK')
-        //         ];
-
-        //         $response = virtualAccount($data);
-
-        //         $VirtualAccount = VirtualAccount::where('user_id', $user->id)->first();
-        //         if($VirtualAccount){
-
-        //             $VirtualAccount->bank_name = $response['data']['bank']['name'];
-        //             $VirtualAccount->account_name = $response['data']['account_name'];
-        //             $VirtualAccount->account_number = $response['data']['account_number'];
-        //             $VirtualAccount->account_name = $response['data']['account_name'];
-        //             $VirtualAccount->currency = 'NGN';
-        //             $VirtualAccount->save();
-
-        //         }else{
-
-
-        //             $VirtualAccount = VirtualAccount::create([
-        //                 'user_id' => $user->id, 
-        //                 'channel' => 'paystack', 
-        //                 'customer_id'=>$updateCustomer['data']['customer_code'], 
-        //                 'customer_intgration'=> $updateCustomer['data']['integration'],
-        //                 'bank_name' => $response['data']['bank']['name'],
-        //                 'account_name' => $response['data']['account_name'],
-        //                 'account_number' => $response['data']['account_number'],
-        //                 'account_name' => $response['data']['account_name'],
-        //                 'currency' => 'NGN'
-        //             ]);
-
-        //         }
-
-        //         $data['res']=$response;
-        //         $data['va']=$VirtualAccount; //back()->with('success', 'Account Created Succesfully');
-        //         return $data;
-        //     }
-
-
-        // }else{
-
-        $phone = '+234' . substr($partner->phone, 1);
-        $payload = [
-            "email" => $partner->email,
-            "first_name" => 'Payhankey',
-            "last_name" => $partner->name,
-            "phone" => $phone
-        ];
-
-        $customer = createCustomer($payload);
-
-        if ($customer['status'] == true) {
-
-            $data = [
-                "customer" => $customer['data']['customer_code'],
-                "preferred_bank" => env('PAYSTACK_BANK') //"wema-bank"
-            ];
-
-            $va = virtualAccount($data);
-
-            if ($va['status'] == true) {
-
-                $updateVA_info = Partner::where('user_id', $partner->user_id)->first();
-
-                $updateVA_info->customer_code = $va['data']['customer']['customer_code'];
-                $updateVA_info->bank_name = $va['data']['bank']['name'];
-                $updateVA_info->account_number = $va['data']['account_number'];
-                $updateVA_info->account_name = $va['data']['account_name'];
-                $updateVA_info->currency = 'NGN';
-                $updateVA_info->save();
-
-                $data['status'] = true;
-                $data['customers'] = $customer;
-                $data['virtual_account'] = $va;
-                $data['partner'] = $partner;
-            } else {
-                return response()->json(['status' => false, 'data' => $data], 403);
-            }
-
-
-
-
-            // $data['res']=$customer;
-            // $data['va']=$va; 
-            // return $data;
-
-            // if($VirtualAccount){
-
-            //     // $VirtualAccount->bank_name = $response['data']['bank']['name'];
-            //     // $VirtualAccount->account_name = $response['data']['account_name'];
-            //     // $VirtualAccount->account_number = $response['data']['account_number'];
-            //     // $VirtualAccount->account_name = $response['data']['account_name'];
-            //     // $VirtualAccount->currency = 'NGN';
-            //     // $VirtualAccount->save();
-
-            // }else{
-
-            //     // $VirtualAccount = VirtualAccount::create([
-            //     //     'user_id' => $user->id, 
-            //     //     'channel' => 'paystack', 
-            //     //     'customer_id'=>$res['data']['customer_code'], 
-            //     //     'customer_intgration'=> $res['data']['integration'],
-            //     //     'bank_name' => $response['data']['bank']['name'],
-            //     //     'account_name' => $response['data']['account_name'],
-            //     //     'account_number' => $response['data']['account_number'],
-            //     //     'account_name' => $response['data']['account_name'],
-            //     //     'currency' => 'NGN'
-            //     // ]);
-
-            // }
-
-
-        } else {
-            return response()->json('Could not create customer account', 403);
-        }
-    }
-}
-
 if (!function_exists('fetchCustomer')) {
     function  fetchCustomer($email)
     {
@@ -1290,8 +1211,180 @@ if (!function_exists('isSpam')) {
 if (!function_exists('extractFirstUrl')) {
     function extractFirstUrl(string $content): ?string
     {
-        preg_match('~https?://[^\s<]+~i', $content, $match);
-        return $match[0] ?? null;
+        preg_match('~(?:https?://|www\.)[^\s<]+~i', $content, $match);
+
+        if (! isset($match[0])) {
+            return null;
+        }
+
+        $url = rtrim($match[0], '.,!?)]');
+
+        if (str_starts_with(strtolower($url), 'www.')) {
+            $url = 'https://'.$url;
+        }
+
+        return $url;
+    }
+}
+
+if (!function_exists('plainPostText')) {
+    function plainPostText(string $content): string
+    {
+        $text = html_entity_decode(strip_tags($content), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+        return trim(preg_replace("/\r\n?/", "\n", $text));
+    }
+}
+
+if (!function_exists('formatLinkDisplayText')) {
+    function formatLinkDisplayText(string $url, int $maxLength = 30): string
+    {
+        $display = preg_replace('~^https?://~i', '', $url);
+        $display = preg_replace('~^www\.~i', '', $display);
+
+        if (mb_strlen($display) <= $maxLength) {
+            return $display;
+        }
+
+        return rtrim(mb_substr($display, 0, $maxLength - 1)).'…';
+    }
+}
+
+if (!function_exists('socialLinkCard')) {
+    function socialLinkCard(string $url): array
+    {
+        $parsed = parse_url($url);
+        $host = $parsed['host'] ?? '';
+        $host = preg_replace('~^www\.~i', '', $host);
+
+        $path = $parsed['path'] ?? '';
+        if (! empty($parsed['query'])) {
+            $path .= '?'.$parsed['query'];
+        }
+
+        $path = $path !== '' && $path !== '/'
+            ? '/'.ltrim($path, '/')
+            : '';
+
+        $pathDisplay = $path !== ''
+            ? formatLinkDisplayText($host.$path, 56)
+            : '';
+
+        if ($pathDisplay !== '' && str_starts_with($pathDisplay, $host)) {
+            $pathDisplay = mb_substr($pathDisplay, mb_strlen($host));
+        }
+
+        return [
+            'url' => $url,
+            'host' => $host,
+            'path' => $pathDisplay,
+        ];
+    }
+}
+
+if (!function_exists('truncateSocialPlainText')) {
+    function truncateSocialPlainText(string $text, int $limit): string
+    {
+        if (mb_strlen($text) <= $limit) {
+            return $text;
+        }
+
+        $cut = mb_substr($text, 0, $limit);
+
+        if (preg_match('~(?:https?://|www\.)[^\s]*$~i', $cut)) {
+            $cut = preg_replace('~(?:https?://|www\.)[^\s]*$~i', '', $cut);
+            $cut = rtrim($cut);
+        }
+
+        return $cut;
+    }
+}
+
+if (!function_exists('formatSocialPostText')) {
+    function formatSocialPostText(string $text): string
+    {
+        if ($text === '') {
+            return '';
+        }
+
+        $placeholders = [];
+
+        $text = preg_replace_callback('/\b((?:https?:\/\/|www\.)[^\s<]+)/i', function (array $matches) use (&$placeholders) {
+            $raw = rtrim($matches[1], '.,!?)]');
+            $href = str_starts_with(strtolower($raw), 'http') ? $raw : 'https://'.$raw;
+            $key = '___PH'.count($placeholders).'___';
+            $label = formatLinkDisplayText($href);
+            $placeholders[$key] = '<a href="'.e($href).'" target="_blank" rel="noopener noreferrer nofollow" class="pk-link" title="'.e($href).'">'.e($label).'</a>';
+
+            return $key;
+        }, $text);
+
+        $text = preg_replace_callback('/(?<!\w)#([\p{L}\p{N}_]+)/u', function (array $matches) use (&$placeholders) {
+            $key = '___PH'.count($placeholders).'___';
+            $tag = $matches[1];
+            $placeholders[$key] = '<a href="'.e(url('hashtag/'.$tag)).'" class="pk-tag">#'.e($tag).'</a>';
+
+            return $key;
+        }, $text);
+
+        $text = preg_replace_callback('/(?<!\w)@([\w.]+)/', function (array $matches) use (&$placeholders) {
+            $key = '___PH'.count($placeholders).'___';
+            $user = $matches[1];
+            $placeholders[$key] = '<a href="'.e(url('profile/'.$user)).'" class="pk-mention">@'.e($user).'</a>';
+
+            return $key;
+        }, $text);
+
+        $html = nl2br(e($text));
+
+        foreach ($placeholders as $key => $replacement) {
+            $html = str_replace(e($key), $replacement, $html);
+        }
+
+        return $html;
+    }
+}
+
+if (!function_exists('stripUrlFromPlainText')) {
+    function stripUrlFromPlainText(string $plain, string $url): string
+    {
+        $withoutScheme = preg_replace('~^https?://~i', '', $url);
+        $variants = array_unique(array_filter([
+            $url,
+            $withoutScheme,
+            'www.'.$withoutScheme,
+        ]));
+
+        $text = str_replace($variants, '', $plain);
+
+        return trim(preg_replace('/\s{2,}/', ' ', $text));
+    }
+}
+
+if (!function_exists('socialPostDisplay')) {
+    function socialPostDisplay(string $content, ?int $limit = 50): array
+    {
+        $plain = plainPostText($content);
+        $embedUrl = extractFirstUrl($plain);
+        $embed = $embedUrl ? resolveSocialLinkEmbed($embedUrl) : null;
+        $linkCard = ($embedUrl && ! $embed) ? socialLinkCard($embedUrl) : null;
+        $hasBottomPreview = (bool) ($embed || $linkCard);
+
+        $textForDisplay = ($embedUrl && $hasBottomPreview)
+            ? stripUrlFromPlainText($plain, $embedUrl)
+            : $plain;
+
+        $needsMore = $limit !== null && mb_strlen($textForDisplay) > $limit;
+        $shortText = $needsMore ? truncateSocialPlainText($textForDisplay, $limit) : $textForDisplay;
+
+        return [
+            'full_html' => formatSocialPostText($textForDisplay),
+            'short_html' => formatSocialPostText($shortText).($needsMore ? '…' : ''),
+            'needs_more' => $needsMore,
+            'embed' => $embed,
+            'link_card' => $linkCard,
+            'preview_url' => $hasBottomPreview ? $embedUrl : null,
+        ];
     }
 }
 
@@ -1396,21 +1489,78 @@ if (!function_exists('isFacebookUrl')) {
     }
 }
 
+if (!function_exists('instagramEmbed')) {
+    function instagramEmbed(string $url): ?string
+    {
+        if (! isInstagramUrl($url)) {
+            return null;
+        }
+
+        if (preg_match('~instagram\.com/(p|reel|tv)/([A-Za-z0-9_-]+)~i', $url, $match)) {
+            return "https://www.instagram.com/{$match[1]}/{$match[2]}/embed";
+        }
+
+        return null;
+    }
+}
+
+if (!function_exists('isTiktokUrl')) {
+    function isTiktokUrl(string $url): bool
+    {
+        return str_contains($url, 'tiktok.com');
+    }
+}
+
+if (!function_exists('tiktokEmbed')) {
+    function tiktokEmbed(string $url): ?string
+    {
+        if (! isTiktokUrl($url)) {
+            return null;
+        }
+
+        if (preg_match('~tiktok\.com/(?:@[^/]+/video/|embed/v2/)(\d+)~i', $url, $match)) {
+            return "https://www.tiktok.com/embed/v2/{$match[1]}";
+        }
+
+        return null;
+    }
+}
+
+if (!function_exists('resolveSocialLinkEmbed')) {
+    function resolveSocialLinkEmbed(string $url): ?array
+    {
+        if ($youtube = youtubeEmbed($url)) {
+            return [
+                'platform' => 'youtube',
+                'embed_url' => $youtube,
+                'original_url' => $url,
+            ];
+        }
+
+        if ($instagram = instagramEmbed($url)) {
+            return [
+                'platform' => 'instagram',
+                'embed_url' => $instagram,
+                'original_url' => $url,
+            ];
+        }
+
+        if ($tiktok = tiktokEmbed($url)) {
+            return [
+                'platform' => 'tiktok',
+                'embed_url' => $tiktok,
+                'original_url' => $url,
+            ];
+        }
+
+        return null;
+    }
+}
+
 if (!function_exists('isEmbeddablePlatform')) {
     function isEmbeddablePlatform(string $url): bool
     {
-        // return isInstagramUrl($url)
-        //     || isXUrl($url)
-        //     || youtubeEmbed($url);
-        // return youtubeEmbed($url)
-        //     || str_contains($url, 'instagram.com')
-        //     || str_contains($url, 'twitter.com')
-        //     || str_contains($url, 'x.com');
-
-        return youtubeEmbed($url)
-            || isInstagramUrl($url)
-            || isXUrl($url)
-            || isFacebookUrl($url);
+        return (bool) resolveSocialLinkEmbed($url);
     }
 }
 if (!function_exists('getNetworkStrength')) {

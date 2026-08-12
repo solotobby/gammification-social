@@ -2,12 +2,14 @@
 
 namespace App\Livewire\User;
 
+use App\Support\StoredMedia;
 use App\Models\Follow;
 use App\Models\Post;
 use App\Models\ProfileViews;
 use App\Models\User;
 use App\Models\UserLike;
 use App\Notifications\GeneralNotification;
+use App\Services\PostEarningsService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Illuminate\Support\Facades\Cache;
@@ -35,13 +37,21 @@ class ViewProfile extends Component
 
     public bool $isOwner = false;
 
-    #[On('view-profile.{user.username}')]
-
-    // #[On('refreshFeed')]
-
-    public function mount($username,)
+    #[On('postDeleted')]
+    public function handlePostDeleted(string $postId): void
     {
+        // Render re-queries posts; this handler forces a refresh after delete.
+    }
 
+    #[On('post-action-toast')]
+    public function handlePostActionToast(string $message): void
+    {
+        session()->flash('success', $message);
+    }
+
+    #[On('view-profile.{user.username}')]
+    public function mount($username)
+    {
         $this->timeline($username);
         $this->isFollowing = Auth::user()?->isFollowing($this->user) ?? false;
         $this->isOwner = Auth::id() === $this->user->id;
@@ -141,9 +151,12 @@ class ViewProfile extends Component
             'avatarUpload' => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
+        $user = auth()->user();
+        StoredMedia::delete($user->avatar);
+
         $url = $this->storeProfileImage($this->avatarUpload, 'avatar');
 
-        auth()->user()->update(['avatar' => $url]);
+        $user->update(['avatar' => $url]);
 
         $this->reset('avatarUpload');
         $this->timeline($this->username);
@@ -160,9 +173,12 @@ class ViewProfile extends Component
             'bannerUpload' => 'required|image|mimes:jpg,jpeg,png,webp|max:4096',
         ]);
 
+        $user = auth()->user();
+        StoredMedia::delete($user->banner);
+
         $url = $this->storeProfileImage($this->bannerUpload, 'banner');
 
-        auth()->user()->update(['banner' => $url]);
+        $user->update(['banner' => $url]);
 
         $this->reset('bannerUpload');
         $this->timeline($this->username);
@@ -175,7 +191,9 @@ class ViewProfile extends Component
             return;
         }
 
-        auth()->user()->update(['banner' => null]);
+        $user = auth()->user();
+        StoredMedia::delete($user->banner);
+        $user->update(['banner' => null]);
         $this->timeline($this->username);
         session()->flash('success', 'Cover photo removed.');
     }
@@ -334,8 +352,12 @@ class ViewProfile extends Component
             ->latest()
             ->take($this->perpage)
             ->get();
-        //$timelines = $this->user->posts()->where(['status' => 'LIVE', 'user_id' =>  $this->user->id])->orderBy('created_at', 'desc')->take($this->perpage)->get(); //$this->timelines();
 
-        return view('livewire.user.view-profile', ['posts' => $timelines]);
+        $earnings = app(PostEarningsService::class)->forPosts($timelines->pluck('id'));
+
+        return view('livewire.user.view-profile', [
+            'posts' => $timelines,
+            'earnings' => $earnings,
+        ]);
     }
 }

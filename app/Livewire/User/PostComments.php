@@ -64,7 +64,7 @@ class PostComments extends Component
         $this->message = '';
         $this->post->refresh();
         $this->loadComments();
-        $this->dispatch('commentAdded');
+        $this->dispatch('commentAdded', postId: $this->post->id);
     }
 
     public function render()

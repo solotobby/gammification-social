@@ -107,7 +107,7 @@
             <header class="dash-header">
                 <div>
                     <h1>Engagement</h1>
-                    <p>{{ $user->name }} · {{ $user->email }}</p>
+                    <p>{{ $user->name }} · {{ $user->email }} · {{ $dateRange->label() }}</p>
                     <div class="dash-meta">
                         <span class="dash-badge dash-badge--indigo">{{ $planName }}</span>
                         @if (in_array($planName, ['Creator', 'Influencer'], true))
@@ -122,31 +122,36 @@
                 </a>
             </header>
 
+            @include('admin.partials.date-range-filter', [
+                'routeName' => 'admin.users.engagement',
+                'routeParams' => ['user' => $user],
+            ])
+
             <section class="dash-section">
                 <div class="dash-grid dash-grid--4">
                     <div class="dash-kpi">
                         <div class="dash-kpi__top">
-                            <span class="dash-kpi__label">Total views</span>
+                            <span class="dash-kpi__label">Views</span>
                             <span class="dash-kpi__icon dash-kpi__icon--sky"><i class="fa fa-eye"></i></span>
                         </div>
                         <div class="dash-kpi__value">{{ number_format($totals->views ?? 0) }}</div>
-                        <div class="dash-kpi__hint">All recorded daily stats</div>
+                        <div class="dash-kpi__hint">{{ $dateRange->label() }}</div>
                     </div>
                     <div class="dash-kpi">
                         <div class="dash-kpi__top">
-                            <span class="dash-kpi__label">Total likes</span>
+                            <span class="dash-kpi__label">Likes</span>
                             <span class="dash-kpi__icon dash-kpi__icon--amber"><i class="fa fa-heart"></i></span>
                         </div>
                         <div class="dash-kpi__value">{{ number_format($totals->likes ?? 0) }}</div>
-                        <div class="dash-kpi__hint">Across payout periods</div>
+                        <div class="dash-kpi__hint">{{ $dateRange->label() }}</div>
                     </div>
                     <div class="dash-kpi">
                         <div class="dash-kpi__top">
-                            <span class="dash-kpi__label">Total comments</span>
+                            <span class="dash-kpi__label">Comments</span>
                             <span class="dash-kpi__icon dash-kpi__icon--emerald"><i class="fa fa-comment"></i></span>
                         </div>
                         <div class="dash-kpi__value">{{ number_format($totals->comments ?? 0) }}</div>
-                        <div class="dash-kpi__hint">Across payout periods</div>
+                        <div class="dash-kpi__hint">{{ $dateRange->label() }}</div>
                     </div>
                     <div class="dash-kpi">
                         <div class="dash-kpi__top">
@@ -169,7 +174,7 @@
                     <div>
                         <h2 class="dash-card__title">Daily trend</h2>
                         <p class="dash-muted" style="margin:0.25rem 0 0;">
-                            Last 30 days · {{ number_format($chart['total'] ?? 0) }} points
+                            {{ $dateRange->label() }} · {{ number_format($chart['total'] ?? 0) }} points
                         </p>
                     </div>
                 </div>
@@ -179,7 +184,7 @@
                             <canvas id="engagement-trend-chart" role="img" aria-label="Daily engagement trend"></canvas>
                         </div>
                     @else
-                        <div class="dash-empty">No daily engagement in the last 30 days.</div>
+                        <div class="dash-empty">No daily engagement in {{ $dateRange->label() }}.</div>
                     @endif
                 </div>
             </section>

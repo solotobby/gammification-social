@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\Admin\AdminUserService;
+use App\Support\AdminDateRange;
+use Illuminate\Http\Request;
 
 class UserEngagementController extends Controller
 {
@@ -12,8 +14,10 @@ class UserEngagementController extends Controller
         protected AdminUserService $users,
     ) {}
 
-    public function engagementAnalytics(User $user)
+    public function engagementAnalytics(Request $request, User $user)
     {
-        return view('admin.user.engagement', $this->users->engagementAnalyticsData($user));
+        $dateRange = AdminDateRange::fromRequest($request);
+
+        return view('admin.user.engagement', $this->users->engagementAnalyticsData($user, $dateRange));
     }
 }

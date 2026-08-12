@@ -7,6 +7,8 @@ use App\Models\CommunityPayout;
 use App\Models\CommunityPost;
 use App\Models\CommunitySubscription;
 use App\Services\AdminAuditService;
+use App\Support\AdminDateRange;
+use App\Support\StoredMedia;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -18,13 +20,25 @@ class AdminCommunityService
         protected AdminAuditService $audit,
     ) {}
 
-    public function dashboardStats(): array
+    public function dashboardStats(?AdminDateRange $range = null): array
     {
-        $revenueByCurrency = CommunityPayout::query()
+        $revenueQuery = CommunityPayout::query()
             ->selectRaw('currency, COUNT(*) as payments, SUM(gross_amount) as gross, SUM(platform_fee) as platform, SUM(creator_amount) as creator')
-            ->groupBy('currency')
-            ->get()
-            ->keyBy('currency');
+            ->groupBy('currency');
+
+        if ($range) {
+            $revenueQuery->whereBetween('created_at', [$range->start, $range->end]);
+        }
+
+        $revenueByCurrency = $revenueQuery->get()->keyBy('currency');
+
+        $postsQuery = CommunityPost::query();
+        $membersQuery = DB::table('community_users')->where('status', 'active');
+
+        if ($range) {
+            $postsQuery->whereBetween('created_at', [$range->start, $range->end]);
+            $membersQuery->whereBetween('created_at', [$range->start, $range->end]);
+        }
 
         return [
             'total' => Community::count(),
@@ -33,8 +47,8 @@ class AdminCommunityService
             'public' => Community::where('type', 'public')->whereNull('archived_at')->count(),
             'activeSubscriptions' => CommunitySubscription::where('status', 'active')->count(),
             'pendingSubscriptions' => CommunitySubscription::where('status', 'pending')->count(),
-            'totalPosts' => CommunityPost::count(),
-            'totalMembers' => (int) DB::table('community_users')->where('status', 'active')->count(),
+            'totalPosts' => $postsQuery->count(),
+            'totalMembers' => (int) $membersQuery->count(),
             'byCurrency' => Community::query()
                 ->selectRaw('currency, COUNT(*) as count')
                 ->groupBy('currency')
@@ -46,20 +60,23 @@ class AdminCommunityService
     /**
      * Snapshot + charts for the admin home dashboard.
      */
-    public function dashboardAnalytics(int $days = 30): array
+    public function dashboardAnalytics(?AdminDateRange $range = null): array
     {
-        $stats = $this->dashboardStats();
+        $range ??= AdminDateRange::fromRequest(request());
+        $stats = $this->dashboardStats($range);
 
         return array_merge($stats, [
-            'newCommunitiesWeek' => Community::where('created_at', '>=', now()->subDays(7))->count(),
-            'newSubscriptionsWeek' => CommunitySubscription::query()
-                ->where('created_at', '>=', now()->subDays(7))
+            'newCommunities' => Community::query()
+                ->whereBetween('created_at', [$range->start, $range->end])
+                ->count(),
+            'newSubscriptions' => CommunitySubscription::query()
+                ->whereBetween('created_at', [$range->start, $range->end])
                 ->where('status', 'active')
                 ->count(),
-            'growthChart' => $this->dailyGrowthChart($days),
-            'revenueChart' => $this->dailyRevenueChart($days),
+            'growthChart' => $this->dailyGrowthChart($range),
+            'revenueChart' => $this->dailyRevenueChart($range),
             'topByMembers' => $this->topCommunitiesByMembers(5),
-            'recentCommunities' => $this->recentCommunities(5),
+            'recentCommunities' => $this->recentCommunities(5, $range),
         ]);
     }
 
@@ -74,29 +91,28 @@ class AdminCommunityService
             ->get();
     }
 
-    public function recentCommunities(int $limit = 5): Collection
+    public function recentCommunities(int $limit = 5, ?AdminDateRange $range = null): Collection
     {
         return Community::query()
             ->with(['user:id,name,username', 'category:id,name'])
             ->withCount('members')
+            ->when($range, fn ($q) => $q->whereBetween('created_at', [$range->start, $range->end]))
             ->latest()
             ->limit($limit)
             ->get();
     }
 
-    protected function dailyGrowthChart(int $days = 30): array
+    protected function dailyGrowthChart(AdminDateRange $range): array
     {
-        $start = now()->subDays($days - 1)->startOfDay();
-
         $communities = Community::query()
-            ->where('created_at', '>=', $start)
+            ->whereBetween('created_at', [$range->start, $range->end])
             ->selectRaw('DATE(created_at) as day, COUNT(*) as total')
             ->groupBy('day')
             ->orderBy('day')
             ->pluck('total', 'day');
 
         $subscriptions = CommunitySubscription::query()
-            ->where('created_at', '>=', $start)
+            ->whereBetween('created_at', [$range->start, $range->end])
             ->where('status', 'active')
             ->selectRaw('DATE(created_at) as day, COUNT(*) as total')
             ->groupBy('day')
@@ -107,12 +123,15 @@ class AdminCommunityService
         $communityValues = [];
         $subscriptionValues = [];
 
-        for ($i = 0; $i < $days; $i++) {
-            $date = $start->copy()->addDays($i);
-            $key = $date->format('Y-m-d');
-            $labels[] = $date->format('M j');
+        $cursor = $range->start->copy()->startOfDay();
+        $endDay = $range->end->copy()->startOfDay();
+
+        while ($cursor->lte($endDay)) {
+            $key = $cursor->format('Y-m-d');
+            $labels[] = $cursor->format('M j');
             $communityValues[] = (int) ($communities[$key] ?? 0);
             $subscriptionValues[] = (int) ($subscriptions[$key] ?? 0);
+            $cursor->addDay();
         }
 
         return [
@@ -124,12 +143,10 @@ class AdminCommunityService
         ];
     }
 
-    protected function dailyRevenueChart(int $days = 30): array
+    protected function dailyRevenueChart(AdminDateRange $range): array
     {
-        $start = now()->subDays($days - 1)->startOfDay();
-
         $rows = CommunityPayout::query()
-            ->where('created_at', '>=', $start)
+            ->whereBetween('created_at', [$range->start, $range->end])
             ->selectRaw('DATE(created_at) as day, currency, COUNT(*) as payments, SUM(platform_fee) as platform_fee')
             ->groupBy('day', 'currency')
             ->orderBy('day')
@@ -140,15 +157,18 @@ class AdminCommunityService
         $ngnPlatform = [];
         $usdPlatform = [];
 
-        for ($i = 0; $i < $days; $i++) {
-            $date = $start->copy()->addDays($i);
-            $key = $date->format('Y-m-d');
-            $labels[] = $date->format('M j');
+        $cursor = $range->start->copy()->startOfDay();
+        $endDay = $range->end->copy()->startOfDay();
+
+        while ($cursor->lte($endDay)) {
+            $key = $cursor->format('Y-m-d');
+            $labels[] = $cursor->format('M j');
 
             $dayRows = $rows->filter(fn ($row) => \Carbon\Carbon::parse($row->day)->format('Y-m-d') === $key);
             $paymentCounts[] = (int) $dayRows->sum('payments');
             $ngnPlatform[] = (float) ($dayRows->firstWhere('currency', 'NGN')?->platform_fee ?? 0);
             $usdPlatform[] = (float) ($dayRows->firstWhere('currency', 'USD')?->platform_fee ?? 0);
+            $cursor->addDay();
         }
 
         return [
@@ -289,17 +309,12 @@ class AdminCommunityService
                 ->with('media')
                 ->each(function (CommunityPost $post) {
                     foreach ($post->media as $item) {
-                        Storage::disk('spaces')->delete($item->path);
+                        StoredMedia::delete($item->path);
                     }
                 });
 
-            if ($community->image) {
-                Storage::disk('spaces')->delete($community->image);
-            }
-
-            if ($community->banner) {
-                Storage::disk('spaces')->delete($community->banner);
-            }
+            StoredMedia::delete($community->image);
+            StoredMedia::delete($community->banner);
 
             $communityId = $community->id;
             $community->delete();
@@ -374,7 +389,7 @@ class AdminCommunityService
         }
 
         foreach ($post->media as $item) {
-            Storage::disk('spaces')->delete($item->path);
+            StoredMedia::delete($item->path);
         }
 
         $post->delete();

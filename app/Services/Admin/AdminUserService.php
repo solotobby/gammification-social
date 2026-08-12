@@ -17,6 +17,7 @@ use App\Models\WithdrawalMethod;
 use App\Models\Withdrawals;
 use App\Services\AdminAuditService;
 use App\Services\FundTransferService;
+use App\Support\AdminDateRange;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -96,7 +97,7 @@ class AdminUserService
         ];
     }
 
-    public function engagementAnalyticsData(User $user): array
+    public function engagementAnalyticsData(User $user, AdminDateRange $range): array
     {
         $user->loadMissing('userLevel.level', 'wallet');
 
@@ -104,6 +105,7 @@ class AdminUserService
 
         $totals = EngagementDailyStat::query()
             ->where('user_id', $user->id)
+            ->whereBetween('date', [$range->start->toDateString(), $range->end->toDateString()])
             ->selectRaw('COALESCE(SUM(views), 0) as views')
             ->selectRaw('COALESCE(SUM(likes), 0) as likes')
             ->selectRaw('COALESCE(SUM(comments), 0) as comments')
@@ -111,8 +113,12 @@ class AdminUserService
             ->selectRaw('COUNT(DISTINCT date) as active_days')
             ->first();
 
+        $monthStart = $range->start->copy()->startOfMonth()->format('Y-m');
+        $monthEnd = $range->end->copy()->startOfMonth()->format('Y-m');
+
         $monthlyTotals = EngagementMonthlyStat::query()
             ->where('user_id', $user->id)
+            ->whereBetween('month', [$monthStart, $monthEnd])
             ->selectRaw('COALESCE(SUM(views), 0) as views')
             ->selectRaw('COALESCE(SUM(likes), 0) as likes')
             ->selectRaw('COALESCE(SUM(comments), 0) as comments')
@@ -123,29 +129,31 @@ class AdminUserService
         return [
             'user' => $user,
             'planName' => $planName,
+            'dateRange' => $range,
             'totals' => $totals,
             'monthlyTotals' => $monthlyTotals,
             'dailyEngagements' => EngagementDailyStat::query()
                 ->where('user_id', $user->id)
+                ->whereBetween('date', [$range->start->toDateString(), $range->end->toDateString()])
                 ->orderByDesc('date')
                 ->orderBy('level')
-                ->paginate(50),
+                ->paginate(50)
+                ->withQueryString(),
             'monthlyStats' => EngagementMonthlyStat::query()
                 ->where('user_id', $user->id)
+                ->whereBetween('month', [$monthStart, $monthEnd])
                 ->orderByDesc('month')
                 ->limit(24)
                 ->get(),
-            'chart' => $this->userEngagementChart($user->id),
+            'chart' => $this->userEngagementChart($user->id, $range),
         ];
     }
 
-    protected function userEngagementChart(string $userId, int $days = 30): array
+    protected function userEngagementChart(string $userId, AdminDateRange $range): array
     {
-        $start = now()->subDays($days - 1)->startOfDay();
-
         $rows = EngagementDailyStat::query()
             ->where('user_id', $userId)
-            ->where('date', '>=', $start->toDateString())
+            ->whereBetween('date', [$range->start->toDateString(), $range->end->toDateString()])
             ->selectRaw('DATE(date) as day')
             ->selectRaw('SUM(views) as views')
             ->selectRaw('SUM(likes) as likes')
@@ -162,16 +170,19 @@ class AdminUserService
         $comments = [];
         $points = [];
 
-        for ($i = 0; $i < $days; $i++) {
-            $date = $start->copy()->addDays($i);
-            $key = $date->format('Y-m-d');
+        $cursor = $range->start->copy()->startOfDay();
+        $endDay = $range->end->copy()->startOfDay();
+
+        while ($cursor->lte($endDay)) {
+            $key = $cursor->format('Y-m-d');
             $row = $rows->get($key);
 
-            $labels[] = $date->format('M j');
+            $labels[] = $cursor->format('M j');
             $views[] = (int) ($row->views ?? 0);
             $likes[] = (int) ($row->likes ?? 0);
             $comments[] = (int) ($row->comments ?? 0);
             $points[] = (int) ($row->points ?? 0);
+            $cursor->addDay();
         }
 
         return [

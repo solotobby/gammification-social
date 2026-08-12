@@ -50,7 +50,149 @@
             radial-gradient(ellipse 50% 40% at 95% 15%, rgba(31, 174, 100, .06), transparent 50%);
     }
 
-    .pk-ui-inner { position: relative; }
+    .pk-ui-inner {
+        position: relative;
+        width: 100%;
+        max-width: none;
+        margin: 0;
+        padding: 0 0 max(24px, env(safe-area-inset-bottom)) 0;
+    }
+
+    @media (min-width: 768px) {
+        .pk-ui-inner {
+            padding-bottom: 32px;
+        }
+    }
+
+    /* Global loading bar for Livewire requests */
+    .community-show-page .pk-page-loading-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        z-index: 9999;
+        background: linear-gradient(90deg, transparent, var(--pk-violet), var(--pk-mint), transparent);
+        background-size: 200% 100%;
+        animation: pk-page-load 0.9s linear infinite;
+        pointer-events: none;
+    }
+
+    @keyframes pk-page-load {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+
+    .community-show-page form.is-saving,
+    #createCommunityModal form.is-saving {
+        opacity: .72;
+        pointer-events: none;
+        transition: opacity .18s ease;
+    }
+
+    .community-show-page .pk-tab-panel {
+        animation: pk-panel-in .22s ease;
+    }
+
+    @keyframes pk-panel-in {
+        from { opacity: 0; transform: translateY(5px); }
+        to { opacity: 1; transform: none; }
+    }
+
+    .community-show-page .pk-tabs {
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x proximity;
+    }
+
+    .community-show-page .pk-tabs::-webkit-scrollbar {
+        display: none;
+    }
+
+    .community-show-page .pk-tab {
+        scroll-snap-align: start;
+        white-space: nowrap;
+        touch-action: manipulation;
+    }
+
+    @media (max-width: 575.98px) {
+        .community-show-page .pk-settings-section {
+            padding: 16px 14px !important;
+        }
+
+        .community-show-page .pk-field input,
+        .community-show-page .pk-field textarea,
+        .community-show-page .pk-field select,
+        .communities-page .pk-field input,
+        .communities-page .pk-field textarea,
+        .communities-page .pk-field select,
+        #createCommunityModal .pk-field input,
+        #createCommunityModal .pk-field textarea,
+        #createCommunityModal .pk-field select {
+            font-size: 16px;
+        }
+
+        .community-show-page .pk-btn,
+        #createCommunityModal .pk-btn {
+            min-height: 44px;
+        }
+
+        .community-show-page .pk-status-opt,
+        #createCommunityModal .pk-status-opt {
+            padding: 14px 12px;
+        }
+    }
+
+    .community-show-page .pk-field.is-invalid input,
+    .community-show-page .pk-field.is-invalid select,
+    .community-show-page .pk-field.is-invalid textarea,
+    .communities-page .pk-field.is-invalid input,
+    .communities-page .pk-field.is-invalid select,
+    .communities-page .pk-field.is-invalid textarea,
+    #createCommunityModal .pk-field.is-invalid input,
+    #createCommunityModal .pk-field.is-invalid select,
+    #createCommunityModal .pk-field.is-invalid textarea {
+        border-color: var(--pk-red);
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, .12);
+    }
+
+    .community-show-page .pk-settings-footer {
+        z-index: 30;
+        margin-top: 8px;
+        padding: 12px 0 max(12px, env(safe-area-inset-bottom));
+        background: rgba(255, 255, 255, .94);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-top: 1px solid var(--pk-line);
+        box-shadow: 0 -6px 24px rgba(15, 17, 23, .06);
+    }
+
+    .community-show-page .pk-btn .pk-spinner,
+    #createCommunityModal .pk-btn .pk-spinner {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        border: 2px solid rgba(255, 255, 255, .35);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: pk-spin .65s linear infinite;
+        vertical-align: -2px;
+        margin-right: 6px;
+    }
+
+    @keyframes pk-spin {
+        to { transform: rotate(360deg); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .community-show-page .pk-tab-panel,
+        .community-show-page .pk-price-field,
+        .community-show-page .pk-page-loading-bar {
+            animation: none;
+        }
+    }
+
+    .community-show-page [x-cloak] { display: none !important; }
 
     /* Cards */
     .communities-page .pk-card,
@@ -101,76 +243,153 @@
         box-shadow: 0 2px 8px var(--pk-violet-glow);
     }
 
-    /* ── Details: Hero ───────────────────────────────────────────── */
+    /* ── Details: Facebook-style hero ─────────────────────────── */
     .community-show-page .pk-hero {
-        overflow: visible;
-    }
-    .community-show-page .pk-hero-banner {
-        height: clamp(140px, 28vw, 200px);
-        border-radius: var(--pk-r-lg) var(--pk-r-lg) 0 0;
-    }
-    .community-show-page .pk-hero-banner::after {
-        background: linear-gradient(to bottom, transparent 30%, rgba(255,255,255,.15) 100%);
-        opacity: 1;
-    }
-    .community-show-page .pk-hero-logo {
-        border-radius: 22px;
-    }
-    .community-show-page .pk-hero-name {
-        font-size: clamp(1.25rem, 3.5vw, 1.55rem);
-        letter-spacing: -.03em;
-    }
-    .community-show-page .pk-hero-stats {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 20px;
-        margin-top: 14px;
-        padding-top: 14px;
-        border-top: 1px solid var(--pk-line);
-    }
-    .community-show-page .pk-hero-stat b {
-        display: block;
-        font-family: 'DM Mono', ui-monospace, monospace;
-        font-size: 1.05rem;
-        font-weight: 500;
-        line-height: 1.2;
-    }
-    .community-show-page .pk-hero-stat span {
-        font-size: .72rem;
-        color: var(--pk-gray-500);
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: .05em;
+        overflow: hidden;
+        margin-bottom: 12px;
     }
 
-    /* Tabs — sticky */
-    .community-show-page .pk-tabs-wrap {
-        position: sticky;
-        top: 0;
-        z-index: 20;
-        background: rgba(248,249,252,.92);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        margin: 0 -4px 18px;
-        padding: 0 4px;
+    .community-show-page .pk-tabs-bar {
+        margin-bottom: 16px;
+        padding: 0;
+        overflow: hidden;
+    }
+
+    .community-show-page .pk-tabs-bar .pk-tabs-wrap {
+        padding: 0 clamp(12px, 2vw, 18px);
+        background: #fff;
+    }
+
+    .community-show-page .pk-tabs-bar .pk-tabs {
+        margin-bottom: 0;
         border-bottom: 1px solid var(--pk-line);
     }
-    .community-show-page .pk-tabs { margin-bottom: 0; border-bottom: none; }
-    .community-show-page .pk-tab.pk-sel {
-        color: var(--pk-violet);
-        border-bottom-color: transparent;
+
+    .community-show-page .pk-tabs-bar .pk-tab {
+        position: relative;
+        padding: 14px 16px;
+        font-size: .9375rem;
+        font-weight: 600;
+        color: var(--pk-gray-500);
     }
-    .community-show-page .pk-tab.pk-sel::after {
+
+    .community-show-page .pk-tabs-bar .pk-tab:hover {
+        color: var(--pk-ink);
+        background: rgba(15, 17, 23, .03);
+    }
+
+    .community-show-page .pk-tabs-bar .pk-tab.pk-sel {
+        color: var(--pk-violet);
+    }
+
+    .community-show-page .pk-tabs-bar .pk-tab.pk-sel::after {
         content: "";
         position: absolute;
         bottom: 0;
-        left: 16px;
-        right: 16px;
+        left: 12px;
+        right: 12px;
         height: 3px;
         background: var(--pk-violet);
         border-radius: 3px 3px 0 0;
     }
-    .community-show-page .pk-tab {
+
+    .community-show-page .pk-feed-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .community-show-page .pk-feed-post {
+        border-radius: var(--pk-r-lg);
+        overflow: hidden;
+        margin-bottom: 0;
+    }
+
+    .community-show-page .pk-text a,
+    .community-show-page .pk-text .pk-tag,
+    .community-show-page .pk-text .pk-mention {
+        color: #1d9bf0;
+        text-decoration: none;
+    }
+
+    .community-show-page .pk-text a:hover,
+    .community-show-page .pk-text .pk-tag:hover,
+    .community-show-page .pk-text .pk-mention:hover {
+        text-decoration: underline;
+    }
+
+    .community-show-page .pk-see-more {
+        background: none;
+        border: none;
+        padding: 0;
+        margin-left: 4px;
+        color: #1d9bf0;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+    }
+
+    .community-show-page .pk-see-more:hover {
+        text-decoration: underline;
+    }
+
+    .community-show-page .pk-link-preview {
+        margin: 0;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+    }
+
+    .community-show-page [x-cloak] {
+        display: none !important;
+    }
+
+    /* legacy: tabs inside hero (unused) */
+    .community-show-page .pk-hero .pk-tabs-wrap {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        margin: 0;
+        padding: 0 clamp(8px, 2vw, 16px);
+        background: #fff;
+        border-top: 1px solid var(--pk-line);
+        border-radius: 0 0 var(--pk-r-lg) var(--pk-r-lg);
+    }
+
+    .community-show-page .pk-hero .pk-tabs {
+        margin-bottom: 0;
+        border-bottom: none;
+    }
+
+    .community-show-page .pk-hero .pk-tab {
+        padding: 14px 16px;
+        font-size: .9375rem;
+        font-weight: 600;
+        color: var(--pk-gray-500);
+    }
+
+    .community-show-page .pk-hero .pk-tab:hover {
+        background: rgba(15, 17, 23, .04);
+        border-radius: 8px 8px 0 0;
+    }
+
+    .community-show-page .pk-hero .pk-tab.pk-sel {
+        color: var(--pk-violet);
+    }
+
+    .community-show-page .pk-hero .pk-tab.pk-sel::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 12px;
+        right: 12px;
+        height: 3px;
+        background: var(--pk-violet);
+        border-radius: 3px 3px 0 0;
+    }
+
+    .community-show-page .pk-hero .pk-tab {
         position: relative;
     }
 

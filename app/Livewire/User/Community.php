@@ -13,18 +13,17 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
-use Livewire\WithPagination;
 
 class Community extends Component
 {
-    use WithPagination;
-
     // ---- list filters ----
     public string $filter = 'all';
     public string $search = '';
     public $category;
 
-    public int $perPage = 6;
+    public int $listPerPage = 6;
+
+    private const LIST_STEP = 6;
 
     // ---- create-community form state ----
     public string $name = '';
@@ -54,12 +53,14 @@ class Community extends Component
 
     protected function rules(): array
     {
+        $currency = creatorCommunityCurrency() ?? userBaseCurrency() ?? 'NGN';
+
         return [
             'name' => ['required', 'string', 'max:255'],
             'description' => ['required', 'string', 'max:1000'],
             'community_categories_id' => ['required', 'exists:community_categories,id'],
             'type' => ['required', Rule::in(['public', 'private', 'paid', 'approval'])],
-            'monthly_fee' => ['required_if:type,paid', 'nullable', 'numeric', 'min:'.communityMinimumPrice()],
+            'monthly_fee' => ['required_if:type,paid', 'nullable', 'numeric', 'min:'.communityMinimumPrice($currency)],
             'fee_payer' => ['required_if:type,paid', 'nullable', Rule::in(['creator', 'members'])],
             'billing_type' => ['required_if:type,paid', 'nullable', Rule::in(['one_off', 'subscription'])],
             'billing_interval' => [
@@ -114,8 +115,8 @@ class Community extends Component
 
         // dd($this->platformFeePercent);
 
-        $userCurrencyCode = getCurrencyCode(); //userBaseCurrency();
-        $userBaseCurrency = userBaseCurrency();
+        $userCurrencyCode = getCurrencyCode(creatorCommunityCurrency());
+        $userBaseCurrency = creatorCommunityCurrency() ?? userBaseCurrency();
        
 
         $breakdown = CommunityFeeCalculator::breakdown(
@@ -137,12 +138,29 @@ class Community extends Component
 
     public function createCommunity(): void
     {
+        $currency = creatorCommunityCurrency();
+
+        if (! $currency) {
+            $this->addError(
+                'name',
+                userBaseCurrency()
+                    ? 'Your wallet currency is not active on Payhankey yet. Choose an active currency in your wallet settings.'
+                    : 'Set up your wallet currency before creating a community.',
+            );
+
+            return;
+        }
+
         $validated = $this->validate();
 
         $isPaid = $validated['type'] === 'paid';
         $isSubscription = $isPaid && $validated['billing_type'] === 'subscription';
 
-        $currency = userBaseCurrency();
+        if ($isPaid && $currency === 'NGN') {
+            $validated['billing_type'] = 'one_off';
+            $validated['billing_interval'] = null;
+            $isSubscription = false;
+        }
 
         $community = DB::transaction(function () use ($validated, $isPaid, $isSubscription, $currency) {
             $community = CommunityModel::create([
@@ -217,7 +235,12 @@ class Community extends Component
 
     private function resetList(): void
     {
-        $this->resetPage();
+        $this->listPerPage = self::LIST_STEP;
+    }
+
+    public function loadMoreCommunities(): void
+    {
+        $this->listPerPage += self::LIST_STEP;
     }
 
     // ---- membership actions ----
@@ -351,11 +374,15 @@ class Community extends Component
 
     public function render()
     {
-        // Paginated list — filters/search reset the page via resetList().
-        $communities = $this->communitiesQuery()->paginate($this->perPage);
+        $query = $this->communitiesQuery();
+        $totalCommunities = (clone $query)->count();
+        $communities = $query->take($this->listPerPage)->get();
 
         return view('livewire.user.community', [
             'communities' => $communities,
+            'hasMoreCommunities' => $communities->count() < $totalCommunities,
+            'totalCommunities' => $totalCommunities,
+            'creatorCurrency' => creatorCommunityCurrency(),
             'trending' => CommunityModel::query()
                 ->withCount('members')
                 ->where('type', '!=', 'private')

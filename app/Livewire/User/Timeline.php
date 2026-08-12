@@ -8,6 +8,7 @@ use Livewire\WithPagination;
 use Livewire\Attributes\On;
 use App\Models\AccessCode;
 use App\Models\Comment;
+use App\Models\HiddenPost;
 use App\Models\Post;
 use App\Models\PostImages;
 use App\Models\PostTrend;
@@ -140,9 +141,14 @@ class Timeline extends Component
     {
         $userId = auth()->id();
 
+        $hiddenPostIds = HiddenPost::query()
+            ->where('user_id', $userId)
+            ->pluck('post_id');
+
         $query = Post::with(['user', 'trends', 'images', 'video'])
             ->withExists(['likes as liked_by_me' => fn ($q) => $q->where('user_id', $userId)])
             ->where('status', 'LIVE')
+            ->when($hiddenPostIds->isNotEmpty(), fn ($q) => $q->whereNotIn('id', $hiddenPostIds))
             ->latest('created_at');
 
         // Fetch more than perPage to allow interleaving
@@ -179,6 +185,26 @@ class Timeline extends Component
 
         $this->page++;
         $this->loadPosts();
+    }
+
+    #[On('postHidden')]
+    public function handlePostHidden(string $postId): void
+    {
+        $this->posts = $this->posts
+            ->reject(fn ($post) => (string) $post->id === (string) $postId)
+            ->values();
+    }
+
+    #[On('postDeleted')]
+    public function handlePostDeleted(string $postId): void
+    {
+        $this->handlePostHidden($postId);
+    }
+
+    #[On('post-action-toast')]
+    public function handlePostActionToast(string $message): void
+    {
+        session()->flash('success', $message);
     }
 
     // public function addTrend(string $trendId): void

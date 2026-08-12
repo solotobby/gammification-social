@@ -64,7 +64,6 @@
                         <td>{{ $user->email }}</td>
                         <td>${{ $user->amount}}</td>
                         <td>{{ $user->code}}</td>
-                        {{-- <td><a href="{{ url('activate/'.$partner->id) }}"> {{ $partner->status == true ? 'YES' : 'NO' }}</a></td> --}}
                     </tr>
                 @endforeach
             </tbody>

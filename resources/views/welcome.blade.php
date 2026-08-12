@@ -250,59 +250,6 @@
         </div>
     </section>
 
-    {{-- <section class="section feather-bg-img" style="background-image: url(asset/images/features-bg-img-1.png)" id="partner">
-        <div class="container">
-            
-            @if ($errors->any())
-                <div class="alert alert-danger">
-                    <ul>
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
-            @if (session('success'))
-                <div class="alert alert-success" role="alert">
-                    {{ session('success') }}
-                </div>
-            @endif
-
-
-            <div class="row justify-content-center">
-                <div class="col-lg-5 align-self-center">
-                    <p class="font-weight-medium text-uppercase mb-2"><i
-                            class="mdi mdi-chart-bubble h2 text-primary me-1 align-middle"></i> Become our Partner </p>
-                    {{-- <h3 class="font-weight-semibold line-height-1_4 mb-4">We do the work you <b>stay focused</b> on
-                        <b>your customers</b>.
-                    </h3> --
-                    <h3 class="title mb-3">Earn more as a Partner</h3>
-
-                    <p class="text-muted font-size-15 mb-4">
-                        As a partner, you can buy bulk access codes at a discounted price and resell 
-                        to your friends and family. This makes you earn affiliate commissions and partner 
-                        commissions. Our partners earn up to $500 daily. Resell Access Code directly from your dashboard.
-                    </p>
-                    
-                    <div class="mt-5">
-                        <a href="{{ url('login') }}" target="_blank"  class="btn btn-primary me-2">Sell Access Code</a>
-                        {{-- <a href="" target="_blank" class="btn btn-soft-primary">Pay in Naira  </a> --}}
-    {{-- data-bs-toggle="modal" data-bs-target="#exampleModalCenter-1" --
-                    </div>
-                    
-                </div>
-                <div class="col-lg-6 offset-lg-1 align-self-center">
-                    <div class="mt-4 mt-lg-0">
-                        <img src="{{asset('asset/images/features-img-1.png')}}" alt="" class="img-fluid d-block mx-auto">
-                    </div>
-                </div>
-                    <!-- Button trigger modal -->
-            </div>
-        </div>
-    </section> --}}
-
-
     <!-- Features End -->
 
     <!-- Pricing Start -->
@@ -644,22 +591,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        {{-- <div class="accordion-item">
-                        <h2 class="accordion-header" id="headingThree-1">
-                          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree-1" aria-expanded="false" aria-controls="collapseThree-1">
-                            How can I be a verified partner 
-                          </button>
-                        </h2>
-                        <div id="collapseThree-1" class="accordion-collapse collapse" aria-labelledby="headingThree-1" data-bs-parent="#accordionExample">
-                          <div class="accordion-body">
-                            You can be a verified partner <a href="{{ url('register') }}">Register Here</a> to vend access codes to your friends and your referrals. Payhankey sells access codes to partners at discounted rates. 
-                            You can resell as a creator or affiliate to earn up to $500 daily. Simply make videos and ask your followers to get access codes from you.
-                            Only verified partners can sell access code on behalf of Payhankey.
-                            All verified partners will be listed
-                          </div>
-                        </div>
-                    </div> --}}
 
                         {{-- <div class="accordion-item">
                         <h2 class="accordion-header" id="headingThree-2">

@@ -66,7 +66,6 @@
                        
                         <td>{{ @$user->level->name}}</td>
                         <td>{{ $user->created_at}}</td>
-                        {{-- <td><a href="{{ url('activate/'.$partner->id) }}"> {{ $partner->status == true ? 'YES' : 'NO' }}</a></td> --}}
                     </tr>
                 @endforeach
             </tbody>

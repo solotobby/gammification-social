@@ -26,9 +26,6 @@
          {{-- <li class="nav-item">
                         <a data-scroll href="#faq" class="nav-link">FAQ</a>
                     </li> --}}
-         {{-- <li class="nav-item">
-                        <a data-scroll href="#partner" class="nav-link">Become a Partner</a>
-                    </li> --}}
          <li class="nav-item">
              <a data-scroll href="#contact" class="nav-link">Contact Us</a>
          </li>

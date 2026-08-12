@@ -186,8 +186,7 @@ body { background: var(--ph-bg); font-family: 'Inter', system-ui, sans-serif; }
 [x-cloak] { display:none !important; }
 </style>
 
-<div class="row">
-    <div class="col-md-8">
+    <div class="col-12">
 
         {{-- Referral --}}
         <div class="ph-card">
@@ -478,8 +477,13 @@ body { background: var(--ph-bg); font-family: 'Inter', system-ui, sans-serif; }
         </div>{{-- /.ph-composer --}}
 
         {{-- Feed --}}
-        @foreach($posts as $post)
-            <livewire:user.post-content :post="$post" :wire:key="'post-'.$post->id"/>
+        @foreach ($posts as $post)
+            <livewire:user.post-content
+                :post="$post"
+                :estimated-earnings="$earnings[$post->id] ?? 0"
+                :format-text="false"
+                :show-post-menu="true"
+                wire:key="post-{{ $post->id }}" />
         @endforeach
 
         @if($isVideoOpen)
@@ -498,7 +502,8 @@ body { background: var(--ph-bg); font-family: 'Inter', system-ui, sans-serif; }
         @endif
 
     </div>
-    @include('layouts.engagement')
+
+    <livewire:user.post-photo-viewer />
 </div>
 
 @script

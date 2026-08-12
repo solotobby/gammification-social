@@ -6,7 +6,6 @@ use App\Models\AccessCode;
 use App\Models\Level;
 use App\Models\LevelPlanId;
 use App\Models\LoginPoint;
-use App\Models\PartnerSlot;
 use App\Models\SubscriptionStat;
 use App\Models\Transaction;
 use App\Models\User;

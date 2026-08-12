@@ -35,8 +35,23 @@ class Community extends Model
         'archived_at' => 'datetime',
     ];
 
+    public function setCurrencyAttribute(?string $value): void
+    {
+        $this->attributes['currency'] = $value ? strtoupper($value) : $value;
+    }
+
     /** Display-only palette cycled deterministically per community — no extra column needed. */
     private const COLOR_PALETTE = ['#5A4FDC', '#1FAE64', '#EF4467', '#37A2F4', '#E3A421', '#9C7BF5'];
+
+    /** Default cover gradients when no banner image is uploaded. */
+    private const COVER_PALETTES = [
+        ['#15103A', '#5A4FDC', '#1FAE64'],
+        ['#1A0F2E', '#EF4467', '#E3A421'],
+        ['#0F1A2E', '#37A2F4', '#5A4FDC'],
+        ['#0F2E1A', '#1FAE64', '#9C7BF5'],
+        ['#2E0F1A', '#EF4467', '#9C7BF5'],
+        ['#1A2E2E', '#37A2F4', '#1FAE64'],
+    ];
 
     /**
      * Communities are looked up by slug in routes (/community/{community}),
@@ -172,6 +187,16 @@ class Community extends Model
         $palette = self::COLOR_PALETTE;
 
         return $palette[crc32((string) $this->id) % count($palette)];
+    }
+
+    /**
+     * Deterministic default hero/cover background when no banner image exists.
+     */
+    public function getCoverGradientAttribute(): string
+    {
+        $palette = self::COVER_PALETTES[crc32((string) $this->id) % count(self::COVER_PALETTES)];
+
+        return "linear-gradient(135deg, {$palette[0]} 0%, {$palette[1]} 52%, {$palette[2]} 130%)";
     }
 
     /**

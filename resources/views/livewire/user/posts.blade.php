@@ -43,7 +43,7 @@
     </style>
 
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-12">
 
             <div class="block block-bordered block-rounded">
                 <div class="block-content block-content-full">
@@ -154,8 +154,6 @@
 
 
         </div>
-        
-        @include('layouts.engagement')
     </div>
 
 

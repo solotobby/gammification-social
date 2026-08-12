@@ -63,7 +63,7 @@
     </style>
 
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-12">
             <div class="block block-rounded block-bordered" id="timelines">
                 <div class="block-header block-header-default">
                     {{-- <div>
@@ -343,8 +343,6 @@
             </a>
 
         </div>
-
-        @include('layouts.engagement')
 
     </div>
 

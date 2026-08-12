@@ -39,7 +39,7 @@
 
 
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-12">
             {{-- @if ($userLevel === 'Basic') --}}
             {{-- <div class="alert alert-info">
                 <h5 class="fs-5 fw-light mb-2">Let your friends join Payhankey!</h5>
@@ -234,8 +234,6 @@
 
         </div>
 
-
-        @include('layouts.engagement')
 
     </div>
 

@@ -141,7 +141,7 @@
             <header class="dash-header">
                 <div>
                     <h1>Good {{ now()->hour < 12 ? 'morning' : (now()->hour < 17 ? 'afternoon' : 'evening') }}, {{ auth()->user()->name }}</h1>
-                    <p>Platform overview · {{ now()->format('l, F j, Y') }}</p>
+                    <p>Platform overview · {{ $dateRange->label() }}</p>
                 </div>
                 <div class="dash-pill">
                     <span class="dash-pill__dot"></span>
@@ -156,31 +156,25 @@
                 <div class="dash-alert dash-alert--error">{{ session('error') }}</div>
             @endif
 
+            @include('admin.partials.date-range-filter', ['routeName' => 'admin.home'])
+
             <section class="dash-section">
                 <div class="dash-grid dash-grid--4">
                     <div class="dash-kpi">
                         <div class="dash-kpi__top">
-                            <span class="dash-kpi__label">Active today</span>
+                            <span class="dash-kpi__label">Active users</span>
                             <span class="dash-kpi__icon dash-kpi__icon--indigo"><i class="fa fa-bolt"></i></span>
                         </div>
-                        <div class="dash-kpi__value">{{ number_format($activeToday) }}</div>
-                        <div class="dash-kpi__hint">Unique sessions today</div>
+                        <div class="dash-kpi__value">{{ number_format($activeUsers) }}</div>
+                        <div class="dash-kpi__hint">Unique sessions · {{ $dateRange->label() }}</div>
                     </div>
                     <div class="dash-kpi">
                         <div class="dash-kpi__top">
-                            <span class="dash-kpi__label">Weekly active</span>
-                            <span class="dash-kpi__icon dash-kpi__icon--sky"><i class="fa fa-chart-line"></i></span>
+                            <span class="dash-kpi__label">New users</span>
+                            <span class="dash-kpi__icon dash-kpi__icon--sky"><i class="fa fa-user-plus"></i></span>
                         </div>
-                        <div class="dash-kpi__value">{{ number_format($activeWeek) }}</div>
-                        <div class="dash-kpi__hint">Last 7 days</div>
-                    </div>
-                    <div class="dash-kpi">
-                        <div class="dash-kpi__top">
-                            <span class="dash-kpi__label">Monthly active</span>
-                            <span class="dash-kpi__icon dash-kpi__icon--sky"><i class="fa fa-calendar"></i></span>
-                        </div>
-                        <div class="dash-kpi__value">{{ number_format($activeMonth) }}</div>
-                        <div class="dash-kpi__hint">Last 30 days</div>
+                        <div class="dash-kpi__value">{{ number_format($newUsers) }}</div>
+                        <div class="dash-kpi__hint">Joined in selected range</div>
                     </div>
                     <a href="{{ route('admin.users.index') }}" class="dash-kpi">
                         <div class="dash-kpi__top">
@@ -188,8 +182,16 @@
                             <span class="dash-kpi__icon dash-kpi__icon--emerald"><i class="fa fa-users"></i></span>
                         </div>
                         <div class="dash-kpi__value">{{ number_format($userCount) }}</div>
-                        <div class="dash-kpi__hint">{{ number_format($newUsersWeek) }} joined this week</div>
+                        <div class="dash-kpi__hint">All-time platform users</div>
                     </a>
+                    <div class="dash-kpi">
+                        <div class="dash-kpi__top">
+                            <span class="dash-kpi__label">Revenue (est.)</span>
+                            <span class="dash-kpi__icon dash-kpi__icon--emerald"><i class="fa fa-dollar-sign"></i></span>
+                        </div>
+                        <div class="dash-kpi__value">${{ number_format($totalRevenueUsd, 2) }}</div>
+                        <div class="dash-kpi__hint">Successful + allocated · {{ $dateRange->label() }}</div>
+                    </div>
                 </div>
             </section>
 
@@ -197,27 +199,19 @@
                 <div class="dash-grid dash-grid--4">
                     <div class="dash-kpi">
                         <div class="dash-kpi__top">
-                            <span class="dash-kpi__label">Revenue (est.)</span>
-                            <span class="dash-kpi__icon dash-kpi__icon--emerald"><i class="fa fa-dollar-sign"></i></span>
-                        </div>
-                        <div class="dash-kpi__value">${{ number_format($totalRevenueUsd, 2) }}</div>
-                        <div class="dash-kpi__hint">Successful + allocated</div>
-                    </div>
-                    <div class="dash-kpi">
-                        <div class="dash-kpi__top">
-                            <span class="dash-kpi__label">Total posts</span>
+                            <span class="dash-kpi__label">Posts</span>
                             <span class="dash-kpi__icon dash-kpi__icon--indigo"><i class="fa fa-image"></i></span>
                         </div>
-                        <div class="dash-kpi__value">{{ number_format($postStats->total_posts ?? 0) }}</div>
-                        <div class="dash-kpi__hint">{{ number_format($postStats->total_views ?? 0) }} views</div>
+                        <div class="dash-kpi__value">{{ number_format($postsInRange) }}</div>
+                        <div class="dash-kpi__hint">{{ number_format($viewsInRange) }} views · {{ $dateRange->label() }}</div>
                     </div>
                     <div class="dash-kpi">
                         <div class="dash-kpi__top">
                             <span class="dash-kpi__label">Engagement</span>
                             <span class="dash-kpi__icon dash-kpi__icon--amber"><i class="fa fa-heart"></i></span>
                         </div>
-                        <div class="dash-kpi__value">{{ number_format(($postStats->total_likes ?? 0) + ($postStats->total_comments ?? 0)) }}</div>
-                        <div class="dash-kpi__hint">Likes + comments</div>
+                        <div class="dash-kpi__value">{{ number_format($engagementInRange) }}</div>
+                        <div class="dash-kpi__hint">Likes + comments · {{ $dateRange->label() }}</div>
                     </div>
                     <a href="{{ route('admin.audit-logs.index') }}" class="dash-kpi">
                         <div class="dash-kpi__top">
@@ -227,6 +221,14 @@
                         <div class="dash-kpi__value" style="font-size:1.125rem;">View logs</div>
                         <div class="dash-kpi__hint">Admin action history</div>
                     </a>
+                    <div class="dash-kpi">
+                        <div class="dash-kpi__top">
+                            <span class="dash-kpi__label">Range</span>
+                            <span class="dash-kpi__icon dash-kpi__icon--sky"><i class="fa fa-calendar"></i></span>
+                        </div>
+                        <div class="dash-kpi__value" style="font-size:1.125rem;">{{ $dateRange->label() }}</div>
+                        <div class="dash-kpi__hint">{{ $dateRange->days() }} day{{ $dateRange->days() === 1 ? '' : 's' }} selected</div>
+                    </div>
                 </div>
             </section>
 
@@ -236,7 +238,7 @@
                 <div class="dash-card__head" style="margin-bottom:1rem;padding:0 0.25rem">
                     <div>
                         <h2 class="dash-card__title" style="font-size:1.125rem">Community analytics</h2>
-                        <p class="dash-muted" style="margin:0.25rem 0 0">Paid communities, memberships, and platform revenue</p>
+                        <p class="dash-muted" style="margin:0.25rem 0 0">Paid communities, memberships, and platform revenue · {{ $dateRange->label() }}</p>
                     </div>
                     <a href="{{ route('admin.communities.index') }}" class="dash-link">Manage all</a>
                 </div>
@@ -248,7 +250,7 @@
                             <span class="dash-kpi__icon dash-kpi__icon--indigo"><i class="fa fa-object-group"></i></span>
                         </div>
                         <div class="dash-kpi__value">{{ number_format($ca['total']) }}</div>
-                        <div class="dash-kpi__hint">{{ number_format($ca['newCommunitiesWeek']) }} created this week</div>
+                        <div class="dash-kpi__hint">{{ number_format($ca['newCommunities']) }} created in range</div>
                     </a>
                     <a href="{{ route('admin.communities.index', ['type' => 'paid']) }}" class="dash-kpi">
                         <div class="dash-kpi__top">
@@ -264,15 +266,15 @@
                             <span class="dash-kpi__icon dash-kpi__icon--sky"><i class="fa fa-repeat"></i></span>
                         </div>
                         <div class="dash-kpi__value">{{ number_format($ca['activeSubscriptions']) }}</div>
-                        <div class="dash-kpi__hint">{{ number_format($ca['newSubscriptionsWeek']) }} new this week · {{ number_format($ca['pendingSubscriptions']) }} pending</div>
+                        <div class="dash-kpi__hint">{{ number_format($ca['newSubscriptions']) }} new in range · {{ number_format($ca['pendingSubscriptions']) }} pending</div>
                     </a>
                     <div class="dash-kpi">
                         <div class="dash-kpi__top">
-                            <span class="dash-kpi__label">Community members</span>
+                            <span class="dash-kpi__label">Members / posts</span>
                             <span class="dash-kpi__icon dash-kpi__icon--amber"><i class="fa fa-user-group"></i></span>
                         </div>
                         <div class="dash-kpi__value">{{ number_format($ca['totalMembers']) }}</div>
-                        <div class="dash-kpi__hint">{{ number_format($ca['totalPosts']) }} community posts</div>
+                        <div class="dash-kpi__hint">{{ number_format($ca['totalPosts']) }} posts in range</div>
                     </div>
                 </div>
 
@@ -282,7 +284,7 @@
                             <div>
                                 <h2 class="dash-card__title">Community growth</h2>
                                 <p class="dash-muted" style="margin:0.25rem 0 0">
-                                    Last 30 days · {{ number_format($ca['growthChart']['communitiesTotal']) }} new communities · {{ number_format($ca['growthChart']['subscriptionsTotal']) }} active subscriptions
+                                    {{ $dateRange->label() }} · {{ number_format($ca['growthChart']['communitiesTotal']) }} new communities · {{ number_format($ca['growthChart']['subscriptionsTotal']) }} active subscriptions
                                 </p>
                             </div>
                         </div>
@@ -298,7 +300,7 @@
                             <div>
                                 <h2 class="dash-card__title">Community payments</h2>
                                 <p class="dash-muted" style="margin:0.25rem 0 0">
-                                    Last 30 days · {{ number_format($ca['revenueChart']['paymentsTotal']) }} payments
+                                    {{ $dateRange->label() }} · {{ number_format($ca['revenueChart']['paymentsTotal']) }} payments
                                 </p>
                             </div>
                         </div>
@@ -421,7 +423,7 @@
                         <div>
                             <h2 class="dash-card__title">Verified sign ups per day</h2>
                             <p class="dash-muted" style="margin:0.25rem 0 0;">
-                                Last 30 days · {{ number_format($signupChart['total'] ?? 0) }} email-verified users
+                                {{ $dateRange->label() }} · {{ number_format($signupChart['total'] ?? 0) }} email-verified users
                             </p>
                         </div>
                     </div>
@@ -437,7 +439,7 @@
                         <div>
                             <h2 class="dash-card__title">Engagement per day</h2>
                             <p class="dash-muted" style="margin:0.25rem 0 0;">
-                                Last 30 days · {{ number_format($engagementChart['total'] ?? 0) }} interactions · {{ number_format($engagementChart['postsTotal'] ?? 0) }} posts
+                                {{ $dateRange->label() }} · {{ number_format($engagementChart['total'] ?? 0) }} interactions · {{ number_format($engagementChart['postsTotal'] ?? 0) }} posts
                             </p>
                         </div>
                     </div>

@@ -8,15 +8,17 @@ use App\Models\Level;
 use App\Models\Post;
 use App\Models\Transaction;
 use App\Models\User;
+use App\Models\UserActivity;
 use App\Models\UserComment;
 use App\Models\UserLevel;
 use App\Models\UserLike;
 use App\Models\UserView;
+use App\Services\Admin\AdminCommunityService;
 use App\Services\FlutterwavePaymentService;
 use App\Services\KorapayService;
-use App\Services\Admin\AdminCommunityService;
 use App\Services\TransactionService;
 use App\Services\UpgradeSubscriptionService;
+use App\Support\AdminDateRange;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
@@ -41,56 +43,78 @@ class AdminController extends Controller
         $this->korapayService = $korapayService;
     }
 
-    public function home()
+    public function home(Request $request)
     {
         if (securityVerification() !== 'OK') {
             abort(404);
         }
 
-        $stats = Cache::remember('admin.dashboard.stats.v5', now()->addMinutes(3), function () {
-            $revenue = Transaction::query()
-                ->whereIn('status', ['successful', 'allocated'])
-                ->selectRaw("COALESCE(SUM(CASE WHEN currency = 'USD' THEN amount ELSE 0 END), 0) as usd")
-                ->selectRaw("COALESCE(SUM(CASE WHEN currency = 'NGN' THEN amount ELSE 0 END), 0) as ngn")
-                ->first();
+        $dateRange = AdminDateRange::fromRequest($request);
 
-            $ngnRate = max(1, (float) config('services.exchange.ngn_usd_rate', 1500));
-            $totalRevenueUsd = (float) ($revenue->usd ?? 0) + ((float) ($revenue->ngn ?? 0) / $ngnRate);
+        $stats = Cache::remember(
+            'admin.dashboard.stats.v6.'.$dateRange->cacheKey(),
+            now()->addMinutes(3),
+            function () use ($dateRange) {
+                $revenue = Transaction::query()
+                    ->whereIn('status', ['successful', 'allocated'])
+                    ->whereBetween('created_at', [$dateRange->start, $dateRange->end])
+                    ->selectRaw("COALESCE(SUM(CASE WHEN currency = 'USD' THEN amount ELSE 0 END), 0) as usd")
+                    ->selectRaw("COALESCE(SUM(CASE WHEN currency = 'NGN' THEN amount ELSE 0 END), 0) as ngn")
+                    ->first();
 
-            $postStats = Post::query()
-                ->selectRaw('COUNT(*) as total_posts')
-                ->selectRaw('COALESCE(SUM(views), 0) as total_views')
-                ->selectRaw('COALESCE(SUM(likes), 0) as total_likes')
-                ->selectRaw('COALESCE(SUM(comments), 0) as total_comments')
-                ->first();
+                $ngnRate = max(1, (float) config('services.exchange.ngn_usd_rate', 1500));
+                $totalRevenueUsd = (float) ($revenue->usd ?? 0) + ((float) ($revenue->ngn ?? 0) / $ngnRate);
 
-            return [
-                'userCount' => User::role('user')->count(),
-                'levelCounts' => UserLevel::query()
-                    ->active()
-                    ->valid()
-                    ->selectRaw('level_id, COUNT(*) as total')
-                    ->groupBy('level_id')
-                    ->with('level:id,name')
-                    ->get(),
-                'onlineUsers' => collect(Cache::get('online_users', []))
-                    ->filter(fn ($lastSeen) => now()->diffInMinutes($lastSeen) <= 2)
-                    ->count(),
-                'activeToday' => fetchActive(),
-                'activeWeek' => fetchActive(7),
-                'activeMonth' => fetchActive(30),
-                'totalRevenueUsd' => $totalRevenueUsd,
-                'postStats' => $postStats,
-                'newUsersWeek' => User::role('user')->where('created_at', '>=', now()->subDays(7))->count(),
-                'signupChart' => $this->dailySignupChart(),
-                'engagementChart' => $this->dailyEngagementChart(),
-                'communityAnalytics' => $this->communityAnalytics->dashboardAnalytics(),
-            ];
-        });
+                $postsInRange = Post::query()
+                    ->whereBetween('created_at', [$dateRange->start, $dateRange->end])
+                    ->count();
+
+                $likesInRange = UserLike::query()
+                    ->whereBetween('created_at', [$dateRange->start, $dateRange->end])
+                    ->count();
+
+                $commentsInRange = UserComment::query()
+                    ->whereBetween('created_at', [$dateRange->start, $dateRange->end])
+                    ->count();
+
+                $viewsInRange = UserView::query()
+                    ->whereBetween('created_at', [$dateRange->start, $dateRange->end])
+                    ->count();
+
+                return [
+                    'userCount' => User::role('user')->count(),
+                    'levelCounts' => UserLevel::query()
+                        ->active()
+                        ->valid()
+                        ->selectRaw('level_id, COUNT(*) as total')
+                        ->groupBy('level_id')
+                        ->with('level:id,name')
+                        ->get(),
+                    'onlineUsers' => collect(Cache::get('online_users', []))
+                        ->filter(fn ($lastSeen) => now()->diffInMinutes($lastSeen) <= 2)
+                        ->count(),
+                    'activeUsers' => UserActivity::query()
+                        ->whereBetween('created_at', [$dateRange->start, $dateRange->end])
+                        ->distinct('user_id')
+                        ->count('user_id'),
+                    'totalRevenueUsd' => $totalRevenueUsd,
+                    'postsInRange' => $postsInRange,
+                    'viewsInRange' => $viewsInRange,
+                    'engagementInRange' => $likesInRange + $commentsInRange,
+                    'newUsers' => User::role('user')
+                        ->whereBetween('created_at', [$dateRange->start, $dateRange->end])
+                        ->count(),
+                    'signupChart' => $this->dailySignupChart($dateRange),
+                    'engagementChart' => $this->dailyEngagementChart($dateRange),
+                    'communityAnalytics' => $this->communityAnalytics->dashboardAnalytics($dateRange),
+                ];
+            }
+        );
 
         $creatorLevel = Level::query()->where('name', 'Creator')->first();
 
         return view('admin.home', array_merge($stats, [
+            'dateRange' => $dateRange,
             'levelId' => $creatorLevel?->id,
             'showTestPayment' => app()->environment(['local', 'staging']) && $creatorLevel,
         ]));
@@ -139,29 +163,25 @@ class AdminController extends Controller
         return redirect()->route('admin.home')->with('error', 'Unknown payment status.');
     }
 
-    protected function dailySignupChart(int $days = 30): array
+    protected function dailySignupChart(AdminDateRange $range): array
     {
-        $start = now()->subDays($days - 1)->startOfDay();
-
         $rows = User::role('user')
             ->whereNotNull('email_verified_at')
-            ->where('email_verified_at', '>=', $start)
+            ->whereBetween('email_verified_at', [$range->start, $range->end])
             ->selectRaw('DATE(email_verified_at) as day, COUNT(*) as total')
             ->groupBy('day')
             ->orderBy('day')
             ->pluck('total', 'day');
 
-        return $this->fillDailySeries($start, $days, $rows);
+        return $this->fillDailySeries($range, $rows);
     }
 
-    protected function dailyEngagementChart(int $days = 30): array
+    protected function dailyEngagementChart(AdminDateRange $range): array
     {
-        $start = now()->subDays($days - 1)->startOfDay();
-
-        $views = $this->dailyEventCounts(UserView::class, $start);
-        $likes = $this->dailyEventCounts(UserLike::class, $start);
-        $comments = $this->dailyEventCounts(UserComment::class, $start);
-        $posts = $this->dailyEventCounts(Post::class, $start);
+        $views = $this->dailyEventCounts(UserView::class, $range);
+        $likes = $this->dailyEventCounts(UserLike::class, $range);
+        $comments = $this->dailyEventCounts(UserComment::class, $range);
+        $posts = $this->dailyEventCounts(Post::class, $range);
 
         $labels = [];
         $viewValues = [];
@@ -169,14 +189,17 @@ class AdminController extends Controller
         $commentValues = [];
         $postValues = [];
 
-        for ($i = 0; $i < $days; $i++) {
-            $date = $start->copy()->addDays($i);
-            $key = $date->format('Y-m-d');
-            $labels[] = $date->format('M j');
+        $cursor = $range->start->copy()->startOfDay();
+        $endDay = $range->end->copy()->startOfDay();
+
+        while ($cursor->lte($endDay)) {
+            $key = $cursor->format('Y-m-d');
+            $labels[] = $cursor->format('M j');
             $viewValues[] = (int) ($views[$key] ?? 0);
             $likeValues[] = (int) ($likes[$key] ?? 0);
             $commentValues[] = (int) ($comments[$key] ?? 0);
             $postValues[] = (int) ($posts[$key] ?? 0);
+            $cursor->addDay();
         }
 
         return [
@@ -190,10 +213,10 @@ class AdminController extends Controller
         ];
     }
 
-    protected function dailyEventCounts(string $model, $start): array
+    protected function dailyEventCounts(string $model, AdminDateRange $range): array
     {
         return $model::query()
-            ->where('created_at', '>=', $start)
+            ->whereBetween('created_at', [$range->start, $range->end])
             ->selectRaw('DATE(created_at) as day, COUNT(*) as total')
             ->groupBy('day')
             ->orderBy('day')
@@ -204,16 +227,19 @@ class AdminController extends Controller
             ->all();
     }
 
-    protected function fillDailySeries($start, int $days, $rows): array
+    protected function fillDailySeries(AdminDateRange $range, $rows): array
     {
         $labels = [];
         $values = [];
 
-        for ($i = 0; $i < $days; $i++) {
-            $date = $start->copy()->addDays($i);
-            $key = $date->format('Y-m-d');
-            $labels[] = $date->format('M j');
+        $cursor = $range->start->copy()->startOfDay();
+        $endDay = $range->end->copy()->startOfDay();
+
+        while ($cursor->lte($endDay)) {
+            $key = $cursor->format('Y-m-d');
+            $labels[] = $cursor->format('M j');
             $values[] = (int) ($rows[$key] ?? 0);
+            $cursor->addDay();
         }
 
         return [

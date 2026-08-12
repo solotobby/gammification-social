@@ -165,6 +165,16 @@ class Post extends Model
         );
     }
 
+    public function reports()
+    {
+        return $this->hasMany(PostReport::class);
+    }
+
+    public function bookmarks()
+    {
+        return $this->hasMany(PostBookmark::class);
+    }
+
     public function counterColumn(string $column): int
     {
         return (int) ($this->attributes[$column] ?? 0);

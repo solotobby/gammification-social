@@ -15,6 +15,30 @@
                     <i class="nav-main-link-icon fa fa-object-group"></i>
                     <span class="nav-main-link-name">Communities</span>
                 </a>
+                <a class="nav-main-link{{ request()->routeIs('admin.posts.*') ? ' active' : '' }}" href="{{ route('admin.posts.index') }}">
+                    <i class="nav-main-link-icon fa fa-newspaper"></i>
+                    <span class="nav-main-link-name">Timeline Posts</span>
+                </a>
+                <a class="nav-main-link{{ request()->routeIs('admin.reports.*') ? ' active' : '' }}" href="{{ route('admin.reports.index') }}">
+                    <i class="nav-main-link-icon fa fa-flag"></i>
+                    <span class="nav-main-link-name">Post Reports</span>
+                </a>
+                <a class="nav-main-link{{ request()->routeIs('admin.videos.*') ? ' active' : '' }}" href="{{ route('admin.videos.index') }}">
+                    <i class="nav-main-link-icon fa fa-film"></i>
+                    <span class="nav-main-link-name">Rolls / Videos</span>
+                </a>
+                <a class="nav-main-link{{ request()->routeIs('admin.bookmarks.*') ? ' active' : '' }}" href="{{ route('admin.bookmarks.index') }}">
+                    <i class="nav-main-link-icon fa fa-bookmark"></i>
+                    <span class="nav-main-link-name">Bookmarks</span>
+                </a>
+                <a class="nav-main-link{{ request()->routeIs('admin.finance.*') ? ' active' : '' }}" href="{{ route('admin.finance.index') }}">
+                    <i class="nav-main-link-icon fa fa-wallet"></i>
+                    <span class="nav-main-link-name">Wallets & Earnings</span>
+                </a>
+                <a class="nav-main-link{{ request()->routeIs('admin.audit-logs.*') ? ' active' : '' }}" href="{{ route('admin.audit-logs.index') }}">
+                    <i class="nav-main-link-icon fa fa-shield-halved"></i>
+                    <span class="nav-main-link-name">Audit Log</span>
+                </a>
                 <a class="nav-main-link" href="{{ route('admin.currencies.index') }}">
                     <i class="nav-main-link-icon fa fa-coins"></i>
                     <span class="nav-main-link-name">Currency</span>
@@ -104,6 +128,10 @@
                     <a class="nav-main-link" href="{{ url('profile/' . auth()->user()->username) }}">
                         <i class="nav-main-link-icon fa fa-user"></i>
                         <span class="nav-main-link-name">Profile</span>
+                    </a>
+                    <a class="nav-main-link{{ request()->routeIs('bookmarks') ? ' active' : '' }}" href="{{ route('bookmarks') }}">
+                        <i class="nav-main-link-icon fa fa-bookmark"></i>
+                        <span class="nav-main-link-name">Bookmarked</span>
                     </a>
                 @endif
 

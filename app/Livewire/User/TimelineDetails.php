@@ -22,11 +22,6 @@ class TimelineDetails extends Component
         $this->user = $this->post->user;
     }
 
-    public function openPhotoViewer(int $imageIndex = 0): void
-    {
-        $this->dispatch('openPhotoViewer', postId: $this->post->id, imageIndex: $imageIndex);
-    }
-
     public function render()
     {
         $earnings = app(PostEarningsService::class)->forPosts(collect([$this->post->id]));

@@ -13,6 +13,11 @@ class Wallet extends Model
     protected $fillable = ['user_id', 'promoter_balance', 'referral_balance', 'balance', 'currency', 'level', 'usdt_wallet_address', 'currency_updated_at'];
 
     protected $casts = [
-        'currency_updated_at'
+        'currency_updated_at' => 'datetime',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

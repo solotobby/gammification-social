@@ -2,11 +2,13 @@
 
 namespace App\Livewire\User;
 
+use Livewire\Attributes\On;
 use Livewire\Component;
+use App\Models\HiddenPost;
 use App\Models\Post;
 use App\Models\PostImages;
 use App\Models\PostVideo;
-use Livewire\Attributes\On;
+use App\Services\PostEarningsService;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -66,8 +68,14 @@ class DashboardTimeline extends Component
     // ── Feed ─────────────────────────────────────────────────
     public function loadPosts(): void
     {
+        $userId = auth()->id();
+        $hiddenPostIds = HiddenPost::query()
+            ->where('user_id', $userId)
+            ->pluck('post_id');
+
         $allPosts = Post::with(['user', 'images', 'video'])
             ->where('status', 'LIVE')
+            ->when($hiddenPostIds->isNotEmpty(), fn ($q) => $q->whereNotIn('id', $hiddenPostIds))
             ->latest('created_at')
             ->take($this->perPage() * $this->page * 2)
             ->get();
@@ -98,6 +106,26 @@ class DashboardTimeline extends Component
         if (!$this->hasMore) return;
         $this->page++;
         $this->loadPosts();
+    }
+
+    #[On('postHidden')]
+    public function handlePostHidden(string $postId): void
+    {
+        $this->posts = $this->posts
+            ->reject(fn ($post) => (string) $post->id === (string) $postId)
+            ->values();
+    }
+
+    #[On('postDeleted')]
+    public function handlePostDeleted(string $postId): void
+    {
+        $this->handlePostHidden($postId);
+    }
+
+    #[On('post-action-toast')]
+    public function handlePostActionToast(string $message): void
+    {
+        session()->flash('success', $message);
     }
 
     // ── Video Player ──────────────────────────────────────────
@@ -380,6 +408,10 @@ class DashboardTimeline extends Component
 
     public function render()
     {
-        return view('livewire.user.dashboard-timeline');
+        $earnings = app(PostEarningsService::class)->forPosts($this->posts->pluck('id'));
+
+        return view('livewire.user.dashboard-timeline', [
+            'earnings' => $earnings,
+        ]);
     }
 }

@@ -1,302 +1,334 @@
 <div>
-    <!-- Simple -->
-    <h2 class="content-heading">Post Analytics - <i>{{ userLevel() }}</i></h2>
+    <style>
+        .pa-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: .88rem;
+            font-weight: 600;
+            color: #536471;
+            text-decoration: none;
+            padding: 16px 0 12px;
+            transition: color .15s;
+        }
 
+        .pa-back:hover { color: #5A4FDC; }
 
-    <blockquote class="blockquote bg-light p-3 rounded border-start border-4 border-primary">
-        {{-- <p class="mb-1 fw-semibold">
-              💡 Tip: Always verify your access code before proceeding.
-          </p> --}}
+        .pa-back svg { width: 18px; height: 18px; flex: none; }
 
-        <p class="mb-3">
-            {{ $post->content }}
-        </p>
-        <footer class="blockquote-footer">
-            {{ $post->created_at }}
-        </footer>
+        .pa-post-snippet {
+            margin-top: 14px;
+            padding: 14px 16px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, .12);
+            border: 1px solid rgba(255, 255, 255, .16);
+            font-size: .92rem;
+            line-height: 1.55;
+            color: rgba(255, 255, 255, .92);
+        }
 
+        .pa-post-meta {
+            margin-top: 8px;
+            font-size: .78rem;
+            color: rgba(255, 255, 255, .72);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 14px;
+        }
 
-    </blockquote>
+        .pa-earn-hero {
+            background: linear-gradient(135deg, #0F1117 0%, #1a1d29 55%, #2d2860 100%);
+            border-radius: 14px;
+            padding: 22px 20px;
+            color: #fff;
+            margin-bottom: 16px;
+            position: relative;
+            overflow: hidden;
+        }
 
+        .pa-earn-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 90% 10%, rgba(90, 79, 220, .35), transparent 50%);
+            pointer-events: none;
+        }
 
+        .pa-earn-inner { position: relative; }
 
+        .pa-earn-label {
+            font-size: .72rem;
+            font-weight: 700;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, .65);
+            margin-bottom: 6px;
+        }
+
+        .pa-earn-value {
+            font-size: clamp(1.75rem, 5vw, 2.35rem);
+            font-weight: 800;
+            letter-spacing: -.02em;
+            line-height: 1.1;
+            color: #34D399;
+            margin: 0 0 8px;
+        }
+
+        .pa-earn-note {
+            margin: 0;
+            font-size: .82rem;
+            color: rgba(255, 255, 255, .72);
+            line-height: 1.5;
+        }
+
+        .pa-breakdown {
+            display: grid;
+            gap: 10px;
+        }
+
+        .pa-breakdown-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 14px;
+            border: 1px solid var(--pk-line);
+            border-radius: 10px;
+            background: var(--pk-bg);
+        }
+
+        .pa-breakdown-row b {
+            font-size: .88rem;
+            font-weight: 700;
+        }
+
+        .pa-breakdown-row span {
+            font-size: .82rem;
+            color: var(--pk-muted);
+            font-weight: 600;
+        }
+
+        .pa-breakdown-amt {
+            font-size: .95rem;
+            font-weight: 800;
+            color: var(--pk-violet);
+            white-space: nowrap;
+        }
+
+        .pa-level-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, .14);
+            font-size: .72rem;
+            font-weight: 700;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+        }
+
+        .pa-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 16px;
+        }
+    </style>
 
     <div class="row">
-        <div class="col-md-6 col-xl-3">
-            <a class="block block-rounded block-link-pop" href="javascript:void(0)">
-                <div class="block-content block-content-full d-flex align-items-center justify-content-between">
-                    <div>
-                        <i class="fa fa-2x fa-eye text-primary"></i>
+        <div class="col-12 ph-feed-wrap">
+            <a href="{{ url('timeline/' . $post->id) }}" class="pa-back" wire:navigate>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Back to post
+            </a>
+
+            <div class="pk-app">
+                @include('livewire.user.partials.pk-app-ui')
+
+                <div class="pk-app-hero">
+                    <div class="pk-app-hero-inner">
+                        <span class="pk-app-kicker">Post performance</span>
+                        <h1>Analytics</h1>
+                        <p>Engagement breakdown and estimated earnings for this post. Payouts are validated at month end.</p>
+
+                        <span class="pa-level-pill">{{ userLevel() }} account</span>
+
+                        @if ($postExcerpt !== '')
+                            <div class="pa-post-snippet">{{ $postExcerpt }}</div>
+                        @else
+                            <div class="pa-post-snippet">Media post</div>
+                        @endif
+
+                        <div class="pa-post-meta">
+                            <span>Posted {{ $post->created_at?->format('M j, Y · g:i A') }}</span>
+                            <span>{{ number_format($monetizedEngagement) }} monetized engagements</span>
+                        </div>
+
+                        <div class="pa-actions">
+                            <a href="{{ url('timeline/' . $post->id) }}" class="pk-btn pk-btn--ghost" wire:navigate
+                                style="background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.2);color:#fff">
+                                View post
+                            </a>
+                            <a href="{{ url('timeline') }}" class="pk-btn pk-btn--ghost" wire:navigate
+                                style="background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.2);color:#fff">
+                                Back to feed
+                            </a>
+                        </div>
                     </div>
-                    <div class="ms-3 text-end">
-                        <p class="fs-3 fw-medium mb-0">
-                            {{ $post->views }}
-                        </p>
-                        <p class="text-muted mb-0">
-                            Monetized Views
+                </div>
+
+                <div class="pa-earn-hero">
+                    <div class="pa-earn-inner">
+                        <div class="pa-earn-label">Estimated total earnings</div>
+                        <p class="pa-earn-value">{{ $currency }}{{ number_format($totalEarnings, 2) }}</p>
+                        <p class="pa-earn-note">
+                            Views {{ $currency }}{{ number_format($viewsRevenue, 2) }}
+                            · Likes {{ $currency }}{{ number_format($likesRevenue, 2) }}
+                            · Comments {{ $currency }}{{ number_format($commentsRevenue, 2) }}
                         </p>
                     </div>
                 </div>
-            </a>
-        </div>
-        <div class="col-md-6 col-xl-3">
-            <a class="block block-rounded block-link-pop" href="javascript:void(0)">
-                <div class="block-content block-content-full d-flex align-items-center justify-content-between">
-                    <div>
-                        <i class="far fa-2x fa-eye text-primary"></i>
+
+                <div class="pk-stat-grid">
+                    <article class="pk-stat-card">
+                        <div class="pk-stat-card-icon" style="background:#EEF2FF;color:#4F46E5;">
+                            <i class="fa fa-eye"></i>
+                        </div>
+                        <p class="pk-stat-card-value">{{ number_format($totalViews) }}</p>
+                        <p class="pk-stat-card-label">Total views</p>
+                    </article>
+                    <article class="pk-stat-card">
+                        <div class="pk-stat-card-icon" style="background:#ECFDF5;color:#059669;">
+                            <i class="fa fa-thumbs-up"></i>
+                        </div>
+                        <p class="pk-stat-card-value">{{ number_format($monetizedLikes) }}</p>
+                        <p class="pk-stat-card-label">Monetized likes</p>
+                    </article>
+                    <article class="pk-stat-card">
+                        <div class="pk-stat-card-icon" style="background:var(--pk-violet-soft);color:var(--pk-violet);">
+                            <i class="fa fa-comments"></i>
+                        </div>
+                        <p class="pk-stat-card-value">{{ number_format($totalComments) }}</p>
+                        <p class="pk-stat-card-label">Total comments</p>
+                    </article>
+                    <article class="pk-stat-card">
+                        <div class="pk-stat-card-icon" style="background:#FEF3C7;color:#D97706;">
+                            <i class="fa fa-chart-line"></i>
+                        </div>
+                        <p class="pk-stat-card-value">{{ number_format($monetizedEngagement) }}</p>
+                        <p class="pk-stat-card-label">Monetized engagement</p>
+                    </article>
+                </div>
+
+                <div class="pk-panel">
+                    <div class="pk-panel-head"><h2>Views</h2></div>
+                    <div class="pk-panel-body">
+                        <div class="pk-stat-grid" style="margin-bottom:14px">
+                            <article class="pk-stat-card">
+                                <p class="pk-stat-card-value">{{ number_format($monetizedViews) }}</p>
+                                <p class="pk-stat-card-label">Monetized</p>
+                            </article>
+                            <article class="pk-stat-card">
+                                <p class="pk-stat-card-value">{{ number_format($unmonetizedViews) }}</p>
+                                <p class="pk-stat-card-label">Unmonetized</p>
+                            </article>
+                            <article class="pk-stat-card">
+                                <p class="pk-stat-card-value">{{ number_format($totalViews) }}</p>
+                                <p class="pk-stat-card-label">Total</p>
+                            </article>
+                            <article class="pk-stat-card">
+                                <p class="pk-stat-card-value">{{ $currency }}{{ number_format($viewsRevenue, 2) }}</p>
+                                <p class="pk-stat-card-label">Revenue</p>
+                            </article>
+                        </div>
                     </div>
-                    <div class="ms-3 text-end">
-                        <p class="fs-3 fw-medium mb-0">
-                            {{ $post->views_external }}
-                        </p>
-                        <p class="text-muted mb-0">
-                            Unmonetized Views
+                </div>
+
+                <div class="pk-panel">
+                    <div class="pk-panel-head"><h2>Likes</h2></div>
+                    <div class="pk-panel-body">
+                        <div class="pk-stat-grid" style="margin-bottom:0">
+                            <article class="pk-stat-card">
+                                <p class="pk-stat-card-value">{{ number_format($monetizedLikes) }}</p>
+                                <p class="pk-stat-card-label">Monetized likes</p>
+                            </article>
+                            <article class="pk-stat-card">
+                                <p class="pk-stat-card-value">{{ $currency }}{{ number_format($likesRevenue, 2) }}</p>
+                                <p class="pk-stat-card-label">Revenue</p>
+                            </article>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pk-panel">
+                    <div class="pk-panel-head"><h2>Comments</h2></div>
+                    <div class="pk-panel-body">
+                        <div class="pk-stat-grid" style="margin-bottom:14px">
+                            <article class="pk-stat-card">
+                                <p class="pk-stat-card-value">{{ number_format($monetizedComments) }}</p>
+                                <p class="pk-stat-card-label">Monetized</p>
+                            </article>
+                            <article class="pk-stat-card">
+                                <p class="pk-stat-card-value">{{ number_format($unmonetizedComments) }}</p>
+                                <p class="pk-stat-card-label">Unmonetized</p>
+                            </article>
+                            <article class="pk-stat-card">
+                                <p class="pk-stat-card-value">{{ number_format($totalComments) }}</p>
+                                <p class="pk-stat-card-label">Total</p>
+                            </article>
+                            <article class="pk-stat-card">
+                                <p class="pk-stat-card-value">{{ $currency }}{{ number_format($commentsRevenue, 2) }}</p>
+                                <p class="pk-stat-card-label">Revenue</p>
+                            </article>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pk-panel">
+                    <div class="pk-panel-head"><h2>Revenue breakdown</h2></div>
+                    <div class="pk-panel-body">
+                        <div class="pa-breakdown">
+                            <div class="pa-breakdown-row">
+                                <div>
+                                    <b>Views</b>
+                                    <span>{{ number_format($monetizedViews) }} monetized</span>
+                                </div>
+                                <div class="pa-breakdown-amt">{{ $currency }}{{ number_format($viewsRevenue, 2) }}</div>
+                            </div>
+                            <div class="pa-breakdown-row">
+                                <div>
+                                    <b>Likes</b>
+                                    <span>{{ number_format($monetizedLikes) }} monetized</span>
+                                </div>
+                                <div class="pa-breakdown-amt">{{ $currency }}{{ number_format($likesRevenue, 2) }}</div>
+                            </div>
+                            <div class="pa-breakdown-row">
+                                <div>
+                                    <b>Comments</b>
+                                    <span>{{ number_format($monetizedComments) }} monetized</span>
+                                </div>
+                                <div class="pa-breakdown-amt">{{ $currency }}{{ number_format($commentsRevenue, 2) }}</div>
+                            </div>
+                        </div>
+                        <p class="pk-hint" style="margin-top:14px;margin-bottom:0">
+                            Figures are estimates based on current monetized engagement. Final payout may differ after validation.
                         </p>
                     </div>
                 </div>
-            </a>
-        </div>
-        <div class="col-md-6 col-xl-3">
-            <a class="block block-rounded block-link-pop" href="javascript:void(0)">
-                <div class="block-content block-content-full d-flex align-items-center justify-content-between">
-                    <div>
-                        <i class="fa fa-2x fa-eye text-primary"></i>
-                    </div>
-                    <div class="me-3 text-end">
-                        <p class="fs-3 fw-medium mb-0">
 
-                            {{ sumCounter($post->views, $post->views_external) }}
-                        </p>
-                        <p class="text-muted mb-0">
-                            Total views
-                        </p>
-                    </div>
+                @if (userLevel() === 'Basic')
+                    @include('layouts.upgrade')
+                @endif
 
-                </div>
-            </a>
-        </div>
-        <div class="col-md-6 col-xl-3">
-            <a class="block block-rounded block-link-pop" href="javascript:void(0)">
-                <div class="block-content block-content-full d-flex align-items-center justify-content-between">
-                    <div>
-                        <i class="fa fa-2x fa-dollar text-primary"></i>
-                    </div>
-                    <div class="me-3 text-end">
-                        <p class="fs-3 fw-medium mb-0">
-
-                            {{ getCurrencyCode() }}{{ viewsAmountCalculator($post->id) }}
-                        </p>
-                        <p class="text-muted mb-0">
-                            Views Revenue
-                        </p>
-                    </div>
-
-                </div>
-            </a>
-        </div>
-
-        <div class="col-md-6 col-xl-6">
-            <a class="block block-rounded block-link-shadow bg-primary" href="javascript:void(0)">
-                <div class="block-content block-content-full d-flex align-items-center justify-content-between">
-                    <div>
-                        <i class="fa fa-2x fa-thumbs-up text-primary-lighter"></i>
-                    </div>
-                    <div class="ms-3 text-end">
-                        <p class="text-white fs-3 fw-medium mb-0">
-                            {{ $post->likes == null ? 0 : $post->likes }}
-                        </p>
-                        <p class="text-white-75 mb-0">
-                            Monetized Likes
-                        </p>
-                    </div>
-                </div>
-            </a>
-        </div>
-        {{-- <div class="col-md-6 col-xl-4">
-        <a class="block block-rounded block-link-shadow bg-primary" href="javascript:void(0)">
-          <div class="block-content block-content-full d-flex align-items-center justify-content-between">
-            <div>
-              <i class="fa fa-2x fa-thumbs-down text-primary-lighter"></i>
+                @if (auth()->user()->email_verified_at == null)
+                    @include('layouts.accesscode_verification')
+                @else
+                    @include('layouts.onboarding')
+                @endif
             </div>
-            <div class="ms-3 text-end">
-              <p class="text-white fs-3 fw-medium mb-0">
-                {{ $post->likes_external }}
-              </p>
-              <p class="text-white-75 mb-0">
-                Unmonetized  Likes
-              </p>
-            </div>
-          </div>
-        </a>
-      </div> --}}
-        <div class="col-md-6 col-xl-6">
-            <a class="block block-rounded block-link-shadow bg-primary" href="javascript:void(0)">
-                <div class="block-content block-content-full d-flex align-items-center justify-content-between">
-                    <div>
-                        <i class="fa fa-2x fa-usd text-primary-lighter"></i>
-                    </div>
-                    <div class="ms-3 text-end">
-                        <p class="text-white fs-3 fw-medium mb-0">
-                            {{ getCurrencyCode() }}{{ likesAmountCalculator($post->id) }}
-                        </p>
-                        <p class="text-white-75 mb-0">
-                            Amount
-                        </p>
-                    </div>
-                </div>
-            </a>
         </div>
-
-        <div class="col-md-6 col-xl-3">
-            <a class="block block-rounded block-link-shadow bg-success" href="javascript:void(0)">
-                <div class="block-content block-content-full d-flex align-items-center justify-content-between">
-                    <div>
-                        <i class="far fa-2x fa-comments text-success-light"></i>
-                    </div>
-                    <div class="ms-3 text-end">
-                        <p class="text-white fs-3 fw-medium mb-0">
-                            {{ $post->comments  == null ? 0 : $post->comments }}
-                        </p>
-                        <p class="text-white-75 mb-0">
-                            Monetized Comments
-                        </p>
-                    </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-6 col-xl-3">
-            <a class="block block-rounded block-link-shadow bg-success" href="javascript:void(0)">
-                <div class="block-content block-content-full d-flex align-items-center justify-content-between">
-                    <div>
-                        <i class="far fa-2x fa-comments text-success-light"></i>
-                    </div>
-                    <div class="ms-3 text-end">
-                        <p class="text-white fs-3 fw-medium mb-0">
-                            {{ $post->comment_external == null ? 0 : $post->comment_external }}
-                        </p>
-                        <p class="text-white-75 mb-0">
-                            Unmonetized 
-                        </p>
-                    </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-6 col-xl-3">
-            <a class="block block-rounded block-link-shadow bg-success" href="javascript:void(0)">
-                <div class="block-content block-content-full d-flex align-items-center justify-content-between">
-                    <div>
-                        <i class="far fa-2x fa-comments text-success-light"></i>
-                    </div>
-                    <div class="ms-3 text-end">
-                        <p class="text-white fs-3 fw-medium mb-0">
-                            {{ sumCounter($post->comment_external == null ? 0 : $post->comment_external, $post->comments == null ? 0 : $post->comments) }}
-                        </p>
-                        <p class="text-white-75 mb-0">
-                            Total Comment
-                        </p>
-                    </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-6 col-xl-3">
-            <a class="block block-rounded block-link-shadow bg-success" href="javascript:void(0)">
-                <div class="block-content block-content-full d-flex align-items-center justify-content-between">
-                    <div>
-                        <i class="far fa-2x fa-usd text-success-light"></i>
-                    </div>
-                    <div class="ms-3 text-end">
-                        <p class="text-white fs-3 fw-medium mb-0">
-                            {{ getCurrencyCode() }}{{ commentsAmountCalculator($post->id) }}
-                        </p>
-                        <p class="text-white-75 mb-0">
-                            Comments Revenue
-                        </p>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-
-        <div class="col-md-12">
-            <a class="block block-rounded bg-gd-sublime" href="javascript:void(0)">
-                <div class="block-content block-content-full">
-                    <div class="row text-center">
-                        <div class="col-3 border-end border-black-op">
-                            <div class="py-3">
-                                <div class="item item-circle bg-black-25 mx-auto">
-                                    <i class="fa fa-briefcase text-white"></i>
-                                </div>
-                                <p class="text-white fs-3 fw-medium mt-3 mb-0">
-                                    {{ $post->views == null ? 0 : $post->views }}
-                                </p>
-                                <p class="text-white-75 mb-0">
-                                    Total Monetized Views
-                                </p>
-                            </div>
-                        </div>
-                        <div class="col-3 border-end border-black-op">
-                            <div class="py-3">
-                                <div class="item item-circle bg-black-25 mx-auto">
-                                    <i class="fa fa-chart-line text-white"></i>
-                                </div>
-                                <p class="text-white fs-3 fw-medium mt-3 mb-0">
-                                    {{ $post->likes == null ? 0 : $post->likes }}
-                                </p>
-                                <p class="text-white-75 mb-0">
-                                    Total Monetized Likes
-                                </p>
-                            </div>
-                        </div>
-                        <div class="col-3 border-end border-black-op">
-                            <div class="py-3">
-                                <div class="item item-circle bg-black-25 mx-auto">
-                                    <i class="fa fa-users text-white"></i>
-                                </div>
-                                <p class="text-white fs-3 fw-medium mt-3 mb-0">
-                                    {{ $post->comments == null ? 0 : $post->comments }}
-                                </p>
-                                <p class="text-white-75 mb-0">
-                                    Total Monetized Comments
-                                </p>
-                            </div>
-                        </div>
-                        <div class="col-3">
-                            <div class="py-3">
-                                <div class="item item-circle bg-black-25 mx-auto">
-                                    <i class="fa fa-users text-white"></i>
-                                </div>
-                                <p class="text-white fs-3 fw-medium mt-3 mb-0">
-                                    <?php
-                                    $all = commentsAmountCalculator($post->id) + likesAmountCalculator($post->id) + viewsAmountCalculator($post->id);
-                                    ?>
-                                    {{ getCurrencyCode() }}{{ $all }}
-                                </p>
-                                <p class="text-white-75 mb-0">
-                                    Amount
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        @if(userLevel() == 'Basic')
-
-            @include('layouts.upgrade')
-
-        @endif
-
-
     </div>
-    <!-- END Simple -->
-
-
-    @if(auth()->user()->email_verified_at == null)
-        @include('layouts.accesscode_verification')
-    @else
-
-        @include('layouts.onboarding')
-
-    @endif
 </div>

@@ -12,14 +12,17 @@ use App\Models\CommunityPostComment;
 use App\Models\CommunityPostLike;
 use App\Models\CommunityPostView;
 use App\Models\CommunitySubscription;
+use App\Models\Follow;
 use App\Models\User;
 use App\Support\CommunityFeeCalculator;
+use App\Support\StoredMedia;
 use App\Services\CommunityMembershipService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -92,6 +95,15 @@ class CommunityDetails extends Component
         $this->settingsBillingInterval = $community->billing_interval ?? 'monthly';
     }
 
+    public function setTab(string $tab): void
+    {
+        $allowed = ['feed', 'about', 'members', 'earnings', 'analytics', 'settings'];
+
+        if (in_array($tab, $allowed, true)) {
+            $this->tab = $tab;
+        }
+    }
+
     public function isOwner(): bool
     {
         return $this->community->user_id === auth()->id();
@@ -155,13 +167,7 @@ class CommunityDetails extends Component
 
     public function canDeletePost(string $postId): bool
     {
-        if ($this->isOwnerOrAdmin()) {
-            return true;
-        }
-
-        $post = $this->community->posts()->find($postId);
-
-        return $post && (string) $post->user_id === (string) auth()->id();
+        return $this->isOwnerOrAdmin();
     }
 
     public function canDeleteComment(string $commentId): bool
@@ -300,6 +306,11 @@ class CommunityDetails extends Component
         $this->postsPerPage += self::PAGE_STEP;
     }
 
+    public function openCommunityPhotoViewer(string $postId, int $imageIndex = 0): void
+    {
+        $this->dispatch('openPhotoViewer', postId: $postId, imageIndex: $imageIndex, source: 'community');
+    }
+
     public function toggleLike(string $postId): void
     {
         if (! $this->isMember()) {
@@ -369,12 +380,65 @@ class CommunityDetails extends Component
         }
 
         foreach ($post->media as $item) {
-            \Illuminate\Support\Facades\Storage::disk('spaces')->delete($item->path);
+            StoredMedia::delete($item->path);
         }
 
         $post->delete();
 
         session()->flash('status', 'Post deleted.');
+    }
+
+    public function toggleFollowAuthor(string $userId): void
+    {
+        if (! auth()->check() || auth()->id() === $userId) {
+            return;
+        }
+
+        $targetUser = User::find($userId);
+
+        if (! $targetUser) {
+            return;
+        }
+
+        $authUser = auth()->user();
+
+        if ($authUser->isFollowing($targetUser)) {
+            Follow::where([
+                'follower_id' => $authUser->id,
+                'following_id' => $targetUser->id,
+            ])->delete();
+
+            if ($authUser->following > 0) {
+                $authUser->decrement('following');
+            }
+
+            if ($targetUser->followers > 0) {
+                $targetUser->decrement('followers');
+            }
+        } else {
+            Follow::firstOrCreate([
+                'follower_id' => $authUser->id,
+                'following_id' => $targetUser->id,
+            ]);
+
+            $authUser->increment('following');
+            $targetUser->increment('followers');
+        }
+    }
+
+    public function reportCommunityPost(string $postId): void
+    {
+        if (! auth()->check()) {
+            return;
+        }
+
+        $exists = $this->community->posts()->where('id', $postId)->exists();
+
+        if (! $exists) {
+            return;
+        }
+
+        session()->flash('status', 'Post reported. Thanks for letting us know.');
     }
 
     public function deleteComment(string $commentId): void
@@ -844,7 +908,11 @@ class CommunityDetails extends Component
             $this->settingsFeePayer = 'creator';
             $this->settingsBillingType = 'subscription';
             $this->settingsBillingInterval = 'monthly';
+
+            return;
         }
+
+        $this->normalizePaidBillingDefaults();
     }
 
     public function updatedSettingsBillingType(): void
@@ -853,6 +921,18 @@ class CommunityDetails extends Component
             $this->settingsBillingInterval = null;
         } elseif (empty($this->settingsBillingInterval)) {
             $this->settingsBillingInterval = 'monthly';
+        }
+    }
+
+    private function normalizePaidBillingDefaults(): void
+    {
+        if ($this->settingsType !== 'paid') {
+            return;
+        }
+
+        if (userBaseCurrency() === 'NGN' && $this->community->billing_type !== 'subscription') {
+            $this->settingsBillingType = 'one_off';
+            $this->settingsBillingInterval = null;
         }
     }
 
@@ -968,11 +1048,7 @@ class CommunityDetails extends Component
 
     private function deleteStoredAsset(?string $path): void
     {
-        if (! $path) {
-            return;
-        }
-
-        Storage::disk('spaces')->delete($path);
+        StoredMedia::delete($path);
     }
 
     private function uniqueSlug(string $name, ?string $exceptId = null): string
@@ -997,30 +1073,59 @@ class CommunityDetails extends Component
             return;
         }
 
+        $this->tab = 'settings';
+
+        if ($this->settingsType !== 'paid') {
+            $this->settingsMonthlyFee = null;
+        } else {
+            $this->normalizePaidBillingDefaults();
+        }
+
         $isPaid = $this->settingsType === 'paid';
         $isSubscription = $isPaid && $this->settingsBillingType === 'subscription';
+        $minimumPrice = communityMinimumPrice($this->community->currency ?? userBaseCurrency());
 
-        $validated = $this->validate([
-            'settingsName' => ['required', 'string', 'max:255'],
-            'settingsDescription' => ['required', 'string', 'max:1000'],
-            'settingsCategoryId' => ['required', 'exists:community_categories,id'],
-            'settingsType' => ['required', Rule::in(['public', 'private', 'paid', 'approval'])],
-            'settingsMonthlyFee' => [
-                'required_if:settingsType,paid',
-                'nullable',
-                'numeric',
-                'min:'.communityMinimumPrice($this->community->currency ?? userBaseCurrency()),
-            ],
-            'settingsFeePayer' => ['required_if:settingsType,paid', 'nullable', Rule::in(['creator', 'members'])],
-            'settingsBillingType' => ['required_if:settingsType,paid', 'nullable', Rule::in(['one_off', 'subscription'])],
-            'settingsBillingInterval' => [
-                'required_if:settingsBillingType,subscription',
-                'nullable',
-                Rule::in(array_keys($this->billingIntervals)),
-            ],
-            'settingsLogo' => ['nullable', 'image', 'max:4096'],
-            'settingsBanner' => ['nullable', 'image', 'max:6144'],
-        ]);
+        try {
+            $validated = $this->validate([
+                'settingsName' => ['required', 'string', 'max:255'],
+                'settingsDescription' => ['required', 'string', 'max:1000'],
+                'settingsCategoryId' => ['required', 'exists:community_categories,id'],
+                'settingsType' => ['required', Rule::in(['public', 'private', 'paid', 'approval'])],
+                'settingsMonthlyFee' => [
+                    Rule::excludeIf(! $isPaid),
+                    'required',
+                    'numeric',
+                    'min:'.$minimumPrice,
+                ],
+                'settingsFeePayer' => [
+                    Rule::excludeIf(! $isPaid),
+                    'required',
+                    Rule::in(['creator', 'members']),
+                ],
+                'settingsBillingType' => [
+                    Rule::excludeIf(! $isPaid),
+                    'required',
+                    Rule::in(['one_off', 'subscription']),
+                ],
+                'settingsBillingInterval' => [
+                    Rule::excludeIf(! $isSubscription),
+                    'required',
+                    Rule::in(array_keys($this->billingIntervals)),
+                ],
+            ], [], [
+                'settingsName' => 'community name',
+                'settingsDescription' => 'description',
+                'settingsCategoryId' => 'category',
+                'settingsType' => 'privacy type',
+                'settingsMonthlyFee' => 'price',
+                'settingsFeePayer' => 'fee payer',
+                'settingsBillingType' => 'billing type',
+                'settingsBillingInterval' => 'billing interval',
+            ]);
+        } catch (ValidationException $e) {
+            $this->dispatch('settings-scroll-to-errors');
+            throw $e;
+        }
 
         $data = [
             'name' => $validated['settingsName'],
@@ -1057,9 +1162,10 @@ class CommunityDetails extends Component
         }
 
         $this->reset(['settingsLogo', 'settingsBanner']);
-        $this->dispatch('settings-saved');
 
         session()->flash('status', 'Community settings updated.');
+
+        $this->redirectRoute('community.show', $this->community, navigate: true);
     }
 
     public function archiveCommunity(): void
@@ -1145,6 +1251,9 @@ class CommunityDetails extends Component
 
     public function render()
     {
+        $this->community->loadMissing(['category', 'user']);
+        $this->community->loadCount(['members', 'posts']);
+
         $postsQuery = $this->community->posts()
             ->with(['user', 'media', 'comments.user'])
             ->withExists(['likes as liked_by_me' => fn ($q) => $q->where('user_id', auth()->id())])
@@ -1165,12 +1274,21 @@ class CommunityDetails extends Component
             ? CommunityInviteController::activeLinkInvite($this->community)
             : null;
 
+        $followingAuthorIds = collect();
+
+        if (auth()->check() && $posts->count() > 0) {
+            $authorIds = $posts->pluck('user_id')->unique()->filter();
+            $followingAuthorIds = auth()->user()->following()
+                ->whereIn('following_id', $authorIds)
+                ->pluck('following_id');
+        }
+
         $members = $this->canViewMembers()
             ? $this->community->members()
             ->when($this->memberSearch !== '', function ($q) {
                 $q->where(function ($qq) {
                     $qq->where('name', 'like', "%{$this->memberSearch}%")
-                        ->orWhere('email', 'like', "%{$this->memberSearch}%");
+                        ->orWhere('username', 'like', "%{$this->memberSearch}%");
                 });
             })
             ->orderByDesc('community_users.created_at')
@@ -1185,6 +1303,7 @@ class CommunityDetails extends Component
                 ? $this->community->pendingJoinRequests()->with('user')->get()
                 : collect(),
             'categories' => CommunityCategory::all(),
+            'followingAuthorIds' => $followingAuthorIds,
             'inviteLinkUrl' => $linkInvite ? route('community.invite.accept', $linkInvite->token) : null,
             'pendingDirectInvites' => $this->isOwnerOrAdmin() && $this->community->type === 'private'
                 ? CommunityInvite::where('community_id', $this->community->id)

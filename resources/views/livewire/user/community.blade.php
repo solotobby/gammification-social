@@ -3,6 +3,8 @@
 
     @include('livewire.user.partials.community-ui')
 
+    <div class="row">
+        <div class="col-md-8 ph-feed-wrap">
     <div class="communities-page position-relative">
         <div class="pk-ui-bg" aria-hidden="true"></div>
         <div class="pk-ui-inner">
@@ -232,53 +234,18 @@
                     margin-bottom: 3px
                 }
 
-                .communities-page .pk-pagination {
+                .communities-page .pk-load-more-row {
                     display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    gap: 10px;
-                    margin-top: 18px;
-                    padding: 14px 18px;
-                    border: 1px solid var(--pk-line);
-                    border-radius: var(--pk-r-md);
-                    background: #fff;
-                    flex-wrap: wrap;
-                }
-
-                .communities-page .pk-pg-info {
-                    font-size: .8rem;
-                    color: var(--pk-gray-500);
-                }
-
-                .communities-page .pk-pg-btns {
-                    display: flex;
+                    flex-direction: column;
                     align-items: center;
                     gap: 8px;
+                    margin-top: 18px;
+                    padding-bottom: 8px;
                 }
 
-                .communities-page .pk-pg-current {
-                    font-size: .8rem;
-                    font-weight: 600;
-                    color: var(--pk-gray-700);
-                }
-
-                .communities-page .pk-pg-btn {
-                    min-width: 36px;
-                    height: 36px;
-                    padding: 0 12px;
-                    border-radius: 8px;
-                    border: 1px solid var(--pk-line);
-                    background: #fff;
-                    font-family: inherit;
-                    font-size: .82rem;
-                    font-weight: 700;
-                    cursor: pointer;
-                    color: var(--pk-ink);
-                }
-
-                .communities-page .pk-pg-btn:disabled {
-                    opacity: .45;
-                    cursor: not-allowed;
+                .communities-page .pk-load-more-count {
+                    font-size: .78rem;
+                    color: var(--pk-gray-500);
                 }
 
                 .communities-page .pk-comm-card {
@@ -293,15 +260,25 @@
                 }
 
                 .communities-page .pk-cc-icon {
-                    width: 42px;
-                    height: 42px;
-                    border-radius: var(--pk-r-md);
+                    width: 56px;
+                    height: 56px;
+                    border-radius: 50%;
                     display: grid;
                     place-items: center;
                     color: #fff;
                     font-weight: 800;
-                    font-size: .9rem;
-                    flex: none
+                    font-size: .85rem;
+                    flex: none;
+                    overflow: hidden;
+                    border: 2px solid #fff;
+                    box-shadow: 0 2px 8px rgba(15, 17, 23, .08);
+                }
+
+                .communities-page .pk-cc-icon img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    display: block;
                 }
 
                 .communities-page .pk-cc-head-txt {
@@ -365,7 +342,11 @@
                     font-size: .86rem;
                     color: var(--pk-gray-700);
                     margin: 10px 0 12px;
-                    line-height: 1.55
+                    line-height: 1.5;
+                    display: -webkit-box;
+                    -webkit-line-clamp: 2;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
                 }
 
                 .communities-page .pk-cc-foot {
@@ -447,15 +428,23 @@
                 }
 
                 .communities-page .pk-tr-ic {
-                    width: 32px;
-                    height: 32px;
-                    border-radius: var(--pk-r-sm);
+                    width: 36px;
+                    height: 36px;
+                    border-radius: 50%;
                     display: grid;
                     place-items: center;
                     color: #fff;
                     font-weight: 700;
                     font-size: .7rem;
-                    flex: none
+                    flex: none;
+                    overflow: hidden;
+                }
+
+                .communities-page .pk-tr-ic img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    display: block;
                 }
 
                 .communities-page .pk-tr-info {
@@ -956,10 +945,6 @@
             </div>
         </div>
 
-        <div class="row g-3 g-lg-4">
-
-            {{-- ============ FEED COLUMN ============ --}}
-            <main class="col-12 col-lg-8 order-2 order-lg-1">
                 <div class="pk-sec-head">
                     <h3>All communities</h3>
                 </div>
@@ -998,7 +983,13 @@
                                     class="d-flex align-items-start gap-3 flex-grow-1 text-decoration-none text-reset"
                                     style="min-width:0">
                                     <div class="pk-cc-icon" style="background:{{ $community->color }}">
-                                        {{ $community->initials }}</div>
+                                        @if ($community->image)
+                                            <img src="{{ Illuminate\Support\Facades\Storage::disk('spaces')->url($community->image) }}"
+                                                alt="{{ $community->name }}">
+                                        @else
+                                            {{ $community->initials }}
+                                        @endif
+                                    </div>
                                     <div class="pk-cc-head-txt">
                                         <div class="pk-cc-name">{{ $community->name }}</div>
                                         <div class="pk-cc-meta">{{ $community->category->name ?? 'Uncategorised' }} ·
@@ -1051,13 +1042,17 @@
                                 @endswitch
                             </div>
 
-                            <p class="pk-cc-desc">{{ Str::limit($community->description, 140) }}</p>
+                            <p class="pk-cc-desc">{{ Str::limit($community->description, 100) }}</p>
 
                             <div class="pk-cc-foot">
                                 <span class="pk-cc-members">{{ number_format($community->members_count) }}
                                     members</span>
 
                                 <div class="d-flex flex-wrap gap-2 justify-content-end">
+                                @unless ($community->archived_at)
+                                    <a href="{{ $community->public_url }}" target="_blank" rel="noopener"
+                                        class="pk-btn pk-btn-outline pk-btn-sm">Public link</a>
+                                @endunless
                                 @if ($community->is_member)
                                     <button type="button" class="pk-btn pk-btn-outline pk-btn-sm" disabled>
                                         {{ $community->type === 'private' ? 'Invite only' : 'Joined' }}
@@ -1112,90 +1107,26 @@
 
                     </div>
 
-                    @if ($communities->hasPages())
-                        <div class="pk-pagination">
-                            <div class="pk-pg-info">
-                                Showing {{ $communities->firstItem() }}–{{ $communities->lastItem() }} of {{ number_format($communities->total()) }} communities
-                            </div>
-                            <div class="pk-pg-btns">
-                                <button type="button" class="pk-pg-btn" wire:click="previousPage"
-                                    wire:loading.attr="disabled" wire:target="previousPage,nextPage,gotoPage"
-                                    @disabled($communities->onFirstPage())>Prev</button>
-                                <span class="pk-pg-current">Page {{ $communities->currentPage() }} of {{ $communities->lastPage() }}</span>
-                                <button type="button" class="pk-pg-btn" wire:click="nextPage"
-                                    wire:loading.attr="disabled" wire:target="previousPage,nextPage,gotoPage"
-                                    @disabled(! $communities->hasMorePages())>Next</button>
-                            </div>
+                    @if ($hasMoreCommunities)
+                        <div class="pk-load-more-row">
+                            <span class="pk-load-more-count">
+                                Showing {{ number_format($communities->count()) }} of {{ number_format($totalCommunities) }} communities
+                            </span>
+                            <button type="button" class="pk-btn pk-btn-outline"
+                                wire:click="loadMoreCommunities"
+                                wire:loading.attr="disabled"
+                                wire:target="loadMoreCommunities">
+                                <span wire:loading.remove wire:target="loadMoreCommunities">Load more</span>
+                                <span wire:loading wire:target="loadMoreCommunities">Loading…</span>
+                            </button>
+                        </div>
+                    @elseif ($communities->isNotEmpty() && $totalCommunities > 0)
+                        <div class="pk-load-more-row">
+                            <span class="pk-load-more-count">
+                                Showing all {{ number_format($totalCommunities) }} communities
+                            </span>
                         </div>
                     @endif
-                </main>
-
-                {{-- ============ RIGHT RAIL ============ --}}
-                <aside class="col-12 col-lg-4 order-1 order-lg-2 d-flex flex-column gap-3">
-                    <div class="pk-card pk-rail-card">
-                        <div class="pk-rc-head">
-                            <span class="pk-t">
-                                <svg viewBox="0 0 24 24" fill="currentColor">
-                                    <path
-                                        d="M13.5 2.5c1 3-1 4.5-2 6-1.3 2-1.5 3.5-.5 5a3 3 0 0 0 5.7-1.2c.9.9 1.3 2 1.3 3.2a6 6 0 0 1-12 0c0-4 2.6-6 3.3-8.4.4-1.4.2-3-.8-4.6Z" />
-                                </svg>
-                                Trending Communities
-                            </span>
-                            <span class="pk-sub">Top {{ $trending->count() }}</span>
-                        </div>
-                        @forelse ($trending as $i => $trendingCommunity)
-                            <div class="pk-tr-row" wire:key="trending-{{ $trendingCommunity->id }}">
-                                <span class="pk-tr-rank">{{ $i + 1 }}</span>
-                                <div class="pk-tr-ic" style="background:{{ $trendingCommunity->color }}">
-                                    {{ $trendingCommunity->initials }}</div>
-                                <div class="pk-tr-info">
-                                    <div class="pk-n">{{ $trendingCommunity->name }}</div>
-                                    <div class="pk-m">{{ number_format($trendingCommunity->members_count) }} members
-                                    </div>
-                                </div>
-                            </div>
-                        @empty
-                            <div class="pk-tr-row"><span class="pk-m">No communities yet.</span></div>
-                        @endforelse
-                    </div>
-
-                    <div class="pk-card pk-rail-card">
-                        <div class="pk-rc-head">
-                            <span class="pk-t">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <circle cx="8" cy="8" r="3" />
-                                    <circle cx="17" cy="9" r="2.5" />
-                                    <path d="M2 20a6.5 6.5 0 0 1 12 0M14 20a5 5 0 0 1 8-3.8" />
-                                </svg>
-                                Suggested for you
-                            </span>
-                        </div>
-                        @forelse ($suggested as $suggestedCommunity)
-                            <div class="pk-tr-row" wire:key="suggested-{{ $suggestedCommunity->id }}">
-                                <div class="pk-tr-ic" style="background:{{ $suggestedCommunity->color }}">
-                                    {{ $suggestedCommunity->initials }}</div>
-                                <div class="pk-tr-info">
-                                    <div class="pk-n">{{ $suggestedCommunity->name }}</div>
-                                    <div class="pk-m">{{ number_format($suggestedCommunity->members_count) }} members
-                                    </div>
-                                </div>
-                                <button type="button" class="pk-tr-add"
-                                    wire:click="join('{{ $suggestedCommunity->id }}')" wire:loading.attr="disabled"
-                                    wire:target="join('{{ $suggestedCommunity->id }}')"
-                                    aria-label="Join {{ $suggestedCommunity->name }}">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
-                                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                                        <circle cx="9" cy="7" r="4" />
-                                        <path d="M20 8v6M23 11h-6" />
-                                    </svg>
-                                </button>
-                            </div>
-                        @empty
-                            <div class="pk-tr-row"><span class="pk-m">Nothing to suggest right now.</span></div>
-                        @endforelse
-                    </div>
-                </aside>
-            </div>
 
         </div>{{-- /.pk-ui-inner --}}
 
@@ -1222,28 +1153,50 @@
                                 aria-label="Close"></button>
                         </div>
 
-                        <form wire:submit.prevent="createCommunity">
+                        <form wire:submit.prevent="createCommunity"
+                            wire:loading.class="is-saving"
+                            wire:target="createCommunity">
                             <div class="modal-body">
-                                <div class="pk-field">
+                                @if ($creatorCurrency)
+                                    <div class="pk-modal-note pk-currency-note">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <circle cx="12" cy="12" r="10" />
+                                            <path d="M12 6v12M9 9h4.5a2.5 2.5 0 0 1 0 5H9" />
+                                        </svg>
+                                        This community will be created in your wallet currency:
+                                        <strong>{{ $creatorCurrency }}</strong>.
+                                        Paid community prices use the same currency as your wallet.
+                                        @if ($type === 'paid')
+                                            All amounts below are in {{ getCurrencyCode($creatorCurrency) }}.
+                                        @endif
+                                    </div>
+                                @else
+                                    <div class="pk-alert pk-alert-error" style="margin-bottom:14px">
+                                        Set up an active wallet currency before creating a community.
+                                    </div>
+                                @endif
+
+                                <div class="pk-field @error('name') is-invalid @enderror">
                                     <label for="cName">Community name</label>
-                                    <input type="text" id="cName" maxlength="255" wire:model.blur="name"
+                                    <input type="text" id="cName" maxlength="255" wire:model="name"
                                         placeholder="e.g. Side Hustle Naija" />
                                     @error('name')
                                         <div class="pk-field-error">{{ $message }}</div>
                                     @enderror
                                 </div>
 
-                                <div class="pk-field">
+                                <div class="pk-field @error('description') is-invalid @enderror">
                                     <label for="cDesc">Description <span
-                                            class="pk-cnt">{{ strlen($description) }}/1000</span></label>
-                                    <textarea id="cDesc" maxlength="1000" wire:model.live.debounce.300ms="description"
-                                        placeholder="What's this community for, and who should join?"></textarea>
+                                            class="pk-cnt" id="cDescCount">{{ strlen($description) }}/1000</span></label>
+                                    <textarea id="cDesc" maxlength="1000" wire:model="description"
+                                        placeholder="What's this community for, and who should join?"
+                                        oninput="document.getElementById('cDescCount').textContent = this.value.length + '/1000'"></textarea>
                                     @error('description')
                                         <div class="pk-field-error">{{ $message }}</div>
                                     @enderror
                                 </div>
 
-                                <div class="pk-field">
+                                <div class="pk-field @error('community_categories_id') is-invalid @enderror">
                                     <label for="cCat">Category</label>
                                     <select id="cCat" wire:model="community_categories_id">
                                         <option value="" disabled selected>Select a category</option>
@@ -1357,14 +1310,14 @@
                                             @php($preview = $this->feePreview())
 
                                             <div class="pk-currency-input">
-                                                <span>{{ getCurrencyCode() }}</span>
+                                                <span>{{ getCurrencyCode($creatorCurrency) }}</span>
                                                 <input type="number" id="cFee"
-                                                    min="{{ communityMinimumPrice() }}"
-                                                    step="{{ userBaseCurrency() === 'USD' ? 1 : 50 }}"
+                                                    min="{{ communityMinimumPrice($creatorCurrency) }}"
+                                                    step="{{ communityPriceStep($creatorCurrency) }}"
                                                     wire:model.live.debounce.400ms="monthly_fee"
-                                                    placeholder="{{ userBaseCurrency() === 'USD' ? 10 : 2500 }}" />
+                                                    placeholder="{{ number_format(communityMinimumPrice($creatorCurrency), communityPriceDecimals($creatorCurrency)) }}" />
                                             </div>
-                                            <div class="pk-field-hint">Minimum {{ getCurrencyCode() }}{{ number_format(communityMinimumPrice(), userBaseCurrency() === 'USD' ? 2 : 0) }}</div>
+                                            <div class="pk-field-hint">Minimum {{ getCurrencyCode($creatorCurrency) }}{{ number_format(communityMinimumPrice($creatorCurrency), communityPriceDecimals($creatorCurrency)) }}</div>
 
                                             @error('monthly_fee')
                                                 <div class="pk-field-error">{{ $message }}</div>
@@ -1422,21 +1375,21 @@
                                                     <div class="pk-fp-row">
                                                         <span>Members pay{{ $preview['suffix'] }}</span>
                                                         <b>
-                                                            {{ getCurrencyCode() }}{{ number_format($preview['memberCharge'], 2) }}
+                                                            {{ getCurrencyCode($creatorCurrency) }}{{ number_format($preview['memberCharge'], 2) }}
                                                         </b>
                                                     </div>
 
                                                     <div class="pk-fp-row">
                                                         <span>Payhankey fee ({{ $platformFeePercent }}%)</span>
                                                         <b>
-                                                            {{ getCurrencyCode() }}{{ number_format($preview['platformCut'], 2) }}
+                                                            {{ getCurrencyCode($creatorCurrency) }}{{ number_format($preview['platformCut'], 2) }}
                                                         </b>
                                                     </div>
 
                                                     <div class="pk-fp-row pk-fp-total">
                                                         <span>You receive{{ $preview['suffix'] }}</span>
                                                         <b>
-                                                            {{ getCurrencyCode() }}{{ number_format($preview['creatorPayout'], 2) }}
+                                                            {{ getCurrencyCode($creatorCurrency) }}{{ number_format($preview['creatorPayout'], 2) }}
                                                         </b>
                                                     </div>
                                                 </div>
@@ -1475,9 +1428,10 @@
                                 <button type="button" class="pk-btn pk-btn-outline" data-bs-dismiss="modal"
                                     wire:click="resetForm">Cancel</button>
                                 <button type="submit" class="pk-btn pk-btn-violet" wire:loading.attr="disabled"
-                                    wire:target="createCommunity">
+                                    wire:target="createCommunity"
+                                    @disabled(! $creatorCurrency)>
                                     <span wire:loading.remove wire:target="createCommunity">Create community</span>
-                                    <span wire:loading wire:target="createCommunity">Creating…</span>
+                                    <span wire:loading wire:target="createCommunity"><span class="pk-spinner" aria-hidden="true"></span>Creating…</span>
                                 </button>
                             </div>
                         </form>
@@ -1500,4 +1454,81 @@
             </script>
 
     </div>{{-- /.communities-page --}}
+        </div>{{-- /.col-md-8 --}}
+
+        <aside class="col-md-4 mt-3 communities-page d-flex flex-column gap-3">
+            <div class="pk-card pk-rail-card">
+                <div class="pk-rc-head">
+                    <span class="pk-t">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M13.5 2.5c1 3-1 4.5-2 6-1.3 2-1.5 3.5-.5 5a3 3 0 0 0 5.7-1.2c.9.9 1.3 2 1.3 3.2a6 6 0 0 1-12 0c0-4 2.6-6 3.3-8.4.4-1.4.2-3-.8-4.6Z" />
+                        </svg>
+                        Trending Communities
+                    </span>
+                    <span class="pk-sub">Top {{ $trending->count() }}</span>
+                </div>
+                @forelse ($trending as $i => $trendingCommunity)
+                    <div class="pk-tr-row" wire:key="trending-{{ $trendingCommunity->id }}">
+                        <span class="pk-tr-rank">{{ $i + 1 }}</span>
+                        <div class="pk-tr-ic" style="background:{{ $trendingCommunity->color }}">
+                            @if ($trendingCommunity->image)
+                                <img src="{{ Illuminate\Support\Facades\Storage::disk('spaces')->url($trendingCommunity->image) }}"
+                                    alt="">
+                            @else
+                                {{ $trendingCommunity->initials }}
+                            @endif
+                        </div>
+                        <div class="pk-tr-info">
+                            <div class="pk-n">{{ $trendingCommunity->name }}</div>
+                            <div class="pk-m">{{ number_format($trendingCommunity->members_count) }} members</div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="pk-tr-row"><span class="pk-m">No communities yet.</span></div>
+                @endforelse
+            </div>
+
+            <div class="pk-card pk-rail-card">
+                <div class="pk-rc-head">
+                    <span class="pk-t">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="8" cy="8" r="3" />
+                            <circle cx="17" cy="9" r="2.5" />
+                            <path d="M2 20a6.5 6.5 0 0 1 12 0M14 20a5 5 0 0 1 8-3.8" />
+                        </svg>
+                        Suggested for you
+                    </span>
+                </div>
+                @forelse ($suggested as $suggestedCommunity)
+                    <div class="pk-tr-row" wire:key="suggested-{{ $suggestedCommunity->id }}">
+                        <div class="pk-tr-ic" style="background:{{ $suggestedCommunity->color }}">
+                            @if ($suggestedCommunity->image)
+                                <img src="{{ Illuminate\Support\Facades\Storage::disk('spaces')->url($suggestedCommunity->image) }}"
+                                    alt="">
+                            @else
+                                {{ $suggestedCommunity->initials }}
+                            @endif
+                        </div>
+                        <div class="pk-tr-info">
+                            <div class="pk-n">{{ $suggestedCommunity->name }}</div>
+                            <div class="pk-m">{{ number_format($suggestedCommunity->members_count) }} members</div>
+                        </div>
+                        <button type="button" class="pk-tr-add"
+                            wire:click="join('{{ $suggestedCommunity->id }}')" wire:loading.attr="disabled"
+                            wire:target="join('{{ $suggestedCommunity->id }}')"
+                            aria-label="Join {{ $suggestedCommunity->name }}">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                                <circle cx="9" cy="7" r="4" />
+                                <path d="M20 8v6M23 11h-6" />
+                            </svg>
+                        </button>
+                    </div>
+                @empty
+                    <div class="pk-tr-row"><span class="pk-m">Nothing to suggest right now.</span></div>
+                @endforelse
+            </div>
+        </aside>
+    </div>{{-- /.row --}}
 </div>

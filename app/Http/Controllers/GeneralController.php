@@ -13,8 +13,6 @@ use App\Models\EngagementDailyStat;
 use App\Models\EngagementMonthlyStat;
 use App\Models\FremiumEngagementStat;
 use App\Models\Level;
-use App\Models\Partner;
-use App\Models\PartnerSlot;
 use App\Models\Payout;
 use App\Models\Post;
 use App\Models\SubscriptionStat;
@@ -440,41 +438,6 @@ class GeneralController extends Controller
 
         return  back();
     }
-
-    // public function partner(Request $request){
-
-    //     $validated = $request->validate([
-    //         'email' => 'bail|required|email|unique:partners|max:255',
-    //         'name' => 'required|string',
-    //         'phone' => 'required|numeric',
-    //         'identification' => 'required|string',
-    //         'country' => 'required|string',
-    //     ]);
-
-    //     Partner::create(['name' => $validated['name'], 'email' => $validated['email'], 'phone' => $validated['phone'], 'identification' => $validated['identification'], 'country' => $validated['country']]);
-
-    //     return back()->with('success', 'You have successfully applied to become a Partner on Payhankey. An email has been sent to you for a short video call');
-
-    // }
-
-    public function viewPartner()
-    {
-        $partners = Partner::all(); //->firstOrFail();
-        // $codes = AccessCode::where(['partner_id'=> $id, 'is_active' => true])->get();
-        return view('view_partner', ['partners' => $partners]);
-    }
-
-    public function viewPartnerActivate($id)
-    {
-        $part = Partner::find($id);
-        $part->status = true;
-        $part->save();
-
-        PartnerSlot::create(['partner_id' => $id, 'beginner' => 0, 'creator' => 0, 'influencer' => 0]);
-
-        return redirect('partners/listed/lots');
-    }
-
 
     public function loadMoreComments(Request $request)
     {

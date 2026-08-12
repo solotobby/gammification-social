@@ -979,11 +979,13 @@
             {{-- ===== Feed ===== --}}
             <div class="ph-feed-head">Your feed</div>
 
-            @forelse (@$posts as $post)
+            @forelse ($posts as $post)
                 <livewire:user.post-content
                     :post="$post"
                     :estimated-earnings="$earnings[$post->id] ?? 0"
-                    :wire:key="'post-'.$post->id" />
+                    :format-text="false"
+                    :show-post-menu="true"
+                    wire:key="post-{{ $post->id }}" />
             @empty
                 <div class="ph-empty">
                     <div class="ph-empty-ic"><i class="fa fa-feather-alt"></i></div>

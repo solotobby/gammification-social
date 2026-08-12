@@ -3,7 +3,7 @@
 @section('content')
 
 <div class="row">
-    <div class="col-md-8">
+    <div class="col-12">
         @if($timeline)
         <div wire:poll.visible.2s class="block block-rounded block-bordered" id="timelines">
             <div class="block-header block-header-default">
@@ -215,7 +215,6 @@
                     });
                 }
         </script>
-    @include('layouts.engagement')
 </div>
 
 @endsection

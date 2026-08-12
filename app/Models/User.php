@@ -73,11 +73,6 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(Wallet::class, 'user_id');
     }
 
-    public function partner()
-    {
-        return $this->hasOne(Partner::class, 'user_id');
-    }
-
     public function posts()
     {
         return $this->hasMany(Post::class);
@@ -237,6 +232,16 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isFollowing(User $user): bool
     {
         return $this->following()->where('following_id', $user->id)->exists();
+    }
+
+    public function bookmarkedPosts()
+    {
+        return $this->belongsToMany(
+            Post::class,
+            'post_bookmarks',
+            'user_id',
+            'post_id'
+        )->withTimestamps();
     }
 
 

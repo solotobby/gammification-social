@@ -61,7 +61,14 @@ return [
     |--------------------------------------------------------------------------
     | Minimum sticker price for paid communities (by currency)
     |--------------------------------------------------------------------------
+    |
+    | Optional per-currency overrides. Any active Payhankey currency without
+    | an entry here gets a minimum derived from default_minimum_usd using
+    | live exchange rates.
+    |
     */
+
+    'default_minimum_usd' => 5,
 
     'minimum_prices' => [
         'NGN' => 500,

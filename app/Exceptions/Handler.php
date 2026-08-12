@@ -3,6 +3,8 @@
 namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Session\TokenMismatchException;
+use Illuminate\Support\Facades\Route;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -25,6 +27,22 @@ class Handler extends ExceptionHandler
     {
         $this->reportable(function (Throwable $e) {
             //
+        });
+
+        // Expired CSRF/session on login (and other forms) → friendly redirect, not Whoops/419.
+        $this->renderable(function (TokenMismatchException $e, $request) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'message' => 'Your session expired. Please refresh and try again.',
+                ], 419);
+            }
+
+            $loginUrl = Route::has('login') ? route('login') : url('/login');
+
+            return redirect()
+                ->to($request->headers->get('referer') ?: $loginUrl)
+                ->withInput($request->except('password', 'password_confirmation', '_token'))
+                ->with('error', 'Your session expired. Please try again.');
         });
     }
 }

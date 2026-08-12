@@ -2,7 +2,7 @@
     {{-- Knowing others is intelligence; knowing yourself is true wisdom. --}}
 
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-12">
             <div wire:poll.visible.420s class="block block-rounded block-bordered" id="timelines">
                 <div class="block-header block-header-default">
                     <div>
@@ -322,9 +322,6 @@
                 });
             });
         </script>
-
-
-        @include('layouts.engagement')
     </div>
 
     @if (auth()->user()->email_verified_at == null)

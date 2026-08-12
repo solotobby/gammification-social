@@ -214,7 +214,7 @@
     .cp .cp-avatar {
         width: 96px;
         height: 96px;
-        border-radius: 22px;
+        border-radius: 50%;
         margin: 0 auto;
         display: grid;
         place-items: center;

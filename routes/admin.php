@@ -4,13 +4,18 @@ use App\Http\Controllers\Admin\AccessCodeController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\BlogController as AdminBlogController;
+use App\Http\Controllers\Admin\BookmarkAnalyticsController;
 use App\Http\Controllers\Admin\CommunityController;
+use App\Http\Controllers\Admin\CurrencyController;
+use App\Http\Controllers\Admin\FinanceController;
 use App\Http\Controllers\Admin\LevelManagementController;
 use App\Http\Controllers\Admin\MonthlyPayoutController;
-use App\Http\Controllers\Admin\PartnerController;
 use App\Http\Controllers\Admin\PayoutController;
+use App\Http\Controllers\Admin\PostController;
+use App\Http\Controllers\Admin\PostReportController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\UserEngagementController;
+use App\Http\Controllers\Admin\VideoController;
 use App\Http\Controllers\Admin\WithdrawalController;
 use App\Http\Controllers\AdminLoginController;
 use Illuminate\Support\Facades\Route;
@@ -69,14 +74,42 @@ Route::middleware(['auth', 'admin'])
             Route::post('send', [AccessCodeController::class, 'processValidateCode'])->name('store');
         });
 
-        Route::post('partners/{partner}/virtual-account', [PartnerController::class, 'generateVirtualAccount'])->name('partners.virtual-account');
-
         Route::prefix('blog')->name('blog.')->group(function () {
             Route::get('/', [AdminBlogController::class, 'list'])->name('index');
             Route::get('create', [AdminBlogController::class, 'create'])->name('create');
             Route::post('/', [AdminBlogController::class, 'store'])->name('store');
             Route::delete('{slug}', [AdminBlogController::class, 'deletePost'])->name('delete');
         });
+
+        Route::prefix('posts')->name('posts.')->group(function () {
+            Route::get('/', [PostController::class, 'index'])->name('index');
+            Route::get('{post}', [PostController::class, 'show'])->name('show');
+            Route::post('{post}/hide', [PostController::class, 'hide'])->name('hide');
+            Route::post('{post}/unhide', [PostController::class, 'unhide'])->name('unhide');
+            Route::delete('{post}', [PostController::class, 'destroy'])->name('destroy');
+        });
+
+        Route::prefix('reports')->name('reports.')->group(function () {
+            Route::get('/', [PostReportController::class, 'index'])->name('index');
+            Route::get('posts/{post}', [PostReportController::class, 'show'])->name('show');
+            Route::post('{report}/dismiss', [PostReportController::class, 'dismiss'])->name('dismiss');
+            Route::post('posts/{post}/dismiss-all', [PostReportController::class, 'dismissAll'])->name('dismiss-all');
+            Route::post('posts/{post}/hide', [PostReportController::class, 'hidePost'])->name('hide-post');
+            Route::delete('posts/{post}', [PostReportController::class, 'destroyPost'])->name('destroy-post');
+            Route::post('posts/{post}/author', [PostReportController::class, 'actionAuthor'])->name('action-author');
+        });
+
+        Route::prefix('videos')->name('videos.')->group(function () {
+            Route::get('/', [VideoController::class, 'index'])->name('index');
+            Route::get('{video}', [VideoController::class, 'show'])->name('show');
+            Route::post('{video}/mark-failed', [VideoController::class, 'markFailed'])->name('mark-failed');
+            Route::post('{video}/mark-completed', [VideoController::class, 'markCompleted'])->name('mark-completed');
+            Route::post('{video}/hide', [VideoController::class, 'hide'])->name('hide');
+            Route::delete('{video}', [VideoController::class, 'destroy'])->name('destroy');
+        });
+
+        Route::get('bookmarks', [BookmarkAnalyticsController::class, 'index'])->name('bookmarks.index');
+        Route::get('finance', [FinanceController::class, 'index'])->name('finance.index');
 
         Route::prefix('communities')->name('communities.')->group(function () {
             Route::get('/', [CommunityController::class, 'index'])->name('index');

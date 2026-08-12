@@ -1,5 +1,5 @@
 <div>
-@if($open && $post)
+@if($open && ($post || $communityPost))
 <style>
 .fpv-overlay {
     position: fixed;
@@ -284,11 +284,12 @@
 </style>
 
 @php
-    $images = $post->images->values();
+    $images = $this->viewerImages();
     $current = $images->get($imageIndex) ?? $images->first();
-    $user = $post->user;
-    $caption = strip_tags($post->content ?? '');
-    $detailUrl = url('timeline/' . $post->id);
+    $user = $this->viewerAuthor();
+    $caption = $this->viewerCaption();
+    $detailUrl = $this->viewerDetailUrl();
+    $createdAt = $this->viewerCreatedAt();
 @endphp
 
 <div class="fpv-overlay"
@@ -319,7 +320,7 @@
                 </button>
             @endif
 
-            <img src="{{ $current->path }}" alt="Photo {{ $imageIndex + 1 }}" wire:key="fpv-img-{{ $imageIndex }}">
+            <img src="{{ $this->imageUrl($current) }}" alt="Photo {{ $imageIndex + 1 }}" wire:key="fpv-img-{{ $imageIndex }}">
         </div>
 
         {{-- FB sidebar --}}
@@ -328,7 +329,7 @@
                 <img src="{{ $user->avatar ?? 'https://ui-avatars.com/api/?name='.urlencode($user->name).'&background=1877f2&color=fff&size=80' }}" alt="">
                 <div class="fpv-rail-user">
                     <a class="fpv-rail-name" href="{{ url('profile/'.$user->username) }}">{{ displayName($user->name) }}</a>
-                    <div class="fpv-rail-time">{{ $post->created_at?->diffForHumans() }}</div>
+                    <div class="fpv-rail-time">{{ $createdAt?->diffForHumans() }}</div>
                 </div>
                 <button type="button" class="fpv-close" wire:click="close" aria-label="Close">&times;</button>
             </div>

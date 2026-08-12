@@ -111,6 +111,9 @@
                     </p>
                 </div>
                 <div class="dash-actions">
+                    @unless ($community->isArchived())
+                        <a href="{{ $community->public_url }}" class="dash-btn dash-btn--ghost" target="_blank">Public page</a>
+                    @endunless
                     <a href="{{ route('community.show', $community) }}" class="dash-btn dash-btn--ghost" target="_blank">View live</a>
                     @if ($community->user)
                         <a href="{{ route('admin.users.show', $community->user) }}" class="dash-btn dash-btn--ghost">Owner profile</a>
