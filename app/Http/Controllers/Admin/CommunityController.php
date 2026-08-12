@@ -37,6 +37,7 @@ class CommunityController extends Controller
             'tab' => $tab,
             'revenueSummary' => $this->communities->revenueSummary($community),
             'paymentPlans' => $this->communities->paymentPlans($community),
+            'activeCurrencies' => $this->communities->activeCurrencies(),
         ];
 
         return match ($tab) {
@@ -58,6 +59,37 @@ class CommunityController extends Controller
             ])),
             default => view('admin.communities.show', $data),
         };
+    }
+
+    public function updateCurrency(Request $request, Community $community)
+    {
+        if ($community->type !== 'paid') {
+            return back()->with('error', 'Currency can only be changed for paid communities.');
+        }
+
+        $validated = $request->validate([
+            'currency' => 'required|string|size:3',
+            'amount' => 'nullable|numeric|min:0',
+            'reason' => 'required|string|min:5|max:500',
+        ]);
+
+        $result = $this->communities->updateCurrency(
+            $community,
+            $validated['currency'],
+            $validated['reason'],
+            $request->filled('amount') ? (float) $validated['amount'] : null,
+        );
+
+        return back()->with(
+            'success',
+            sprintf(
+                'Currency changed from %s to %s · fee %s → %s. Creator notified.',
+                $result['from'],
+                $result['to'],
+                number_format($result['old_fee'], 2),
+                number_format($result['new_fee'], 2)
+            )
+        );
     }
 
     public function archive(Community $community)

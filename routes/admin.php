@@ -114,6 +114,7 @@ Route::middleware(['auth', 'admin'])
         Route::prefix('communities')->name('communities.')->group(function () {
             Route::get('/', [CommunityController::class, 'index'])->name('index');
             Route::get('{community}', [CommunityController::class, 'show'])->name('show');
+            Route::post('{community}/currency', [CommunityController::class, 'updateCurrency'])->name('currency.update');
             Route::post('{community}/archive', [CommunityController::class, 'archive'])->name('archive');
             Route::post('{community}/unarchive', [CommunityController::class, 'unarchive'])->name('unarchive');
             Route::post('{community}/ban-member', [CommunityController::class, 'banMember'])->name('ban-member');

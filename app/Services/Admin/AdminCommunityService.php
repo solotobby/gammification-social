@@ -2,17 +2,23 @@
 
 namespace App\Services\Admin;
 
+use App\Mail\GeneralMail;
 use App\Models\Community;
+use App\Models\CommunityPaymentPlan;
 use App\Models\CommunityPayout;
 use App\Models\CommunityPost;
 use App\Models\CommunitySubscription;
+use App\Models\Currency;
+use App\Notifications\GeneralNotification;
 use App\Services\AdminAuditService;
 use App\Support\AdminDateRange;
 use App\Support\StoredMedia;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 
 class AdminCommunityService
 {
@@ -282,6 +288,146 @@ class AdminCommunityService
     public function paymentPlans(Community $community): Collection
     {
         return $community->paymentPlans()->orderBy('currency')->orderBy('billing_interval')->get();
+    }
+
+    public function activeCurrencies(): Collection
+    {
+        return Currency::query()
+            ->where('is_active', true)
+            ->orderBy('code')
+            ->get(['id', 'code', 'name', 'base_rate']);
+    }
+
+    /**
+     * Change community currency and convert list price / payment-plan amounts.
+     *
+     * @return array{community: Community, from: string, to: string, old_fee: float, new_fee: float}
+     */
+    public function updateCurrency(
+        Community $community,
+        string $currency,
+        string $reason,
+        ?float $amount = null,
+    ): array {
+        if ($community->type !== 'paid') {
+            throw ValidationException::withMessages([
+                'currency' => 'Currency can only be changed for paid communities.',
+            ]);
+        }
+
+        $from = Community::normaliseCurrency($community->currency);
+        $to = Community::normaliseCurrency($currency);
+        $reason = trim($reason);
+
+        if ($reason === '') {
+            throw ValidationException::withMessages([
+                'reason' => 'A reason is required when changing community currency.',
+            ]);
+        }
+
+        if ($from === $to) {
+            throw ValidationException::withMessages([
+                'currency' => 'Choose a different currency from the current one.',
+            ]);
+        }
+
+        if (! Currency::query()->where('is_active', true)->where('code', $to)->exists()) {
+            throw ValidationException::withMessages([
+                'currency' => 'Selected currency is not active.',
+            ]);
+        }
+
+        $oldFee = (float) $community->monthly_fee;
+
+        try {
+            $converted = $amount !== null
+                ? round($amount, 2)
+                : (float) convertCurrency(max($oldFee, 0), $from, $to);
+        } catch (\InvalidArgumentException $e) {
+            throw ValidationException::withMessages([
+                'currency' => $e->getMessage(),
+            ]);
+        }
+
+        $minimum = communityMinimumPrice($to);
+        if ($converted < $minimum) {
+            throw ValidationException::withMessages([
+                'amount' => "Converted price must be at least {$to} ".number_format($minimum, communityPriceDecimals($to)).'.',
+            ]);
+        }
+
+        $newFee = $converted;
+
+        DB::transaction(function () use ($community, $from, $to, $oldFee, $newFee, $reason) {
+            $community->update([
+                'currency' => $to,
+                'monthly_fee' => $newFee,
+            ]);
+
+            // Invalidate Flutterwave plans tied to the previous currency/amount.
+            CommunityPaymentPlan::query()
+                ->where('community_id', $community->id)
+                ->where('status', 'active')
+                ->update(['status' => 'inactive']);
+
+            $this->audit->log('community.currency_updated', $community->fresh(), [
+                'from_currency' => $from,
+                'to_currency' => $to,
+                'old_monthly_fee' => $oldFee,
+                'new_monthly_fee' => $newFee,
+                'reason' => $reason,
+            ]);
+        });
+
+        $community = $community->fresh(['user']);
+        $this->notifyCreatorOfCurrencyChange($community, $from, $to, $oldFee, $newFee, $reason);
+
+        return [
+            'community' => $community,
+            'from' => $from,
+            'to' => $to,
+            'old_fee' => $oldFee,
+            'new_fee' => $newFee,
+        ];
+    }
+
+    protected function notifyCreatorOfCurrencyChange(
+        Community $community,
+        string $from,
+        string $to,
+        float $oldFee,
+        float $newFee,
+        string $reason,
+    ): void {
+        $owner = $community->user;
+        if (! $owner) {
+            return;
+        }
+
+        $priceLine = sprintf(
+            'Price updated from %s %s to %s %s.',
+            $from,
+            number_format($oldFee, 2),
+            $to,
+            number_format($newFee, 2),
+        );
+
+        $message = "An admin changed the currency for your paid community \"{$community->name}\". {$priceLine} Reason: {$reason}";
+
+        $owner->notify(new GeneralNotification([
+            'title' => 'Community currency updated',
+            'message' => $message,
+            'icon' => 'fa-coins text-warning',
+            'url' => url('community/'.$community->slug),
+        ]));
+
+        if ($owner->email) {
+            Mail::to($owner->email)->send(new GeneralMail(
+                (object) ['name' => $owner->name, 'email' => $owner->email],
+                'Community currency updated — '.$community->name,
+                $message.' You can review billing details in your community settings.'
+            ));
+        }
     }
 
     public function archive(Community $community): void

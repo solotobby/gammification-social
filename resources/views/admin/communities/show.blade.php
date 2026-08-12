@@ -188,6 +188,80 @@
                 </section>
 
                 @if ($community->type === 'paid')
+                    <section class="dash-section">
+                        <div class="dash-card">
+                            <div class="dash-card__head">
+                                <div>
+                                    <h2 class="dash-card__title">Change currency</h2>
+                                    <p class="dash-muted" style="margin:.25rem 0 0">Paid communities only — converts list price using current exchange rates and notifies the creator</p>
+                                </div>
+                            </div>
+                            <div class="dash-card__body">
+                                @php
+                                    $currentCurrency = \App\Models\Community::normaliseCurrency($community->currency);
+                                    $currentFee = (float) $community->monthly_fee;
+                                    $rateMap = ($activeCurrencies ?? collect())->mapWithKeys(
+                                        fn ($c) => [strtoupper($c->code) => (float) $c->base_rate]
+                                    );
+                                @endphp
+
+                                @if ($errors->any())
+                                    <div class="dash-alert dash-alert--error" style="margin-bottom:1rem">
+                                        {{ $errors->first() }}
+                                    </div>
+                                @endif
+
+                                <form method="post"
+                                      action="{{ route('admin.communities.currency.update', $community) }}"
+                                      class="dash-currency-form"
+                                      id="community-currency-form"
+                                      data-from="{{ $currentCurrency }}"
+                                      data-fee="{{ $currentFee }}"
+                                      data-rates='@json($rateMap)'
+                                      data-paid="1"
+                                      onsubmit="return confirm('Change this community currency and notify the creator?');">
+                                    @csrf
+                                    <div class="dash-meta-grid" style="margin-bottom:1rem">
+                                        <div class="dash-meta-item">
+                                            <span>Current</span>
+                                            <strong>{{ $currentCurrency }} · {{ number_format($currentFee, 2) }}</strong>
+                                        </div>
+                                        <div class="dash-meta-item">
+                                            <span>New currency</span>
+                                            <select name="currency" id="community-new-currency" class="dash-input" style="min-width:0;width:100%" required>
+                                                <option value="">Select currency</option>
+                                                @foreach (($activeCurrencies ?? []) as $currencyOption)
+                                                    @continue(strtoupper($currencyOption->code) === $currentCurrency)
+                                                    <option value="{{ strtoupper($currencyOption->code) }}" @selected(old('currency') === strtoupper($currencyOption->code))>
+                                                        {{ strtoupper($currencyOption->code) }} — {{ $currencyOption->name }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="dash-meta-item">
+                                            <span>New list price</span>
+                                            <input type="number"
+                                                   name="amount"
+                                                   id="community-new-amount"
+                                                   class="dash-input"
+                                                   style="min-width:0;width:100%"
+                                                   step="0.01"
+                                                   min="0"
+                                                   value="{{ old('amount') }}"
+                                                   placeholder="Auto-converted">
+                                            <small class="dash-muted" id="community-convert-hint" style="display:block;margin-top:.35rem">Select a currency to preview conversion.</small>
+                                        </div>
+                                        <div class="dash-meta-item" style="grid-column:1 / -1">
+                                            <span>Reason (required)</span>
+                                            <textarea name="reason" class="dash-input" style="min-width:0;width:100%;min-height:80px" required minlength="5" maxlength="500" placeholder="Why is this currency changing?">{{ old('reason') }}</textarea>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="dash-btn dash-btn--primary">Update currency & notify creator</button>
+                                </form>
+                            </div>
+                        </div>
+                    </section>
+
                     <section class="dash-section dash-grid dash-grid--2">
                         <div class="dash-card">
                             <div class="dash-card__head"><h2 class="dash-card__title">Billing configuration</h2></div>
@@ -591,4 +665,59 @@
             @endif
         </div>
     </div>
+@endsection
+
+@section('script')
+<script>
+(function () {
+    const form = document.getElementById('community-currency-form');
+    if (!form || form.dataset.paid !== '1') return;
+
+    const currencySelect = document.getElementById('community-new-currency');
+    const amountInput = document.getElementById('community-new-amount');
+    const hint = document.getElementById('community-convert-hint');
+    if (!currencySelect || !amountInput || !hint) return;
+
+    const from = (form.dataset.from || 'NGN').toUpperCase();
+    const fee = parseFloat(form.dataset.fee || '0');
+    let rates = {};
+    try { rates = JSON.parse(form.dataset.rates || '{}'); } catch (e) { rates = {}; }
+
+    function convert(amount, fromCode, toCode) {
+        const fromRate = rates[fromCode];
+        const toRate = rates[toCode];
+        if (!fromRate || !toRate) return null;
+        if (fromCode === toCode) return amount;
+        return Math.round((amount / fromRate) * toRate * 100) / 100;
+    }
+
+    function refreshPreview() {
+        const to = (currencySelect.value || '').toUpperCase();
+        if (!to) {
+            hint.textContent = 'Select a currency to preview conversion.';
+            if (!amountInput.dataset.touched) amountInput.value = '';
+            return;
+        }
+
+        const converted = convert(fee, from, to);
+        if (converted === null) {
+            hint.textContent = 'Unable to convert — missing exchange rate.';
+            return;
+        }
+
+        hint.textContent = `Suggested: ${from} ${fee.toFixed(2)} → ${to} ${converted.toFixed(2)} (editable)`;
+        if (!amountInput.dataset.touched) {
+            amountInput.value = converted.toFixed(2);
+        }
+    }
+
+    amountInput.addEventListener('input', () => { amountInput.dataset.touched = '1'; });
+    currencySelect.addEventListener('change', () => {
+        delete amountInput.dataset.touched;
+        refreshPreview();
+    });
+
+    if (currencySelect.value) refreshPreview();
+})();
+</script>
 @endsection
