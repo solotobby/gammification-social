@@ -3,8 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>@yield('title', 'Payhankey | Get Paid for the Posts You Already Make')</title>
-<meta name="description" content="@yield('meta_description', 'Payhankey is the social platform that pays you for likes, comments and views — no followers needed. Free signup, welcome bonus, withdraw from $1.')">
+<title>@yield('title', 'Payhankey | Creator Monetization Platform for Africa')</title>
+<meta name="description" content="@yield('meta_description', 'Payhankey is an AI-powered creator monetization platform built for Africa. Create, grow, monetize content, build communities and earn through subscriptions and local payouts.')">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="{{ url()->current() }}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Payhankey">
+<meta property="og:title" content="@yield('title', 'Payhankey | Creator Monetization Platform for Africa')">
+<meta property="og:description" content="@yield('meta_description', 'Payhankey is an AI-powered creator monetization platform built for Africa. Create, grow, monetize content, build communities and earn through subscriptions and local payouts.')">
+<meta property="og:url" content="{{ url()->current() }}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="@yield('title', 'Payhankey | Creator Monetization Platform for Africa')">
+<meta name="twitter:description" content="@yield('meta_description', 'Payhankey is an AI-powered creator monetization platform built for Africa. Create, grow, monetize content, build communities and earn through subscriptions and local payouts.')">
 <link rel="shortcut icon" href="{{ asset('favicon.png') }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

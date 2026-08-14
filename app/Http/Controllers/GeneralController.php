@@ -43,10 +43,7 @@ class GeneralController extends Controller
 
     public function landingpage()
     {
-        return view('general.landingpage', [
-            'previewEarners' => $this->publicSite->landingPreviewEarners(3),
-            'platformStats' => $this->publicSite->platformStats(),
-        ]);
+        return view('general.landingpage');
     }
 
     public function features()
@@ -58,6 +55,12 @@ class GeneralController extends Controller
     {
         return view('general.how');
     }
+
+    public function faq()
+    {
+        return view('general.faq');
+    }
+
     public function about()
     {
         return view('general.about');

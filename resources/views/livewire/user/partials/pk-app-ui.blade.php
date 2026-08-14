@@ -485,6 +485,20 @@
         background-size: cover;
         background-position: center;
         position: relative;
+        overflow: hidden;
+    }
+
+    .pk-blog-card-cover img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .pk-blog-card-cover.is-fallback {
+        background: linear-gradient(135deg, var(--pk-violet), #7C3AED);
     }
 
     .pk-blog-card-cat {

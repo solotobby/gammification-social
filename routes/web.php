@@ -35,6 +35,7 @@ use App\Livewire\User\EarningList;
 use App\Livewire\User\Hashtag;
 use App\Livewire\User\HowItWorks;
 use App\Livewire\User\HowToEarn;
+use App\Livewire\User\Messages;
 use App\Livewire\User\NewTimeline;
 use App\Livewire\User\Payout;
 use App\Livewire\User\PostAnalytics;
@@ -89,6 +90,7 @@ Route::group(['namespace' => 'auth'], function () {
     Route::get('terms/conditions', [\App\Http\Controllers\GeneralController::class, 'terms']);
     Route::get('how-it-works', [\App\Http\Controllers\GeneralController::class, 'how']);
     Route::get('features', [\App\Http\Controllers\GeneralController::class, 'features'])->name('features');
+    Route::get('faq', [\App\Http\Controllers\GeneralController::class, 'faq'])->name('faq');
 
     Route::get('about', [\App\Http\Controllers\GeneralController::class, 'about']);
     Route::get('contact', [\App\Http\Controllers\GeneralController::class, 'contact']);
@@ -211,6 +213,7 @@ Route::middleware([
         Route::get('timeline', Timeline::class);
         Route::get('timeline/{post}', TimelineDetails::class)->name('timeline.show');
         Route::get('bookmarks', BookmarkedPosts::class)->name('bookmarks');
+        Route::get('messages', Messages::class)->name('messages');
         Route::get('new-timeline', NewTimeline::class);
         Route::get('dashboard-timeline', DashboardTimeline::class);
 

@@ -69,4 +69,6 @@
     </div>
   </div>
 </section>
+
+@include('general.partials.apl-close-cta')
 @endsection

@@ -1,8 +1,21 @@
 @props(['blog'])
 
+@php
+    $coverUrl = $blog->cover_url ?? \App\Models\Blog::normalizeImageUrl($blog->cover_image ?? null);
+@endphp
+
 <article class="pk-blog-card" wire:key="blog-{{ $blog->id }}">
     <a href="{{ url('blog/' . $blog->slug) }}" class="pk-blog-card-link">
-        <div class="pk-blog-card-cover" @if ($blog->cover_image) style="background-image:url('{{ $blog->cover_image }}')" @endif>
+        <div class="pk-blog-card-cover {{ $coverUrl ? '' : 'is-fallback' }}">
+            @if ($coverUrl)
+                <img
+                    src="{{ $coverUrl }}"
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    onerror="this.remove(); this.parentElement.classList.add('is-fallback');"
+                >
+            @endif
             <span class="pk-blog-card-cat">{{ $blog->blogCategory->name ?? 'Article' }}</span>
         </div>
         <div class="pk-blog-card-body">

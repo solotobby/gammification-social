@@ -1,21 +1,38 @@
 @extends('general.master.apple')
 
 @section('title', 'How it works · Payhankey')
+@section('meta_description', 'From your first post to your first community — see how Payhankey helps creators grow audiences, launch communities, earn recurring income, and build lasting digital businesses.')
 
 @section('apple_content')
 @include('general.partials.apl-pagehero', [
     'crumb' => 'How it works',
-    'eyebrow' => 'How it works',
-    'title' => 'From signup to payout in plain English',
-    'lead' => 'Payhankey was built so anyone can earn — no jargon, no gatekeeping.',
+    'eyebrow' => 'The Creator Journey',
+    'title' => 'From Your First Post to Your First Community.',
+    'lead' => 'Payhankey is more than a place to post content. It\'s where creators grow audiences, launch communities, earn recurring income, and build lasting digital businesses.',
 ])
 
 <section class="apl-showcase apl-showcase--soft">
   <div class="apl-steps">
-    <div class="apl-step reveal"><div class="apl-step__num">1</div><h3>Create your account</h3><p>Sign up free in under a minute. Confirm your email and claim a welcome bonus of up to $2.</p></div>
-    <div class="apl-step reveal"><div class="apl-step__num">2</div><h3>Post your content</h3><p>Share posts, facts, quizzes, teasers and videos. No follower requirement.</p></div>
-    <div class="apl-step reveal"><div class="apl-step__num">3</div><h3>Earn from engagement</h3><p>Likes, comments and views convert into earnings, tracked live in your dashboard.</p></div>
-    <div class="apl-step reveal"><div class="apl-step__num">4</div><h3>Withdraw your money</h3><p>Once you reach $1, request a payout — paid on the 2nd of every month.</p></div>
+    <div class="apl-step reveal">
+      <div class="apl-step__num">1</div>
+      <h3>Create Your Creator Profile</h3>
+      <p>Create your free account, personalize your profile and tell the world what you create.</p>
+    </div>
+    <div class="apl-step reveal">
+      <div class="apl-step__num">2</div>
+      <h3>Publish &amp; Get Discovered</h3>
+      <p>Share posts, photos or Payhankey Rolls. Our recommendation engine helps the right audience discover your content.</p>
+    </div>
+    <div class="apl-step reveal">
+      <div class="apl-step__num">3</div>
+      <h3>Build Your Community</h3>
+      <p>Turn followers into loyal members with public, membership, private or request-to-join communities.</p>
+    </div>
+    <div class="apl-step reveal">
+      <div class="apl-step__num">4</div>
+      <h3>Earn &amp; Grow</h3>
+      <p>Monetize through creator rewards, memberships, referrals and future brand partnerships while tracking everything from one dashboard.</p>
+    </div>
   </div>
 </section>
 
@@ -46,11 +63,5 @@
   </div>
 </section>
 
-<section class="apl-close">
-  <h2 class="reveal">Ready to earn from your first post?</h2>
-  <p class="reveal">It's free to start and takes less than a minute. Your welcome bonus is waiting.</p>
-  <div class="apl-close__cta reveal">
-    <a class="apl-btn apl-btn--fill" href="{{ url('/register') }}">Create free account</a>
-  </div>
-</section>
+@include('general.partials.apl-close-cta')
 @endsection

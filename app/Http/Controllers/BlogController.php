@@ -42,14 +42,33 @@ class BlogController extends Controller
 
         $blog->increment('views');
 
+        $limit = 3;
+        $select = ['id', 'title', 'slug', 'excerpt', 'cover_image', 'content', 'created_at', 'published_at', 'blog_category_id'];
+
         $suggestions = Blog::query()
             ->with('blogCategory:id,name')
             ->where('status', 'PUBLISHED')
-            ->where('blog_category_id', $blog->blog_category_id)
             ->where('id', '!=', $blog->id)
+            ->when($blog->blog_category_id, fn ($query) => $query->where('blog_category_id', $blog->blog_category_id))
             ->orderByDesc('published_at')
-            ->limit(3)
-            ->get(['id', 'title', 'slug', 'excerpt', 'cover_image', 'content', 'created_at', 'published_at', 'blog_category_id']);
+            ->orderByDesc('created_at')
+            ->limit($limit)
+            ->get($select);
+
+        if ($suggestions->count() < $limit) {
+            $excludeIds = $suggestions->pluck('id')->push($blog->id)->all();
+
+            $fillers = Blog::query()
+                ->with('blogCategory:id,name')
+                ->where('status', 'PUBLISHED')
+                ->whereNotIn('id', $excludeIds)
+                ->orderByDesc('published_at')
+                ->orderByDesc('created_at')
+                ->limit($limit - $suggestions->count())
+                ->get($select);
+
+            $suggestions = $suggestions->concat($fillers)->values();
+        }
 
         return view('general.show', compact('blog', 'suggestions'));
     }

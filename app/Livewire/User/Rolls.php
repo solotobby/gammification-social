@@ -3,8 +3,11 @@
 namespace App\Livewire\User;
 
 use App\Models\Comment;
+use App\Models\Follow;
 use App\Models\Post;
 use App\Models\PostVideo;
+use App\Models\User;
+use App\Notifications\GeneralNotification;
 use App\Services\CommentService;
 use App\Services\LikeService;
 use App\Services\ViewService;
@@ -34,6 +37,9 @@ class Rolls extends Component
     /** Persist like UI across Livewire re-renders (e.g. opening comments). */
     public array $likeOverrides = [];
 
+    /** userId => whether auth user follows them */
+    public array $followingMap = [];
+
     // ─────────────────────────────────────────────────────────
     public function mount(PostVideo $video): void
     {
@@ -52,7 +58,6 @@ class Rolls extends Component
             ?->post;
 
         $rest = Post::with($this->eagerLoads())
-            ->withExists(['likes as liked_by_me' => fn ($q) => $q->where('user_id', Auth::id())])
             ->join('post_videos', 'post_videos.post_id', '=', 'posts.id')
             ->where('posts.status', 'LIVE')
             ->where('post_videos.processing_status', 'completed')
@@ -62,6 +67,7 @@ class Rolls extends Component
                 'posts.*',
                 DB::raw('(COALESCE(post_videos.play_count, 0) * 2 + COALESCE(post_videos.avg_watch_time, 0)) AS engagement_score')
             )
+            ->withExists(['likes as liked_by_me' => fn ($q) => $q->where('user_id', Auth::id())])
             ->orderByDesc('engagement_score')
             ->orderByDesc('posts.created_at')
             ->limit($this->perPage * $this->page)
@@ -72,6 +78,8 @@ class Rolls extends Component
         $this->videos = $startPost
             ? $rest->prepend($startPost)
             : $rest;
+
+        $this->syncFollowingMap();
     }
 
     public function loadMore(): void
@@ -90,6 +98,37 @@ class Rolls extends Component
             'user',
             'video',
         ];
+    }
+
+    private function syncFollowingMap(): void
+    {
+        if (! Auth::check() || ! $this->videos) {
+            $this->followingMap = [];
+
+            return;
+        }
+
+        $userIds = $this->videos->pluck('user_id')->unique()->filter()->values();
+        if ($userIds->isEmpty()) {
+            $this->followingMap = [];
+
+            return;
+        }
+
+        $following = Follow::query()
+            ->where('follower_id', Auth::id())
+            ->whereIn('following_id', $userIds)
+            ->pluck('following_id')
+            ->map(fn ($id) => (string) $id)
+            ->flip();
+
+        $map = [];
+        foreach ($userIds as $id) {
+            $key = (string) $id;
+            $map[$key] = isset($following[$key]);
+        }
+
+        $this->followingMap = $map;
     }
 
     #[Renderless]
@@ -117,19 +156,39 @@ class Rolls extends Component
     }
 
     #[Renderless]
-    public function recordWatch($postId, $watchSeconds, $isFirstPlay): void
+    public function recordPlay($postId): void
     {
-        $postId       = (string) $postId;
+        $postId = (string) $postId;
+        $video = Post::find($postId)?->video;
+        if (! $video) {
+            return;
+        }
+
+        $video->incrementPlays();
+
+        $this->dispatch(
+            'playCountUpdated',
+            postId: $postId,
+            count: (int) $video->fresh()->play_count,
+        );
+    }
+
+    #[Renderless]
+    public function recordWatch($postId, $watchSeconds, $isFirstPlay = false): void
+    {
+        $postId = (string) $postId;
         $watchSeconds = (float) $watchSeconds;
-        $isFirstPlay  = (bool) $isFirstPlay;
+        $isFirstPlay = (bool) $isFirstPlay;
 
         $video = Post::find($postId)?->video;
         if (! $video) {
             return;
         }
 
+        // Play count is preferred via recordPlay() on activate; keep this as a
+        // safe fallback for beacons that still send is_first_play.
         if ($isFirstPlay) {
-            $video->increment('play_count');
+            $video->incrementPlays();
             $this->dispatch(
                 'playCountUpdated',
                 postId: $postId,
@@ -137,7 +196,7 @@ class Rolls extends Component
             );
         }
 
-        if ($watchSeconds > 0.5) {
+        if ($watchSeconds >= 0.25) {
             $video->updateWatchTime($watchSeconds);
         }
     }
@@ -167,6 +226,70 @@ class Rolls extends Component
         $this->dispatch('likeUpdated', postId: $postId, liked: $liked, count: $count);
 
         return ['postId' => $postId, 'liked' => $liked, 'count' => $count];
+    }
+
+    #[Renderless]
+    public function toggleFollow($userId): array
+    {
+        $userId = (string) $userId;
+
+        if (! Auth::check() || $userId === '' || $userId === (string) Auth::id()) {
+            return ['userId' => $userId, 'following' => false];
+        }
+
+        $authUser = Auth::user();
+        $target = User::find($userId);
+        if (! $target) {
+            return ['userId' => $userId, 'following' => false];
+        }
+
+        $existing = Follow::query()
+            ->where('follower_id', $authUser->id)
+            ->where('following_id', $target->id)
+            ->first();
+
+        if ($existing) {
+            $existing->delete();
+
+            if ($authUser->following > 0) {
+                $authUser->decrement('following');
+            }
+            if ($target->followers > 0) {
+                $target->decrement('followers');
+            }
+
+            $following = false;
+
+            $target->notify(new GeneralNotification([
+                'title' => displayName($authUser->name) . ' unfollowed you',
+                'message' => displayName($authUser->name) . ' unfollowed you',
+                'icon' => 'fa-user-minus text-primary',
+                'url' => url('profile/' . $authUser->username),
+            ]));
+        } else {
+            Follow::create([
+                'follower_id' => $authUser->id,
+                'following_id' => $target->id,
+            ]);
+
+            $authUser->increment('following');
+            $target->increment('followers');
+
+            $following = true;
+
+            $target->notify(new GeneralNotification([
+                'title' => displayName($authUser->name) . ' followed you',
+                'message' => displayName($authUser->name) . ' started following you',
+                'icon' => 'fa-user-plus text-primary',
+                'url' => url('profile/' . $authUser->username),
+            ]));
+        }
+
+        $this->followingMap[$userId] = $following;
+
+        $this->dispatch('followUpdated', userId: $userId, following: $following);
+
+        return ['userId' => $userId, 'following' => $following];
     }
 
     public function openComments($postId): void

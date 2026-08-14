@@ -48,12 +48,5 @@
   </div>
 </section>
 
-<section class="apl-close">
-  <h2 class="reveal">See it in action</h2>
-  <p class="reveal">Create your account, post once, and watch the dashboard do its thing.</p>
-  <div class="apl-close__cta reveal">
-    <a class="apl-btn apl-btn--fill" href="{{ url('/register') }}">Join free</a>
-    <a class="apl-btn apl-btn--outline" href="{{ url('/how-it-works') }}">How it works</a>
-  </div>
-</section>
+@include('general.partials.apl-close-cta')
 @endsection

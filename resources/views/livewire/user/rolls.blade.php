@@ -340,6 +340,9 @@
     padding: 0;
     z-index: 1;
 }
+.reels-rail-follow.is-following {
+    background: #3a3a3a;
+}
 
 .reels-action {
     display: flex;
@@ -366,7 +369,13 @@
     transition: transform .12s ease;
 }
 .reels-action:active .reels-action-icon { transform: scale(.88); }
-.reels-action.is-liked .reels-action-icon { color: var(--tt-like); }
+.reels-action.is-liked .reels-action-icon,
+.reels-action.is-liked .reels-action-icon i {
+    color: #fe2c55 !important;
+}
+.reels-action.is-liked .reels-action-icon i {
+    font-weight: 900;
+}
 
 .reels-action-label {
     font-size: 12px;
@@ -477,6 +486,11 @@
 }
 .reels-follow:hover {
     background: rgba(255,255,255,.12);
+}
+.reels-follow.is-following {
+    color: rgba(255,255,255,.72);
+    border-color: rgba(255,255,255,.28);
+    background: rgba(255,255,255,.08);
 }
 
 .reels-verified {
@@ -828,8 +842,9 @@
                     @php
                         $vid = $post->video;
                         $user = $post->user;
-                        $liked = $likeOverrides[$post->id]['liked'] ?? (bool) ($post->liked_by_me ?? false);
-                        $likes = $likeOverrides[$post->id]['count'] ?? $post->totalLikes();
+                        $postKey = (string) $post->id;
+                        $liked = (bool) ($likeOverrides[$postKey]['liked'] ?? $post->liked_by_me ?? false);
+                        $likes = $likeOverrides[$postKey]['count'] ?? $post->totalLikes();
                         $comments = $post->totalComments();
                         $qualities = $vid->quality_versions ?? [];
                         $srcHigh = $qualities['high'] ?? $vid->path;
@@ -841,7 +856,7 @@
                         $shareUrl = route('rolls.show', ['video' => $vid->id]);
                         $level = userLevel($user->id);
                         $isVerified = in_array($level, ['Creator', 'Influencer']);
-                        $jsId = json_encode((string) $post->id);
+                        $jsId = json_encode($postKey);
                         $isOwner = auth()->id() === $post->user_id;
             @endphp
 
@@ -877,7 +892,13 @@
                                     </svg>
                                 @endif
                                 @if(!$isOwner)
-                                    <button type="button" class="reels-follow" onclick="window.location='{{ url('profile/'.$user->username) }}'">Follow</button>
+                                    @php $isFollowing = (bool) ($followingMap[(string) $user->id] ?? false); @endphp
+                                    <button type="button"
+                                        class="reels-follow {{ $isFollowing ? 'is-following' : '' }}"
+                                        data-follow-user="{{ $user->id }}"
+                                        @click.stop="toggleFollow({{ json_encode((string) $user->id) }})">
+                                        {{ $isFollowing ? 'Following' : 'Follow' }}
+                                    </button>
                                 @endif
                             </div>
 
@@ -907,9 +928,13 @@
                             <div class="reels-rail-avatar-wrap">
                                 <x-user-avatar :user="$user" size="lg" class="reels-ua" />
                                 @if(!$isOwner)
-                                    <button type="button" class="reels-rail-follow" aria-label="Follow"
-                                        onclick="window.location='{{ url('profile/'.$user->username) }}'">
-                                        <i class="fa-solid fa-plus"></i>
+                                    @php $isFollowing = (bool) ($followingMap[(string) $user->id] ?? false); @endphp
+                                    <button type="button"
+                                        class="reels-rail-follow {{ $isFollowing ? 'is-following' : '' }}"
+                                        data-follow-user="{{ $user->id }}"
+                                        aria-label="{{ $isFollowing ? 'Unfollow' : 'Follow' }}"
+                                        @click.stop="toggleFollow({{ json_encode((string) $user->id) }})">
+                                        <i class="fa-solid {{ $isFollowing ? 'fa-check' : 'fa-plus' }}"></i>
                                     </button>
                                 @endif
                             </div>
@@ -918,9 +943,10 @@
                                 class="reels-action {{ $liked ? 'is-liked' : '' }}"
                          id="like-{{ $post->id }}"
                                 @click.stop="likePost({{ $jsId }})"
-                                aria-label="Like">
+                                aria-label="Like"
+                                aria-pressed="{{ $liked ? 'true' : 'false' }}">
                                 <span class="reels-action-icon">
-                                    <i class="{{ $liked ? 'fa-solid' : 'fa-regular' }} fa-heart"></i>
+                                    <i class="fa-solid fa-heart" @if($liked) style="color:#fe2c55" @endif></i>
                                 </span>
                                 <span class="reels-action-label" id="lc-{{ $post->id }}">{{ number_format($likes) }}</span>
                             </button>
@@ -1034,6 +1060,7 @@ Alpine.data('rollsPlayer', function(wire) {
         shareOpen: false,
         shareUrl: '',
         copyLabel: 'Copy',
+        _following: @js($followingMap),
 
         _feed: null,
         _activeCard: null,
@@ -1041,6 +1068,7 @@ Alpine.data('rollsPlayer', function(wire) {
         _activePostId: null,
         _watchStart: null,
         _watchSent: false,
+        _playRecorded: {},
         _isFirstPlay: {},
         _seen: null,
         _observer: null,
@@ -1059,20 +1087,22 @@ Alpine.data('rollsPlayer', function(wire) {
                     const first = this._feed.querySelector('.reels-card[data-post-id]');
                     if (first) this._activate(first);
                 }
-            }, 100);
+            }, 80);
 
             const unlockAudio = () => {
-                if (this.muted) {
-                    this.muted = false;
-                    this._autoplayBlocked = false;
-                    if (this._activeVideo) {
-                        this._activeVideo.muted = false;
+                this.muted = false;
+                this._autoplayBlocked = false;
+                if (this._activeVideo) {
+                    this._activeVideo.muted = false;
+                    this._activeVideo.volume = 1;
+                    if (this._activeVideo.paused) {
                         this._activeVideo.play().catch(() => {});
                     }
                 }
             };
-            this.$refs.feed?.addEventListener('click', unlockAudio, { once: true, passive: true });
+            this.$refs.feed?.addEventListener('pointerdown', unlockAudio, { once: true, passive: true });
             this.$refs.feed?.addEventListener('touchstart', unlockAudio, { once: true, passive: true });
+            this.$refs.feed?.addEventListener('click', unlockAudio, { once: true, passive: true });
 
             Livewire.hook('morph.updated', () => {
                 this._feed.querySelectorAll('.reels-card[data-post-id]').forEach(c => {
@@ -1093,7 +1123,7 @@ Alpine.data('rollsPlayer', function(wire) {
                     if (e.isIntersecting) this._activate(e.target);
                     else this._deactivate(e.target);
                 });
-            }, { root: this._feed, threshold: 0.6 });
+            }, { root: this._feed, threshold: 0.55 });
 
             this._feed.querySelectorAll('.reels-card[data-post-id]').forEach(c => {
                 this._seen.add(c);
@@ -1116,7 +1146,16 @@ Alpine.data('rollsPlayer', function(wire) {
             this._loadAndPlay(card, this._activeVideo);
             this._watchStart = Date.now();
             this._watchSent = false;
-            wire.call('recordView', this._activePostId);
+            wire.call('recordView', this._activePostId).catch(() => {});
+
+            if (!this._playRecorded[this._activePostId]) {
+                this._playRecorded[this._activePostId] = true;
+                this._isFirstPlay[this._activePostId] = false;
+                wire.call('recordPlay', this._activePostId).catch(() => {
+                    this._playRecorded[this._activePostId] = false;
+                    this._isFirstPlay[this._activePostId] = true;
+                });
+            }
         },
 
         _deactivate(card) {
@@ -1129,6 +1168,9 @@ Alpine.data('rollsPlayer', function(wire) {
 
         _loadAndPlay(card, video) {
             video.muted = this.muted;
+            video.volume = 1;
+            video.setAttribute('playsinline', '');
+            video.setAttribute('webkit-playsinline', '');
             const src = this._pickQuality(card);
             if (!card.dataset.loaded) {
                 card.dataset.loaded = '1';
@@ -1193,18 +1235,22 @@ Alpine.data('rollsPlayer', function(wire) {
         },
 
         _doPlay(video) {
-            video.muted = this.muted;
+            // Prefer unmuted autoplay; browsers may block until a gesture.
+            this.muted = false;
+            video.muted = false;
+            video.volume = 1;
             const p = video.play();
             if (p?.then) {
                 p.then(() => {
                     this._autoplayBlocked = false;
+                    video.muted = false;
                 }).catch(() => {
-                    if (!this.muted) {
-                        this._autoplayBlocked = true;
+                    // Temporary mute only to satisfy autoplay policy, then hint for sound.
                     video.muted = true;
+                    video.play().then(() => {
+                        this._autoplayBlocked = true;
                         this.muted = true;
-                    video.play().catch(() => {});
-                    }
+                    }).catch(() => {});
                 });
             }
         },
@@ -1217,6 +1263,16 @@ Alpine.data('rollsPlayer', function(wire) {
             const video = card.querySelector('.reels-video');
             const postId = card.dataset.postId;
             const now = Date.now();
+
+            // Any tap unlocks audio preference.
+            if (this.muted || this._autoplayBlocked) {
+                this.muted = false;
+                this._autoplayBlocked = false;
+                if (video) {
+                    video.muted = false;
+                    video.volume = 1;
+                }
+            }
 
             if (now - this._lastTap < 280) {
                 clearTimeout(this._tapTimer);
@@ -1247,6 +1303,7 @@ Alpine.data('rollsPlayer', function(wire) {
             this._autoplayBlocked = false;
             if (this._activeVideo) {
                 this._activeVideo.muted = this.muted;
+                this._activeVideo.volume = 1;
                 if (!this.muted && this._activeVideo.paused) {
                     this._activeVideo.play().catch(() => {});
                 }
@@ -1257,9 +1314,14 @@ Alpine.data('rollsPlayer', function(wire) {
             const btn = document.getElementById('like-' + postId);
             const countEl = document.getElementById('lc-' + postId);
             const icon = btn?.querySelector('.reels-action-icon i');
-            const burst = document.getElementById('hburst-' + postId);
-            if (btn) btn.classList.toggle('is-liked', !!liked);
-            if (icon) icon.className = (liked ? 'fa-solid' : 'fa-regular') + ' fa-heart';
+            if (btn) {
+                btn.classList.toggle('is-liked', !!liked);
+                btn.setAttribute('aria-pressed', liked ? 'true' : 'false');
+            }
+            if (icon) {
+                icon.className = 'fa-solid fa-heart';
+                icon.style.color = liked ? '#fe2c55' : '';
+            }
             if (countEl) countEl.textContent = this._fmt(count ?? 0);
         },
 
@@ -1282,6 +1344,41 @@ Alpine.data('rollsPlayer', function(wire) {
             wire.call('toggleLike', postId)
                 .then(r => { if (r?.postId) this._applyLikeState(r.postId, r.liked, r.count); })
                 .catch(() => this._applyLikeState(postId, wasLiked, current));
+        },
+
+        toggleFollow(userId) {
+            userId = String(userId || '');
+            if (!userId) return;
+
+            const prev = !!this._following[userId];
+            const next = !prev;
+            this._following[userId] = next;
+            this._applyFollowState(userId, next);
+
+            wire.call('toggleFollow', userId)
+                .then(r => {
+                    if (!r?.userId) return;
+                    this._following[r.userId] = !!r.following;
+                    this._applyFollowState(r.userId, !!r.following);
+                })
+                .catch(() => {
+                    this._following[userId] = prev;
+                    this._applyFollowState(userId, prev);
+                });
+        },
+
+        _applyFollowState(userId, following) {
+            document.querySelectorAll('[data-follow-user="' + userId + '"]').forEach(btn => {
+                btn.classList.toggle('is-following', !!following);
+                btn.setAttribute('aria-label', following ? 'Unfollow' : 'Follow');
+                if (btn.classList.contains('reels-follow')) {
+                    btn.textContent = following ? 'Following' : 'Follow';
+                }
+                const icon = btn.querySelector('i');
+                if (icon) {
+                    icon.className = 'fa-solid ' + (following ? 'fa-check' : 'fa-plus');
+                }
+            });
         },
 
         _heartBurst(postId) {
@@ -1349,10 +1446,9 @@ Alpine.data('rollsPlayer', function(wire) {
         _flushWatch(postId) {
             if (!this._watchSent && this._watchStart && postId === this._activePostId) {
                 const s = (Date.now() - this._watchStart) / 1000;
-                const wasFirst = this._isFirstPlay[postId] === true;
-                if (s > 0.5) {
-                    wire.call('recordWatch', postId, s, wasFirst).catch(() => {});
-                    this._isFirstPlay[postId] = false;
+                if (s >= 0.25) {
+                    // Play already counted in _activate via recordPlay; never send is_first_play here.
+                    wire.call('recordWatch', postId, s, false).catch(() => {});
                     this._watchSent = true;
                 }
             }
@@ -1367,6 +1463,13 @@ Alpine.data('rollsPlayer', function(wire) {
             Livewire.on('likeUpdated', payload => {
                 const { postId, liked, count } = apply(payload);
                 if (postId) this._applyLikeState(postId, liked, count);
+            });
+
+            Livewire.on('followUpdated', payload => {
+                const { userId, following } = apply(payload);
+                if (!userId) return;
+                this._following[userId] = !!following;
+                this._applyFollowState(userId, !!following);
             });
 
             Livewire.on('commentCountUpdated', payload => {
@@ -1390,6 +1493,7 @@ Alpine.data('rollsPlayer', function(wire) {
                         if (this._activeVideo.paused) {
                             this._doPlay(this._activeVideo);
                             this._watchStart = Date.now();
+                            this._watchSent = false;
                         } else {
                             this._activeVideo.pause();
                             this._flushWatch(this._activePostId);
@@ -1402,14 +1506,15 @@ Alpine.data('rollsPlayer', function(wire) {
             document.addEventListener('visibilitychange', () => {
                 if (!document.hidden || !this._watchStart || !this._activePostId || this._watchSent) return;
                 const s = (Date.now() - this._watchStart) / 1000;
-                if (s < 0.5) return;
+                if (s < 0.25) return;
                 navigator.sendBeacon('{{ url("api/rolls/watch") }}', new Blob([JSON.stringify({
                     post_id: this._activePostId,
                     watch_seconds: s,
-                    is_first_play: this._isFirstPlay[this._activePostId] === true,
+                    is_first_play: false,
                     _token: document.querySelector('meta[name="csrf-token"]')?.content
                 })], { type: 'application/json' }));
                 this._watchSent = true;
+                this._watchStart = null;
             });
         },
 

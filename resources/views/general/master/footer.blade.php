@@ -7,7 +7,7 @@
           <span><img src="{{ asset('rsc/logo_sm.png') }}" alt="Payhankey logo" width="32" height="32"></span>
           <span>Payhankey</span>
         </div>
-        <p>The social platform that pays you for the posts, videos, quizzes and teasers you already make — no followers or watch hours required. A product of Freebyz Technologies Ltd.</p>
+        <p>Payhankey is an AI-powered creator monetization platform built for African creators. Create content, grow your audience, build communities and develop sustainable digital income streams.</p>
         <div class="footer__social">
           @if ($social['tiktok'] ?? null)
             <a href="{{ $social['tiktok'] }}" aria-label="TikTok" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 8.2a6.5 6.5 0 0 0 4 1.4V6.7a3.6 3.6 0 0 1-2.6-1.1A3.6 3.6 0 0 1 16.4 3H13.4v12.2a2.3 2.3 0 1 1-2.3-2.3c.24 0 .47.04.7.1v-3.1a5.4 5.4 0 1 0 4.2 5.3z"/></svg></a>
@@ -27,7 +27,7 @@
         <h5>Platform</h5>
         <a href="{{ route('features') }}">Features</a>
         <a href="{{ url('/how-it-works') }}">How it works</a>
-        <a href="{{ url('/top-earners') }}">Top earners</a>
+        <a href="{{ route('faq') }}">FAQ</a>
         <a href="{{ url('/register') }}">Create account</a>
         <a href="{{ url('/login') }}">Log in</a>
       </div>

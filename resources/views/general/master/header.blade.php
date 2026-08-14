@@ -3,7 +3,7 @@
         ['href' => url('/'), 'label' => 'Home', 'active' => request()->is('/')],
         ['href' => route('features'), 'label' => 'Features', 'active' => request()->is('features')],
         ['href' => url('/how-it-works'), 'label' => 'How it works', 'active' => request()->is('how-it-works')],
-        ['href' => url('/top-earners'), 'label' => 'Top earners', 'active' => request()->is('top-earners') || request()->is('top/earners')],
+        ['href' => route('faq'), 'label' => 'FAQ', 'active' => request()->routeIs('faq')],
         ['href' => route('blog'), 'label' => 'Blog', 'active' => request()->routeIs('blog') || request()->is('blog*')],
         ['href' => url('/about'), 'label' => 'About', 'active' => request()->is('about')],
         ['href' => url('/contact'), 'label' => 'Contact', 'active' => request()->is('contact')],
