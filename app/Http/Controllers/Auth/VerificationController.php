@@ -23,9 +23,12 @@ class VerificationController extends Controller
     /**
      * Where to redirect users after verification.
      *
-     * @var string
+     * Prefer a stored intended URL (e.g. community join from a public page).
      */
-    protected $redirectTo = '/home';
+    public function redirectTo()
+    {
+        return session()->pull('url.intended', '/home');
+    }
 
     /**
      * Create a new controller instance.

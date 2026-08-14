@@ -109,9 +109,17 @@
                 </div>
             @endforelse
 
-            @if ($posts->hasPages())
-                <div class="ph-more" style="margin-top:16px">
-                    {{ $posts->links() }}
+            @if ($hasMore)
+                <div class="text-center my-3">
+                    <button type="button"
+                        class="ph-loadmore"
+                        style="display:inline-flex;align-items:center;gap:8px;border:1px solid #cfd9de;background:#fff;color:#5A4FDC;font-weight:700;font-size:.9rem;padding:11px 24px;border-radius:999px;cursor:pointer"
+                        wire:click="loadMore"
+                        wire:loading.attr="disabled"
+                        wire:target="loadMore">
+                        <span wire:loading.remove wire:target="loadMore">Load more posts <i class="fa fa-arrow-down"></i></span>
+                        <span wire:loading wire:target="loadMore">Loading…</span>
+                    </button>
                 </div>
             @endif
         </div>

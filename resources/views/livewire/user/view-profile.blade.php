@@ -9,19 +9,24 @@
         $bannerUrl = $user->banner ?: $defaultBanner;
         $hasCustomBanner = filled($user->banner);
         $totalLikes = sumCounter($user->total_likes, $user->total_likes_external);
-        $profileViews = sumCounter($user->profile_views ?? 0, $user->profile_views_external ?? 0);
     @endphp
 
     @verbatim
         <style>
             .pf-page {
+                --pf-violet: #5A4FDC;
                 --pf-blue: #1877F2;
                 --pf-blue-hover: #166FE5;
+                --pf-ink: #0F1117;
                 --pf-text: #050505;
                 --pf-muted: #65676B;
+                --pf-gray-400: #9CA3AF;
+                --pf-gray-500: #6B7280;
+                --pf-gray-700: #374151;
                 --pf-line: #CED0D4;
                 --pf-bg: #F0F2F5;
                 --pf-white: #FFFFFF;
+                --pf-avatar: clamp(112px, 22vw, 168px);
                 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
                 color: var(--pf-text);
                 margin: 0 -12px 16px;
@@ -31,29 +36,83 @@
                 .pf-page { margin-inline: 0; }
             }
 
-            .pf-page * { box-sizing: border-box; }
+            .pf-page *,
+            .pf-page *::before,
+            .pf-page *::after { box-sizing: border-box; }
 
-            /* ---- cover photo ---- */
-            .pf-cover-wrap {
+            /* ---- hero shell (matches community) ---- */
+            .pf-hero {
                 background: var(--pf-white);
-                box-shadow: 0 1px 2px rgba(0, 0, 0, .1);
+                border: 1px solid #eff3f4;
                 border-radius: 0 0 8px 8px;
-                overflow: hidden;
+                box-shadow: 0 1px 2px rgba(0, 0, 0, .06);
+                overflow: visible;
+                margin-bottom: 12px;
+                padding-bottom: 0;
             }
 
+            /* ---- cover + fade ---- */
             .pf-cover {
                 position: relative;
-                height: clamp(180px, 35vw, 350px);
+                height: clamp(160px, 32vw, 350px);
                 background-color: #BCC0C4;
                 background-size: cover;
                 background-position: center;
             }
 
+            .pf-cover:not(.has-image)::before {
+                content: "";
+                position: absolute;
+                inset: 0;
+                background:
+                    radial-gradient(circle at 18% 28%, rgba(255, 255, 255, .14) 0%, transparent 42%),
+                    radial-gradient(circle at 82% 72%, rgba(255, 255, 255, .1) 0%, transparent 38%),
+                    radial-gradient(circle at 55% 105%, rgba(255, 255, 255, .08) 0%, transparent 45%);
+                pointer-events: none;
+            }
+
+            .pf-cover::after {
+                content: "";
+                position: absolute;
+                inset: 0;
+                background: linear-gradient(
+                    to bottom,
+                    transparent 0%,
+                    transparent 58%,
+                    rgba(255, 255, 255, .55) 82%,
+                    rgba(255, 255, 255, .98) 100%
+                );
+                pointer-events: none;
+                z-index: 1;
+            }
+
+            .pf-cover.has-image::after {
+                background: linear-gradient(
+                    to bottom,
+                    transparent 0%,
+                    transparent 52%,
+                    rgba(255, 255, 255, .6) 80%,
+                    rgba(255, 255, 255, .98) 100%
+                );
+            }
+
             .pf-cover-edit {
                 position: absolute;
-                right: 16px;
+                right: 12px;
                 bottom: 16px;
                 z-index: 2;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                max-width: calc(100% - 24px);
+                justify-content: flex-end;
+            }
+
+            @media (min-width: 576px) {
+                .pf-cover-edit {
+                    right: 16px;
+                    bottom: 20px;
+                }
             }
 
             .pf-cover-edit label,
@@ -66,11 +125,12 @@
                 border: none;
                 background: rgba(255, 255, 255, .92);
                 color: var(--pf-text);
-                font-size: 15px;
+                font-size: clamp(.8rem, 2.4vw, .9375rem);
                 font-weight: 600;
                 cursor: pointer;
                 box-shadow: 0 1px 2px rgba(0, 0, 0, .15);
                 font-family: inherit;
+                white-space: nowrap;
             }
 
             .pf-cover-edit label:hover,
@@ -79,7 +139,6 @@
             }
 
             .pf-cover-edit button.pf-cover-remove {
-                margin-left: 8px;
                 background: rgba(0, 0, 0, .55);
                 color: #fff;
             }
@@ -103,19 +162,22 @@
             /* ---- profile head ---- */
             .pf-head {
                 position: relative;
-                padding: 0 16px 16px;
+                padding: 0 16px 10px;
                 background: var(--pf-white);
+                margin-top: 0;
+                z-index: 2;
+                border-radius: 0 0 8px 8px;
             }
 
             @media (min-width: 768px) {
-                .pf-head { padding: 0 32px 16px; }
+                .pf-head { padding: 0 32px 12px; }
             }
 
             .pf-head-row {
                 display: flex;
                 flex-direction: column;
                 align-items: center;
-                gap: 12px;
+                gap: 8px;
             }
 
             @media (min-width: 900px) {
@@ -123,7 +185,7 @@
                     flex-direction: row;
                     align-items: flex-end;
                     justify-content: space-between;
-                    min-height: 36px;
+                    min-height: 0;
                 }
             }
 
@@ -132,49 +194,32 @@
                 flex-direction: column;
                 align-items: center;
                 width: 100%;
+                min-width: 0;
+                gap: 4px;
             }
 
             @media (min-width: 900px) {
                 .pf-head-left {
                     flex-direction: row;
                     align-items: flex-end;
-                    gap: 20px;
+                    gap: 14px;
                     width: auto;
                     flex: 1;
-                    min-width: 0;
                 }
             }
 
+            /* 50% of avatar sits on the faded cover */
             .pf-avatar-wrap {
                 position: relative;
-                margin-top: -64px;
+                margin-top: calc(var(--pf-avatar) / -2);
                 flex-shrink: 0;
+                z-index: 3;
             }
 
-            @media (min-width: 900px) {
-                .pf-avatar-wrap { margin-top: -84px; }
-            }
-
-            .pf-avatar-ring {
-                padding: 4px;
-                border-radius: 50%;
-                background: var(--pf-white);
-                display: inline-block;
-            }
-
-            .pf-avatar-ring--influencer {
-                background: linear-gradient(135deg, #1877F2, #5A4FDC);
-                padding: 5px;
-            }
-
-            .pf-avatar {
-                width: clamp(120px, 22vw, 168px);
-                height: clamp(120px, 22vw, 168px);
-                border-radius: 50%;
-                object-fit: cover;
-                display: block;
-                border: 4px solid var(--pf-white);
-                background: #E4E6EB;
+            .pf-avatar-wrap .ua {
+                --ua-size: var(--pf-avatar) !important;
+                width: var(--pf-avatar);
+                height: var(--pf-avatar);
             }
 
             .pf-avatar-edit {
@@ -186,6 +231,7 @@
                 place-items: center;
                 cursor: pointer;
                 transition: background .2s ease;
+                z-index: 4;
             }
 
             .pf-avatar-wrap:hover .pf-avatar-edit {
@@ -194,7 +240,7 @@
 
             .pf-avatar-edit i {
                 color: #fff;
-                font-size: 28px;
+                font-size: clamp(1.25rem, 4vw, 1.75rem);
                 opacity: 0;
                 transition: opacity .2s ease;
             }
@@ -213,32 +259,38 @@
                 font-weight: 600;
                 display: grid;
                 place-items: center;
-                z-index: 2;
+                z-index: 5;
             }
 
             .pf-identity {
-                text-align: center;
+                flex: 1;
                 min-width: 0;
-                padding-bottom: 4px;
+                padding-bottom: 0;
+                text-align: center;
             }
 
             @media (min-width: 900px) {
-                .pf-identity { text-align: left; }
+                .pf-identity {
+                    text-align: left;
+                    padding-bottom: 2px;
+                }
             }
 
             .pf-name {
-                font-size: clamp(1.5rem, 4vw, 2rem);
-                font-weight: 700;
-                line-height: 1.2;
-                margin: 0 0 4px;
-                color: var(--pf-text);
+                margin: 0;
+                font-size: clamp(1.2rem, 2.8vw, 1.75rem);
+                font-weight: 800;
+                line-height: 1.1;
+                letter-spacing: -.02em;
+                color: var(--pf-ink);
+                word-break: break-word;
             }
 
             .pf-name-row {
                 display: inline-flex;
                 align-items: center;
                 flex-wrap: wrap;
-                gap: 6px;
+                gap: 5px;
                 justify-content: center;
             }
 
@@ -246,31 +298,58 @@
                 .pf-name-row { justify-content: flex-start; }
             }
 
+            .pf-name-row svg {
+                flex: none;
+                width: 18px;
+                height: 18px;
+            }
+
             .pf-subline {
-                font-size: 15px;
-                color: var(--pf-muted);
-                margin: 0 0 8px;
-                line-height: 1.4;
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                justify-content: center;
+                gap: 5px;
+                margin: 2px 0 0;
+                font-size: clamp(.78rem, 1.8vw, .875rem);
+                color: var(--pf-gray-500);
+                line-height: 1.25;
+            }
+
+            @media (min-width: 900px) {
+                .pf-subline { justify-content: flex-start; }
             }
 
             .pf-subline a {
-                color: var(--pf-muted);
+                color: var(--pf-gray-700);
                 text-decoration: none;
                 font-weight: 600;
             }
 
             .pf-subline a:hover { text-decoration: underline; }
 
-            .pf-dot { margin: 0 4px; }
+            .pf-subline strong {
+                color: var(--pf-gray-700);
+                font-weight: 600;
+            }
+
+            .pf-dot {
+                width: 3px;
+                height: 3px;
+                border-radius: 50%;
+                background: var(--pf-gray-400);
+                flex: none;
+            }
 
             .pf-meta-inline {
                 display: flex;
                 flex-wrap: wrap;
-                gap: 12px;
+                gap: 4px 12px;
                 justify-content: center;
-                font-size: 15px;
+                font-size: clamp(.75rem, 1.8vw, .82rem);
                 color: var(--pf-muted);
-                margin-top: 6px;
+                margin-top: 4px;
+                line-height: 1.25;
             }
 
             @media (min-width: 900px) {
@@ -280,23 +359,28 @@
             .pf-meta-inline span {
                 display: inline-flex;
                 align-items: center;
-                gap: 6px;
+                gap: 5px;
+                min-width: 0;
+                max-width: 100%;
             }
 
             .pf-head-actions {
                 display: flex;
                 flex-wrap: wrap;
-                gap: 8px;
+                align-items: center;
                 justify-content: center;
+                gap: 6px;
                 width: 100%;
-                padding-top: 4px;
+                position: relative;
+                z-index: 2;
             }
 
             @media (min-width: 900px) {
                 .pf-head-actions {
-                    width: auto;
                     justify-content: flex-end;
-                    padding-bottom: 8px;
+                    width: auto;
+                    flex-shrink: 0;
+                    padding-bottom: 2px;
                 }
             }
 
@@ -304,54 +388,81 @@
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
-                gap: 8px;
-                padding: 0 16px;
-                min-height: 36px;
+                gap: 6px;
+                padding: 0 14px;
+                min-height: 32px;
                 border-radius: 6px;
                 border: none;
                 font-family: inherit;
-                font-size: 15px;
+                font-size: .875rem;
                 font-weight: 600;
+                line-height: 1.2;
+                white-space: nowrap;
                 cursor: pointer;
                 text-decoration: none;
-                transition: background .15s ease;
+                transition: background .15s ease, filter .15s ease;
             }
 
             .pf-btn--primary {
-                background: var(--pf-blue);
+                background: var(--pf-violet);
                 color: #fff;
             }
 
             .pf-btn--primary:hover {
-                background: var(--pf-blue-hover);
+                filter: brightness(1.06);
                 color: #fff;
             }
 
             .pf-btn--secondary {
                 background: #E4E6EB;
-                color: var(--pf-text);
+                color: var(--pf-ink);
             }
 
-            .pf-btn--secondary:hover { background: #D8DADF; color: var(--pf-text); }
+            .pf-btn--secondary:hover { background: #D8DADF; color: var(--pf-ink); }
 
             .pf-btn--following {
                 background: #E4E6EB;
-                color: var(--pf-text);
+                color: var(--pf-ink);
+            }
+
+            @media (max-width: 899.98px) {
+                .pf-head-actions .pf-btn {
+                    flex: 1 1 calc(50% - 4px);
+                    min-width: 0;
+                }
+            }
+
+            @media (max-width: 479.98px) {
+                .pf-page {
+                    --pf-avatar: clamp(96px, 28vw, 128px);
+                }
+
+                .pf-head-actions .pf-btn {
+                    flex: 1 1 100%;
+                }
+
+                .pf-cover {
+                    height: clamp(140px, 42vw, 220px);
+                }
             }
 
             /* ---- tabs (FB-style) ---- */
             .pf-tabs {
                 display: flex;
-                gap: 4px;
+                gap: 2px;
                 border-top: 1px solid var(--pf-line);
-                margin-top: 12px;
+                margin-top: 8px;
                 padding-top: 0;
                 overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
             }
 
+            .pf-tabs::-webkit-scrollbar { display: none; }
+
             .pf-tab {
-                padding: 14px 16px;
-                font-size: 15px;
+                padding: 10px 14px;
+                font-size: .875rem;
                 font-weight: 600;
                 color: var(--pf-muted);
                 border: none;
@@ -360,21 +471,15 @@
                 cursor: default;
                 white-space: nowrap;
                 font-family: inherit;
+                line-height: 1.2;
             }
+
+            a.pf-tab { cursor: pointer; }
 
             .pf-tab--active {
-                color: var(--pf-blue);
-                border-bottom-color: var(--pf-blue);
+                color: var(--pf-violet);
+                border-bottom-color: var(--pf-violet);
             }
-
-            .pf-referral {
-                margin-top: 10px;
-                font-size: 13px;
-                color: var(--pf-muted);
-                word-break: break-all;
-            }
-
-            .pf-referral i { margin-right: 4px; }
 
             .pf-alert {
                 margin: 0 16px 12px;
@@ -402,9 +507,10 @@
         </style>
     @endverbatim
 
-    <div class="pf-cover-wrap">
-        {{-- Cover photo --}}
-        <div class="pf-cover" style="background-image:url('{{ $bannerUrl }}')">
+    <div class="pf-hero">
+        {{-- Cover photo with fade into header --}}
+        <div @class(['pf-cover', 'has-image' => true])
+            style="background-image:url('{{ $bannerUrl }}')">
             @if ($isOwner)
                 <div class="pf-cover-edit">
                     <label for="bannerUploadInput">
@@ -433,9 +539,7 @@
             <div class="pf-head-row">
                 <div class="pf-head-left">
                     <div class="pf-avatar-wrap">
-                        <span @class(['pf-avatar-ring', 'pf-avatar-ring--influencer' => $isInfluencer])>
-                            <img src="{{ $avatarUrl }}" alt="{{ $user->name }}" class="pf-avatar">
-                        </span>
+                        <x-user-avatar :user="$user" size="hero" :href="false" :alt="$user->name" />
 
                         @if ($isOwner)
                             <label class="pf-avatar-edit" for="avatarUploadInput" title="Edit profile picture">
@@ -448,29 +552,24 @@
 
                     <div class="pf-identity">
                         <div class="pf-name-row">
-                            <h1 class="pf-name">{{ displayName($user->name) }}</h1>
+                            <h1 class="pf-name">{{ $user->name }}</h1>
                             @if ($isVerified)
-                                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="#1877F2" aria-label="Verified">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="{{ $isInfluencer ? '#5A4FDC' : '#1877F2' }}" aria-label="Verified">
                                     <path d="M22.5 5.5l-12 12-5.5-5.5 1.5-1.5 4 4 10.5-10.5z"/>
                                 </svg>
                             @endif
                         </div>
 
                         <p class="pf-subline">
-                            <a href="{{ url('profile/' . $user->username . '/connection?tab=followers') }}">{{ number_format($user->followers) }} followers</a>
-                            <span class="pf-dot">·</span>
-                            <a href="{{ url('profile/' . $user->username . '/connection?tab=following') }}">{{ number_format($user->following) }} following</a>
-                            <span class="pf-dot">·</span>
-                            <span>{{ number_format($totalLikes) }} likes</span>
-                            <span class="pf-dot">·</span>
-                            <span>{{ number_format($profileViews) }} profile views</span>
-                        </p>
-
-                        <p class="pf-subline" style="margin-bottom:0">
-                            <strong>{{ $level }}</strong> account
-                            @if ($isVerified)
-                                <span class="pf-dot">·</span> Verified creator
-                            @endif
+                            <a href="{{ url('profile/' . $user->username . '/connection?tab=followers') }}">
+                                <strong>{{ number_format($user->followers) }}</strong> followers
+                            </a>
+                            <span class="pf-dot" aria-hidden="true"></span>
+                            <a href="{{ url('profile/' . $user->username . '/connection?tab=following') }}">
+                                <strong>{{ number_format($user->following) }}</strong> following
+                            </a>
+                            <span class="pf-dot" aria-hidden="true"></span>
+                            <span><strong>{{ number_format($totalLikes) }}</strong> likes</span>
                         </p>
 
                         @if ($user->profile?->about || $user->profile?->date_of_birth || $user->profile?->location)
@@ -487,13 +586,6 @@
                                 @if ($user->profile?->location)
                                     <span><i class="fa fa-map-marker"></i> {{ $user->profile->location }}</span>
                                 @endif
-                            </div>
-                        @endif
-
-                        @if ($isOwner)
-                            <div class="pf-referral">
-                                <i class="fa fa-share"></i>
-                                {{ url('/reg?referral_code=' . auth()->user()->referral_code) }}
                             </div>
                         @endif
                     </div>
@@ -543,7 +635,7 @@
                 <livewire:user.post-content
                     :post="$post"
                     :estimated-earnings="$earnings[$post->id] ?? 0"
-                    :format-text="true"
+                    :format-text="false"
                     :show-post-menu="true"
                     wire:key="post-{{ $post->id }}" />
             @empty
@@ -557,6 +649,20 @@
                     </p>
                 </div>
             @endforelse
+
+            @if ($hasMore)
+                <div class="text-center my-3">
+                    <button type="button"
+                        class="ph-loadmore"
+                        style="display:inline-flex;align-items:center;gap:8px;border:1px solid #cfd9de;background:#fff;color:#5A4FDC;font-weight:700;font-size:.9rem;padding:11px 24px;border-radius:999px;cursor:pointer"
+                        wire:click="loadMore"
+                        wire:loading.attr="disabled"
+                        wire:target="loadMore">
+                        <span wire:loading.remove wire:target="loadMore">Load more posts <i class="fa fa-arrow-down"></i></span>
+                        <span wire:loading wire:target="loadMore">Loading…</span>
+                    </button>
+                </div>
+            @endif
         </div>
 
         @include('layouts.engagement')

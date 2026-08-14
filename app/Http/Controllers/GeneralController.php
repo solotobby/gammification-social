@@ -125,6 +125,30 @@ class GeneralController extends Controller
         return view('community.publics', ['community' => $community]);
     }
 
+    /**
+     * Guest CTA from a public community page: remember CommunityDetails as the
+     * intended destination, then send them to login (or register via that page).
+     */
+    public function communityAuthIntent(Community $community)
+    {
+        if ($community->isArchived()) {
+            abort(404);
+        }
+
+        $destination = route('community.show', $community);
+
+        if (auth()->check()) {
+            return redirect()->to($destination);
+        }
+
+        session([
+            'url.intended' => $destination,
+            'community_join_intent' => $community->name,
+        ]);
+
+        return redirect()->route('login');
+    }
+
     public function topEarners()
     {
         $earners = $this->publicSite->topEarners(10);

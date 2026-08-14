@@ -91,8 +91,20 @@
                 background: #E4E6EB;
             }
 
+            .st-head-left .ua {
+                --ua-size: 96px !important;
+                width: 96px;
+                height: 96px;
+            }
+
             @media (min-width: 768px) {
                 .st-avatar { width: 112px; height: 112px; margin-top: -8px; }
+                .st-head-left .ua {
+                    --ua-size: 112px !important;
+                    width: 112px;
+                    height: 112px;
+                    margin-top: -8px;
+                }
             }
 
             .st-title-block { text-align: center; }
@@ -351,7 +363,7 @@
         <div class="st-head">
             <div class="st-head-row">
                 <div class="st-head-left">
-                    <img src="{{ $avatarUrl }}" alt="{{ $userName }}" class="st-avatar">
+                    <x-user-avatar :user="auth()->user()" size="xl" :href="false" class="st-avatar-ua" />
                     <div class="st-title-block">
                         <h1 class="st-title">Settings</h1>
                         <p class="st-subtitle">{{ displayName($userName) }} · @<span>{{ $username }}</span></p>

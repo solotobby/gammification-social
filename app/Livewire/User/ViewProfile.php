@@ -350,14 +350,18 @@ class ViewProfile extends Component
         $timelines = $this->user->posts()
             ->visibleToViewer($this->user, auth()->user())
             ->latest()
-            ->take($this->perpage)
+            ->take($this->perpage + 1)
             ->get();
+
+        $hasMore = $timelines->count() > $this->perpage;
+        $timelines = $timelines->take($this->perpage);
 
         $earnings = app(PostEarningsService::class)->forPosts($timelines->pluck('id'));
 
         return view('livewire.user.view-profile', [
             'posts' => $timelines,
             'earnings' => $earnings,
+            'hasMore' => $hasMore,
         ]);
     }
 }

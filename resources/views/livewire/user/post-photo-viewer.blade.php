@@ -326,7 +326,7 @@
         {{-- FB sidebar --}}
         <aside class="fpv-rail">
             <div class="fpv-rail-head">
-                <img src="{{ $user->avatar ?? 'https://ui-avatars.com/api/?name='.urlencode($user->name).'&background=1877f2&color=fff&size=80' }}" alt="">
+                <x-user-avatar :user="$user" size="md" />
                 <div class="fpv-rail-user">
                     <a class="fpv-rail-name" href="{{ url('profile/'.$user->username) }}">{{ displayName($user->name) }}</a>
                     <div class="fpv-rail-time">{{ $createdAt?->diffForHumans() }}</div>
@@ -380,7 +380,13 @@
             <div class="fpv-comments">
                 @forelse($comments as $comment)
                     <div class="fpv-comment" wire:key="fpv-c-{{ $comment['id'] }}">
-                        <img src="{{ $comment['avatar'] ?? 'https://ui-avatars.com/api/?name='.urlencode($comment['name']).'&size=64&background=e4e6eb&color=050505' }}" alt="">
+                        <x-user-avatar
+                            :user-id="$comment['user_id'] ?? null"
+                            :src="$comment['avatar'] ?? null"
+                            :alt="$comment['name'] ?? 'User'"
+                            :href="isset($comment['username']) ? url('profile/'.$comment['username']) : false"
+                            size="sm"
+                        />
                         <div class="fpv-comment-body">
                             <div class="fpv-comment-bubble">
                                 <a class="fpv-comment-user" href="{{ url('profile/'.$comment['username']) }}">{{ displayName($comment['name']) }}</a>
@@ -402,7 +408,7 @@
             </div>
 
             <form class="fpv-compose" wire:submit.prevent="submitComment">
-                <img src="{{ auth()->user()->avatar ?? 'https://ui-avatars.com/api/?name='.urlencode(auth()->user()->name).'&size=64&background=e4e6eb&color=050505' }}" alt="">
+                <x-user-avatar :user="auth()->user()" size="sm" :href="false" />
                 <input id="fpv-comment-input" type="text" wire:model.live="commentText"
                     placeholder="Write a comment…" maxlength="500" autocomplete="off">
                 <button type="submit" class="{{ trim($commentText) !== '' ? 'active' : '' }}"

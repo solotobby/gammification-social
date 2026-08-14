@@ -109,379 +109,132 @@
             </li>
         </ul>
     @else
+        @php
+            $earnOpen = request()->is('upgrade*')
+                || request()->is('wallets*')
+                || request()->is('transaction/list*')
+                || request()->is('analytics*')
+                || request()->is('referral/list*')
+                || request()->is('bank/information*');
+
+            $accountOpen = request()->is('profile/*')
+                || request()->is('settings*')
+                || request()->is('how/it/works*');
+        @endphp
+
         <ul class="nav-main">
+            {{-- Create & engage --}}
+            <li class="nav-main-heading">Feed</li>
             <li class="nav-main-item">
-                <a class="nav-main-link" href="{{ url('home') }}">
+                <a class="nav-main-link{{ request()->is('home') || request()->is('timeline*') || request()->is('user/home') ? ' active' : '' }}" href="{{ url('home') }}">
                     <i class="nav-main-link-icon fa fa-home"></i>
                     <span class="nav-main-link-name">Dashboard</span>
-
                 </a>
+            </li>
+            <li class="nav-main-item">
                 <a class="nav-main-link{{ request()->routeIs('rolls.*') ? ' active' : '' }}" href="{{ route('rolls.random') }}">
                     <i class="nav-main-link-icon fa fa-circle-play"></i>
                     <span class="nav-main-link-name">Rolls</span>
                 </a>
+            </li>
+            <li class="nav-main-item">
                 <a class="nav-main-link{{ request()->routeIs('community*') ? ' active' : '' }}" href="{{ route('community') }}">
                     <i class="nav-main-link-icon fa fa-users"></i>
                     <span class="nav-main-link-name">Communities</span>
                 </a>
-                @if (Auth::user())
-                    <a class="nav-main-link" href="{{ url('profile/' . auth()->user()->username) }}">
-                        <i class="nav-main-link-icon fa fa-user"></i>
-                        <span class="nav-main-link-name">Profile</span>
-                    </a>
+            </li>
+            @auth
+                <li class="nav-main-item">
                     <a class="nav-main-link{{ request()->routeIs('bookmarks') ? ' active' : '' }}" href="{{ route('bookmarks') }}">
                         <i class="nav-main-link-icon fa fa-bookmark"></i>
-                        <span class="nav-main-link-name">Bookmarked</span>
+                        <span class="nav-main-link-name">Bookmarks</span>
                     </a>
-                @endif
+                </li>
+            @endauth
 
-                <a class="nav-main-link" href="{{ url('upgrade') }}">
-                    <i class="nav-main-link-icon fa fa-level-up-alt"></i>
-                    <span class="nav-main-link-name">Upgrade Level</span>
+            {{-- Monetization --}}
+            <li class="nav-main-heading">Monetize</li>
+            <li class="nav-main-item{{ $earnOpen ? ' open' : '' }}">
+                <a class="nav-main-link nav-main-link-submenu{{ $earnOpen ? ' active' : '' }}"
+                    data-toggle="submenu"
+                    aria-haspopup="true"
+                    aria-expanded="{{ $earnOpen ? 'true' : 'false' }}"
+                    href="#">
+                    <i class="nav-main-link-icon fa fa-coins"></i>
+                    <span class="nav-main-link-name">Earnings</span>
                 </a>
-                {{-- <a class="nav-main-link" href="{{ url('user/payouts') }}">
-                    <i class="nav-main-link-icon fa fa-usd"></i>
-                    <span class="nav-main-link-name">Payouts</span>
-                </a> --}}
+                <ul class="nav-main-submenu" @if ($earnOpen) style="display:block" @endif>
+                    <li class="nav-main-item">
+                        <a class="nav-main-link{{ request()->is('upgrade*') ? ' active' : '' }}" href="{{ url('upgrade') }}">
+                            <span class="nav-main-link-name">Upgrade</span>
+                        </a>
+                    </li>
+                    <li class="nav-main-item">
+                        <a class="nav-main-link{{ request()->is('wallets*') ? ' active' : '' }}" href="{{ url('wallets') }}">
+                            <span class="nav-main-link-name">Wallet</span>
+                        </a>
+                    </li>
+                    <li class="nav-main-item">
+                        <a class="nav-main-link{{ request()->is('transaction/list*') ? ' active' : '' }}" href="{{ url('transaction/list') }}">
+                            <span class="nav-main-link-name">Transactions</span>
+                        </a>
+                    </li>
+                    <li class="nav-main-item">
+                        <a class="nav-main-link{{ request()->is('analytics*') ? ' active' : '' }}" href="{{ url('analytics') }}">
+                            <span class="nav-main-link-name">Analytics</span>
+                        </a>
+                    </li>
+                    <li class="nav-main-item">
+                        <a class="nav-main-link{{ request()->is('referral/list*') ? ' active' : '' }}" href="{{ url('referral/list') }}">
+                            <span class="nav-main-link-name">My Referrals</span>
+                        </a>
+                    </li>
+                    <li class="nav-main-item">
+                        <a class="nav-main-link{{ request()->is('bank/information*') ? ' active' : '' }}" href="{{ url('bank/information') }}">
+                            <span class="nav-main-link-name">Bank Information</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
 
-                <a class="nav-main-link" href="{{ url('analytics') }}">
-                    <i class="nav-main-link-icon si si-bar-chart"></i>
-                    <span class="nav-main-link-name">Analytics</span>
-                </a>
-
-
-                <a class="nav-main-link" href="{{ url('wallets') }}">
-                    <i class="nav-main-link-icon fa fa-wallet"></i>
-                    <span class="nav-main-link-name">Wallets</span>
-                </a>
-                <a class="nav-main-link" href="{{ url('bank/information') }}">
-                    <i class="nav-main-link-icon fa fa-th"></i>
-                    <span class="nav-main-link-name">Bank Information</span>
-                </a>
-
-                <a class="nav-main-link" href="{{ url('transaction/list') }}">
-                    <i class="nav-main-link-icon fa fa-table"></i>
-                    <span class="nav-main-link-name">Transaction</span>
-                </a>
-                <a class="nav-main-link" href="{{ url('earner/list') }}">
-                    <i class="nav-main-link-icon fa fa-list"></i>
-                    <span class="nav-main-link-name">Top Earners</span>
-                </a>
-
-                <a class="nav-main-link" href="{{ url('referral/list') }}">
-                    <i class="nav-main-link-icon fa fa-user-friends"></i>
-                    <span class="nav-main-link-name">My Referrals</span>
-                </a>
-
-
-                <a class="nav-main-link" href="{{ url('settings') }}">
+            {{-- Account & help --}}
+            <li class="nav-main-heading">Account</li>
+            <li class="nav-main-item{{ $accountOpen ? ' open' : '' }}">
+                <a class="nav-main-link nav-main-link-submenu{{ $accountOpen ? ' active' : '' }}"
+                    data-toggle="submenu"
+                    aria-haspopup="true"
+                    aria-expanded="{{ $accountOpen ? 'true' : 'false' }}"
+                    href="#">
                     <i class="nav-main-link-icon si si-settings"></i>
                     <span class="nav-main-link-name">Settings</span>
                 </a>
-                <a class="nav-main-link" href="{{ url('user/blog') }}">
+                <ul class="nav-main-submenu" @if ($accountOpen) style="display:block" @endif>
+                    @auth
+                        <li class="nav-main-item">
+                            <a class="nav-main-link{{ request()->is('profile/' . auth()->user()->username) || request()->is('profile/' . auth()->user()->username . '/*') ? ' active' : '' }}"
+                                href="{{ url('profile/' . auth()->user()->username) }}">
+                                <span class="nav-main-link-name">Profile</span>
+                            </a>
+                        </li>
+                    @endauth
+                    <li class="nav-main-item">
+                        <a class="nav-main-link{{ request()->is('settings*') ? ' active' : '' }}" href="{{ url('settings') }}">
+                            <span class="nav-main-link-name">Account</span>
+                        </a>
+                    </li>
+                    <li class="nav-main-item">
+                        <a class="nav-main-link{{ request()->is('how/it/works*') ? ' active' : '' }}" href="{{ url('how/it/works') }}">
+                            <span class="nav-main-link-name">How It Works</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            <li class="nav-main-item">
+                <a class="nav-main-link{{ request()->is('user/blog*') || request()->is('blog*') ? ' active' : '' }}" href="{{ url('user/blog') }}">
                     <i class="nav-main-link-icon fa fa-blog"></i>
-                    <span class="nav-main-link-name">Blog Post</span>
+                    <span class="nav-main-link-name">Blog</span>
                 </a>
-
-                <a class="nav-main-link" href="{{ url('how/it/works') }}">
-                    <i class="nav-main-link-icon fa fa-cogs"></i>
-                    <span class="nav-main-link-name">How It Works</span>
-                </a>
-
-
-
-
-
             </li>
-
-            {{-- <li class="nav-main-heading">Pages</li>
-        <li class="nav-main-item">
-          <a class="nav-main-link nav-main-link-submenu" data-toggle="submenu" aria-haspopup="true" aria-expanded="false" href="#">
-            <i class="nav-main-link-icon fa fa-rocket"></i>
-            <span class="nav-main-link-name">Dashboards</span>
-          </a>
-          <ul class="nav-main-submenu">
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="be_pages_dashboard_all.html">
-                <span class="nav-main-link-name">All</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="be_pages_dashboard_v1.html">
-                <span class="nav-main-link-name">Corporate v1</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="db_social.html">
-                <span class="nav-main-link-name">Social</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="db_messages.html">
-                <span class="nav-main-link-name">Messages</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="db_dark.html">
-                <span class="nav-main-link-name">Dark</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="db_minimal.html">
-                <span class="nav-main-link-name">Minimal</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="db_modern.html">
-                <span class="nav-main-link-name">Modern</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="db_classic_boxed.html">
-                <span class="nav-main-link-name">Classic Boxed</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="db_banking.html">
-                <span class="nav-main-link-name">Banking</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="db_crypto.html">
-                <span class="nav-main-link-name">Crypto</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="db_hosting.html">
-                <span class="nav-main-link-name">Hosting</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="db_booking.html">
-                <span class="nav-main-link-name">Booking</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="db_gaming.html">
-                <span class="nav-main-link-name">Gaming</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="db_tasks.html">
-                <span class="nav-main-link-name">Tasks</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="db_medical.html">
-                <span class="nav-main-link-name">Medical</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="db_travel.html">
-                <span class="nav-main-link-name">Travel</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="db_social_compact.html">
-                <span class="nav-main-link-name">Social Compact</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="db_chat.html">
-                <span class="nav-main-link-name">Chat</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="db_analytics.html">
-                <span class="nav-main-link-name">Analytics</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="db_corporate_slim.html">
-                <span class="nav-main-link-name">Corporate Slim</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="db_wp_post.html">
-                <span class="nav-main-link-name">WP Post</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="db_file_hosting.html">
-                <span class="nav-main-link-name">File Hosting</span>
-              </a>
-            </li>
-          </ul>
-        </li>
-        <li class="nav-main-item">
-          <a class="nav-main-link nav-main-link-submenu" data-toggle="submenu" aria-haspopup="true" aria-expanded="false" href="#">
-            <i class="nav-main-link-icon fa fa-user-friends"></i>
-            <span class="nav-main-link-name">Auth</span>
-          </a>
-          <ul class="nav-main-submenu">
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="be_pages_auth_all.html">
-                <span class="nav-main-link-name">All</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="op_auth_signin.html">
-                <span class="nav-main-link-name">Sign In</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="op_auth_signin_box.html">
-                <span class="nav-main-link-name">Sign In Box</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="op_auth_signin_box_alt.html">
-                <span class="nav-main-link-name">Sign In Box Alt</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="op_auth_signup.html">
-                <span class="nav-main-link-name">Sign Up</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="op_auth_signup_box.html">
-                <span class="nav-main-link-name">Sign Up Box</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="op_auth_signup_box_alt.html">
-                <span class="nav-main-link-name">Sign Up Box Alt</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="op_auth_lock.html">
-                <span class="nav-main-link-name">Lock Screen</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="op_auth_lock_box.html">
-                <span class="nav-main-link-name">Lock Screen Box</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="op_auth_lock_box_alt.html">
-                <span class="nav-main-link-name">Lock Screen Box Alt</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="op_auth_reminder.html">
-                <span class="nav-main-link-name">Pass Reminder</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="op_auth_reminder_box.html">
-                <span class="nav-main-link-name">Pass Reminder Box</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="op_auth_reminder_box_alt.html">
-                <span class="nav-main-link-name">Pass Reminder Box Alt</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="op_auth_two_factor.html">
-                <span class="nav-main-link-name">Two Factor</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="op_auth_two_factor_box.html">
-                <span class="nav-main-link-name">Two Factor Box</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="op_auth_two_factor_box_alt.html">
-                <span class="nav-main-link-name">Two Factor Box Alt</span>
-              </a>
-            </li>
-          </ul>
-        </li>
-        <li class="nav-main-item">
-          <a class="nav-main-link nav-main-link-submenu" data-toggle="submenu" aria-haspopup="true" aria-expanded="false" href="#">
-            <i class="nav-main-link-icon fa fa-ghost"></i>
-            <span class="nav-main-link-name">Error</span>
-          </a>
-          <ul class="nav-main-submenu">
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="be_pages_error_all.html">
-                <span class="nav-main-link-name">All</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="op_error_400.html">
-                <span class="nav-main-link-name">400</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="op_error_401.html">
-                <span class="nav-main-link-name">401</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="op_error_403.html">
-                <span class="nav-main-link-name">403</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="op_error_404.html">
-                <span class="nav-main-link-name">404</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="op_error_500.html">
-                <span class="nav-main-link-name">500</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="op_error_503.html">
-                <span class="nav-main-link-name">503</span>
-              </a>
-            </li>
-          </ul>
-        </li>
-        <li class="nav-main-item">
-          <a class="nav-main-link nav-main-link-submenu" data-toggle="submenu" aria-haspopup="true" aria-expanded="false" href="#">
-            <i class="nav-main-link-icon fa fa-coffee"></i>
-            <span class="nav-main-link-name">Get Started</span>
-          </a>
-          <ul class="nav-main-submenu">
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="gs_backend.html">
-                <span class="nav-main-link-name">Backend</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="gs_backend_boxed.html">
-                <span class="nav-main-link-name">Backend Boxed</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="gs_landing.html">
-                <span class="nav-main-link-name">Landing</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="gs_rtl_backend.html">
-                <span class="nav-main-link-name">RTL Backend</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="gs_rtl_backend_boxed.html">
-                <span class="nav-main-link-name">RTL Backend Boxed</span>
-              </a>
-            </li>
-            <li class="nav-main-item">
-              <a class="nav-main-link" href="gs_rtl_landing.html">
-                <span class="nav-main-link-name">RTL Landing</span>
-              </a>
-            </li>
-          </ul>
-        </li> --}}
         </ul>
     @endif
 </div>

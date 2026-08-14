@@ -108,7 +108,7 @@
     </div>
 
     <form wire:submit.prevent="commentFeed" class="td-comment-form">
-        <img src="{{ auth()->user()->avatar ?? asset('src/assets/media/avatars/avatar13.jpg') }}" alt="">
+        <x-user-avatar :user="auth()->user()" size="sm" :href="false" />
         <div class="td-comment-input-wrap">
             <input type="text" wire:model="message" maxlength="500"
                 class="td-comment-input" placeholder="Write a comment…">
@@ -127,11 +127,13 @@
     @if ($comments->isNotEmpty())
         @foreach ($comments as $comment)
             <div class="td-comment-row" wire:key="comment-{{ $comment['id'] ?? $loop->index }}">
-                <a href="{{ url('profile/' . $comment['username']) }}">
-                    <img class="td-comment-av"
-                        src="{{ $comment['avatar'] ?? asset('src/assets/media/avatars/avatar3.jpg') }}"
-                        alt="{{ $comment['name'] }}">
-                </a>
+                <x-user-avatar
+                    :user-id="$comment['user_id'] ?? null"
+                    :src="$comment['avatar'] ?? null"
+                    :alt="$comment['name'] ?? 'User'"
+                    :href="isset($comment['username']) ? url('profile/' . $comment['username']) : false"
+                    size="sm"
+                />
                 <div class="td-comment-bubble">
                     <a class="td-comment-name" href="{{ url('profile/' . $comment['username']) }}">
                         {{ displayName($comment['name']) }}

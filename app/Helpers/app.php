@@ -35,7 +35,7 @@ if (!function_exists('engagement')) {
         $limit = 5;
         $since = now()->subHours($hours);
 
-        $users = Post::with(['user:id,name,username'])
+        $users = Post::with(['user:id,name,username,avatar'])
             ->where('created_at', '>=', $since)
             ->select(
                 'user_id',
@@ -62,8 +62,10 @@ if (!function_exists('engagement')) {
                         $user->total_views) * 8;
 
                 return [
-                    'name' => $user->user->name,
-                    'username' => $user->user->username,
+                    'id' => $user->user_id,
+                    'name' => $user->user->name ?? 'Member',
+                    'username' => $user->user->username ?? null,
+                    'avatar' => $user->user->avatar ?? null,
                     'total_engagement' => $user->total_engagement
                 ];
             })
@@ -1230,9 +1232,15 @@ if (!function_exists('extractFirstUrl')) {
 if (!function_exists('plainPostText')) {
     function plainPostText(string $content): string
     {
-        $text = html_entity_decode(strip_tags($content), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $content = preg_replace('/<br\s*\/?>/i', "\n", $content) ?? $content;
+        $content = preg_replace('/<\/(p|div|h[1-6]|li)\s*>/i', "$0\n", $content) ?? $content;
 
-        return trim(preg_replace("/\r\n?/", "\n", $text));
+        $text = html_entity_decode(strip_tags($content), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $text = str_replace("\xc2\xa0", ' ', $text); // nbsp
+        $text = preg_replace("/\r\n?/", "\n", $text) ?? $text;
+        $text = preg_replace("/\n{3,}/", "\n\n", $text) ?? $text;
+
+        return trim($text);
     }
 }
 
@@ -1282,27 +1290,61 @@ if (!function_exists('socialLinkCard')) {
     }
 }
 
-if (!function_exists('truncateSocialPlainText')) {
-    function truncateSocialPlainText(string $text, int $limit): string
+if (!function_exists('countSocialWords')) {
+    function countSocialWords(string $text): int
     {
-        if (mb_strlen($text) <= $limit) {
+        return preg_match_all('/\S+/u', $text) ?: 0;
+    }
+}
+
+if (!function_exists('truncateSocialPlainText')) {
+    /**
+     * Truncate plain post text by word count while preserving original whitespace/newlines.
+     */
+    function truncateSocialPlainText(string $text, int $wordLimit): string
+    {
+        if ($wordLimit <= 0) {
+            return '';
+        }
+
+        if (countSocialWords($text) <= $wordLimit) {
             return $text;
         }
 
-        $cut = mb_substr($text, 0, $limit);
+        $parts = preg_split('/(\s+)/u', $text, -1, PREG_SPLIT_DELIM_CAPTURE) ?: [];
+        $count = 0;
+        $out = '';
 
-        if (preg_match('~(?:https?://|www\.)[^\s]*$~i', $cut)) {
-            $cut = preg_replace('~(?:https?://|www\.)[^\s]*$~i', '', $cut);
-            $cut = rtrim($cut);
+        foreach ($parts as $part) {
+            if ($part === '') {
+                continue;
+            }
+
+            if (preg_match('/^\s+$/u', $part)) {
+                if ($count > 0) {
+                    $out .= $part;
+                }
+                continue;
+            }
+
+            $count++;
+            if ($count > $wordLimit) {
+                break;
+            }
+
+            $out .= $part;
         }
 
-        return $cut;
+        return rtrim($out, " \t\n\r\0\x0B.,;:!?");
     }
 }
 
 if (!function_exists('formatSocialPostText')) {
     function formatSocialPostText(string $text): string
     {
+        $text = preg_replace('/^[\s\x{00A0}\x{200B}]+/u', '', $text) ?? $text;
+        $text = ltrim($text, "\n\r");
+
         if ($text === '') {
             return '';
         }
@@ -1335,7 +1377,8 @@ if (!function_exists('formatSocialPostText')) {
             return $key;
         }, $text);
 
-        $html = nl2br(e($text));
+        // Escape only — .pk-text uses white-space:pre-wrap for line breaks (no nl2br).
+        $html = e($text);
 
         foreach ($placeholders as $key => $replacement) {
             $html = str_replace(e($key), $replacement, $html);
@@ -1362,7 +1405,10 @@ if (!function_exists('stripUrlFromPlainText')) {
 }
 
 if (!function_exists('socialPostDisplay')) {
-    function socialPostDisplay(string $content, ?int $limit = 50): array
+    /**
+     * @param  int|null  $wordLimit  Max words before "See more". Null = full text.
+     */
+    function socialPostDisplay(string $content, ?int $wordLimit = 170): array
     {
         $plain = plainPostText($content);
         $embedUrl = extractFirstUrl($plain);
@@ -1374,8 +1420,12 @@ if (!function_exists('socialPostDisplay')) {
             ? stripUrlFromPlainText($plain, $embedUrl)
             : $plain;
 
-        $needsMore = $limit !== null && mb_strlen($textForDisplay) > $limit;
-        $shortText = $needsMore ? truncateSocialPlainText($textForDisplay, $limit) : $textForDisplay;
+        // Avoid leading whitespace showing under white-space:pre-wrap.
+        $textForDisplay = preg_replace('/^[\s\x{00A0}\x{200B}]+/u', '', $textForDisplay) ?? $textForDisplay;
+        $textForDisplay = ltrim($textForDisplay, "\n\r");
+
+        $needsMore = $wordLimit !== null && countSocialWords($textForDisplay) > $wordLimit;
+        $shortText = $needsMore ? truncateSocialPlainText($textForDisplay, $wordLimit) : $textForDisplay;
 
         return [
             'full_html' => formatSocialPostText($textForDisplay),

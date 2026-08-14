@@ -214,7 +214,12 @@ class RegisterController extends Controller
             Auth::login($user);
         });
 
-        return redirect()->route('home');
+        // Keep url.intended (e.g. community join) until after email verification.
+        if (! Auth::user()->hasVerifiedEmail()) {
+            return redirect()->route('verification.notice');
+        }
+
+        return redirect()->intended(route('home'));
     }
 
 
@@ -329,6 +334,11 @@ class RegisterController extends Controller
 
         // Prevent session fixation
         $request->session()->regenerate();
+
+        // Keep url.intended until after email verification when needed.
+        if (! Auth::user()->hasVerifiedEmail()) {
+            return redirect()->route('verification.notice');
+        }
 
         return redirect()->intended(route('home'));
     }

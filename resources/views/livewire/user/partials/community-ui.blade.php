@@ -319,19 +319,23 @@
     }
 
     .community-show-page .pk-see-more {
+        display: inline;
         background: none;
         border: none;
         padding: 0;
-        margin-left: 4px;
-        color: #1d9bf0;
-        font-size: 14px;
-        font-weight: 600;
+        margin: 0 0 0 6px;
+        color: #5A4FDC;
+        font-size: inherit;
+        font-weight: 700;
+        line-height: inherit;
         cursor: pointer;
         font-family: inherit;
+        text-decoration: underline;
+        text-underline-offset: 2px;
     }
 
     .community-show-page .pk-see-more:hover {
-        text-decoration: underline;
+        color: #4338ca;
     }
 
     .community-show-page .pk-link-preview {

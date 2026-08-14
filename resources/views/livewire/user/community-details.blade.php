@@ -204,19 +204,23 @@
                 }
 
                 .pk-see-more {
+                    display: inline;
                     background: none;
                     border: none;
                     padding: 0;
-                    color: #1d9bf0;
-                    font-size: 14px;
-                    font-weight: 600;
+                    margin: 0 0 0 6px;
+                    color: #5A4FDC;
+                    font-size: inherit;
+                    font-weight: 700;
+                    line-height: inherit;
                     cursor: pointer;
                     font-family: inherit;
-                    margin-left: 4px;
+                    text-decoration: underline;
+                    text-underline-offset: 2px;
                 }
 
                 .pk-see-more:hover {
-                    text-decoration: underline;
+                    color: #4338ca;
                 }
 
                 /* ── Trend tags ─────────────────────────────────────────── */
@@ -2411,6 +2415,10 @@
                             {{ mb_strtoupper(mb_substr(auth()->user()->name ?? 'U', 0, 1)) }}</div>
                         <div class="pk-comp-field">
                             <textarea rows="2" wire:model.live="content" placeholder="What's on your mind? Share with {{ $community->name }}…"></textarea>
+                            @php $communityPostWords = countSocialWords($content ?? ''); @endphp
+                            <div class="pk-cnt" style="margin-top:4px;font-size:.75rem;color:{{ $communityPostWords > 100000 ? '#dc2626' : '#6b7280' }}">
+                                {{ number_format($communityPostWords) }}/100,000 words
+                            </div>
                             @error('content')
                                 <div class="pk-field-error">{{ $message }}</div>
                             @enderror
@@ -2725,8 +2733,7 @@
                     @forelse ($members as $member)
                         <div class="pk-member-row d-flex flex-wrap align-items-center gap-2"
                             wire:key="member-{{ $member->id }}">
-                            <div class="pk-ph-av" style="background:{{ $community->color }}">
-                                {{ mb_strtoupper(mb_substr($member->name ?? '?', 0, 1)) }}</div>
+                            <x-user-avatar :user="$member" size="sm" />
                             <div class="flex-grow-1" style="min-width:140px">
                                 <div class="pk-n">{{ $member->name }}</div>
                                 <div class="pk-h">@<span>{{ $member->username }}</span></div>

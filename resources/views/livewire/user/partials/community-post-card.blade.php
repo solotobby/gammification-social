@@ -1,7 +1,7 @@
 @include('livewire.user.partials.post-card-ui')
 
 @php
-    $display = socialPostDisplay($post->content ?? '', 50);
+    $display = socialPostDisplay($post->content ?? '', 170);
     $mediaCount = $post->media->count();
     $showLinkEmbed = ! empty($display['embed']) && $mediaCount === 0;
     $showLinkCard = ! empty($display['link_card']) && $mediaCount === 0 && ! $showLinkEmbed;
@@ -14,11 +14,7 @@
 <article class="pk-card pk-feed-post" wire:init="recordView('{{ $post->id }}')" wire:key="cpost-{{ $post->id }}">
     <div class="pk-header">
         <div class="pk-avatar-col">
-            <a href="{{ $profileUrl }}">
-                <img class="pk-avatar"
-                    src="{{ $post->user->avatar ?? asset('src/assets/media/avatars/avatar13.jpg') }}"
-                    alt="{{ $post->user->name ?? 'Deleted user' }}">
-            </a>
+            <x-user-avatar :user="$post->user" size="md" :href="$profileUrl" />
         </div>
 
         <div style="flex:1;min-width:0">
@@ -58,17 +54,12 @@
     @if ($display['full_html'] !== '')
         <div class="pk-body">
             @if ($display['needs_more'])
-                <div x-data="{ expanded: false }">
-                    <p class="pk-text">
-                        <span x-show="!expanded">{!! $display['short_html'] !!}</span>
-                        <span x-show="expanded" x-cloak>{!! $display['full_html'] !!}</span>
-                        <button type="button" class="pk-see-more" x-show="!expanded" @click="expanded = true">
-                            Show more
-                        </button>
-                    </p>
+                <div class="pk-text-wrap" x-data="{ expanded: false }">
+                    <div class="pk-text" x-show="!expanded">{!! $display['short_html'] !!}<button type="button" class="pk-see-more" @click="expanded = true">See more</button></div>
+                    <div class="pk-text" x-show="expanded" x-cloak>{!! $display['full_html'] !!}<button type="button" class="pk-see-more" @click="expanded = false">See less</button></div>
                 </div>
             @else
-                <p class="pk-text">{!! $display['full_html'] !!}</p>
+                <div class="pk-text">{!! $display['full_html'] !!}</div>
             @endif
         </div>
     @endif
@@ -161,9 +152,7 @@
 
         @foreach ($post->comments->take(3) as $comment)
             <div class="pk-fb-comment" wire:key="comment-{{ $comment->id }}">
-                <img class="pk-fb-comment-av"
-                    src="{{ $comment->user->avatar ?? asset('src/assets/media/avatars/avatar13.jpg') }}"
-                    alt="{{ $comment->user->name ?? 'User' }}">
+                <x-user-avatar :user="$comment->user" size="sm" />
                 <div class="pk-fb-comment-bubble">
                     <div class="d-flex align-items-start justify-content-between gap-2">
                         <div>

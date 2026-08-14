@@ -6,74 +6,31 @@
         <div class="block-header block-header-default">
 
             <div class="d-flex align-items-center">
-                @if (userLevel($timeline->user->id) == 'Basic')
-                    <a class="img-link me-1" href="{{ url('profile/' . $timeline->user->username) }}">
-                        <img class="img-avatar img-avatar32 img-avatar-thumb"
-                            src="{{ $timeline->user->avatar ?? asset('src/assets/media/avatars/avatar13.jpg') }}"
-                            alt="Avatar">
-                    </a>
+                <x-user-avatar :user="$timeline->user" size="sm" class="me-2" />
 
+                <div class="d-flex align-items-center flex-wrap gap-1">
                     <a class="fw-semibold" href="{{ url('profile/' . $timeline->user->username) }}"
-                        style="color: #5A4FDC">{{ displayName($timeline->user->name) }}</a>
-
-
-                    <span class="fs-sm text-muted ms-2">{{ $timeline->created_at?->shortAbsoluteDiffForHumans() }}
-                    </span>
-                @elseif (userLevel($timeline->user->id) == 'Creator')
-                    <a class="img-link me-1" href="{{ url('profile/' . $timeline->user->username) }}">
-                        <img class="img-avatar img-avatar32 img-avatar-thumb"
-                            src="{{ $timeline->user->avatar ?? asset('src/assets/media/avatars/avatar13.jpg') }}"
-                            alt="Avatar">
-                    </a>
-                    {{-- Username + Verified Tick --}}
-                    <div class="d-flex align-items-center">
-                        <a class="fw-semibold me-1" href="{{ url('profile/' . $timeline->user->username) }}"
-                            style="color: #5A4FDC">
-                            {{ displayName($timeline->user->name) }}
-                        </a>
-
-                        {{-- @if ($timeline->user->is_verified) --}}
-                        <!-- Twitter-style blue tick SVG -->
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                            fill="#1DA1F2" class="ms-1">
-                            <path d="M22.5 5.5l-12 12-5.5-5.5 1.5-1.5 4 4 10.5-10.5z" />
-                        </svg>
-                        {{-- @endif --}}
-                    </div>
-
-                    {{-- Timestamp --}}
-                    <span class="fs-sm text-muted ms-2">
-                        {{ $timeline->created_at?->shortAbsoluteDiffForHumans() }}
-                    </span>
-                @else
-                    {{-- Avatar --}}
-                    <a class="img-link me-2" href="{{ url('profile/' . $timeline->user->username) }}">
-                        <img class="img-avatar img-avatar32 img-avatar-thumb rounded-circle border border-primary border-2"
-                            src="{{ $timeline->user->avatar ?? asset('src/assets/media/avatars/avatar13.jpg') }}"
-                            alt="Avatar">
+                        style="color: #5A4FDC">
+                        {{ displayName($timeline->user->name) }}
                     </a>
 
-                    {{-- Username + Verified Tick --}}
-                    <div class="d-flex align-items-center">
-                        <a class="fw-semibold me-1" href="{{ url('profile/' . $timeline->user->username) }}"
-                            style="color: #5A4FDC">
-                            {{ displayName($timeline->user->name) }}
-                        </a>
-
-                        {{-- @if ($timeline->user->is_verified) --}}
-                        <!-- Twitter-style blue tick SVG -->
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                            fill="#1DA1F2" class="ms-1">
-                            <path d="M22.5 5.5l-12 12-5.5-5.5 1.5-1.5 4 4 10.5-10.5z" />
+                    @php $feedLevel = userLevel($timeline->user->id); @endphp
+                    @if ($feedLevel === 'Creator')
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+                            <circle cx="11" cy="11" r="11" fill="#1d9bf0" />
+                            <path d="M7 11l3 3 5-5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
-                        {{-- @endif --}}
-                    </div>
+                    @elseif ($feedLevel === 'Influencer')
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+                            <circle cx="11" cy="11" r="11" fill="#5A4FDC" />
+                            <path d="M7 11l3 3 5-5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    @endif
 
-                    {{-- Timestamp --}}
-                    <span class="fs-sm text-muted ms-2">
+                    <span class="fs-sm text-muted ms-1">
                         {{ $timeline->created_at?->shortAbsoluteDiffForHumans() }}
                     </span>
-                @endif
+                </div>
             </div>
 
             <div class="block-options">

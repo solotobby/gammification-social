@@ -4,7 +4,13 @@
 
 @section('content')
     <h1>Register</h1>
-    <p class="auth-scaffold__lead">Create your free account to start earning from your content.</p>
+    <p class="auth-scaffold__lead">
+        @if (session('community_join_intent'))
+            Create your free account to continue to <strong>{{ session('community_join_intent') }}</strong>.
+        @else
+            Create your free account to start earning from your content.
+        @endif
+    </p>
 
     @if ($errors->any())
         <div class="alert alert--error">

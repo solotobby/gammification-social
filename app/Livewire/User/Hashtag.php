@@ -9,17 +9,32 @@ use Livewire\Component;
 
 class Hashtag extends Component
 {
+    public string $tag;
 
-    public $tag; 
+    public int $page = 1;
 
-    public function mount($tag){
+    public int $perPage = 10;
+
+    public bool $hasMore = false;
+
+    public function mount($tag): void
+    {
         $this->tag = $tag;
+    }
+
+    public function loadMore(): void
+    {
+        if (! $this->hasMore) {
+            return;
+        }
+
+        $this->page++;
     }
 
     #[On('postDeleted')]
     public function handlePostDeleted(string $postId): void
     {
-        // Render re-queries posts; this handler forces a refresh after delete.
+        // Render re-queries posts.
     }
 
     #[On('post-action-toast')]
@@ -30,14 +45,11 @@ class Hashtag extends Component
 
     public function render()
     {
-       
-         $hashtag =  ModelsHashtag::where(
-            'name',
-            $this->tag
-        )
-        ->firstOrFail();
+        $hashtag = ModelsHashtag::query()
+            ->where('name', $this->tag)
+            ->firstOrFail();
 
-
+        $limit = $this->perPage * $this->page;
 
         $posts = $hashtag
             ->posts()
@@ -46,18 +58,23 @@ class Hashtag extends Component
                 'hashtags',
                 'images',
                 'video',
+                'trends',
             ])
             ->latest()
-            ->paginate(15);
+            ->take($limit + 1)
+            ->get();
 
-        $earnings = app(PostEarningsService::class)->forPosts(
-            $posts->getCollection()->pluck('id')
-        );
+        $this->hasMore = $posts->count() > $limit;
+        $posts = $posts->take($limit);
+
+        $earnings = app(PostEarningsService::class)->forPosts($posts->pluck('id'));
 
         return view('livewire.user.hashtag', [
-                'hashtag'=>$hashtag,
-                'posts'=>$posts,
-                'earnings' => $earnings,
-            ]);
+            'hashtag' => $hashtag,
+            'posts' => $posts,
+            'earnings' => $earnings,
+            'trendingMembers' => engagement(),
+            'trendingTopics' => trendingTopics(),
+        ])->layout('layouts.app');
     }
 }

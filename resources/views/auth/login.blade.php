@@ -4,7 +4,13 @@
 
 @section('content')
     <h1>Log in</h1>
-    <p class="auth-scaffold__lead">Enter your email and password to access your account.</p>
+    <p class="auth-scaffold__lead">
+        @if (session('community_join_intent'))
+            Sign in to continue to <strong>{{ session('community_join_intent') }}</strong>.
+        @else
+            Enter your email and password to access your account.
+        @endif
+    </p>
 
     @if ($errors->any())
         <div class="alert alert--error">

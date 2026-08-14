@@ -258,13 +258,19 @@
 
         /* 72px = 44px avatar + 12px gap + 16px left pad */
 
+        .pk-text-wrap {
+            margin: 0;
+        }
+
         .pk-text {
             font-size: 15px;
-            line-height: 1.55;
+            line-height: 1.5;
             color: #0f1419;
             white-space: pre-wrap;
+            overflow-wrap: anywhere;
             word-break: break-word;
             margin: 0;
+            text-align: left;
         }
 
         .pk-text a,
@@ -281,19 +287,24 @@
         }
 
         .pk-see-more {
+            display: inline;
             background: none;
             border: none;
             padding: 0;
-            color: #1d9bf0;
-            font-size: 14px;
-            font-weight: 600;
+            margin-left: 6px;
+            color: #5A4FDC;
+            font-size: inherit;
+            font-weight: 700;
+            line-height: inherit;
             cursor: pointer;
             font-family: inherit;
-            margin-left: 4px;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+            white-space: nowrap;
         }
 
         .pk-see-more:hover {
-            text-decoration: underline;
+            color: #4338ca;
         }
 
         /* ── External link embeds (YouTube / Instagram / TikTok) ── */

@@ -117,6 +117,7 @@ Route::group(['namespace' => 'auth'], function () {
 
 
     Route::get('/c/{community:slug}', [\App\Http\Controllers\GeneralController::class, 'communityPublic'])->name('community.public');
+    Route::get('/c/{community:slug}/join', [\App\Http\Controllers\GeneralController::class, 'communityAuthIntent'])->name('community.auth');
 
     Route::get('success', [\App\Http\Controllers\GeneralController::class, 'success']);
     Route::get('error', [\App\Http\Controllers\GeneralController::class, 'error']);

@@ -15,11 +15,15 @@
     <div class="pt-3 fs-sm">
         @foreach ($previewComments as $comment)
             <div class="d-flex mb-2" wire:key="preview-comment-{{ $comment['id'] }}">
-                <a class="flex-shrink-0 img-link me-2" href="{{ url('profile/'.$comment['username']) }}">
-                    <img class="img-avatar img-avatar32 img-avatar-thumb"
-                        src="{{ $comment['avatar'] ?? asset('src/assets/media/avatars/avatar13.jpg') }}"
-                        alt="{{ $comment['name'] }}">
-                </a>
+                <div class="flex-shrink-0 me-2">
+                    <x-user-avatar
+                        :user-id="$comment['user_id'] ?? null"
+                        :src="$comment['avatar'] ?? null"
+                        :alt="$comment['name'] ?? 'User'"
+                        :href="isset($comment['username']) ? url('profile/'.$comment['username']) : false"
+                        size="sm"
+                    />
+                </div>
 
                 <div class="flex-grow-1">
                     <div class="bg-light rounded px-3 py-2">

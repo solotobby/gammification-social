@@ -7,8 +7,7 @@
                 <div class="block-header block-header-default">
                     <div>
                         <a class="img-link me-1" href="javascript:void(0)">
-                            <img class="img-avatar img-avatar32 img-avatar-thumb"
-                                src="{{ $timeline->user->avatar ?? asset('src/assets/media/avatars/avatar13.jpg') }}" alt="">
+                            <x-user-avatar :user="$timeline->user" size="sm" :href="false" />
                         </a>
                         <a class="fw-semibold" href="{{ url('profile/' . $timeline->user->username) }}"
                             style="color: #5A4FDC">{{ displayName($timeline->user->name) }}</a>
@@ -172,9 +171,7 @@
                             <div class="d-flex">
                                 <a class="flex-shrink-0 img-link me-2"
                                     href="{{ url('profile/' . $comment->user->username) }}">
-                                    <img class="img-avatar img-avatar32 img-avatar-thumb"
-                                        {{-- src="{{ asset('src/assets/media/avatars/avatar3.jpg') }}" alt=""> --}}
-                                        src="{{ $comment->user->avatar ?? asset('src/assets/media/avatars/avatar3.jpg') }}" alt="">
+                                    <x-user-avatar :user="$comment->user" size="sm" :href="false" />
                                 </a>
                                 <div class="flex-grow-1">
                                     <p class="mb-1">

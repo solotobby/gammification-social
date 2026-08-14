@@ -318,6 +318,7 @@ class PostPhotoViewer extends Component
 
             $mapped = $page->map(fn ($comment) => [
                 'id' => $comment->id,
+                'user_id' => $comment->user_id,
                 'username' => $comment->user->username ?? 'user',
                 'name' => $comment->user->name ?? 'User',
                 'avatar' => $comment->user->avatar,
@@ -353,6 +354,7 @@ class PostPhotoViewer extends Component
 
         $mapped = $page->map(fn ($comment) => [
             'id' => $comment->id,
+            'user_id' => $comment->user_id,
             'username' => $comment->user->username ?? 'user',
             'name' => $comment->user->name ?? 'User',
             'avatar' => $comment->user->avatar,

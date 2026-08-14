@@ -47,6 +47,7 @@ class CommunityDetails extends Component
     public string $memberSearch = '';
     public string $postSearch = '';
     private const PAGE_STEP = 10;
+    private const MAX_POST_WORDS = 100000;
 
     // ---- settings form ----
     public string $settingsName = '';
@@ -262,7 +263,15 @@ class CommunityDetails extends Component
         }
 
         $this->validate([
-            'content' => ['nullable', 'string', 'max:2000'],
+            'content' => [
+                'nullable',
+                'string',
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    if (countSocialWords((string) $value) > self::MAX_POST_WORDS) {
+                        $fail('Community posts cannot exceed '.number_format(self::MAX_POST_WORDS).' words.');
+                    }
+                },
+            ],
             'media' => ['array', 'max:4'],
             'media.*' => ['file', 'mimes:jpg,jpeg,png,gif,mp4,mov', 'max:20480'],
         ]);

@@ -59,7 +59,7 @@
                             <tr wire:key="ref-{{ $person->id }}">
                                 <td>
                                     <a href="{{ url('profile/' . $person->username) }}" class="pk-user-row" style="text-decoration:none;color:inherit">
-                                        <img src="{{ $person->avatar ?: asset('src/assets/media/avatars/avatar13.jpg') }}" alt="">
+                                        <x-user-avatar :user="$person" size="sm" :href="false" />
                                         <div>
                                             <b>{{ displayName($person->name) }}</b>
                                             <small>@{{ $person->username }}</small>

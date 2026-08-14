@@ -56,10 +56,8 @@
                             $isFollowing = in_array($person->id, $followingIds, true);
                         @endphp
                         <div class="pk-search-row" wire:key="search-user-{{ $person->id }}">
-                            <a href="{{ url('profile/' . $person->username) }}">
-                                <img class="pk-search-row-avatar"
-                                    src="{{ $person->avatar ?: $defaultAvatar }}"
-                                    alt="">
+                            <a href="{{ url('profile/' . $person->username) }}" class="d-inline-flex">
+                                <x-user-avatar :user="$person" size="md" :href="false" />
                             </a>
 
                             <div class="pk-search-row-body">

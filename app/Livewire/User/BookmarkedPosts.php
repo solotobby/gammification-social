@@ -6,22 +6,34 @@ use App\Models\Post;
 use App\Services\PostEarningsService;
 use Livewire\Attributes\On;
 use Livewire\Component;
-use Livewire\WithPagination;
 
 class BookmarkedPosts extends Component
 {
-    use WithPagination;
+    public int $page = 1;
+
+    public int $perPage = 10;
+
+    public bool $hasMore = false;
+
+    public function loadMore(): void
+    {
+        if (! $this->hasMore) {
+            return;
+        }
+
+        $this->page++;
+    }
 
     #[On('bookmarkRemoved')]
     public function handleBookmarkRemoved(string $postId): void
     {
-        $this->resetPage();
+        $this->page = 1;
     }
 
     #[On('postDeleted')]
     public function handlePostDeleted(string $postId): void
     {
-        $this->resetPage();
+        $this->page = 1;
     }
 
     #[On('post-action-toast')]
@@ -33,6 +45,7 @@ class BookmarkedPosts extends Component
     public function render()
     {
         $userId = auth()->id();
+        $limit = $this->perPage * $this->page;
 
         $posts = Post::query()
             ->select('posts.*')
@@ -42,11 +55,13 @@ class BookmarkedPosts extends Component
             ->with(['user', 'trends', 'images', 'video'])
             ->withExists(['likes as liked_by_me' => fn ($q) => $q->where('user_id', $userId)])
             ->orderByDesc('post_bookmarks.created_at')
-            ->paginate(10);
+            ->take($limit + 1)
+            ->get();
 
-        $earnings = app(PostEarningsService::class)->forPosts(
-            $posts->getCollection()->pluck('id')
-        );
+        $this->hasMore = $posts->count() > $limit;
+        $posts = $posts->take($limit);
+
+        $earnings = app(PostEarningsService::class)->forPosts($posts->pluck('id'));
 
         return view('livewire.user.bookmarked-posts', [
             'posts' => $posts,

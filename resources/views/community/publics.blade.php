@@ -650,7 +650,7 @@
             </div>
 
             <div class="cp-cta-wrap">
-                <a href="{{ route('community.show', $community) }}" class="cp-cta">
+                <a href="{{ auth()->check() ? route('community.show', $community) : route('community.auth', $community) }}" class="cp-cta">
                     @switch($community->type)
                         @case('public')
                             Join this community
@@ -671,7 +671,7 @@
                 </a>
                 <p class="cp-cta-note">
                     @guest
-                        Free {{ config('app.name') }} account required
+                        Free {{ config('app.name') }} account required — you will return here after signing in
                     @else
                         Continue in the app to participate
                     @endguest
@@ -750,7 +750,7 @@
 
 {{-- Mobile sticky CTA --}}
 <div class="cp-sticky" id="cp-sticky">
-    <a href="{{ route('community.show', $community) }}" class="cp-cta">
+    <a href="{{ auth()->check() ? route('community.show', $community) : route('community.auth', $community) }}" class="cp-cta">
         @switch($community->type)
             @case('public') Join now @break
             @case('paid') Subscribe @break

@@ -843,10 +843,10 @@
                         $isVerified = in_array($level, ['Creator', 'Influencer']);
                         $jsId = json_encode((string) $post->id);
                         $isOwner = auth()->id() === $post->user_id;
-                    @endphp
+            @endphp
 
                     <article class="reels-slide reels-card"
-                             data-post-id="{{ $post->id }}"
+                 data-post-id="{{ $post->id }}"
                              data-src="{{ $src }}"
                              data-src-high="{{ $srcHigh }}"
                              data-src-medium="{{ $srcMedium }}"
@@ -858,14 +858,14 @@
 
                         <div class="reels-flash" id="flash-{{ $post->id }}">
                             <i id="flash-ic-{{ $post->id }}" class="fa-solid fa-play"></i>
-                        </div>
+                    </div>
                         <div class="reels-heart-burst" id="hburst-{{ $post->id }}">
                             <i class="fa-solid fa-heart"></i>
-                        </div>
+                </div>
 
                         <div class="tt-progress" aria-hidden="true">
                             <div class="tt-progress-fill" id="prog-{{ $post->id }}"></div>
-                        </div>
+                </div>
 
                         {{-- Bottom meta --}}
                         <footer class="reels-meta">
@@ -896,8 +896,8 @@
                                 <div class="tt-sound-track">
                                     <div class="tt-sound-marquee">
                                         <span>{{ $user->username }} · Original sound — {{ $user->username }} · Original sound — </span>
-                                    </div>
-                                </div>
+                        </div>
+                    </div>
                             </div>
                         </footer>
                         </div>{{-- /reels-slide-media --}}
@@ -905,10 +905,7 @@
                         {{-- Right rail — sits on black gutter (desktop) or dark gradient zone (mobile) --}}
                         <aside class="reels-rail">
                             <div class="reels-rail-avatar-wrap">
-                                <a href="{{ url('profile/'.$user->username) }}" class="reels-rail-avatar">
-                                    <img src="{{ $user->avatar ?: asset('src/assets/media/avatars/avatar13.jpg') }}"
-                                         alt="{{ $user->username }}" loading="lazy">
-                                </a>
+                                <x-user-avatar :user="$user" size="lg" class="reels-ua" />
                                 @if(!$isOwner)
                                     <button type="button" class="reels-rail-follow" aria-label="Follow"
                                         onclick="window.location='{{ url('profile/'.$user->username) }}'">
@@ -919,7 +916,7 @@
 
                             <button type="button"
                                 class="reels-action {{ $liked ? 'is-liked' : '' }}"
-                                id="like-{{ $post->id }}"
+                         id="like-{{ $post->id }}"
                                 @click.stop="likePost({{ $jsId }})"
                                 aria-label="Like">
                                 <span class="reels-action-icon">
@@ -941,28 +938,28 @@
                             </button>
 
                             <a href="{{ url('profile/'.$user->username) }}" class="tt-disc" aria-label="Original sound">
-                                <img src="{{ $user->avatar ?: asset('src/assets/media/avatars/avatar13.jpg') }}" alt="">
+                                <x-user-avatar :user="$user" size="sm" :href="false" />
                             </a>
                         </aside>
 
                     </article>
 
-                @empty
+        @empty
                     <div class="reels-loadmore">
                         <p class="reels-empty">No rolls yet. Be the first to post a video.</p>
-                    </div>
-                @endforelse
+            </div>
+        @endforelse
 
-                @if($hasMore)
+        @if($hasMore)
                     <div class="reels-loadmore">
                         <button type="button" class="reels-loadmore-btn" wire:click="loadMore" wire:loading.attr="disabled">
-                            <span wire:loading.remove wire:target="loadMore">Load more</span>
+                    <span wire:loading.remove wire:target="loadMore">Load more</span>
                             <span wire:loading wire:target="loadMore"><i class="fa-solid fa-spinner fa-spin"></i></span>
-                        </button>
-                    </div>
-                @endif
+                </button>
+            </div>
+        @endif
 
-            </div>{{-- /feed --}}
+    </div>{{-- /feed --}}
 
         </div>{{-- /stage --}}
     </div>{{-- /viewport --}}
@@ -981,11 +978,9 @@
             @if($showComments && $activeComments && $activeComments->count())
                 @foreach($activeComments as $c)
                     <div class="reels-comment" wire:key="rc-{{ $c->id }}">
-                        <img class="reels-comment-av"
-                             src="{{ $c->user->avatar ?? 'https://ui-avatars.com/api/?name='.urlencode($c->user->name ?? 'U').'&size=64&background=eaeaea&color=262626' }}"
-                             alt="">
+                        <x-user-avatar :user="$c->user" size="sm" />
                         <div class="reels-comment-body">
-                            <div>
+                        <div>
                                 <span class="reels-comment-user">{{ $c->user->username ?? 'user' }}</span>
                             </div>
                             <p class="reels-comment-text">{{ $c->message }}</p>
@@ -999,7 +994,7 @@
         </div>
 
         <div class="reels-comments-input">
-            <img src="{{ auth()->user()->avatar ?? 'https://ui-avatars.com/api/?name='.urlencode(auth()->user()->name).'&size=64&background=eaeaea&color=262626' }}" alt="">
+            <x-user-avatar :user="auth()->user()" size="sm" :href="false" />
             <input type="text" class="reels-comments-field" x-model="commentText"
                 placeholder="Add comment..." maxlength="500"
                 @keydown.enter.prevent="submitComment()">
@@ -1206,9 +1201,9 @@ Alpine.data('rollsPlayer', function(wire) {
                 }).catch(() => {
                     if (!this.muted) {
                         this._autoplayBlocked = true;
-                        video.muted = true;
+                    video.muted = true;
                         this.muted = true;
-                        video.play().catch(() => {});
+                    video.play().catch(() => {});
                     }
                 });
             }
@@ -1234,16 +1229,16 @@ Alpine.data('rollsPlayer', function(wire) {
             this._lastTap = now;
             clearTimeout(this._tapTimer);
             this._tapTimer = setTimeout(() => {
-                if (video.paused) {
-                    this._doPlay(video);
-                    this._flash(postId, 'fa-play');
-                    this._watchStart = Date.now();
+            if (video.paused) {
+                this._doPlay(video);
+                this._flash(postId, 'fa-play');
+                this._watchStart = Date.now();
                     this._watchSent = false;
-                } else {
-                    video.pause();
-                    this._flash(postId, 'fa-pause');
-                    this._flushWatch(postId);
-                }
+            } else {
+                video.pause();
+                this._flash(postId, 'fa-pause');
+                this._flushWatch(postId);
+            }
             }, 260);
         },
 
@@ -1338,7 +1333,7 @@ Alpine.data('rollsPlayer', function(wire) {
                 .then(() => { this.copyLabel = 'Copied'; })
                 .catch(() => {
                     this.$refs.shareInput?.select();
-                    document.execCommand('copy');
+                        document.execCommand('copy');
                     this.copyLabel = 'Copied';
                 });
         },
@@ -1382,7 +1377,7 @@ Alpine.data('rollsPlayer', function(wire) {
             });
         },
 
-        _setupKeys() {
+         _setupKeys() {
             document.addEventListener('keydown', e => {
                 const tag = document.activeElement?.tagName;
                 if (tag === 'INPUT' || tag === 'TEXTAREA') return;
@@ -1392,14 +1387,14 @@ Alpine.data('rollsPlayer', function(wire) {
                 if (e.key === ' ') {
                     e.preventDefault();
                     if (!this._activeVideo) return;
-                    if (this._activeVideo.paused) {
-                        this._doPlay(this._activeVideo);
-                        this._watchStart = Date.now();
-                    } else {
-                        this._activeVideo.pause();
-                        this._flushWatch(this._activePostId);
+                        if (this._activeVideo.paused) {
+                            this._doPlay(this._activeVideo);
+                            this._watchStart = Date.now();
+                        } else {
+                            this._activeVideo.pause();
+                            this._flushWatch(this._activePostId);
+                        }
                     }
-                }
                 if (e.key === 'm') this.toggleMute();
                 if (e.key === 'Escape') { wire.call('closeComments'); this.shareOpen = false; }
             });

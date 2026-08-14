@@ -15,7 +15,8 @@
     @php
         $level = userLevel($post->user->id);
         $isOwner = auth()->id() === $post->user_id;
-        $display = socialPostDisplay($post->content, $formatText ? ($standalone ? null : 50) : null);
+        // Feed cards: 170 words + See more. Standalone detail: full text.
+        $display = socialPostDisplay($post->content, $standalone ? null : 170);
         $imgs = $post->images ?? collect();
         $imgCount = $imgs->count();
         $vid = $post->video ?? null;
@@ -23,10 +24,6 @@
         $shareUrl = url('timeline/' . $post->id);
         $showLinkEmbed = ! empty($display['embed']) && ! $vid;
         $showLinkCard = ! empty($display['link_card']) && ! $vid && ! $showLinkEmbed;
-        $plainText = plainPostText($post->content ?? '');
-        $postText = ($display['preview_url'] && ($showLinkEmbed || $showLinkCard))
-            ? stripUrlFromPlainText($plainText, $display['preview_url'])
-            : $plainText;
     @endphp
 
     <div @class(['pk-card', 'pk-standalone' => $standalone]) wire:init="recordView">
@@ -38,11 +35,7 @@
 
             {{-- Avatar --}}
             <div class="pk-avatar-col">
-                <a href="{{ url('profile/' . $post->user->username) }}">
-                    <img class="pk-avatar"
-                        src="{{ $post->user->avatar ?? asset('src/assets/media/avatars/avatar13.jpg') }}"
-                        alt="{{ $post->user->name }}">
-                </a>
+                <x-user-avatar :user="$post->user" size="md" />
             </div>
 
             {{-- Name / handle / time --}}
@@ -99,25 +92,16 @@
     ══════════════════════════════════════════ --}}
         <div class="pk-body">
 
-            {{-- Text --}}
-            @if ($formatText && $display['full_html'] !== '')
-
+            {{-- Text — 170 words preview + See more on feeds --}}
+            @if ($display['full_html'] !== '')
                 @if ($display['needs_more'])
-                    <div x-data="{ expanded: false }">
-                        <p class="pk-text">
-                            <span x-show="!expanded">{!! $display['short_html'] !!}</span>
-                            <span x-show="expanded" x-cloak>{!! $display['full_html'] !!}</span>
-                            <button type="button" class="pk-see-more" x-show="!expanded" @click="expanded = true">
-                                Show more
-                            </button>
-                        </p>
+                    <div class="pk-text-wrap" x-data="{ expanded: false }">
+                        <div class="pk-text" x-show="!expanded">{!! $display['short_html'] !!}<button type="button" class="pk-see-more" @click="expanded = true">See more</button></div>
+                        <div class="pk-text" x-show="expanded" x-cloak>{!! $display['full_html'] !!}<button type="button" class="pk-see-more" @click="expanded = false">See less</button></div>
                     </div>
                 @else
-                    <p class="pk-text">{!! $display['full_html'] !!}</p>
+                    <div class="pk-text">{!! $display['full_html'] !!}</div>
                 @endif
-
-            @elseif (! $formatText && $postText !== '')
-                <p class="pk-text">{!! nl2br(e($postText)) !!}</p>
             @endif
 
             {{-- Trends — editorial left-rule treatment --}}

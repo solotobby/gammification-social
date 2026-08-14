@@ -258,9 +258,7 @@ body { background: var(--ph-bg); font-family: 'Inter', system-ui, sans-serif; }
 
             {{-- Avatar + Textarea --}}
             <div class="ph-top">
-                <img class="ph-avatar"
-                     src="{{ auth()->user()->avatar ?? 'https://ui-avatars.com/api/?name='.urlencode(auth()->user()->name).'&background=1877f2&color=fff&size=84' }}"
-                     alt="{{ auth()->user()->name }}">
+                <x-user-avatar :user="auth()->user()" size="md" :href="false" class="ph-avatar-ua" />
                 <div class="ph-textarea-wrap">
                     <textarea
                         wire:model.live="content"

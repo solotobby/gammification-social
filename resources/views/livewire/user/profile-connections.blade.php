@@ -341,8 +341,8 @@
                 $avatarUrl = $person->avatar ?: $defaultAvatar;
             @endphp
             <li class="xc-user" wire:key="conn-{{ $activeTab }}-{{ $person->id }}">
-                <a href="{{ url('profile/' . $person->username) }}">
-                    <img src="{{ $avatarUrl }}" alt="{{ $person->name }}" class="xc-user-avatar">
+                <a href="{{ url('profile/' . $person->username) }}" class="d-inline-flex">
+                    <x-user-avatar :user="$person" size="md" :href="false" />
                 </a>
 
                 <div class="xc-user-body">
