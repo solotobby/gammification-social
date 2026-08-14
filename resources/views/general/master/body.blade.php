@@ -19,8 +19,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{{ asset('rsc/styles.css') }}">
+<link rel="stylesheet" href="{{ versioned_asset('rsc/styles.css') }}">
 @stack('head')
+<noscript><style>.reveal{opacity:1!important;transform:none!important}</style></noscript>
 </head>
 <body class="has-site-nav @yield('body_class')" data-page="{{ url()->current() }}">
 
@@ -30,7 +31,7 @@
 
   @include('general.master.footer')
 
-<script src="{{ asset('rsc/app.js') }}"></script>
+<script src="{{ versioned_asset('rsc/app.js') }}"></script>
 @stack('scripts')
 </body>
 </html>

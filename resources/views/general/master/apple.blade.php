@@ -3,7 +3,7 @@
 @section('body_class', 'page-landing-apple')
 
 @push('head')
-<link rel="stylesheet" href="{{ asset('rsc/landing-apple.css') }}">
+<link rel="stylesheet" href="{{ versioned_asset('rsc/landing-apple.css') }}">
 @endpush
 
 @section('content')

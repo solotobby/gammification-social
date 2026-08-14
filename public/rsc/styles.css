@@ -748,8 +748,9 @@ h3 { font-size: clamp(1.25rem, 2vw, 1.55rem); }
 .tl-item p { color: var(--ink-soft); font-size: .96rem; }
 
 /* Reveal animation ------------------------------------------------------- */
-.reveal { opacity: 0; transform: translateY(24px); transition: opacity .6s ease, transform .6s ease; }
-.reveal.in { opacity: 1; transform: none; }
+/* Only hide when JS marked the document (progressive enhancement). */
+html.js .reveal { opacity: 0; transform: translateY(24px); transition: opacity .6s ease, transform .6s ease; }
+html.js .reveal.in { opacity: 1; transform: none; }
 
 /* Responsive ------------------------------------------------------------- */
 @media (max-width: 980px) {
@@ -775,7 +776,7 @@ h3 { font-size: clamp(1.25rem, 2vw, 1.55rem); }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
-  .reveal { opacity: 1; transform: none; }
+  html.js .reveal { opacity: 1; transform: none; }
 }
 
 /* ---- Auth inline icon helpers ---- */

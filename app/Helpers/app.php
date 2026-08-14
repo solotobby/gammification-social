@@ -27,6 +27,26 @@ use Illuminate\Support\Facades\DB;
 use Symfony\Polyfill\Uuid\Uuid;
 use Illuminate\Support\Facades\Cache;
 
+if (! function_exists('versioned_asset')) {
+    /**
+     * Root-relative public asset URL with filemtime cache-busting.
+     * Root-relative paths avoid mixed-content blocks when production sits
+     * behind TLS termination and asset() would otherwise emit http://.
+     */
+    function versioned_asset(string $path): string
+    {
+        $path = ltrim($path, '/');
+        $url = '/'.$path;
+        $full = public_path($path);
+
+        if (is_file($full)) {
+            $url .= '?v='.filemtime($full);
+        }
+
+        return $url;
+    }
+}
+
 if (!function_exists('engagement')) {
     function engagement()
     {

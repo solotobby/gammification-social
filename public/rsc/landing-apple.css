@@ -1,5 +1,35 @@
 /* Apple-inspired landing — scoped under .landing--apple */
 
+/* Safety: keep brand tokens even if styles.css is cached/stale after deploy */
+:root {
+  --ink: #16122E;
+  --ink-soft: #4A4570;
+  --ink-faint: #8E89AD;
+  --violet: #5A4FDC;
+  --violet-deep: #4034B0;
+  --violet-bright: #7C6FF2;
+  --lilac: #ECE9FB;
+  --lilac-deep: #DAD4F7;
+  --mint: #12B886;
+  --mint-soft: #E4F7F0;
+  --gold: #F5B73C;
+  --gold-soft: #FCF1DA;
+  --paper: #FAF9FE;
+  --white: #FFFFFF;
+  --rose: #F25C8A;
+  --font-display: 'Sora', system-ui, sans-serif;
+  --font-body: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --radius-sm: 12px;
+  --radius: 18px;
+  --radius-lg: 26px;
+  --radius-pill: 999px;
+  --shadow-sm: 0 2px 8px rgba(22,18,46,.06);
+  --shadow: 0 14px 40px rgba(50,40,120,.10);
+  --shadow-lg: 0 30px 80px rgba(50,40,120,.18);
+  --shadow-violet: 0 18px 40px rgba(90,79,220,.32);
+  --maxw: 1200px;
+}
+
 body.page-landing-apple {
   background: #fbfbfd;
 }

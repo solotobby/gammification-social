@@ -2,6 +2,9 @@
 (function () {
   'use strict';
 
+  /* Enable JS-only progressive enhancements (e.g. .reveal hide). */
+  document.documentElement.classList.add('js');
+
   /* ---- Apple-style nav ---- */
   var navRoot = document.querySelector('[data-nav]');
   if (navRoot) {
