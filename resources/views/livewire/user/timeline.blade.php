@@ -839,12 +839,14 @@
                                 @if ($userLevel === 'Creator') x-bind:disabled="images.length >= 1" @endif
                                 @if ($userLevel === 'Influencer') x-bind:disabled="images.length >= 4" @endif>
 
-                            <input type="file"
-                                x-ref="vidInput"
-                                wire:model="video"
-                                accept="video/*"
-                                style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none"
-                                tabindex="-1">
+                            @if (canUploadVideo($userLevel))
+                                <input type="file"
+                                    x-ref="vidInput"
+                                    wire:model="video"
+                                    accept="video/*"
+                                    style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none"
+                                    tabindex="-1">
+                            @endif
                         @endif
 
                         <div class="ph-comp-top">
@@ -865,7 +867,7 @@
                         </div>
 
                         {{-- Facebook-style media preview + toolbar --}}
-                        @if (canUploadVideo($userLevel))
+                        @if (in_array($userLevel, ['Creator', 'Influencer']))
                             @php
                                 $maxImages = $userLevel === 'Creator' ? 1 : 4;
                                 $imgPreviewCount = count($images);
@@ -890,44 +892,46 @@
                                 </div>
                             </div>
 
-                            {{-- Roll preview --}}
-                            <div class="ph-fb-preview" x-show="videoMode && vStatus !== 'idle'" x-cloak>
-                                <div class="ph-fb-preview-bar">
-                                    <span><i class="fas fa-video" style="color:#f02849;margin-right:4px"></i> Roll</span>
-                                    <button type="button" @click="resetVideo(); $wire.cancelVideoUpload()">Remove</button>
-                                </div>
-
-                                <div class="ph-vprog" x-show="vStatus === 'uploading' || vStatus === 'processing'">
-                                    <div class="ph-vprog-meta">
-                                        <span x-text="vStatus === 'processing' ? 'Processing video (high / medium / low)…' : 'Uploading…'"></span>
-                                        <span x-text="vPct + '%'"></span>
+                            @if (canUploadVideo($userLevel))
+                                {{-- Roll preview --}}
+                                <div class="ph-fb-preview" x-show="videoMode && vStatus !== 'idle'" x-cloak>
+                                    <div class="ph-fb-preview-bar">
+                                        <span><i class="fas fa-video" style="color:#f02849;margin-right:4px"></i> Roll</span>
+                                        <button type="button" @click="resetVideo(); $wire.cancelVideoUpload()">Remove</button>
                                     </div>
-                                    <div class="ph-vprog-track">
-                                        <div class="ph-vprog-fill" :style="'width:' + vPct + '%'"></div>
+
+                                    <div class="ph-vprog" x-show="vStatus === 'uploading' || vStatus === 'processing'">
+                                        <div class="ph-vprog-meta">
+                                            <span x-text="vStatus === 'processing' ? 'Processing video (high / medium / low)…' : 'Uploading…'"></span>
+                                            <span x-text="vPct + '%'"></span>
+                                        </div>
+                                        <div class="ph-vprog-track">
+                                            <div class="ph-vprog-fill" :style="'width:' + vPct + '%'"></div>
+                                        </div>
+                                    </div>
+
+
+                                    @if ($cloudinaryVideoUrl)
+                                        <div class="ph-fb-vid" x-show="vStatus === 'done'">
+                                            <video src="{{ $cloudinaryVideoUrl }}" muted playsinline controls></video>
+                                        </div>
+                                    @endif
+
+                                    <div class="ph-fb-vid-status" x-show="vStatus === 'done'">
+                                        <i class="fas fa-check-circle" style="color:#45bd62"></i> Ready — add a caption and post
+                                    </div>
+
+                                    <div class="ph-fb-vid-status" x-show="vStatus === 'error'" style="color:#f02849">
+                                        Upload failed. Tap Roll below to try again.
                                     </div>
                                 </div>
 
-
-                                @if ($cloudinaryVideoUrl)
-                                    <div class="ph-fb-vid" x-show="vStatus === 'done'">
-                                        <video src="{{ $cloudinaryVideoUrl }}" muted playsinline controls></video>
-                                    </div>
-                                @endif
-
-                                <div class="ph-fb-vid-status" x-show="vStatus === 'done'">
-                                    <i class="fas fa-check-circle" style="color:#45bd62"></i> Ready — add a caption and post
+                                <div wire:loading wire:target="video" class="ph-fb-preview" style="margin-top:12px" x-show="videoMode">
+                                    <div class="ph-fb-vid-status"><span class="ph-spin"></span> Staging video…</div>
                                 </div>
+                            @endif
 
-                                <div class="ph-fb-vid-status" x-show="vStatus === 'error'" style="color:#f02849">
-                                    Upload failed. Tap Roll below to try again.
-                                </div>
-                            </div>
-
-                            <div wire:loading wire:target="video" class="ph-fb-preview" style="margin-top:12px" x-show="videoMode">
-                                <div class="ph-fb-vid-status"><span class="ph-spin"></span> Staging video…</div>
-                            </div>
-
-                            {{-- FB toolbar: Photo | Roll --}}
+                            {{-- FB toolbar: Photo | Roll (Influencer only) --}}
                             <div class="ph-fb-toolbar">
                                 <button type="button" class="ph-fb-tool ph-fb-tool--photo"
                                     @click="openPhoto()"
@@ -935,12 +939,14 @@
                                     <span class="ph-fb-tool-ic"><i class="fas fa-image"></i></span>
                                     <span>Photo<small>{{ $maxImages === 1 ? '1 max' : 'Up to '.$maxImages }}</small></span>
                                 </button>
-                                <button type="button" class="ph-fb-tool ph-fb-tool--roll"
-                                    @click="openVideo()"
-                                    :disabled="images.length > 0 && !videoMode">
-                                    <span class="ph-fb-tool-ic"><i class="fas fa-video"></i></span>
-                                    <span>Roll<small>{{ $userLevel === 'Creator' ? '60 sec' : '3 min' }}</small></span>
-                                </button>
+                                @if (canUploadVideo($userLevel))
+                                    <button type="button" class="ph-fb-tool ph-fb-tool--roll"
+                                        @click="openVideo()"
+                                        :disabled="images.length > 0 && !videoMode">
+                                        <span class="ph-fb-tool-ic"><i class="fas fa-video"></i></span>
+                                        <span>Roll<small>10 min</small></span>
+                                    </button>
+                                @endif
                             </div>
                         @endif
 
@@ -952,8 +958,10 @@
                                 Uploading your video…
                             </span>
                             <span class="ph-comp-foot-note" x-show="!videoMode" wire:loading.remove wire:target="createPost">
-                                @if (in_array($userLevel, ['Creator', 'Influencer']))
+                                @if ($userLevel === 'Influencer')
                                     Photo post or roll — pick one above.
+                                @elseif ($userLevel === 'Creator')
+                                    Photo posts · 1 image max.
                                 @else
                                     Basic posts · 160 characters max.
                                 @endif

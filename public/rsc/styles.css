@@ -172,15 +172,15 @@ h3 { font-size: clamp(1.25rem, 2vw, 1.55rem); }
   align-items: center;
   justify-content: center;
   gap: 0;
-  max-width: calc(100% - 200px);
+  max-width: calc(100% - 240px);
 }
 
 .nav__links a {
-  font-size: .8125rem;
+  font-size: .78rem;
   font-weight: 400;
   letter-spacing: -.01em;
   color: rgba(29, 29, 31, .88);
-  padding: 0 10px;
+  padding: 0 8px;
   line-height: 44px;
   white-space: nowrap;
   opacity: .88;
@@ -238,10 +238,10 @@ h3 { font-size: clamp(1.25rem, 2vw, 1.55rem); }
   transform: scale(1.02);
 }
 
-@media (max-width: 1060px) and (min-width: 901px) {
+@media (max-width: 1180px) and (min-width: 1101px) {
   .nav__links a {
-    padding: 0 7px;
-    font-size: .75rem;
+    padding: 0 6px;
+    font-size: .72rem;
   }
 
   .nav__action-link,
@@ -305,7 +305,7 @@ h3 { font-size: clamp(1.25rem, 2vw, 1.55rem); }
   display: none;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1100px) {
   .site-nav .nav {
     position: fixed;
     left: 0;
@@ -365,11 +365,11 @@ h3 { font-size: clamp(1.25rem, 2vw, 1.55rem); }
   }
 
   .nav__sheet-links a {
-    font-size: 1.75rem;
+    font-size: 1.35rem;
     font-weight: 600;
-    letter-spacing: -.03em;
+    letter-spacing: -.02em;
     color: var(--ink);
-    padding: 14px 0;
+    padding: 12px 0;
     border-bottom: 1px solid rgba(0, 0, 0, .06);
     opacity: .92;
     transition: opacity .15s;

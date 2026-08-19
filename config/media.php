@@ -13,8 +13,8 @@ return [
     ],
 
     'video_max_seconds' => [
-        'Creator'    => (int) (env('VIDEO_MAX_SECONDS_CREATOR') ?: 60),
-        'Influencer' => (int) (env('VIDEO_MAX_SECONDS_INFLUENCER') ?: 180),
+        'Creator'    => (int) (env('VIDEO_MAX_SECONDS_CREATOR') ?: 0),
+        'Influencer' => (int) (env('VIDEO_MAX_SECONDS_INFLUENCER') ?: 600),
     ],
 
     'image_max_kb' => (int) (env('IMAGE_MAX_KB') ?: 10240),

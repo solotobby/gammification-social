@@ -247,13 +247,15 @@ body { background: var(--ph-bg); font-family: 'Inter', system-ui, sans-serif; }
                        tabindex="-1"
                        @change="onImages($event)">
 
-                <input type="file"
-                       x-ref="vidInput"
-                       wire:model="video"
-                       accept="video/mp4,video/quicktime,video/webm,video/x-msvideo"
-                       style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;top:0;left:0"
-                       tabindex="-1"
-                       @change="onVideoSelected($event)">
+                @if(canUploadVideo($userLevel))
+                    <input type="file"
+                           x-ref="vidInput"
+                           wire:model="video"
+                           accept="video/mp4,video/quicktime,video/webm,video/x-msvideo"
+                           style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;top:0;left:0"
+                           tabindex="-1"
+                           @change="onVideoSelected($event)">
+                @endif
             @endif
 
             {{-- Avatar + Textarea --}}
@@ -289,8 +291,8 @@ body { background: var(--ph-bg); font-family: 'Inter', system-ui, sans-serif; }
                 </div>
             @endif
 
-            {{-- Video upload zone — only for Creator/Influencer --}}
-            @if(in_array($userLevel,['Creator','Influencer']))
+            {{-- Video upload zone — Influencer only --}}
+            @if(canUploadVideo($userLevel))
 
                 {{-- ── STEP 1: Idle — show drop zone ────────── --}}
                 <div class="ph-vzone"
@@ -310,7 +312,7 @@ body { background: var(--ph-bg); font-family: 'Inter', system-ui, sans-serif; }
                         <h6>Add a video to your post</h6>
                         <p>
                             Drag &amp; drop or click to browse · MP4, MOV, WEBM ·
-                            @if($userLevel==='Creator') Max 25 MB / 60s @else Max 100 MB / 3 min @endif
+                            Max 100 MB / 10 min
                         </p>
                     </div>
                     {{-- Livewire chunked-upload spinner --}}
@@ -422,15 +424,17 @@ body { background: var(--ph-bg); font-family: 'Inter', system-ui, sans-serif; }
                         Photo
                     </button>
 
-                    <button type="button" class="ph-act video"
-                            x-show="mode!=='image'"
-                            @click="openVid()">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M15 10l4.553-2.532A1 1 0 0121 8.382v7.236a1 1 0 01-1.447.894L15 14"/>
-                            <rect x="2" y="6" width="13" height="12" rx="2"/>
-                        </svg>
-                        Video
-                    </button>
+                    @if(canUploadVideo($userLevel))
+                        <button type="button" class="ph-act video"
+                                x-show="mode!=='image'"
+                                @click="openVid()">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M15 10l4.553-2.532A1 1 0 0121 8.382v7.236a1 1 0 01-1.447.894L15 14"/>
+                                <rect x="2" y="6" width="13" height="12" rx="2"/>
+                            </svg>
+                            Video
+                        </button>
+                    @endif
 
                     <button type="button" class="ph-act cancel"
                             x-show="mode!=='none'"
@@ -607,7 +611,7 @@ Alpine.data('composerUI', () => ({
         }
 
         // Client-side duration check
-        const maxSecs = {{ $userLevel === 'Creator' ? 60 : 180 }};
+        const maxSecs = {{ canUploadVideo($userLevel) ? 600 : 0 }};
         const objUrl  = URL.createObjectURL(file);
         const tmp     = document.createElement('video');
         tmp.preload   = 'metadata';

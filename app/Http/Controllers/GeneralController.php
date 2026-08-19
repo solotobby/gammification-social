@@ -9,6 +9,7 @@ use App\Models\Comment;
 use App\Models\CommentExternal;
 use App\Models\CommentExternalMessage;
 use App\Models\Community;
+use App\Models\CommunityCategory;
 use App\Models\EngagementDailyStat;
 use App\Models\EngagementMonthlyStat;
 use App\Models\FremiumEngagementStat;
@@ -51,14 +52,61 @@ class GeneralController extends Controller
         return view('general.features');
     }
 
+    public function creators()
+    {
+        return view('general.creators');
+    }
+
+    public function communities(Request $request)
+    {
+        $categories = CommunityCategory::query()
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
+        $communities = Community::query()
+            ->with([
+                'category:id,name',
+                'user:id,name,username,avatar',
+            ])
+            ->withCount('members')
+            ->whereNull('archived_at')
+            ->where('type', '!=', 'private')
+            ->when($request->filled('category'), function ($query) use ($request) {
+                $query->where('community_categories_id', $request->string('category'));
+            })
+            ->when($request->filled('q'), function ($query) use ($request) {
+                $term = '%' . $request->string('q') . '%';
+                $query->where(function ($q) use ($term) {
+                    $q->where('name', 'like', $term)
+                        ->orWhere('description', 'like', $term);
+                });
+            })
+            ->orderByDesc('members_count')
+            ->orderByDesc('created_at')
+            ->paginate(8)
+            ->withQueryString();
+
+        if ($request->boolean('partial') || $request->ajax()) {
+            $html = view('general.partials.community-cards', [
+                'communities' => $communities,
+            ])->render();
+
+            return response()->json([
+                'html' => $html,
+                'count' => $communities->count(),
+                'shown' => min($communities->total(), $communities->currentPage() * $communities->perPage()),
+                'total' => $communities->total(),
+                'has_more' => $communities->hasMorePages(),
+                'next_page' => $communities->hasMorePages() ? $communities->currentPage() + 1 : null,
+            ]);
+        }
+
+        return view('general.communities', compact('communities', 'categories'));
+    }
+
     public function how()
     {
         return view('general.how');
-    }
-
-    public function faq()
-    {
-        return view('general.faq');
     }
 
     public function about()
@@ -101,6 +149,16 @@ class GeneralController extends Controller
     public function howToEarn()
     {
         return view('general.earn');
+    }
+
+    public function earn()
+    {
+        return view('general.earn');
+    }
+
+    public function ai()
+    {
+        return view('general.ai');
     }
 
     public function test()

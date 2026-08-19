@@ -11,7 +11,9 @@ use App\Http\Controllers\Admin\TrendController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\UserEngagementController;
 use App\Http\Controllers\AdminLoginController;
+use App\Http\Controllers\AcademyController;
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\HelpCenterController;
 use App\Http\Controllers\CloudinaryWebhookController;
 use App\Http\Controllers\FlutterwaveWebhookController;
 use App\Http\Controllers\GeneralController;
@@ -90,7 +92,13 @@ Route::group(['namespace' => 'auth'], function () {
     Route::get('terms/conditions', [\App\Http\Controllers\GeneralController::class, 'terms']);
     Route::get('how-it-works', [\App\Http\Controllers\GeneralController::class, 'how']);
     Route::get('features', [\App\Http\Controllers\GeneralController::class, 'features'])->name('features');
-    Route::get('faq', [\App\Http\Controllers\GeneralController::class, 'faq'])->name('faq');
+    Route::get('creators', [\App\Http\Controllers\GeneralController::class, 'creators'])->name('creators');
+    Route::get('communities', [\App\Http\Controllers\GeneralController::class, 'communities'])->name('communities');
+    Route::get('earn', [\App\Http\Controllers\GeneralController::class, 'earn'])->name('earn');
+    Route::get('ai', [\App\Http\Controllers\GeneralController::class, 'ai'])->name('ai');
+    Route::get('faq', fn () => redirect()->route('help', [], 301))->name('faq');
+    Route::get('help', [HelpCenterController::class, 'index'])->name('help');
+    Route::get('help/{slug}', [HelpCenterController::class, 'show'])->name('help.show');
 
     Route::get('about', [\App\Http\Controllers\GeneralController::class, 'about']);
     Route::get('contact', [\App\Http\Controllers\GeneralController::class, 'contact']);
@@ -139,6 +147,9 @@ Route::group(['namespace' => 'auth'], function () {
 
     Route::get('blog', [BlogController::class, 'index'])->name('blog');
     Route::get('blog/{slug}', [BlogController::class, 'show']);
+
+    Route::get('academy', [AcademyController::class, 'index'])->name('academy');
+    Route::get('academy/{slug}', [AcademyController::class, 'show'])->name('academy.show');
 
     Route::get('top/earners',  [\App\Http\Controllers\GeneralController::class, 'topEarners']);
 

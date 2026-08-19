@@ -144,6 +144,9 @@
                                         </td>
                                         <td>
                                             <div class="dash-actions">
+                                                <a href="{{ route('admin.blog.edit', $blog->slug) }}" class="dash-btn dash-btn--ghost" style="padding:0.5rem 0.75rem;">
+                                                    <i class="fa fa-pen"></i> Edit
+                                                </a>
                                                 <a href="{{ url('blog/' . $blog->slug) }}" target="_blank" class="dash-btn dash-btn--ghost" style="padding:0.5rem 0.75rem;">
                                                     <i class="fa fa-external-link"></i> View
                                                 </a>

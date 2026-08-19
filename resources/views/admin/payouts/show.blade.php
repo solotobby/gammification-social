@@ -160,13 +160,15 @@
                                 <select id="bank_code" name="bank_code" class="dash-select" required>
                                     <option value="">Select bank</option>
                                     @foreach (bankList() as $bank)
-                                        <option value="{{ $bank['code'] }}">{{ $bank['name'] }}</option>
+                                        <option value="{{ $bank['code'] }}" @selected((string) ($withdrawals->bank_code ?? '') === (string) $bank['code'])>
+                                            {{ $bank['name'] }}
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="dash-field">
                                 <label for="validationCode">Validation code</label>
-                                <input type="text" id="validationCode" name="validationCode" class="dash-input" required>
+                                <input type="text" id="validationCode" name="validationCode" class="dash-input" required autocomplete="off">
                             </div>
                             <button type="submit" class="dash-btn dash-btn--primary">Process transfer</button>
                         </form>
@@ -186,9 +188,22 @@
             const responseBox = document.getElementById('transfer-response');
             const submitBtn = form.querySelector('button[type="submit"]');
 
+            function csrfToken() {
+                const meta = document.querySelector('meta[name="csrf-token"]');
+                if (meta && meta.content) return meta.content;
+                const input = form.querySelector('input[name="_token"]');
+                return input ? input.value : '';
+            }
+
             form.addEventListener('submit', function (e) {
                 e.preventDefault();
                 if (submitBtn.disabled) return;
+
+                const token = csrfToken();
+                if (!token) {
+                    responseBox.innerHTML = '<div class="dash-alert dash-alert--error">Missing CSRF token. Refresh the page and try again.</div>';
+                    return;
+                }
 
                 responseBox.innerHTML = '';
                 submitBtn.disabled = true;
@@ -197,23 +212,32 @@
                 fetch(form.action, {
                     method: 'POST',
                     headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'X-CSRF-TOKEN': token,
+                        'X-Requested-With': 'XMLHttpRequest',
                         'Accept': 'application/json',
                     },
                     body: new FormData(form),
+                    credentials: 'same-origin',
                 })
                     .then(async (res) => {
                         const data = await res.json().catch(() => ({}));
-                        if (!res.ok) throw data;
+                        if (!res.ok) {
+                            const message = data.message
+                                || (data.errors ? Object.values(data.errors).flat().join(' ') : null)
+                                || ('Request failed (' + res.status + ')');
+                            throw { message: message };
+                        }
                         return data;
                     })
                     .then((data) => {
                         const ok = data.status === 'success';
-                        responseBox.innerHTML = `<div class="dash-alert dash-alert--${ok ? 'success' : 'error'}">${data.message}</div>`;
-                        if (ok) form.reset();
+                        responseBox.innerHTML = `<div class="dash-alert dash-alert--${ok ? 'success' : 'error'}">${data.message || (ok ? 'Transfer initiated.' : 'Transfer failed')}</div>`;
+                        if (ok) {
+                            setTimeout(function () { window.location.reload(); }, 1200);
+                        }
                     })
                     .catch((err) => {
-                        const message = err?.message || (typeof err === 'object' && err.message) || 'Transfer failed';
+                        const message = (err && err.message) ? err.message : 'Transfer failed';
                         responseBox.innerHTML = `<div class="dash-alert dash-alert--error">${message}</div>`;
                     })
                     .finally(() => {

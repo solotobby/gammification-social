@@ -48,7 +48,7 @@
     });
 
     window.addEventListener('resize', function () {
-      if (window.innerWidth > 900 && navRoot.classList.contains('is-open')) setOpen(false);
+      if (window.innerWidth > 1100 && navRoot.classList.contains('is-open')) setOpen(false);
     });
   }
 

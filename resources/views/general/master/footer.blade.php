@@ -27,7 +27,7 @@
         <h5>Platform</h5>
         <a href="{{ route('features') }}">Features</a>
         <a href="{{ url('/how-it-works') }}">How it works</a>
-        <a href="{{ route('faq') }}">FAQ</a>
+        <a href="{{ route('help') }}">Help Center</a>
         <a href="{{ url('/register') }}">Create account</a>
         <a href="{{ url('/login') }}">Log in</a>
       </div>

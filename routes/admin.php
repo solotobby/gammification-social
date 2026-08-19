@@ -2,8 +2,10 @@
 
 use App\Http\Controllers\Admin\AccessCodeController;
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\AcademyController as AdminAcademyController;
 use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\BlogController as AdminBlogController;
+use App\Http\Controllers\Admin\HelpCenterController as AdminHelpCenterController;
 use App\Http\Controllers\Admin\BookmarkAnalyticsController;
 use App\Http\Controllers\Admin\CommunityController;
 use App\Http\Controllers\Admin\CurrencyController;
@@ -78,7 +80,23 @@ Route::middleware(['auth', 'admin'])
             Route::get('/', [AdminBlogController::class, 'list'])->name('index');
             Route::get('create', [AdminBlogController::class, 'create'])->name('create');
             Route::post('/', [AdminBlogController::class, 'store'])->name('store');
+            Route::get('{slug}/edit', [AdminBlogController::class, 'edit'])->name('edit');
+            Route::put('{slug}', [AdminBlogController::class, 'update'])->name('update');
             Route::delete('{slug}', [AdminBlogController::class, 'deletePost'])->name('delete');
+        });
+
+        Route::prefix('academy')->name('academy.')->group(function () {
+            Route::get('/', [AdminAcademyController::class, 'list'])->name('index');
+            Route::get('create', [AdminAcademyController::class, 'create'])->name('create');
+            Route::post('/', [AdminAcademyController::class, 'store'])->name('store');
+            Route::delete('{slug}', [AdminAcademyController::class, 'delete'])->name('delete');
+        });
+
+        Route::prefix('help')->name('help.')->group(function () {
+            Route::get('/', [AdminHelpCenterController::class, 'list'])->name('index');
+            Route::get('create', [AdminHelpCenterController::class, 'create'])->name('create');
+            Route::post('/', [AdminHelpCenterController::class, 'store'])->name('store');
+            Route::delete('{slug}', [AdminHelpCenterController::class, 'delete'])->name('delete');
         });
 
         Route::prefix('posts')->name('posts.')->group(function () {

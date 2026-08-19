@@ -88,7 +88,7 @@ class PayoutController extends Controller
         $validated = $request->validate([
             'user_id' => 'required|uuid|exists:users,id',
             'payout_id' => 'required|uuid|exists:payouts,id',
-            'bank_code' => 'required|numeric',
+            'bank_code' => 'required|string|max:20',
             'validationCode' => 'required|string',
         ]);
 
@@ -101,10 +101,12 @@ class PayoutController extends Controller
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Fund transfer successful',
+                'message' => 'Fund transfer initiated successfully.',
                 'data' => $response,
             ]);
         } catch (\Throwable $e) {
+            report($e);
+
             return response()->json([
                 'status' => 'error',
                 'message' => 'Transfer failed: ' . $e->getMessage(),

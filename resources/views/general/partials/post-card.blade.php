@@ -24,11 +24,11 @@
     </div>
     <div class="apl-blog-card__body">
       <h3>{{ $blog->title }}</h3>
-      <p>{{ Str::limit(strip_tags($blog->excerpt ?? ''), 110) }}</p>
+      <p class="apl-blog-card__excerpt">{{ Str::limit(strip_tags($blog->excerpt ?? ''), 110) }}</p>
       <div class="apl-blog-meta">
         <span>{{ ($blog->published_at ?? $blog->created_at)?->format('M d, Y') }}</span>
         @if ($readMins)
-          <span>·</span>
+          <span aria-hidden="true">·</span>
           <span>{{ $readMins }} min read</span>
         @endif
       </div>

@@ -19,6 +19,8 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             LevelSeeder::class,
             CurrencySeeder::class,
+            AcademyCategorySeeder::class,
+            HelpCenterSeeder::class,
         ]);
     }
 }

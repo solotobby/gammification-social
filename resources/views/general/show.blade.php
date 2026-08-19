@@ -39,15 +39,23 @@
 @section('apple_content')
 <div class="apl-read-progress" id="readProgress" aria-hidden="true"></div>
 
+<nav class="apl-article__mobile-bar" aria-label="Article actions">
+  <a class="apl-article__back" href="{{ route('blog') }}">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+    <span>Blog</span>
+  </a>
+  <span class="apl-article__mobile-meta">{{ $readMins }} min read</span>
+</nav>
+
 <article class="apl-article">
   <header class="apl-article__hero">
     <div class="apl-article__hero-inner reveal">
-      <div class="apl-crumbs">
+      <div class="apl-crumbs apl-crumbs--article">
         <a href="{{ url('/') }}">Home</a>
         <span>/</span>
         <a href="{{ route('blog') }}">Blog</a>
-        <span>/</span>
-        <span>{{ Str::limit($blog->title, 42) }}</span>
+        <span class="apl-crumbs__tail">/</span>
+        <span class="apl-crumbs__current">{{ Str::limit($blog->title, 36) }}</span>
       </div>
 
       @if ($blog->blogCategory)
@@ -62,9 +70,17 @@
 
       <div class="apl-article__byline">
         <div class="apl-article__avatar" aria-hidden="true">PK</div>
-        <div>
+        <div class="apl-article__byline-text">
           <strong>Payhankey Team</strong>
-          <span>{{ $published?->format('M d, Y') }} · {{ $readMins }} min read@if($blog->views) · {{ number_format($blog->views) }} reads@endif</span>
+          <span class="apl-article__meta-line">
+            <span>{{ $published?->format('M d, Y') }}</span>
+            <span aria-hidden="true">·</span>
+            <span>{{ $readMins }} min read</span>
+            @if ($blog->views)
+              <span aria-hidden="true">·</span>
+              <span>{{ number_format($blog->views) }} reads</span>
+            @endif
+          </span>
         </div>
       </div>
     </div>

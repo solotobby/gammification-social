@@ -61,12 +61,10 @@ class NewTimeline extends Component
     {
         $level   = userLevel();
         $maxSecs = match ($level) {
-            'Creator'    => 20,
-            'Influencer' => 80,
+            'Influencer' => 600,
             default      => 0,
         };
-        // 20 s @ ~10 Mbps ≈ 25 MB | 80 s ≈ 100 MB
-        $maxKB = $maxSecs === 20 ? 25600 : 102400;
+        $maxKB = $maxSecs > 0 ? 102400 : 1;
 
         return [
             'video' => "required|file|mimetypes:video/mp4,video/quicktime,video/x-msvideo,video/webm|max:{$maxKB}",
@@ -208,8 +206,8 @@ class NewTimeline extends Component
     public function toggleVideoUpload(): void
     {
         $level = userLevel();
-        if (! in_array($level, ['Creator', 'Influencer'])) {
-            session()->flash('error', 'Only Creators and Influencers can upload videos.');
+        if (! canUploadVideo($level)) {
+            session()->flash('error', 'Only Influencers can upload videos. Creators can post photos.');
             return;
         }
         $this->showVideoUpload = ! $this->showVideoUpload;
@@ -222,6 +220,12 @@ class NewTimeline extends Component
      */
     public function updatedVideo(): void
     {
+        if (! canUploadVideo()) {
+            $this->reset('video');
+            session()->flash('error', 'Only Influencers can upload videos. Creators can post photos.');
+            return;
+        }
+
         $this->validate($this->videoRules());
 
         // Start the async upload (runs synchronously in PHP but is isolated here
@@ -233,15 +237,15 @@ class NewTimeline extends Component
     {
         $level = userLevel();
 
-        if (! in_array($level, ['Creator', 'Influencer'])) {
+        if (! canUploadVideo($level)) {
             $this->videoUploadStatus = 'error';
             session()->flash('error', 'Permission denied.');
             return;
         }
 
         $maxSeconds = match ($level) {
-            'Creator'    => 20,
-            'Influencer' => 80,
+            'Influencer' => 600,
+            default      => 0,
         };
 
         $this->videoUploadStatus   = 'uploading';
@@ -293,8 +297,8 @@ class NewTimeline extends Component
     {
         $level = userLevel();
 
-        if (! in_array($level, ['Creator', 'Influencer'])) {
-            session()->flash('error', 'Permission denied.');
+        if (! canUploadVideo($level)) {
+            session()->flash('error', 'Only Influencer accounts can upload rolls. Creators can post photos.');
             return;
         }
 

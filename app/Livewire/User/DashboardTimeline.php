@@ -243,7 +243,7 @@ class DashboardTimeline extends Component
 
         if (! canUploadVideo($level) || $maxKB <= 0) {
             $this->videoUploadStatus = 'error';
-            $this->addError('video', 'Only Creator and Influencer accounts can upload rolls.');
+            $this->addError('video', 'Only Influencer accounts can upload rolls. Creators can post photos.');
             return;
         }
 
@@ -270,9 +270,9 @@ class DashboardTimeline extends Component
 
         $level = userLevel();
 
-        if (! in_array($level, ['Creator', 'Influencer'])) {
+        if (! canUploadVideo($level)) {
             $this->videoUploadStatus = 'error';
-            session()->flash('error', 'Permission denied.');
+            session()->flash('error', 'Only Influencer accounts can upload rolls. Creators can post photos.');
             return;
         }
 
@@ -314,8 +314,8 @@ class DashboardTimeline extends Component
     {
         $level = userLevel();
 
-        if (!in_array($level, ['Creator', 'Influencer'])) {
-            session()->flash('error', 'Permission denied.');
+        if (! canUploadVideo($level)) {
+            session()->flash('error', 'Only Influencer accounts can upload rolls. Creators can post photos.');
             return;
         }
 

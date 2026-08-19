@@ -24,7 +24,7 @@
       </div>
       <div class="apl-info">
         <div class="apl-info__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
-        <div><b>Need a quick answer?</b><span>Check our <a href="{{ url('/how-it-works') }}" style="color:var(--violet);font-weight:600">How it works</a> guide or homepage FAQ.</span></div>
+        <div><b>Need a quick answer?</b><span>Check our <a href="{{ url('/how-it-works') }}" style="color:var(--violet);font-weight:600">How it works</a> guide or the <a href="{{ route('help') }}" style="color:var(--violet);font-weight:600">Help Center</a>.</span></div>
       </div>
       <div style="margin-top:24px">
         <b style="font-family:var(--font-display);display:block;margin-bottom:12px">Follow us</b>

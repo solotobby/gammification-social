@@ -8,23 +8,32 @@
     'crumb' => 'Blog',
     'title' => 'Creator Tips, Guides &amp; Stories',
     'lead' => 'Practical ideas to grow your audience, monetize content, build communities and turn your creativity into a sustainable digital business.',
+    'compact' => true,
 ])
 
 <section class="apl-blog-shell">
   <div class="apl-wrap">
-    <form method="get" action="{{ route('blog') }}" class="apl-blog-toolbar reveal">
-      <div class="apl-chips-row">
-        <a href="{{ route('blog') }}" class="apl-chip-filter {{ ! request('category') ? 'is-active' : '' }}">All</a>
-        @foreach ($blogCategories as $category)
-          <a href="{{ route('blog', ['category' => $category->id]) }}"
-            class="apl-chip-filter {{ (string) request('category') === (string) $category->id ? 'is-active' : '' }}">
-            {{ $category->name }}
-          </a>
-        @endforeach
+    <form method="get" action="{{ route('blog') }}" class="apl-blog-toolbar reveal" role="search">
+      @if (request('category'))
+        <input type="hidden" name="category" value="{{ request('category') }}">
+      @endif
+      <div class="apl-chips-scroll" aria-label="Filter by category">
+        <div class="apl-chips-row">
+          <a href="{{ route('blog', request()->only('q')) }}" class="apl-chip-filter {{ ! request('category') ? 'is-active' : '' }}">All</a>
+          @foreach ($blogCategories as $category)
+            <a href="{{ route('blog', array_filter(['category' => $category->id, 'q' => request('q')])) }}"
+              class="apl-chip-filter {{ (string) request('category') === (string) $category->id ? 'is-active' : '' }}">
+              {{ $category->name }}
+            </a>
+          @endforeach
+        </div>
       </div>
       <div class="apl-search">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="search" name="q" value="{{ request('q') }}" placeholder="Search articles" aria-label="Search articles">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="search" name="q" value="{{ request('q') }}" placeholder="Search articles" aria-label="Search articles" enterkeyhint="search" autocomplete="off">
+        @if (request('q'))
+          <a class="apl-search__clear" href="{{ route('blog', request()->only('category')) }}" aria-label="Clear search">×</a>
+        @endif
       </div>
     </form>
 
@@ -72,15 +81,18 @@
       @if ($blogs->hasPages())
         <nav class="apl-blog-pager reveal" aria-label="Blog pagination">
           @if ($blogs->onFirstPage())
-            <span class="is-disabled">Previous</span>
+            <span class="apl-blog-pager__btn is-disabled" aria-disabled="true">Previous</span>
           @else
-            <a href="{{ $blogs->previousPageUrl() }}">Previous</a>
+            <a class="apl-blog-pager__btn" href="{{ $blogs->previousPageUrl() }}">Previous</a>
           @endif
-          <span class="apl-blog-pager__status">Page {{ $blogs->currentPage() }} of {{ $blogs->lastPage() }}</span>
+          <span class="apl-blog-pager__status">
+            <span class="apl-blog-pager__status-full">Page {{ $blogs->currentPage() }} of {{ $blogs->lastPage() }}</span>
+            <span class="apl-blog-pager__status-short" aria-hidden="true">{{ $blogs->currentPage() }} / {{ $blogs->lastPage() }}</span>
+          </span>
           @if ($blogs->hasMorePages())
-            <a href="{{ $blogs->nextPageUrl() }}">Next</a>
+            <a class="apl-blog-pager__btn" href="{{ $blogs->nextPageUrl() }}">Next</a>
           @else
-            <span class="is-disabled">Next</span>
+            <span class="apl-blog-pager__btn is-disabled" aria-disabled="true">Next</span>
           @endif
         </nav>
       @endif
@@ -88,6 +100,7 @@
       <div class="apl-blog-empty reveal">
         <h3>No articles found</h3>
         <p>Try a different search or category.</p>
+        <a class="apl-chip-filter is-active" href="{{ route('blog') }}" style="margin-top:18px;display:inline-flex">View all articles</a>
       </div>
     @endif
   </div>

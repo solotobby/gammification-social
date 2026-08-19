@@ -14,7 +14,7 @@
             <span class="pk-step-num">1</span>
             <div>
                 <h3>Content & engagement</h3>
-                <p>Post text, images, and video. As a Creator or Influencer, earn from views, likes, and comments. Basic accounts see estimates; upgrade to monetize.</p>
+                <p>Post text and images. As a Creator or Influencer, earn from views, likes, and comments. Influencers can also post video Rolls. Basic accounts see estimates; upgrade to monetize.</p>
             </div>
         </div>
         <div class="pk-step">

@@ -408,7 +408,7 @@ class Timeline extends Component
 
         if (! canUploadVideo($level)) {
             $this->videoUploadStatus = 'error';
-            $this->addError('video', 'Only Creator and Influencer accounts can upload rolls.');
+            $this->addError('video', 'Only Influencer accounts can upload rolls. Creators can post photos.');
             return;
         }
 
@@ -436,7 +436,7 @@ class Timeline extends Component
         $level = userLevel();
         if (! canUploadVideo($level)) {
             $this->videoUploadStatus = 'error';
-            session()->flash('error', 'Only Creator and Influencer accounts can upload rolls.');
+            session()->flash('error', 'Only Influencer accounts can upload rolls. Creators can post photos.');
             return;
         }
 
@@ -530,7 +530,7 @@ class Timeline extends Component
         $level = userLevel();
 
         if (! canUploadVideo($level)) {
-            session()->flash('error', 'Only Creator and Influencer accounts can upload rolls.');
+            session()->flash('error', 'Only Influencer accounts can upload rolls. Creators can post photos.');
             return;
         }
 

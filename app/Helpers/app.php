@@ -284,7 +284,7 @@ if (!function_exists('canUploadVideo')) {
     {
         $level ??= userLevel();
 
-        return in_array(normalizeUserLevel($level), ['Creator', 'Influencer'], true);
+        return normalizeUserLevel($level) === 'Influencer';
     }
 }
 

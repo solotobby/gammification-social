@@ -4,19 +4,18 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 use Exception;
 
-class FundTransferService{
-    
-   
+class FundTransferService
+{
     protected string $secretKey;
+
     protected string $baseUrl;
 
-      public function __construct()
+    public function __construct()
     {
-        $this->baseUrl = config('services.env.kora_base_url');
-        $this->secretKey = config('services.env.kora_sec');
+        $this->baseUrl = rtrim((string) config('services.env.kora_base_url'), '/');
+        $this->secretKey = (string) config('services.env.kora_sec');
     }
 
     public function transfer($user, float $amount, string $bankCode, string $accountNumber): array
@@ -25,85 +24,94 @@ class FundTransferService{
             throw new Exception('Invalid transfer amount.');
         }
 
-        // 🔐 Generate idempotent reference
+        if ($this->secretKey === '' || $this->baseUrl === '') {
+            throw new Exception('Korapay credentials are not configured.');
+        }
+
         $reference = generateTransactionRef();
 
-        // 💰 Convert to kobo (VERY IMPORTANT)
-        $amountInKobo = (int) round($amount);
-
+        // Korapay expects major units with 2 decimal places (not kobo).
+        // @see https://developers.korapay.com/docs/payout-via-api
         $payload = [
-            "reference" => $reference,
-            "destination" => [
-                "type" => "bank_account",
-                "amount" => $amountInKobo,
-                "currency" => "NGN",
-                "narration" => "Payhankey Payout",
-                "bank_account" => [
-                    "bank" => $bankCode,
-                    "account" => $accountNumber
+            'reference' => $reference,
+            'destination' => [
+                'type' => 'bank_account',
+                'amount' => round($amount, 2),
+                'currency' => 'NGN',
+                'narration' => 'Payhankey Payout',
+                'bank_account' => [
+                    'bank' => (string) $bankCode,
+                    'account' => (string) $accountNumber,
                 ],
-                "customer" => [
-                    "name" => $user->name,
-                    "email" => $user->email
-                ]
-            ]
+                'customer' => [
+                    'name' => $user->name,
+                    'email' => $user->email,
+                ],
+            ],
         ];
 
         try {
-
-            $response = Http::timeout(15) // prevent hanging
-                ->retry(2, 500) // retry twice on network failure
+            $response = Http::timeout(30)
+                ->retry(2, 500)
                 ->withHeaders([
                     'Accept' => 'application/json',
-                    'Authorization' => 'Bearer ' . $this->secretKey,
+                    'Content-Type' => 'application/json',
+                    'Authorization' => 'Bearer '.$this->secretKey,
                 ])
-                ->post($this->baseUrl . '/transactions/disburse', $payload);
+                ->post($this->baseUrl.'/transactions/disburse', $payload);
 
-                Log::info('Raw Response Data', [
-                    'reference' => $reference,
-                    'response' => $response->json()
-                ]);
+            Log::info('Korapay disburse response', [
+                'reference' => $reference,
+                'status' => $response->status(),
+                'body' => $response->json(),
+            ]);
 
-            if (!$response->successful()) {
+            if (! $response->successful()) {
+                $message = data_get($response->json(), 'message')
+                    ?: data_get($response->json(), 'error')
+                    ?: 'Bank transfer request failed.';
+
                 Log::error('Kora Transfer Failed', [
                     'reference' => $reference,
                     'status' => $response->status(),
-                    'body' => $response->body()
+                    'body' => $response->body(),
                 ]);
 
-                throw new Exception('Bank transfer request failed.');
+                throw new Exception($message);
             }
 
             $responseData = $response->json();
 
-            // ✅ Validate expected response structure
-            if (!isset($responseData['status']) || $responseData['status'] !== true) {
+            if (! isset($responseData['status']) || $responseData['status'] !== true) {
+                $message = $responseData['message'] ?? 'Transfer was not successful.';
 
                 Log::error('Kora Transfer Unsuccessful', [
                     'reference' => $reference,
-                    'response' => $responseData
+                    'response' => $responseData,
                 ]);
 
-                throw new Exception('Transfer was not successful. ');
+                throw new Exception($message);
             }
 
             return [
                 'reference' => $reference,
                 'provider_reference' => $responseData['data']['reference'] ?? null,
                 'status' => $responseData['data']['status'] ?? 'processing',
-                // 'raw' => $responseData
             ];
-
-        } catch (\Throwable $e) {
-
+        } catch (Exception $e) {
             Log::critical('FundTransferService Exception', [
                 'reference' => $reference,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
-            throw new Exception('Transfer service temporarily unavailable.  '. $e->getMessage());
+            throw $e;
+        } catch (\Throwable $e) {
+            Log::critical('FundTransferService Exception', [
+                'reference' => $reference,
+                'error' => $e->getMessage(),
+            ]);
+
+            throw new Exception('Transfer service temporarily unavailable. '.$e->getMessage(), 0, $e);
         }
     }
-
-
 }

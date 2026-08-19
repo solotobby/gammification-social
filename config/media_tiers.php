@@ -5,11 +5,11 @@ return [
     'tiers' => [
         'Creator' => [
             'images' => ['allowed' => true, 'max' => 1],
-            'video'  => ['allowed' => true, 'max_seconds' => 60],
+            'video'  => ['allowed' => false, 'max_seconds' => 0],
         ],
         'Influencer' => [
             'images' => ['allowed' => true, 'max' => 4],
-            'video'  => ['allowed' => true, 'max_seconds' => 180],
+            'video'  => ['allowed' => true, 'max_seconds' => 600],
         ],
         'default' => [
             'images' => ['allowed' => false, 'max' => 0],

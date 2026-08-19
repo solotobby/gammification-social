@@ -480,6 +480,8 @@
                         <a href="{{ route('admin.currencies.index') }}" class="dash-btn dash-btn--ghost"><i class="fa fa-coins"></i> Currencies</a>
                         <a href="{{ route('admin.levels.index') }}" class="dash-btn dash-btn--ghost"><i class="fa fa-layer-group"></i> Levels</a>
                         <a href="{{ route('admin.blog.index') }}" class="dash-btn dash-btn--ghost"><i class="fa fa-blog"></i> Blog</a>
+                        <a href="{{ route('admin.academy.index') }}" class="dash-btn dash-btn--ghost"><i class="fa fa-graduation-cap"></i> Academy</a>
+                        <a href="{{ route('admin.help.index') }}" class="dash-btn dash-btn--ghost"><i class="fa fa-life-ring"></i> Help</a>
                         <a href="{{ route('admin.communities.index') }}" class="dash-btn dash-btn--ghost"><i class="fa fa-object-group"></i> Communities</a>
                         @if ($showTestPayment ?? false)
                             <a href="{{ route('admin.test.subscribe', $levelId) }}" class="dash-btn dash-btn--primary"><i class="fa fa-flask"></i> Test payment</a>

@@ -18,8 +18,8 @@ class VideoUploadService
     ];
 
     private const DEFAULT_MAX_SECONDS = [
-        'Creator'    => 60,
-        'Influencer' => 180,
+        'Creator'    => 0,
+        'Influencer' => 600,
     ];
 
     public function maxSeconds(string $level): int
@@ -137,7 +137,7 @@ class VideoUploadService
         $level = normalizeUserLevel($level);
 
         if (! canUploadVideo($level)) {
-            throw new \RuntimeException('Only Creator and Influencer accounts can upload rolls.');
+            throw new \RuntimeException('Only Influencer accounts can upload rolls.');
         }
 
         $maxSeconds = $this->maxSeconds($level);
