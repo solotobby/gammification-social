@@ -853,7 +853,7 @@
                         $src = $srcMedium;
                         $poster = $vid->thumbnail_path ?? '';
                         $caption = strip_tags($post->content ?? '');
-                        $shareUrl = route('rolls.show', ['video' => $vid->id]);
+                        $shareUrl = route('rolls.public', ['video' => $vid->id]);
                         $level = userLevel($user->id);
                         $isVerified = in_array($level, ['Creator', 'Influencer']);
                         $jsId = json_encode($postKey);

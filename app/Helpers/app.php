@@ -1853,7 +1853,7 @@ if (!function_exists('rolls_url')) {
      */
     function rolls_url($videoId, $context = 'global', $userId = null)
     {
-        return route('rolls.show', ['video' => $videoId]);
+        return route('rolls.public', ['video' => $videoId]);
     }
 }
 
