@@ -20,6 +20,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Validator;
 use Spatie\Permission\Models\Role;
 use Illuminate\Auth\Events\Registered;
@@ -318,10 +319,7 @@ class RegisterController extends Controller
             'password' => ['required', 'string', 'min:8'],
         ]);
 
-
-        if (!Auth::attempt($credentials, $request->boolean('remember'))) {
-
-            // Optional: log failed attempts
+        if (! Auth::attempt($credentials, $request->boolean('remember'))) {
             logger()->warning('Failed login attempt', [
                 'email' => $request->email,
                 'ip' => $request->ip(),
@@ -331,6 +329,8 @@ class RegisterController extends Controller
                 'email' => 'Invalid login credentials.',
             ])->onlyInput('email');
         }
+
+        RateLimiter::clear($request->ip().'|'.strtolower((string) $request->input('email')));
 
         // Prevent session fixation
         $request->session()->regenerate();

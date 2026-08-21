@@ -34,6 +34,8 @@ use App\Livewire\User\Community;
 use App\Livewire\User\CommunityDetails;
 use App\Livewire\User\DashboardTimeline;
 use App\Livewire\User\EarningList;
+use App\Livewire\User\FeedbackForm;
+use App\Livewire\User\FeedbackThread;
 use App\Livewire\User\Hashtag;
 use App\Livewire\User\HowItWorks;
 use App\Livewire\User\HowToEarn;
@@ -114,12 +116,12 @@ Route::group(['namespace' => 'auth'], function () {
     Route::post('process/reg', [\App\Http\Controllers\Auth\RegisterController::class, 'regUser'])->name('reg.user');
 
     Route::post('user/login', [\App\Http\Controllers\Auth\RegisterController::class, 'loginUser'])
-        ->middleware('throttle:5,1')->name('login.user');
+        ->middleware('throttle:login')->name('login.user');
 
     // Fresh CSRF token for long-lived auth forms (login/register).
     Route::get('csrf-token', function () {
         return response()->json(['token' => csrf_token()]);
-    })->middleware('throttle:30,1')->name('csrf.token');
+    })->middleware('throttle:120,1')->name('csrf.token');
 
 
     Route::get('access/code/{level}', [\App\Http\Controllers\GeneralController::class, 'accessCode']);
@@ -235,6 +237,8 @@ Route::middleware([
         Route::get('post/timeline/{id}/analytics', PostAnalytics::class);
         Route::get('analytics', Analytics::class);
         Route::get('settings', Settings::class);
+        Route::get('feedback', FeedbackForm::class)->name('feedback');
+        Route::get('feedback/{feedback}', FeedbackThread::class)->name('feedback.show');
         Route::get('wallets', Wallets::class);
         Route::get('how/to/earn', HowToEarn::class);
         Route::get('upgrade', UpgradeAccount::class);

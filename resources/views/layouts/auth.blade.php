@@ -62,8 +62,17 @@
 
     document.querySelectorAll('form[method="post"], form[method="POST"]').forEach((form) => {
         form.addEventListener('submit', (event) => {
+            if (form.dataset.submitting === '1') {
+                event.preventDefault();
+                return;
+            }
+
             if (form.dataset.csrfReady === '1') {
                 form.dataset.csrfReady = '';
+                form.dataset.submitting = '1';
+                form.querySelectorAll('[type="submit"]').forEach((btn) => {
+                    btn.disabled = true;
+                });
                 return;
             }
 

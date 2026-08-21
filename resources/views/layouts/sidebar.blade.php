@@ -23,6 +23,10 @@
                     <i class="nav-main-link-icon fa fa-flag"></i>
                     <span class="nav-main-link-name">Post Reports</span>
                 </a>
+                <a class="nav-main-link{{ request()->routeIs('admin.feedback.*') ? ' active' : '' }}" href="{{ route('admin.feedback.index') }}">
+                    <i class="nav-main-link-icon fa fa-comment-dots"></i>
+                    <span class="nav-main-link-name">User Feedback</span>
+                </a>
                 <a class="nav-main-link{{ request()->routeIs('admin.videos.*') ? ' active' : '' }}" href="{{ route('admin.videos.index') }}">
                     <i class="nav-main-link-icon fa fa-film"></i>
                     <span class="nav-main-link-name">Rolls / Videos</span>
@@ -159,6 +163,7 @@
 
             $accountOpen = request()->is('profile/*')
                 || request()->is('settings*')
+                || request()->is('feedback*')
                 || request()->is('how/it/works*');
         @endphp
 
@@ -260,6 +265,11 @@
                     <li class="nav-main-item">
                         <a class="nav-main-link{{ request()->is('settings*') ? ' active' : '' }}" href="{{ url('settings') }}">
                             <span class="nav-main-link-name">Account</span>
+                        </a>
+                    </li>
+                    <li class="nav-main-item">
+                        <a class="nav-main-link{{ request()->routeIs('feedback') ? ' active' : '' }}" href="{{ route('feedback') }}">
+                            <span class="nav-main-link-name">Send Feedback</span>
                         </a>
                     </li>
                     <li class="nav-main-item">

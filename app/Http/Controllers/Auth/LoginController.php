@@ -36,4 +36,17 @@ class LoginController extends Controller
     {
         $this->middleware('guest')->except('logout');
     }
+
+    /**
+     * Laravel's default /login POST (Auth::routes) — keep lockout aligned with custom login.
+     */
+    protected function maxAttempts()
+    {
+        return 30;
+    }
+
+    protected function decayMinutes()
+    {
+        return 1;
+    }
 }

@@ -28,6 +28,21 @@ class RouteServiceProvider extends ServiceProvider
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
         });
 
+        // Login: generous enough for retries / shared NATs, still slows brute force.
+        RateLimiter::for('login', function (Request $request) {
+            $email = strtolower((string) $request->input('email', ''));
+
+            return Limit::perMinute(30)
+                ->by($request->ip().'|'.$email)
+                ->response(function (Request $request, array $headers) {
+                    return back()
+                        ->withInput($request->only('email'))
+                        ->withErrors([
+                            'email' => 'Too many login attempts. Please wait about a minute and try again.',
+                        ]);
+                });
+        });
+
         $this->routes(function () {
             Route::middleware('api')
                 ->prefix('api')

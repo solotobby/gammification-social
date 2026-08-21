@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\BookmarkAnalyticsController;
 use App\Http\Controllers\Admin\CommunityController;
 use App\Http\Controllers\Admin\CurrencyController;
 use App\Http\Controllers\Admin\FinanceController;
+use App\Http\Controllers\Admin\FeedbackController;
 use App\Http\Controllers\Admin\LevelManagementController;
 use App\Http\Controllers\Admin\MonthlyPayoutController;
 use App\Http\Controllers\Admin\PayoutController;
@@ -115,6 +116,13 @@ Route::middleware(['auth', 'admin'])
             Route::post('posts/{post}/hide', [PostReportController::class, 'hidePost'])->name('hide-post');
             Route::delete('posts/{post}', [PostReportController::class, 'destroyPost'])->name('destroy-post');
             Route::post('posts/{post}/author', [PostReportController::class, 'actionAuthor'])->name('action-author');
+        });
+
+        Route::prefix('feedback')->name('feedback.')->group(function () {
+            Route::get('/', [FeedbackController::class, 'index'])->name('index');
+            Route::get('{feedback}', [FeedbackController::class, 'show'])->name('show');
+            Route::post('{feedback}/reply', [FeedbackController::class, 'reply'])->name('reply');
+            Route::put('{feedback}', [FeedbackController::class, 'update'])->name('update');
         });
 
         Route::prefix('videos')->name('videos.')->group(function () {
