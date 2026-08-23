@@ -11,6 +11,10 @@
                     <i class="nav-main-link-icon fa fa-users"></i>
                     <span class="nav-main-link-name">User List</span>
                 </a>
+                <a class="nav-main-link{{ request()->routeIs('admin.outreach.*') ? ' active' : '' }}" href="{{ route('admin.outreach.index') }}">
+                    <i class="nav-main-link-icon fa fa-bullhorn"></i>
+                    <span class="nav-main-link-name">Outreach Leaders</span>
+                </a>
                 <a class="nav-main-link{{ request()->routeIs('admin.communities.*') ? ' active' : '' }}" href="{{ route('admin.communities.index') }}">
                     <i class="nav-main-link-icon fa fa-object-group"></i>
                     <span class="nav-main-link-name">Communities</span>

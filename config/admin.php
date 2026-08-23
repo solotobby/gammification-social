@@ -54,6 +54,7 @@ return [
         'reports',
         'feedback',
         'blog',
+        'outreach',
     ],
 
 ];

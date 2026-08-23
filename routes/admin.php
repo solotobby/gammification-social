@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\FinanceController;
 use App\Http\Controllers\Admin\FeedbackController;
 use App\Http\Controllers\Admin\LevelManagementController;
 use App\Http\Controllers\Admin\MonthlyPayoutController;
+use App\Http\Controllers\Admin\OutreachController;
 use App\Http\Controllers\Admin\PayoutController;
 use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\PostReportController;
@@ -91,6 +92,7 @@ Route::middleware(['auth', 'admin'])
         });
 
         Route::get('bookmarks', [BookmarkAnalyticsController::class, 'index'])->name('bookmarks.index');
+        Route::get('outreach', [OutreachController::class, 'index'])->name('outreach.index');
 
         Route::prefix('blog')->name('blog.')->group(function () {
             Route::get('/', [AdminBlogController::class, 'list'])->name('index');
