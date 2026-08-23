@@ -770,6 +770,52 @@ if (!function_exists('ipLocation')) {
     }
 }
 ////SECURITY VERIFICATION HELPERS////
+if (! function_exists('isAdmin')) {
+    function isAdmin($user = null): bool
+    {
+        $user ??= auth()->user();
+
+        return (bool) ($user && $user->hasRole('admin'));
+    }
+}
+
+if (! function_exists('isStaff')) {
+    function isStaff($user = null): bool
+    {
+        $user ??= auth()->user();
+
+        return (bool) ($user && $user->hasRole('staff'));
+    }
+}
+
+if (! function_exists('isAdminPanelUser')) {
+    function isAdminPanelUser($user = null): bool
+    {
+        $user ??= auth()->user();
+
+        return isAdmin($user) || isStaff($user);
+    }
+}
+
+if (! function_exists('staffCanAccessRoute')) {
+    function staffCanAccessRoute($request = null): bool
+    {
+        $request ??= request();
+        $routeName = (string) optional($request->route())->getName();
+
+        if ($routeName === '' || ! str_starts_with($routeName, 'admin.')) {
+            return false;
+        }
+
+        $rest = substr($routeName, strlen('admin.'));
+        $prefix = explode('.', $rest)[0] ?? '';
+
+        $allowed = config('admin.staff_route_prefixes', []);
+
+        return in_array($prefix, $allowed, true);
+    }
+}
+
 if (!function_exists('securityVerification')) {
     function securityVerification()
     {
@@ -779,7 +825,7 @@ if (!function_exists('securityVerification')) {
 
         $user = Auth::user();
 
-        if ($user && $user->hasRole('admin') && session(AdminGateService::SESSION_PANEL_ACCESS)) {
+        if ($user && isAdminPanelUser($user) && session(AdminGateService::SESSION_PANEL_ACCESS)) {
             return 'OK';
         }
 

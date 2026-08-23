@@ -53,7 +53,7 @@ class AdminGateService
         $user = $request->user();
 
         return $user !== null
-            && $user->hasRole('admin')
+            && isAdminPanelUser($user)
             && $this->hasPanelAccess($request);
     }
 

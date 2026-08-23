@@ -68,6 +68,7 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'track.online' => TrackUserOnline::class,
         'admin' => \App\Http\Middleware\EnsureAdmin::class,
+        'admin.only' => \App\Http\Middleware\EnsureAdminOnly::class,
         'admin.gate' => \App\Http\Middleware\AdminGateAllowed::class,
         'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
         'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,

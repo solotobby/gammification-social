@@ -31,4 +31,29 @@ return [
 
     'local_client_ip' => env('ADMIN_LOCAL_IP', '127.0.0.1'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Staff panel access
+    |--------------------------------------------------------------------------
+    |
+    | Staff can access the admin panel for moderation/content ops only.
+    | Route name prefixes they may use (admin.{prefix}.*).
+    |
+    */
+
+    'staff_invite_ttl_days' => (int) env('STAFF_INVITE_TTL_DAYS', 7),
+
+    'staff_route_prefixes' => [
+        'home',
+        'logout',
+        'users',
+        'communities',
+        'posts',
+        'videos',
+        'bookmarks',
+        'reports',
+        'feedback',
+        'blog',
+    ],
+
 ];

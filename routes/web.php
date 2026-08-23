@@ -134,6 +134,11 @@ Route::group(['namespace' => 'auth'], function () {
     // Public standalone roll — watch one video without logging in
     Route::get('/v/{video}', [RollsController::class, 'publicShow'])->name('rolls.public');
 
+    Route::get('staff/invite/{token}', [\App\Http\Controllers\StaffInviteController::class, 'show'])->name('staff.invite.show');
+    Route::post('staff/invite/{token}', [\App\Http\Controllers\StaffInviteController::class, 'accept'])
+        ->middleware('throttle:10,1')
+        ->name('staff.invite.accept');
+
     Route::get('success', [\App\Http\Controllers\GeneralController::class, 'success']);
     Route::get('error', [\App\Http\Controllers\GeneralController::class, 'error']);
 

@@ -1,13 +1,13 @@
 <div class="content-side">
 
-    @if (auth()->user()->hasRole('admin'))
+    @if (isAdminPanelUser())
         <ul class="nav-main">
             <li class="nav-main-item">
-                <a class="nav-main-link" href="{{ route('admin.home') }}">
+                <a class="nav-main-link{{ request()->routeIs('admin.home') ? ' active' : '' }}" href="{{ route('admin.home') }}">
                     <i class="nav-main-link-icon fa fa-home"></i>
                     <span class="nav-main-link-name">Dashboard</span>
                 </a>
-                <a class="nav-main-link" href="{{ route('admin.users.index') }}">
+                <a class="nav-main-link{{ request()->routeIs('admin.users.*') ? ' active' : '' }}" href="{{ route('admin.users.index') }}">
                     <i class="nav-main-link-icon fa fa-users"></i>
                     <span class="nav-main-link-name">User List</span>
                 </a>
@@ -35,6 +35,28 @@
                     <i class="nav-main-link-icon fa fa-bookmark"></i>
                     <span class="nav-main-link-name">Bookmarks</span>
                 </a>
+
+            <li class="nav-main-item">
+                <a class="nav-main-link nav-main-link-submenu" data-toggle="submenu" aria-haspopup="true"
+                    aria-expanded="false" href="#">
+                    <i class="nav-main-link-icon fa fa-blog"></i>
+                    <span class="nav-main-link-name">Blog</span>
+                </a>
+                <ul class="nav-main-submenu">
+                    <li class="nav-main-item">
+                        <a class="nav-main-link" href="{{ route('admin.blog.create') }}">
+                            <span class="nav-main-link-name">Create</span>
+                        </a>
+                    </li>
+                    <li class="nav-main-item">
+                        <a class="nav-main-link" href="{{ route('admin.blog.index') }}">
+                            <span class="nav-main-link-name">View</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+            @if (isAdmin())
                 <a class="nav-main-link{{ request()->routeIs('admin.finance.*') ? ' active' : '' }}" href="{{ route('admin.finance.index') }}">
                     <i class="nav-main-link-icon fa fa-wallet"></i>
                     <span class="nav-main-link-name">Wallets & Earnings</span>
@@ -42,6 +64,10 @@
                 <a class="nav-main-link{{ request()->routeIs('admin.audit-logs.*') ? ' active' : '' }}" href="{{ route('admin.audit-logs.index') }}">
                     <i class="nav-main-link-icon fa fa-shield-halved"></i>
                     <span class="nav-main-link-name">Audit Log</span>
+                </a>
+                <a class="nav-main-link{{ request()->routeIs('admin.staff.*') ? ' active' : '' }}" href="{{ route('admin.staff.index') }}">
+                    <i class="nav-main-link-icon fa fa-user-tie"></i>
+                    <span class="nav-main-link-name">Staff</span>
                 </a>
                 <a class="nav-main-link" href="{{ route('admin.currencies.index') }}">
                     <i class="nav-main-link-icon fa fa-coins"></i>
@@ -80,26 +106,6 @@
                     <li class="nav-main-item">
                         <a class="nav-main-link" href="{{ route('admin.payouts.levels.show', 'Basic') }}">
                             <span class="nav-main-link-name">Basic</span>
-                        </a>
-                    </li>
-                </ul>
-            </li>
-
-            <li class="nav-main-item">
-                <a class="nav-main-link nav-main-link-submenu" data-toggle="submenu" aria-haspopup="true"
-                    aria-expanded="false" href="#">
-                    <i class="nav-main-link-icon fa fa-blog"></i>
-                    <span class="nav-main-link-name">Blog</span>
-                </a>
-                <ul class="nav-main-submenu">
-                    <li class="nav-main-item">
-                        <a class="nav-main-link" href="{{ route('admin.blog.create') }}">
-                            <span class="nav-main-link-name">Create</span>
-                        </a>
-                    </li>
-                    <li class="nav-main-item">
-                        <a class="nav-main-link" href="{{ route('admin.blog.index') }}">
-                            <span class="nav-main-link-name">View</span>
                         </a>
                     </li>
                 </ul>
@@ -149,6 +155,7 @@
                 <i class="nav-main-link-icon fa fa-building-columns"></i>
                 <span class="nav-main-link-name">Bank Account</span>
             </a>
+            @endif
 
             </li>
         </ul>

@@ -12,12 +12,17 @@ class EnsureAdmin
     {
         $user = $request->user();
 
-        if (! $user || ! $user->hasRole('admin')) {
+        if (! $user || ! isAdminPanelUser($user)) {
             abort(403, 'Unauthorized.');
         }
 
         if (securityVerification() !== 'OK') {
             abort(404);
+        }
+
+        // Staff may only hit shared moderation/content routes.
+        if (isStaff($user) && ! isAdmin($user) && ! staffCanAccessRoute($request)) {
+            abort(403, 'Staff cannot access this area.');
         }
 
         return $next($request);

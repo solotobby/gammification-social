@@ -94,7 +94,7 @@ class AdminLoginController extends Controller
 
         $user = Auth::user();
 
-        if (! $user->hasRole('admin')) {
+        if (! isAdminPanelUser($user)) {
             Auth::logout();
             RateLimiter::hit($throttleKey, 900);
 

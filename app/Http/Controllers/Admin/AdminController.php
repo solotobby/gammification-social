@@ -4,8 +4,13 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Mail\GeneralMail;
+use App\Models\Blog;
+use App\Models\Community;
+use App\Models\Feedback;
 use App\Models\Level;
 use App\Models\Post;
+use App\Models\PostReport;
+use App\Models\PostVideo;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Models\UserActivity;
@@ -21,7 +26,9 @@ use App\Services\UpgradeSubscriptionService;
 use App\Support\AdminDateRange;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Schema;
 
 class AdminController extends Controller
 {
@@ -50,6 +57,10 @@ class AdminController extends Controller
         }
 
         $dateRange = AdminDateRange::fromRequest($request);
+
+        if (isStaff() && ! isAdmin()) {
+            return $this->staffHome($dateRange);
+        }
 
         $stats = Cache::remember(
             'admin.dashboard.stats.v6.'.$dateRange->cacheKey(),
@@ -117,6 +128,56 @@ class AdminController extends Controller
             'dateRange' => $dateRange,
             'levelId' => $creatorLevel?->id,
             'showTestPayment' => app()->environment(['local', 'staging']) && $creatorLevel,
+        ]));
+    }
+
+    protected function staffHome(AdminDateRange $dateRange)
+    {
+        $stats = Cache::remember(
+            'staff.dashboard.stats.v1.'.$dateRange->cacheKey(),
+            now()->addMinutes(3),
+            function () use ($dateRange) {
+                $bookmarkCount = 0;
+                if (Schema::hasTable('post_bookmarks')) {
+                    $bookmarkCount = (int) DB::table('post_bookmarks')
+                        ->whereBetween('created_at', [$dateRange->start, $dateRange->end])
+                        ->count();
+                }
+
+                return [
+                    'userCount' => User::role('user')->count(),
+                    'newUsers' => User::role('user')
+                        ->whereBetween('created_at', [$dateRange->start, $dateRange->end])
+                        ->count(),
+                    'onlineUsers' => collect(Cache::get('online_users', []))
+                        ->filter(fn ($lastSeen) => now()->diffInMinutes($lastSeen) <= 2)
+                        ->count(),
+                    'postsInRange' => Post::query()
+                        ->whereBetween('created_at', [$dateRange->start, $dateRange->end])
+                        ->count(),
+                    'livePosts' => Post::query()->where('status', 'LIVE')->count(),
+                    'pendingReports' => PostReport::query()->pending()->count(),
+                    'awaitingFeedback' => Feedback::query()
+                        ->where('last_message_by', 'user')
+                        ->whereNotIn('status', ['closed'])
+                        ->count(),
+                    'newFeedback' => Feedback::query()->where('status', 'new')->count(),
+                    'communities' => Community::query()->count(),
+                    'rollsReady' => PostVideo::query()
+                        ->where('processing_status', 'completed')
+                        ->whereNotNull('path')
+                        ->count(),
+                    'rollsInRange' => PostVideo::query()
+                        ->whereBetween('created_at', [$dateRange->start, $dateRange->end])
+                        ->count(),
+                    'bookmarksInRange' => $bookmarkCount,
+                    'blogPosts' => Blog::query()->count(),
+                ];
+            }
+        );
+
+        return view('admin.staff-home', array_merge($stats, [
+            'dateRange' => $dateRange,
         ]));
     }
 

@@ -327,7 +327,7 @@
                             <a href="{{ route('admin.users.engagement', $user) }}" class="dash-btn dash-btn--ghost">
                                 <i class="fa fa-chart-line"></i> Engagement
                             </a>
-                            @if ($userLevel)
+                            @if ($userLevel && isAdmin())
                                 <form method="POST" action="{{ route('admin.users.bonus', [$user, $planName]) }}" class="d-inline"
                                     onsubmit="return confirm('Credit upgrade bonus for {{ $planName }}?');">
                                     @csrf
@@ -368,6 +368,7 @@
                     </div>
                 </div>
 
+                @if (isAdmin())
                 <div class="dash-card">
                     <div class="dash-card__head">
                         <h2 class="dash-card__title">Upgrade plan</h2>
@@ -396,6 +397,7 @@
                         </form>
                     </div>
                 </div>
+                @endif
 
                 <div class="dash-card">
                     <div class="dash-card__head">

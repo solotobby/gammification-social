@@ -41,14 +41,11 @@ class HomeController extends Controller
         $user = auth()->user();
 
 
-        if ($user->hasRole('admin')) {
-            // return 'admin';
-            // return redirect()->route('logout');
+        if ($user->hasRole('admin') || $user->hasRole('staff')) {
+            // Panel users use /admin after gate login.
         } else {
             $this->loginPoints(auth()->user());
             return redirect('timeline');
-
-            // return redirect()->route('user.home');
         }
 
         // return redirect('timeline');
