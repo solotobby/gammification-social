@@ -62,33 +62,36 @@ class AdminLoginController extends Controller
             return $redirect;
         }
 
-        $throttleKey = 'admin-login:' . $request->ip();
+        $email = strtolower((string) $request->input('email', ''));
+        $throttleKey = 'admin-login:'.$request->ip().'|'.$email;
+        $maxAttempts = 10;
+        $decaySeconds = 900; // 15 minutes after too many failures
 
-        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+        if (RateLimiter::tooManyAttempts($throttleKey, $maxAttempts)) {
             $seconds = RateLimiter::availableIn($throttleKey);
 
             return back()
-                ->withInput($request->only('email'))
-                ->withErrors(['email' => "Too many attempts. Try again in {$seconds} seconds."]);
+                ->withInput($request->only('email', 'gate_code'))
+                ->withErrors(['email' => "Too many failed attempts. Try again in {$seconds} seconds."]);
         }
 
         $gate = $this->adminGate->findValidGate($request->string('gate_code')->toString(), $request);
 
         if (! $gate || ! $this->adminGate->gateMatchesSession($gate, $request)) {
-            RateLimiter::hit($throttleKey, 900);
+            RateLimiter::hit($throttleKey, $decaySeconds);
 
             return back()
-                ->withInput($request->only('email'))
+                ->withInput($request->only('email', 'gate_code'))
                 ->withErrors(['email' => 'This admin login link has expired or is invalid. Request a new one.']);
         }
 
         $credentials = $request->only('email', 'password');
 
         if (! Auth::attempt($credentials, false)) {
-            RateLimiter::hit($throttleKey, 900);
+            RateLimiter::hit($throttleKey, $decaySeconds);
 
             return back()
-                ->withInput($request->only('email'))
+                ->withInput($request->only('email', 'gate_code'))
                 ->withErrors(['email' => 'These credentials do not match our records.']);
         }
 
@@ -96,10 +99,10 @@ class AdminLoginController extends Controller
 
         if (! isAdminPanelUser($user)) {
             Auth::logout();
-            RateLimiter::hit($throttleKey, 900);
+            RateLimiter::hit($throttleKey, $decaySeconds);
 
             return back()
-                ->withInput($request->only('email'))
+                ->withInput($request->only('email', 'gate_code'))
                 ->withErrors(['email' => 'You do not have permission to access the admin panel.']);
         }
 

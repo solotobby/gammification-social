@@ -43,6 +43,30 @@ class RouteServiceProvider extends ServiceProvider
                 });
         });
 
+        // Admin gate issue / form view — avoid raw 429 on refresh.
+        RateLimiter::for('admin-gate', function (Request $request) {
+            return Limit::perMinute(20)
+                ->by($request->ip())
+                ->response(function () {
+                    abort(404);
+                });
+        });
+
+        // Admin credential POST — enough for retries; controller still locks out on failures.
+        RateLimiter::for('admin-login', function (Request $request) {
+            $email = strtolower((string) $request->input('email', ''));
+
+            return Limit::perMinute(30)
+                ->by($request->ip().'|'.$email)
+                ->response(function (Request $request, array $headers) {
+                    return back()
+                        ->withInput($request->only('email', 'gate_code'))
+                        ->withErrors([
+                            'email' => 'Too many admin login attempts. Please wait about a minute and try again.',
+                        ]);
+                });
+        });
+
         $this->routes(function () {
             Route::middleware('api')
                 ->prefix('api')

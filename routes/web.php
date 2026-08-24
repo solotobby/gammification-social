@@ -146,13 +146,13 @@ Route::group(['namespace' => 'auth'], function () {
 
     Route::get('get/ip', [\App\Http\Controllers\GeneralController::class, 'ipConfig']);
 
-    Route::middleware(['admin.gate', 'throttle:6,1'])->group(function () {
+    Route::middleware(['admin.gate', 'throttle:admin-gate'])->group(function () {
         Route::get('seniore/login', [AdminLoginController::class, 'createGate'])->name('admin.gate.create');
         Route::get('registration/{code}', [AdminLoginController::class, 'showLoginForm'])->name('admin.gate.show');
     });
 
     Route::post('registration', [AdminLoginController::class, 'login'])
-        ->middleware('throttle:5,1')
+        ->middleware('throttle:admin-login')
         ->name('dinky.reg');
 
     Route::get('blog', [BlogController::class, 'index'])->name('blog');
