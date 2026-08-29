@@ -597,9 +597,9 @@
                             <i class="fa fa-pencil"></i> Edit profile
                         </a>
                     @else
-                        <a href="{{ route('messages', ['start' => $user->username]) }}" class="pf-btn pf-btn--secondary">
+                        {{-- <a href="{{ route('messages', ['start' => $user->username]) }}" class="pf-btn pf-btn--secondary">
                             <i class="fa fa-envelope"></i> Message
-                        </a>
+                        </a> --}}
                         <button type="button" wire:click="toggleFollow"
                             @class(['pf-btn', 'pf-btn--following' => $isFollowing, 'pf-btn--primary' => ! $isFollowing])>
                             <i class="fa {{ $isFollowing ? 'fa-check' : 'fa-user-plus' }}"></i>
