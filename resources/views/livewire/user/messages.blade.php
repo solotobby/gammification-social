@@ -2,16 +2,9 @@
     $active = $thread['meta'];
     $messages = $thread['messages'];
     $unreadTotal = collect($conversations)->sum(fn ($c) => (int) ($c['unread'] ?? 0));
-    $reverb = config('broadcasting.connections.reverb');
 @endphp
 
-<div id="msg-echo-root"
-    data-user-id="{{ $me['id'] }}"
-    data-active-conversation-id="{{ $activeId ?? '' }}"
-    data-reverb-key="{{ $reverb['key'] ?? '' }}"
-    data-reverb-host="{{ env('VITE_REVERB_HOST', env('REVERB_HOST', 'localhost')) }}"
-    data-reverb-port="{{ env('VITE_REVERB_PORT', env('REVERB_PORT', 8080)) }}"
-    data-reverb-scheme="{{ env('VITE_REVERB_SCHEME', env('REVERB_SCHEME', 'http')) }}"
+<div wire:poll.2s="pollMessages"
     class="msg-page"
     x-data="{
         mobilePane: {{ $active ? "'chat'" : "'list'" }},
@@ -729,9 +722,7 @@
                                 @if (! empty($c['official'])) <i class="fa fa-check-circle" style="color:#1d9bf0;font-size:12px" title="Official"></i> @endif
                             </div>
                             <div class="msg-convo-preview">
-                                @if (! empty($c['typing']))
-                                    <span class="msg-typing">Typing…</span>
-                                @elseif (! empty($c['has_image']))
+                                @if (! empty($c['has_image']))
                                     <i class="fa fa-image" style="margin-right:3px"></i>{{ $c['last_message'] }}
                                 @elseif (! empty($c['last_from_me']))
                                     <span class="msg-receipt {{ ($c['last_status'] ?? '') === 'read' ? 'is-read' : '' }}">
@@ -781,9 +772,7 @@
                 <div class="msg-chat-head-info">
                     <strong>{{ $active['name'] }}</strong>
                     <span>
-                        @if (! empty($active['typing']))
-                            <span class="msg-typing">typing…</span>
-                        @elseif (! empty($active['online']))
+                        @if (! empty($active['online']))
                             <span class="is-online">Active now</span>
                         @else
                             {{ '@' . ($active['username'] ?? 'user') }}
@@ -858,14 +847,6 @@
                         </div>
                     </div>
                 @endforeach
-
-                @if (! empty($active['typing']))
-                    <div class="msg-row is-theirs">
-                        <div class="msg-bubble" style="padding:12px 14px">
-                            <span class="msg-typing">typing…</span>
-                        </div>
-                    </div>
-                @endif
             </div>
 
             <div class="msg-compose">
@@ -894,7 +875,6 @@
                             rows="1"
                             placeholder="Message…"
                             wire:model.debounce.300ms="draft"
-                            wire:keydown.debounce.400ms="broadcastTyping(true)"
                             wire:keydown.enter.prevent="if (!$event.shiftKey) sendMessage()"
                         ></textarea>
                     </div>
@@ -951,23 +931,22 @@
 </div>
 
 <script>
-    function scrollMessageThread() {
+    function scrollMessageThread(force = false) {
         const el = document.getElementById('msg-thread');
-        if (el) el.scrollTop = el.scrollHeight;
+        if (!el) return;
+        const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
+        if (force || nearBottom) {
+            el.scrollTop = el.scrollHeight;
+        }
     }
 
-    document.addEventListener('livewire:navigated', scrollMessageThread);
-    document.addEventListener('DOMContentLoaded', scrollMessageThread);
+    document.addEventListener('livewire:navigated', () => scrollMessageThread(true));
+    document.addEventListener('DOMContentLoaded', () => scrollMessageThread(true));
     document.addEventListener('livewire:initialized', () => {
-        Livewire.on('message-thread-scroll', scrollMessageThread);
-        let lastSubscribedConversationId = null;
-        Livewire.hook('message.processed', () => {
-            scrollMessageThread();
-            const root = document.getElementById('msg-echo-root');
-            const conversationId = root?.dataset.activeConversationId || '';
-            if (conversationId !== lastSubscribedConversationId && window.messagingSubscribeConversation) {
-                lastSubscribedConversationId = conversationId;
-                window.messagingSubscribeConversation(conversationId);
+        Livewire.on('message-thread-scroll', () => scrollMessageThread(true));
+        Livewire.hook('message.processed', ({ component }) => {
+            if (component?.name === 'user.messages') {
+                scrollMessageThread();
             }
         });
     });

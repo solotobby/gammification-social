@@ -2,17 +2,14 @@
 
 namespace App\Livewire\User;
 
-use App\Events\UserTyping;
 use App\Models\Conversation;
 use App\Models\ConversationMessage;
 use App\Models\ConversationParticipant;
 use App\Models\User;
-use App\Support\SafeBroadcaster;
 use App\Services\ConversationService;
 use App\Services\MessageService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
-use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -37,11 +34,12 @@ class Messages extends Component
 
     public string $newUserQuery = '';
 
-    /** @var array<int, string> */
-    public array $onlineUserIds = [];
-
-    /** @var array<string, bool> */
-    public array $typingByConversation = [];
+    public function pollMessages(): void
+    {
+        if ($this->activeId) {
+            $this->markActiveRead();
+        }
+    }
 
     public function mount(?string $conversation = null): void
     {
@@ -64,7 +62,7 @@ class Messages extends Component
         if ($conversation) {
             app(ConversationService::class)->assertParticipant($conversation, Auth::id());
             $this->activeId = $conversation;
-            $this->markActiveRead(broadcast: false);
+            $this->markActiveRead();
 
             return;
         }
@@ -74,7 +72,7 @@ class Messages extends Component
             if (! $participant || $participant->hidden_at) {
                 $this->activeId = null;
             } else {
-                $this->markActiveRead(broadcast: false);
+                $this->markActiveRead();
             }
         }
     }
@@ -85,7 +83,6 @@ class Messages extends Component
         $this->activeId = $id;
         $this->draft = '';
         $this->uploads = [];
-        $this->typingByConversation[$id] = false;
         $this->markActiveRead();
     }
 
@@ -160,23 +157,6 @@ class Messages extends Component
         $this->draft = '';
         $this->uploads = [];
         $this->dispatch('message-thread-scroll');
-        $this->dispatch('stop-typing');
-
-        $this->dispatch('message-appended', message: $message->toBroadcastArray());
-    }
-
-    public function broadcastTyping(bool $typing = true): void
-    {
-        if (! $this->activeId) {
-            return;
-        }
-
-        SafeBroadcaster::emit(new UserTyping(
-            $this->activeId,
-            Auth::id(),
-            Auth::user()->name,
-            $typing,
-        ), toOthers: true);
     }
 
     public function togglePin(): void
@@ -235,56 +215,7 @@ class Messages extends Component
         $this->activeId = null;
     }
 
-    #[On('echo:message.sent')]
-    public function onMessageSent($message = null): void
-    {
-        if (! is_array($message)) {
-            return;
-        }
-
-        if (($message['conversation_id'] ?? null) !== $this->activeId) {
-            return;
-        }
-
-        if (($message['user_id'] ?? null) === Auth::id()) {
-            return;
-        }
-
-        $this->markActiveRead();
-        $this->dispatch('message-thread-scroll');
-    }
-
-    #[On('echo:messages.read')]
-    public function onMessagesRead($conversation_id = null, $user_id = null): void
-    {
-        if ($conversation_id !== $this->activeId) {
-            return;
-        }
-    }
-
-    #[On('echo:user.typing')]
-    public function onUserTyping($conversation_id = null, $user_id = null, $typing = false): void
-    {
-        if (! $conversation_id || $user_id === Auth::id()) {
-            return;
-        }
-
-        $this->typingByConversation[$conversation_id] = (bool) $typing;
-    }
-
-    #[On('echo:conversation.updated')]
-    public function onConversationUpdated(): void
-    {
-        // Re-render list via Livewire refresh.
-    }
-
-    #[On('presence:online-users')]
-    public function onPresenceUpdated($userIds = []): void
-    {
-        $this->onlineUserIds = is_array($userIds) ? $userIds : [];
-    }
-
-    protected function markActiveRead(bool $broadcast = true): void
+    protected function markActiveRead(): void
     {
         if (! $this->activeId) {
             return;
@@ -292,7 +223,7 @@ class Messages extends Component
 
         $conversation = Conversation::query()->find($this->activeId);
         if ($conversation) {
-            app(MessageService::class)->markConversationRead($conversation, Auth::user(), $broadcast);
+            app(MessageService::class)->markConversationRead($conversation, Auth::user());
         }
     }
 
@@ -319,8 +250,7 @@ class Messages extends Component
 
                 $item = $messageService->conversationListItem($conversation, $userId);
                 $other = $conversationService->otherParticipant($conversation, $userId);
-                $item['online'] = $other && in_array($other->id, $this->onlineUserIds, true);
-                $item['typing'] = (bool) ($this->typingByConversation[$conversation->id] ?? false);
+                $item['online'] = $other && userIsOnline($other->id);
 
                 if ($row->pinned_at) {
                     $item['pinned'] = true;
@@ -397,8 +327,7 @@ class Messages extends Component
                 'name' => $other?->name ?? 'Unknown',
                 'username' => $other?->username ?? 'user',
                 'avatar' => $other?->avatar ?: asset('src/assets/media/avatars/avatar13.jpg'),
-                'online' => $other && in_array($other->id, $this->onlineUserIds, true),
-                'typing' => (bool) ($this->typingByConversation[$conversation->id] ?? false),
+                'online' => $other && userIsOnline($other->id),
                 'pinned' => (bool) $participant?->pinned_at,
                 'muted' => (bool) $participant?->muted_at,
                 'blocked' => $other && $conversationService->isBlockedBy(Auth::user(), $other),

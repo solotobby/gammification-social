@@ -2,15 +2,11 @@
 
 namespace App\Services;
 
-use App\Events\ConversationUpdated;
-use App\Events\MessageSent;
-use App\Events\MessagesRead;
 use App\Models\Conversation;
 use App\Models\ConversationMessage;
 use App\Models\ConversationMessageAttachment;
 use App\Models\ConversationParticipant;
 use App\Models\User;
-use App\Support\SafeBroadcaster;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -65,31 +61,15 @@ class MessageService
             return $message->fresh(['user:id,name,username,avatar', 'attachments']);
         });
 
-        SafeBroadcaster::emit(new MessageSent($message), toOthers: true);
-
         $this->notifyParticipants($conversation, $sender, $message);
-        SafeBroadcaster::emit(new ConversationUpdated(
-            $sender->id,
-            $this->conversationListItem($conversation, $sender->id, $message),
-        ));
 
         return $message;
     }
 
-    public function markConversationRead(Conversation $conversation, User $reader, bool $broadcast = true): void
+    public function markConversationRead(Conversation $conversation, User $reader): void
     {
         $participant = $this->conversations->assertParticipant($conversation->id, $reader->id);
         $this->conversations->markRead($participant);
-
-        if (! $broadcast) {
-            return;
-        }
-
-        SafeBroadcaster::emit(new MessagesRead(
-            $conversation->id,
-            $reader->id,
-            now()->toIso8601String(),
-        ), toOthers: true);
     }
 
     protected function storeImage(string $conversationId, UploadedFile $file): string
@@ -117,9 +97,6 @@ class MessageService
             ->get();
 
         foreach ($participants as $participant) {
-            $item = $this->conversationListItem($conversation, $participant->user_id, $message);
-            SafeBroadcaster::emit(new ConversationUpdated($participant->user_id, $item));
-
             if ($participant->user) {
                 app(MessagingNotificationService::class)->notifyForMessage(
                     $conversation,

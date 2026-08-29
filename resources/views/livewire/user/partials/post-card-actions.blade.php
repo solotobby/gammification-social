@@ -109,6 +109,16 @@
                             @endif
                         </button>
 
+                        @auth
+                            @if (auth()->user()->hasRole('user'))
+                                <a href="{{ route('messages', ['start' => $username]) }}"
+                                    class="pk-menu-item" wire:navigate>
+                                    <i class="fa fa-envelope"></i>
+                                    Message {{ '@'.$username }}
+                                </a>
+                            @endif
+                        @endauth
+
                         <button type="button" class="pk-menu-item @if ($isBookmarked) pk-menu-item--active @endif"
                             wire:click="toggleBookmark">
                             <i class="@if ($isBookmarked) fa @else far @endif fa-bookmark"></i>
