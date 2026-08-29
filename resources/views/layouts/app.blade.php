@@ -97,10 +97,7 @@
     </script>
 
 
-    @vite([
-        // 'resources/sass/app.scss',
-        // 'resources/js/app.js'
-    ])
+    @vite(['resources/js/app.js'])
     @livewireStyles
 
     <!-- You can include a specific file from css/themes/ folder to alter the default color theme of the template. eg: -->
@@ -751,6 +748,7 @@
     <script>
         Dashmix.helpersOnLoad(['js-highlightjs', 'jq-magnific-popup']);
     </script>
+    @livewireScripts
 </body>
 
 </html>

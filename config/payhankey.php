@@ -3,6 +3,10 @@
 return [
     'support_email' => env('PAYHANKEY_SUPPORT_EMAIL', 'support@payhankey.com'),
 
+    'child_safety_email' => env('PAYHANKEY_CHILD_SAFETY_EMAIL', 'safety@payhankey.com'),
+
+    'child_safety_contact' => env('PAYHANKEY_CHILD_SAFETY_CONTACT', 'Payhankey Trust & Safety Team'),
+
     'social' => [
         'tiktok' => 'https://www.tiktok.com/@payhankeyofficial',
         'instagram' => 'https://www.instagram.com/payhankey_official',

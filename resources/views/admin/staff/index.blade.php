@@ -78,10 +78,10 @@
                                             <td class="dash-muted">{{ $member->email }}</td>
                                             <td>
                                                 <form method="post" action="{{ route('admin.staff.remove', $member) }}"
-                                                    onsubmit="return confirm('Remove staff access for {{ $member->email }}?')">
+                                                    onsubmit="return confirm('Delete staff account for {{ $member->email }}? This cannot be undone.')">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="dash-btn dash-btn--ghost" style="padding:.4rem .7rem;">Remove</button>
+                                                    <button type="submit" class="dash-btn dash-btn--ghost" style="padding:.4rem .7rem;">Delete</button>
                                                 </form>
                                             </td>
                                         </tr>

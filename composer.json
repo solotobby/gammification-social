@@ -11,6 +11,7 @@
         "cloudinary-labs/cloudinary-laravel": "^2.3",
         "guzzlehttp/guzzle": "^7.2",
         "laravel/framework": "^10.10",
+        "laravel/reverb": "^1.11",
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",
         "laravel/ui": "^4.5",

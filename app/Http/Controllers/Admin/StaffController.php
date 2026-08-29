@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Mail\GeneralMail;
 use App\Models\StaffInvite;
 use App\Models\User;
+use App\Models\Wallet;
 use App\Services\AdminAuditService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
@@ -112,9 +114,22 @@ class StaffController extends Controller
             return back()->with('error', 'You cannot remove yourself.');
         }
 
-        $user->removeRole('staff');
-        $this->audit->log('staff.removed', $user);
+        $email = $user->email;
 
-        return back()->with('success', $user->email.' is no longer staff.');
+        DB::transaction(function () use ($user, $email) {
+            $this->audit->log('staff.removed', $user, [
+                'email' => $email,
+                'deleted' => true,
+            ]);
+
+            $user->roles()->detach();
+            $user->permissions()->detach();
+            $user->wallet()?->delete();
+            $user->profile()?->delete();
+
+            $user->delete();
+        });
+
+        return back()->with('success', $email.' staff account deleted.');
     }
 }

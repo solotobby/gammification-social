@@ -31,6 +31,11 @@
                                 </a>
                             </li>
                             <li class="list-inline-item float-right me-4">
+                                <a href="{{ route('child-safety') }}" class="footer-social-icon" target="_blank">
+                                   Child Safety
+                                </a>
+                            </li>
+                            <li class="list-inline-item float-right me-4">
                                 <a href="{{ url('privacy/policy') }}" class="footer-social-icon" target="_blank">
                                    Privacy Policy
                                 </a>

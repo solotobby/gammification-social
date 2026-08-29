@@ -2,11 +2,19 @@
     $active = $thread['meta'];
     $messages = $thread['messages'];
     $unreadTotal = collect($conversations)->sum(fn ($c) => (int) ($c['unread'] ?? 0));
+    $reverb = config('broadcasting.connections.reverb');
 @endphp
 
-<div class="msg-page"
+<div id="msg-echo-root"
+    data-user-id="{{ $me['id'] }}"
+    data-active-conversation-id="{{ $activeId ?? '' }}"
+    data-reverb-key="{{ $reverb['key'] ?? '' }}"
+    data-reverb-host="{{ env('VITE_REVERB_HOST', env('REVERB_HOST', 'localhost')) }}"
+    data-reverb-port="{{ env('VITE_REVERB_PORT', env('REVERB_PORT', 8080)) }}"
+    data-reverb-scheme="{{ env('VITE_REVERB_SCHEME', env('REVERB_SCHEME', 'http')) }}"
+    class="msg-page"
     x-data="{
-        mobilePane: 'list',
+        mobilePane: {{ $active ? "'chat'" : "'list'" }},
         lightbox: null,
         emojiOpen: false,
         attachOpen: false,
@@ -674,15 +682,13 @@
         }
     </style>
 
-    <div class="msg-proto">Design preview · messaging is not connected to a backend yet</div>
-
     <div class="msg-shell">
         {{-- ===== LIST ===== --}}
         <aside class="msg-pane msg-list-pane">
             <div class="msg-top">
                 <h1>Messages @if ($unreadTotal > 0)<span style="color:var(--msg-violet);font-size:.9rem">({{ $unreadTotal }})</span>@endif</h1>
                 <div class="msg-top-actions">
-                    <button type="button" class="msg-icon" title="New message" aria-label="New message">
+                    <button type="button" class="msg-icon" title="New message" aria-label="New message" wire:click="openNewModal">
                         <i class="fa fa-edit"></i>
                     </button>
                 </div>
@@ -757,6 +763,7 @@
 
         {{-- ===== CHAT ===== --}}
         <section class="msg-pane msg-chat-pane">
+            @if ($active)
             <div class="msg-chat-head">
                 <button type="button" class="msg-icon msg-back" @click="openList()" aria-label="Back to chats">
                     <i class="fa fa-arrow-left"></i>
@@ -783,18 +790,23 @@
                 </div>
 
                 <div class="msg-top-actions" style="position:relative">
-                    <button type="button" class="msg-icon" title="Voice call" aria-label="Voice call"><i class="fa fa-phone"></i></button>
-                    <button type="button" class="msg-icon" title="Video call" aria-label="Video call"><i class="fa fa-video"></i></button>
                     <button type="button" class="msg-icon" @click="infoOpen = !infoOpen" aria-label="More">
                         <i class="fa fa-ellipsis-v"></i>
                     </button>
                     <div class="msg-menu" x-show="infoOpen" x-cloak @click.outside="infoOpen = false">
-                        <button type="button">View profile</button>
-                        <button type="button">Search in chat</button>
-                        <button type="button">Mute notifications</button>
-                        <button type="button">Pin conversation</button>
-                        <button type="button" style="color:#b91c1c">Block</button>
-                        <button type="button" style="color:#b91c1c">Delete chat</button>
+                        @if (! empty($active['username']))
+                            <a href="{{ url('profile/'.$active['username']) }}">View profile</a>
+                        @endif
+                        <button type="button" wire:click="toggleMute" @click="infoOpen = false">
+                            {{ ! empty($active['muted']) ? 'Unmute notifications' : 'Mute notifications' }}
+                        </button>
+                        <button type="button" wire:click="togglePin" @click="infoOpen = false">
+                            {{ ! empty($active['pinned']) ? 'Unpin conversation' : 'Pin conversation' }}
+                        </button>
+                        <button type="button" wire:click="blockActiveUser" @click="infoOpen = false" style="color:#b91c1c">
+                            {{ ! empty($active['blocked']) ? 'Unblock user' : 'Block user' }}
+                        </button>
+                        <button type="button" wire:click="deleteChat" @click="infoOpen = false" style="color:#b91c1c">Delete chat</button>
                     </div>
                 </div>
             </div>
@@ -854,64 +866,78 @@
                 @endif
             </div>
 
-            <div class="msg-compose"
-                x-data="{
-                    text: '',
-                    previews: [],
-                    grow(el) {
-                        el.style.height = 'auto';
-                        el.style.height = Math.min(el.scrollHeight, 120) + 'px';
-                    },
-                    onFiles(e) {
-                        const files = Array.from(e.target.files || []).slice(0, 4);
-                        files.forEach(f => {
-                            if (!f.type.startsWith('image/')) return;
-                            const url = URL.createObjectURL(f);
-                            this.previews.push(url);
-                        });
-                        e.target.value = '';
-                    },
-                    removePreview(i) { this.previews.splice(i, 1) },
-                    canSend() { return this.text.trim().length > 0 || this.previews.length > 0 },
-                    fakeSend() {
-                        if (!this.canSend()) return;
-                        this.text = '';
-                        this.previews = [];
-                    }
-                }">
-                <div class="msg-preview" x-show="previews.length" x-cloak>
-                    <template x-for="(src, i) in previews" :key="i">
-                        <div class="msg-preview-item">
-                            <img :src="src" alt="">
-                            <button type="button" @click="removePreview(i)" aria-label="Remove">&times;</button>
-                        </div>
-                    </template>
-                </div>
+            <div class="msg-compose">
+                @if ($errors->has('draft'))
+                    <div style="padding:.35rem .75rem;color:#b91c1c;font-size:.82rem;">{{ $errors->first('draft') }}</div>
+                @endif
+
+                @if (count($uploads) > 0)
+                    <div class="msg-preview">
+                        @foreach ($uploads as $index => $upload)
+                            <div class="msg-preview-item">
+                                <img src="{{ $upload->temporaryUrl() }}" alt="">
+                                <button type="button" wire:click="removeUpload({{ $index }})" aria-label="Remove">&times;</button>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
 
                 <div class="msg-compose-row">
                     <div class="msg-compose-box">
                         <label class="msg-icon" title="Attach image" style="cursor:pointer">
                             <i class="fa fa-image"></i>
-                            <input type="file" accept="image/*" multiple hidden @change="onFiles($event)">
+                            <input type="file" accept="image/*" multiple wire:model="uploads" hidden>
                         </label>
-                        <button type="button" class="msg-icon" title="Emoji" @click="emojiOpen = !emojiOpen">
-                            <i class="fa fa-smile"></i>
-                        </button>
                         <textarea
                             rows="1"
                             placeholder="Message…"
-                            x-model="text"
-                            @input="grow($el)"
-                            @keydown.enter.prevent="if (!$event.shiftKey) fakeSend()"
+                            wire:model.debounce.300ms="draft"
+                            wire:keydown.debounce.400ms="broadcastTyping(true)"
+                            wire:keydown.enter.prevent="if (!$event.shiftKey) sendMessage()"
                         ></textarea>
                     </div>
-                    <button type="button" class="msg-send" :disabled="!canSend()" @click="fakeSend()" aria-label="Send">
-                        <i class="fa fa-paper-plane"></i>
+                    <button type="button" class="msg-send" wire:click="sendMessage" wire:loading.attr="disabled" aria-label="Send">
+                        <i class="fa fa-paper-plane" wire:loading.remove wire:target="sendMessage"></i>
+                        <i class="fa fa-spinner fa-spin" wire:loading wire:target="sendMessage"></i>
                     </button>
                 </div>
             </div>
+            @else
+                <div class="msg-empty" style="flex:1;display:grid;place-items:center;">
+                    <div style="text-align:center;padding:2rem;">
+                        <h3>Select a conversation</h3>
+                        <p class="dash-muted">Pick a chat or start a new message.</p>
+                        <button type="button" class="msg-chip is-on" wire:click="openNewModal" style="margin-top:1rem;">New message</button>
+                    </div>
+                </div>
+            @endif
         </section>
     </div>
+
+    @if ($showNewModal)
+        <div style="position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:1200;display:grid;place-items:center;padding:1rem;" wire:click.self="closeNewModal">
+            <div style="background:#fff;border-radius:16px;max-width:420px;width:100%;padding:1.25rem;border:1px solid #e5e7eb;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+                    <h2 style="margin:0;font-size:1.05rem;">New message</h2>
+                    <button type="button" wire:click="closeNewModal" style="border:0;background:transparent;font-size:1.25rem;">&times;</button>
+                </div>
+                <input type="search" wire:model.live.debounce.250ms="newUserQuery" placeholder="Search by name or @username" class="dash-input" style="width:100%;margin-bottom:.75rem;">
+                <div style="max-height:260px;overflow:auto;">
+                    @forelse ($searchUsers as $user)
+                        <button type="button" wire:click="startConversation('{{ $user->username }}')" style="width:100%;display:flex;align-items:center;gap:.65rem;padding:.65rem;border:0;background:transparent;text-align:left;border-radius:10px;">
+                            <img src="{{ $user->avatar ?: asset('src/assets/media/avatars/avatar13.jpg') }}" alt="" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">
+                            <span>
+                                <strong style="display:block;">{{ $user->name }}</strong>
+                                <span style="color:#6b7280;font-size:.82rem;">{{ '@'.$user->username }}</span>
+                            </span>
+                        </button>
+                    @empty
+                        <p style="color:#6b7280;font-size:.88rem;margin:0;">Type at least 2 characters to find someone.</p>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+    @endif
 
     {{-- Lightbox --}}
     <div class="msg-lightbox" x-show="lightbox" x-cloak @click.self="closeLightbox()">
@@ -921,12 +947,24 @@
 </div>
 
 <script>
-    document.addEventListener('livewire:navigated', () => {
+    function scrollMessageThread() {
         const el = document.getElementById('msg-thread');
         if (el) el.scrollTop = el.scrollHeight;
-    });
-    document.addEventListener('DOMContentLoaded', () => {
-        const el = document.getElementById('msg-thread');
-        if (el) el.scrollTop = el.scrollHeight;
+    }
+
+    document.addEventListener('livewire:navigated', scrollMessageThread);
+    document.addEventListener('DOMContentLoaded', scrollMessageThread);
+    document.addEventListener('livewire:initialized', () => {
+        Livewire.on('message-thread-scroll', scrollMessageThread);
+        let lastSubscribedConversationId = null;
+        Livewire.hook('message.processed', () => {
+            scrollMessageThread();
+            const root = document.getElementById('msg-echo-root');
+            const conversationId = root?.dataset.activeConversationId || '';
+            if (conversationId !== lastSubscribedConversationId && window.messagingSubscribeConversation) {
+                lastSubscribedConversationId = conversationId;
+                window.messagingSubscribeConversation(conversationId);
+            }
+        });
     });
 </script>

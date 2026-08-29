@@ -41,6 +41,7 @@
         <h5>Legal</h5>
         <a href="{{ url('/terms/conditions') }}">Terms &amp; Conditions</a>
         <a href="{{ url('/privacy/policy') }}">Privacy Policy</a>
+        <a href="{{ route('child-safety') }}">Child Safety</a>
         <a href="{{ url('/contact') }}">Support</a>
       </div>
     </div>

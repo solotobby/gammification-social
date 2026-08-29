@@ -2,6 +2,8 @@
 
 use App\Livewire\User\Posts;
 use App\Models\CommentExternal;
+use App\Models\ConversationMessage;
+use App\Models\ConversationParticipant;
 use App\Models\Currency;
 use App\Models\Level;
 use App\Models\LevelPlanId;
@@ -813,6 +815,49 @@ if (! function_exists('staffCanAccessRoute')) {
         $allowed = config('admin.staff_route_prefixes', []);
 
         return in_array($prefix, $allowed, true);
+    }
+}
+
+if (! function_exists('userIsOnline')) {
+    function userIsOnline(?string $userId = null): bool
+    {
+        $userId ??= auth()->id();
+
+        if (! $userId) {
+            return false;
+        }
+
+        $lastSeen = Cache::get('online_users', [])[$userId] ?? null;
+
+        if (! $lastSeen) {
+            return false;
+        }
+
+        return now()->diffInMinutes($lastSeen) < 2;
+    }
+}
+
+if (! function_exists('messagingUnreadTotal')) {
+    function messagingUnreadTotal(?string $userId = null): int
+    {
+        $userId ??= auth()->id();
+        if (! $userId) {
+            return 0;
+        }
+
+        return (int) ConversationParticipant::query()
+            ->where('user_id', $userId)
+            ->whereNull('hidden_at')
+            ->get()
+            ->sum(function (ConversationParticipant $participant) {
+                $lastRead = $participant->last_read_at;
+
+                return ConversationMessage::query()
+                    ->where('conversation_id', $participant->conversation_id)
+                    ->where('user_id', '!=', $participant->user_id)
+                    ->when($lastRead, fn ($q) => $q->where('created_at', '>', $lastRead))
+                    ->count();
+            });
     }
 }
 

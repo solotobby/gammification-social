@@ -92,6 +92,7 @@ Route::group(['namespace' => 'auth'], function () {
     Route::get('fix', [\App\Http\Controllers\GeneralController::class, 'devy']);
     Route::get('privacy/policy', [\App\Http\Controllers\GeneralController::class, 'privacyPolicy']);
     Route::get('terms/conditions', [\App\Http\Controllers\GeneralController::class, 'terms']);
+    Route::get('child-safety', [\App\Http\Controllers\GeneralController::class, 'childSafety'])->name('child-safety');
     Route::get('how-it-works', [\App\Http\Controllers\GeneralController::class, 'how']);
     Route::get('features', [\App\Http\Controllers\GeneralController::class, 'features'])->name('features');
     Route::get('creators', [\App\Http\Controllers\GeneralController::class, 'creators'])->name('creators');
@@ -210,7 +211,14 @@ Route::middleware([
     Route::get('/home', [\App\Http\Controllers\HomeController::class, 'index'])->name('home');
     Route::get('user/home', [\App\Http\Controllers\HomeController::class, 'userHome'])->name('user.home');
 
-    Route::group(['middleware' => 'auth', 'role:user'], function () {
+    Route::redirect('messages', '/user/messages', 301);
+    Route::redirect('messages/thread/{conversation}', '/user/messages/{conversation}', 301);
+
+    Route::middleware(['role:user'])->group(function () {
+        Route::get('user/messages', Messages::class)->name('messages');
+        Route::get('user/messages/{conversation}', Messages::class)
+            ->name('messages.show')
+            ->whereUuid('conversation');
 
         Route::post('complete/onboarding', [\App\Http\Controllers\HomeController::class, 'completeOnboarding'])->name('complete.onboarding');
         Route::post('access/code/verification', [\App\Http\Controllers\HomeController::class, 'accessCodeVerification'])->name('access.code.verification');
@@ -234,7 +242,6 @@ Route::middleware([
         Route::get('timeline', Timeline::class);
         Route::get('timeline/{post}', TimelineDetails::class)->name('timeline.show');
         Route::get('bookmarks', BookmarkedPosts::class)->name('bookmarks');
-        Route::get('messages', Messages::class)->name('messages');
         Route::get('new-timeline', NewTimeline::class);
         Route::get('dashboard-timeline', DashboardTimeline::class);
 
@@ -271,10 +278,4 @@ Route::middleware([
         Route::get('community/{community}', CommunityDetails::class)->name('community.show');
     });
 
-    // Route::get('rolls/{video}', VideoRolls::class);
-
-
-
 });
-
-

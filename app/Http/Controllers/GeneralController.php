@@ -146,6 +146,11 @@ class GeneralController extends Controller
         return view('general.terms');
     }
 
+    public function childSafety()
+    {
+        return view('general.child-safety');
+    }
+
     public function howToEarn()
     {
         return view('general.earn');
