@@ -113,7 +113,7 @@
                             @if (auth()->user()->hasRole('user'))
                                 <a href="{{ route('messages', ['start' => $username]) }}"
                                     class="pk-menu-item" wire:navigate>
-                                    <i class="fa fa-envelope"></i>
+                                    <i class="fa fa-comment-dots"></i>
                                     Message {{ '@'.$username }}
                                 </a>
                             @endif

@@ -599,7 +599,7 @@
                     @else
                         @if (auth()->user()->hasRole('user'))
                         <a href="{{ route('messages', ['start' => $user->username]) }}" class="pf-btn pf-btn--secondary">
-                            <i class="fa fa-envelope"></i> Message
+                            <i class="fa fa-comment-dots"></i> Message
                         </a>
                         @endif
                         <button type="button" wire:click="toggleFollow"

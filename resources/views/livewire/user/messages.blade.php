@@ -4,8 +4,7 @@
     $unreadTotal = collect($conversations)->sum(fn ($c) => (int) ($c['unread'] ?? 0));
 @endphp
 
-<div wire:poll.2s="pollMessages"
-    class="msg-page"
+<div class="msg-page"
     x-data="{
         mobilePane: {{ $active ? "'chat'" : "'list'" }},
         lightbox: null,
@@ -309,6 +308,15 @@
         }
 
         .msg-receipt.is-read { color: #38bdf8; }
+
+        .msg-chat-body {
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            height: 100%;
+            flex: 1;
+            width: 100%;
+        }
 
         .msg-chat-head {
             display: flex;
@@ -677,7 +685,7 @@
         }
     </style>
 
-    <div class="msg-shell">
+    <div class="msg-shell" wire:poll.2s="pollMessages">
         {{-- ===== LIST ===== --}}
         <aside class="msg-pane msg-list-pane">
             <div class="msg-top">
@@ -757,6 +765,7 @@
         {{-- ===== CHAT ===== --}}
         <section class="msg-pane msg-chat-pane">
             @if ($active)
+            <div class="msg-chat-body">
             <div class="msg-chat-head">
                 <button type="button" class="msg-icon msg-back" @click="openList()" aria-label="Back to chats">
                     <i class="fa fa-arrow-left"></i>
@@ -874,8 +883,8 @@
                         <textarea
                             rows="1"
                             placeholder="Message…"
-                            wire:model.debounce.300ms="draft"
-                            wire:keydown.enter.prevent="if (!$event.shiftKey) sendMessage()"
+                            wire:model.live="draft"
+                            @keydown.enter="if ($event.shiftKey) return; $event.preventDefault(); $wire.sendMessage()"
                         ></textarea>
                     </div>
                     <button type="button" class="msg-send" wire:click="sendMessage" wire:loading.attr="disabled" aria-label="Send">
@@ -883,6 +892,7 @@
                         <i class="fa fa-spinner fa-spin" wire:loading wire:target="sendMessage"></i>
                     </button>
                 </div>
+            </div>
             </div>
             @else
                 <div class="msg-empty" style="flex:1;display:grid;place-items:center;">

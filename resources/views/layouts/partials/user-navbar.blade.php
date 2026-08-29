@@ -108,8 +108,27 @@
         background: var(--n-hover);
     }
 
-    .pk-n-bell {
+    .pk-n-bell,
+    .pk-n-msg {
         position: relative;
+    }
+
+    .pk-n-count {
+        position: absolute;
+        top: 2px;
+        right: 0;
+        min-width: 16px;
+        height: 16px;
+        padding: 0 4px;
+        border-radius: 999px;
+        background: #ef4444;
+        color: #fff;
+        font-size: 10px;
+        font-weight: 700;
+        line-height: 16px;
+        text-align: center;
+        border: 1.5px solid #fff;
+        pointer-events: none;
     }
 
     .pk-n-dot {
@@ -329,6 +348,9 @@
             </a>
 
             @auth
+                @if ($navUser->hasRole('user'))
+                    <livewire:user.navbar-messages />
+                @endif
                 <livewire:user.navbar-notifications />
             @endauth
 
