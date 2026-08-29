@@ -1,7 +1,9 @@
-<div wire:poll.15s class="dropdown d-inline-flex">
+<div wire:poll.15s
+    data-pk-dropdown
+    class="dropdown d-inline-flex">
     <button type="button"
         class="pk-n-btn pk-n-bell"
-        data-bs-toggle="dropdown"
+        data-pk-dropdown-toggle
         aria-haspopup="true"
         aria-expanded="false"
         aria-label="Notifications">
@@ -11,7 +13,8 @@
         @endif
     </button>
 
-    <div class="dropdown-menu dropdown-menu-end pk-n-notify">
+    <div class="dropdown-menu dropdown-menu-end pk-n-notify"
+        data-pk-dropdown-menu>
         <div class="pk-n-notify-h">
             <span>Notifications</span>
             @if ($unreadCount)

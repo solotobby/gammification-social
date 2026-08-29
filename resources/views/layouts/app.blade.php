@@ -81,6 +81,14 @@
         .my-float {
             margin-top: 16px;
         }
+
+        [x-cloak] {
+            display: none !important;
+        }
+
+        #page-header.pk-header {
+            z-index: 1045 !important;
+        }
     </style>
 
 
@@ -749,6 +757,49 @@
         Dashmix.helpersOnLoad(['js-highlightjs', 'jq-magnific-popup']);
     </script>
     @livewireScripts
+
+    <script>
+        (function () {
+            function closePkDropdowns() {
+                document.querySelectorAll('[data-pk-dropdown-menu].pk-dropdown-open').forEach(function (menu) {
+                    menu.classList.remove('pk-dropdown-open');
+                    var toggle = menu.closest('[data-pk-dropdown]')?.querySelector('[data-pk-dropdown-toggle]');
+                    if (toggle) {
+                        toggle.setAttribute('aria-expanded', 'false');
+                    }
+                });
+            }
+
+            document.addEventListener('click', function (e) {
+                var toggle = e.target.closest('[data-pk-dropdown-toggle]');
+                if (toggle) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    var menu = toggle.closest('[data-pk-dropdown]')?.querySelector('[data-pk-dropdown-menu]');
+                    if (!menu) {
+                        return;
+                    }
+                    var willOpen = !menu.classList.contains('pk-dropdown-open');
+                    closePkDropdowns();
+                    if (willOpen) {
+                        menu.classList.add('pk-dropdown-open');
+                        toggle.setAttribute('aria-expanded', 'true');
+                    }
+                    return;
+                }
+
+                if (!e.target.closest('[data-pk-dropdown]')) {
+                    closePkDropdowns();
+                }
+            });
+
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') {
+                    closePkDropdowns();
+                }
+            });
+        })();
+    </script>
 </body>
 
 </html>

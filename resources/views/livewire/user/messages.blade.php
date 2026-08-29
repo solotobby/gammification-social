@@ -28,6 +28,8 @@
     @keydown.escape.window="lightbox = null; infoOpen = false; emojiOpen = false; attachOpen = false">
 
     <style>
+        [x-cloak] { display: none !important; }
+
         .msg-page {
             --msg-violet: #5A4FDC;
             --msg-ink: #111827;
@@ -940,10 +942,12 @@
     @endif
 
     {{-- Lightbox --}}
-    <div class="msg-lightbox" x-show="lightbox" x-cloak @click.self="closeLightbox()">
-        <button type="button" class="msg-lightbox-close" @click="closeLightbox()" aria-label="Close">&times;</button>
-        <img :src="lightbox" alt="Full size">
-    </div>
+    <template x-if="lightbox">
+        <div class="msg-lightbox" @click.self="closeLightbox()">
+            <button type="button" class="msg-lightbox-close" @click="closeLightbox()" aria-label="Close">&times;</button>
+            <img :src="lightbox" alt="Full size">
+        </div>
+    </template>
 </div>
 
 <script>

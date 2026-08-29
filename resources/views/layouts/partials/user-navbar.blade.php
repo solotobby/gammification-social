@@ -19,6 +19,8 @@
         background: #fff !important;
         border-bottom: 1px solid var(--n-line);
         box-shadow: none;
+        z-index: 1045 !important;
+        overflow: visible !important;
     }
 
     /* Beat Dashmix .content-header { margin:0 auto } shrink-wrap on mobile */
@@ -149,9 +151,31 @@
         background: #e5e7eb;
     }
 
+    #page-header.pk-header .content-header,
+    #page-header.pk-header .pk-n-right {
+        overflow: visible !important;
+    }
+
+    [data-pk-dropdown] {
+        position: relative;
+    }
+
+    [data-pk-dropdown-menu] {
+        display: none;
+        position: absolute;
+        top: calc(100% + 8px);
+        right: 0;
+        left: auto;
+        z-index: 1050;
+    }
+
+    [data-pk-dropdown-menu].pk-dropdown-open {
+        display: block !important;
+    }
+
     .pk-n-menu {
         min-width: 220px;
-        margin-top: 8px !important;
+        margin-top: 0 !important;
         padding: 6px;
         border: 1px solid var(--n-line);
         border-radius: 10px;
@@ -218,7 +242,7 @@
 
     .pk-n-notify {
         min-width: min(300px, 92vw);
-        margin-top: 8px !important;
+        margin-top: 0 !important;
         padding: 0;
         border: 1px solid var(--n-line);
         border-radius: 10px;
@@ -308,18 +332,20 @@
                 <livewire:user.navbar-notifications />
             @endauth
 
-            <div class="dropdown d-inline-flex">
+            <div class="dropdown d-inline-flex" data-pk-dropdown>
                 <button type="button"
                     class="pk-n-avatar-btn"
                     id="page-header-user-dropdown"
-                    data-bs-toggle="dropdown"
+                    data-pk-dropdown-toggle
                     aria-haspopup="true"
                     aria-expanded="false"
                     aria-label="Account menu">
                     <img src="{{ $navAvatar }}" alt="" class="pk-n-avatar">
                 </button>
 
-                <div class="dropdown-menu dropdown-menu-end pk-n-menu" aria-labelledby="page-header-user-dropdown">
+                <div class="dropdown-menu dropdown-menu-end pk-n-menu"
+                    data-pk-dropdown-menu
+                    aria-labelledby="page-header-user-dropdown">
                     <div class="pk-n-menu-top">
                         <strong>{{ $navName }}</strong>
                         <span>{{ '@' . $navUser->username }} · {{ $navLevel }}</span>
