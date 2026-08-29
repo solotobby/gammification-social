@@ -200,19 +200,6 @@
                 </a>
             </li>
             @auth
-                @if (auth()->user()->hasRole('user'))
-                <li class="nav-main-item">
-                    <a class="nav-main-link{{ request()->routeIs('messages*') ? ' active' : '' }}" href="{{ route('messages') }}">
-                        <i class="nav-main-link-icon fa fa-envelope"></i>
-                        <span class="nav-main-link-name">Messages
-                            @php $msgUnread = messagingUnreadTotal(); @endphp
-                            @if ($msgUnread > 0)
-                                <span class="badge bg-primary ms-1">{{ $msgUnread > 99 ? '99+' : $msgUnread }}</span>
-                            @endif
-                        </span>
-                    </a>
-                </li>
-                @endif
                 <li class="nav-main-item">
                     <a class="nav-main-link{{ request()->routeIs('bookmarks') ? ' active' : '' }}" href="{{ route('bookmarks') }}">
                         <i class="nav-main-link-icon fa fa-bookmark"></i>
