@@ -115,6 +115,7 @@ Route::middleware(['auth', 'admin'])
             Route::post('users/{user}/bonus/{level}', [UserController::class, 'creditBonus'])->name('users.bonus');
             Route::post('users/upgrade', [UserController::class, 'upgradeProcess'])->name('users.upgrade');
             Route::post('users/wallet/credit', [UserController::class, 'processWalletCredit'])->name('users.wallet.credit');
+            Route::post('users/{user}/paykoin/credit', [UserController::class, 'creditPayKoin'])->name('users.paykoin.credit');
 
             Route::get('audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');
             Route::get('bank-accounts', [UserController::class, 'bankInformation'])->name('bank-accounts.index');

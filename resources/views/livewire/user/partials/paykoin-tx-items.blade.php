@@ -2,12 +2,14 @@
     @php
         $icons = [
             'topup' => 'fa-plus-circle',
+            'admin_credit' => 'fa-user-shield',
             'gift_sent' => 'fa-gift',
             'gift_received' => 'fa-heart',
             'convert' => 'fa-exchange',
         ];
         $titles = [
             'topup' => 'Top-up',
+            'admin_credit' => 'Admin credit',
             'gift_sent' => 'Gift sent',
             'gift_received' => 'Gift received',
             'convert' => 'Converted to wallet',

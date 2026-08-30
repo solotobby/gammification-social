@@ -424,6 +424,7 @@
                                             @php
                                                 $paykoinTxTypes = [
                                                     'topup' => 'Top-up',
+                                                    'admin_credit' => 'Admin credit',
                                                     'gift_sent' => 'Sent',
                                                     'gift_received' => 'Received',
                                                     'convert' => 'Converted',

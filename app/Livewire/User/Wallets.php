@@ -144,7 +144,7 @@ class Wallets extends Component
         }
 
         $map = [
-            'topup' => ['topup'],
+            'topup' => ['topup', 'admin_credit'],
             'gift_sent' => ['gift_sent'],
             'gift_received' => ['gift_received'],
             'convert' => ['convert'],

@@ -8,12 +8,18 @@ use App\Models\Post;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Models\WithdrawalMethod;
+use App\Services\Admin\AdminPayKoinService;
 use App\Services\Admin\AdminUserService;
+use App\Services\AdminAuditService;
 use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
-    public function __construct(protected AdminUserService $users) {}
+    public function __construct(
+        protected AdminUserService $users,
+        protected AdminPayKoinService $payKoin,
+        protected AdminAuditService $audit,
+    ) {}
 
     public function userList(Request $request)
     {
@@ -42,7 +48,45 @@ class UserController extends Controller
 
     public function userInfo(User $user)
     {
-        return view('admin.user.user_info', $this->users->profileData($user->id));
+        return view('admin.user.user_info', array_merge(
+            $this->users->profileData($user->id),
+            ['paykoin' => $this->payKoin->userWalletSummary($user)],
+        ));
+    }
+
+    public function creditPayKoin(Request $request, User $user)
+    {
+        $validated = $request->validate([
+            'pk_amount' => 'required|integer|min:1|max:1000000',
+            'note' => 'nullable|string|max:255',
+            'validationCode' => 'required|string',
+        ]);
+
+        if ($validated['validationCode'] !== config('services.env.validation_code')) {
+            return back()->with('error', 'Invalid validation code.');
+        }
+
+        try {
+            $transaction = $this->payKoin->creditUser(
+                $user,
+                (int) $validated['pk_amount'],
+                $validated['note'] ?? null,
+            );
+
+            $this->audit->log('paykoin.admin_credit', $user, [
+                'pk_amount' => $transaction->pk_amount,
+                'ref' => $transaction->ref,
+                'note' => $transaction->description,
+            ]);
+
+            return back()->with(
+                'success',
+                'Credited '.number_format($transaction->pk_amount).' PK to @'.$user->username.'. New spendable balance: '
+                .number_format((int) $user->fresh()->wallet?->paykoin_spendable).' PK.'
+            );
+        } catch (\Throwable $e) {
+            return back()->with('error', 'PayKoin credit failed: '.$e->getMessage());
+        }
     }
 
     public function updateCurrency(Request $request)

@@ -4,10 +4,13 @@ namespace App\Services\Admin;
 
 use App\Models\PaykoinTransaction;
 use App\Models\PostGift;
+use App\Models\User;
 use App\Models\Wallet;
 use App\Support\AdminDateRange;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use InvalidArgumentException;
 
 class AdminPayKoinService
 {
@@ -209,10 +212,81 @@ class AdminPayKoinService
     {
         return [
             'topup' => 'Top-ups',
+            'admin_credit' => 'Admin credit',
             'gift_sent' => 'Gifts sent',
             'gift_received' => 'Gifts received',
             'convert' => 'Converted',
         ];
+    }
+
+    public function userWalletSummary(User $user): array
+    {
+        $user->loadMissing('wallet');
+        $wallet = $user->wallet;
+
+        $spendable = (int) ($wallet->paykoin_spendable ?? 0);
+        $earned = (int) ($wallet->paykoin_earned ?? 0);
+
+        $baseQuery = PaykoinTransaction::query()->where('user_id', $user->id);
+
+        return [
+            'spendable' => $spendable,
+            'earned' => $earned,
+            'total' => $spendable + $earned,
+            'transactions' => (clone $baseQuery)->latest()->paginate(20)->withQueryString(),
+            'stats' => [
+                'topups' => (int) (clone $baseQuery)->where('type', 'topup')->sum('pk_amount'),
+                'admin_credits' => (int) (clone $baseQuery)->where('type', 'admin_credit')->sum('pk_amount'),
+                'gifts_sent' => abs((int) (clone $baseQuery)->where('type', 'gift_sent')->sum('pk_amount')),
+                'gifts_received' => (int) (clone $baseQuery)->where('type', 'gift_received')->sum('pk_amount'),
+                'converted' => abs((int) (clone $baseQuery)->where('type', 'convert')->sum('pk_amount')),
+            ],
+            'type_labels' => $this->transactionTypes(),
+        ];
+    }
+
+    public function creditUser(User $user, int $pkAmount, ?string $note = null): PaykoinTransaction
+    {
+        if ($pkAmount < 1) {
+            throw new InvalidArgumentException('Amount must be at least 1 PK.');
+        }
+
+        return DB::transaction(function () use ($user, $pkAmount, $note) {
+            $wallet = Wallet::query()
+                ->where('user_id', $user->id)
+                ->lockForUpdate()
+                ->first();
+
+            if (! $wallet) {
+                $wallet = Wallet::create([
+                    'user_id' => $user->id,
+                    'balance' => 0,
+                    'promoter_balance' => 0,
+                    'referral_balance' => 0,
+                    'currency' => strtoupper((string) (userBaseCurrency($user->id) ?? 'USD')),
+                    'level' => userLevel($user->id),
+                    'paykoin_spendable' => 0,
+                    'paykoin_earned' => 0,
+                ]);
+            }
+
+            $wallet->paykoin_spendable = (int) $wallet->paykoin_spendable + $pkAmount;
+            $wallet->save();
+
+            return PaykoinTransaction::create([
+                'user_id' => $user->id,
+                'type' => 'admin_credit',
+                'pk_amount' => $pkAmount,
+                'fiat_amount' => null,
+                'currency' => $wallet->currency,
+                'ref' => generateTransactionRef('PKN'),
+                'description' => filled($note) ? $note : 'Admin PayKoin credit',
+                'meta' => [
+                    'source' => 'admin',
+                    'admin_id' => auth()->id(),
+                ],
+            ]);
+        });
     }
 
     public function artifactLabel(string $artifactId): string
