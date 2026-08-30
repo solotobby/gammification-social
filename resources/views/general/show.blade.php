@@ -98,7 +98,7 @@
     </div>
   @endif
 
-  <div class="apl-article__body reveal" id="articleBody">
+  <div class="apl-article__body" id="articleBody">
     {!! $blog->safeContentHtml() !!}
 
     <aside class="apl-article__author">

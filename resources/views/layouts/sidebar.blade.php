@@ -65,6 +65,10 @@
                     <i class="nav-main-link-icon fa fa-wallet"></i>
                     <span class="nav-main-link-name">Wallets & Earnings</span>
                 </a>
+                <a class="nav-main-link{{ request()->routeIs('admin.paykoin.*') ? ' active' : '' }}" href="{{ route('admin.paykoin.index') }}">
+                    <i class="nav-main-link-icon fa fa-gift"></i>
+                    <span class="nav-main-link-name">PayKoin</span>
+                </a>
                 <a class="nav-main-link{{ request()->routeIs('admin.audit-logs.*') ? ' active' : '' }}" href="{{ route('admin.audit-logs.index') }}">
                     <i class="nav-main-link-icon fa fa-shield-halved"></i>
                     <span class="nav-main-link-name">Audit Log</span>

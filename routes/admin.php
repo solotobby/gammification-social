@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\LevelManagementController;
 use App\Http\Controllers\Admin\MonthlyPayoutController;
 use App\Http\Controllers\Admin\OutreachController;
 use App\Http\Controllers\Admin\PayoutController;
+use App\Http\Controllers\Admin\PayKoinController;
 use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\PostReportController;
 use App\Http\Controllers\Admin\StaffController;
@@ -112,6 +113,7 @@ Route::middleware(['auth', 'admin'])
             Route::get('audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');
             Route::get('bank-accounts', [UserController::class, 'bankInformation'])->name('bank-accounts.index');
             Route::get('finance', [FinanceController::class, 'index'])->name('finance.index');
+            Route::get('paykoin', [PayKoinController::class, 'index'])->name('paykoin.index');
 
             Route::prefix('withdrawals')->name('withdrawals.')->group(function () {
                 Route::get('/', [WithdrawalController::class, 'withdrawalList'])->name('index');

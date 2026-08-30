@@ -168,6 +168,14 @@
         Dashmix.onLoad(function () {
             CKEDITOR.config.height = '450px';
             Dashmix.helpers(['js-ckeditor']);
+
+            document.querySelector('.dash-form')?.addEventListener('submit', function () {
+                if (typeof CKEDITOR !== 'undefined') {
+                    for (var name in CKEDITOR.instances) {
+                        CKEDITOR.instances[name].updateElement();
+                    }
+                }
+            });
         });
     </script>
 @endsection

@@ -347,6 +347,98 @@
                 </section>
             @endif
 
+            @php($pk = $paykoinAnalytics ?? null)
+
+            @if ($pk)
+                <section class="dash-section">
+                    <div class="dash-card__head" style="margin-bottom:1rem;padding:0 0.25rem">
+                        <div>
+                            <h2 class="dash-card__title" style="font-size:1.125rem">PayKoin</h2>
+                            <p class="dash-muted" style="margin:0.25rem 0 0">Top-ups, gifts, and conversions · {{ $dateRange->label() }}</p>
+                        </div>
+                        <a href="{{ route('admin.paykoin.index', $dateRange->queryParams()) }}" class="dash-link">Manage PayKoin</a>
+                    </div>
+
+                    <div class="dash-grid dash-grid--4" style="margin-bottom:1rem">
+                        <a href="{{ route('admin.paykoin.index', $dateRange->queryParams()) }}" class="dash-kpi">
+                            <div class="dash-kpi__top">
+                                <span class="dash-kpi__label">PK in circulation</span>
+                                <span class="dash-kpi__icon dash-kpi__icon--amber"><i class="fa fa-coins"></i></span>
+                            </div>
+                            <div class="dash-kpi__value">{{ number_format($pk['totalSpendable'] + $pk['totalEarned']) }}</div>
+                            <div class="dash-kpi__hint">{{ number_format($pk['walletsWithPk']) }} wallets · {{ number_format($pk['totalSpendable']) }} spendable</div>
+                        </a>
+                        <a href="{{ route('admin.paykoin.index', array_merge($dateRange->queryParams(), ['tab' => 'transactions'])) }}" class="dash-kpi">
+                            <div class="dash-kpi__top">
+                                <span class="dash-kpi__label">Top-ups</span>
+                                <span class="dash-kpi__icon dash-kpi__icon--emerald"><i class="fa fa-plus-circle"></i></span>
+                            </div>
+                            <div class="dash-kpi__value">+{{ number_format($pk['topupsInRange']) }} PK</div>
+                            <div class="dash-kpi__hint">
+                                @if ($pk['topupFiatNgn'] > 0) ₦{{ number_format($pk['topupFiatNgn'], 0) }} @endif
+                                @if ($pk['topupFiatUsd'] > 0) ${{ number_format($pk['topupFiatUsd'], 2) }} @endif
+                            </div>
+                        </a>
+                        <a href="{{ route('admin.paykoin.index', array_merge($dateRange->queryParams(), ['tab' => 'gifts'])) }}" class="dash-kpi">
+                            <div class="dash-kpi__top">
+                                <span class="dash-kpi__label">Gifts sent</span>
+                                <span class="dash-kpi__icon dash-kpi__icon--indigo"><i class="fa fa-gift"></i></span>
+                            </div>
+                            <div class="dash-kpi__value">{{ number_format($pk['giftsSentInRange']) }} PK</div>
+                            <div class="dash-kpi__hint">{{ number_format($pk['giftsCountInRange']) }} gifts · {{ number_format($pk['giftsReceivedInRange']) }} PK earned</div>
+                        </a>
+                        <div class="dash-kpi">
+                            <div class="dash-kpi__top">
+                                <span class="dash-kpi__label">Converted</span>
+                                <span class="dash-kpi__icon dash-kpi__icon--sky"><i class="fa fa-exchange"></i></span>
+                            </div>
+                            <div class="dash-kpi__value">{{ number_format($pk['convertedInRange']) }} PK</div>
+                            <div class="dash-kpi__hint">{{ number_format($pk['totalGiftsAllTime']) }} gifts all time</div>
+                        </div>
+                    </div>
+
+                    <div class="dash-grid dash-grid--2">
+                        <div class="dash-card">
+                            <div class="dash-card__head">
+                                <h2 class="dash-card__title">PayKoin volume</h2>
+                            </div>
+                            <div class="dash-card__body">
+                                <div class="dash-chart" style="height:240px">
+                                    <canvas id="paykoin-home-chart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dash-card">
+                            <div class="dash-card__head">
+                                <h2 class="dash-card__title">Recent PayKoin activity</h2>
+                            </div>
+                            <div class="dash-card__body dash-card__body--flush">
+                                <div class="dash-table-wrap">
+                                    <table class="dash-table">
+                                        <thead><tr><th>User</th><th>Type</th><th>PK</th><th>When</th></tr></thead>
+                                        <tbody>
+                                            @forelse ($pk['recentTransactions'] as $tx)
+                                                @php
+                                                    $txTypes = ['topup' => 'Top-up', 'gift_sent' => 'Sent', 'gift_received' => 'Received', 'convert' => 'Converted'];
+                                                @endphp
+                                                <tr>
+                                                    <td>{{ $tx->user ? '@'.$tx->user->username : '—' }}</td>
+                                                    <td>{{ $txTypes[$tx->type] ?? $tx->type }}</td>
+                                                    <td>{{ $tx->pk_amount >= 0 ? '+' : '' }}{{ number_format($tx->pk_amount) }}</td>
+                                                    <td>{{ $tx->created_at->diffForHumans() }}</td>
+                                                </tr>
+                                            @empty
+                                                <tr><td colspan="4"><div class="dash-empty">No PayKoin activity yet.</div></td></tr>
+                                            @endforelse
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            @endif
+
             <section class="dash-section dash-grid dash-grid--2">
                 <div class="dash-card">
                     <div class="dash-card__head">
@@ -483,6 +575,7 @@
                         <a href="{{ route('admin.academy.index') }}" class="dash-btn dash-btn--ghost"><i class="fa fa-graduation-cap"></i> Academy</a>
                         <a href="{{ route('admin.help.index') }}" class="dash-btn dash-btn--ghost"><i class="fa fa-life-ring"></i> Help</a>
                         <a href="{{ route('admin.communities.index') }}" class="dash-btn dash-btn--ghost"><i class="fa fa-object-group"></i> Communities</a>
+                        <a href="{{ route('admin.paykoin.index') }}" class="dash-btn dash-btn--ghost"><i class="fa fa-gift"></i> PayKoin</a>
                         @if ($showTestPayment ?? false)
                             <a href="{{ route('admin.test.subscribe', $levelId) }}" class="dash-btn dash-btn--primary"><i class="fa fa-flask"></i> Test payment</a>
                         @endif
@@ -511,6 +604,10 @@
             const communityPaymentCounts = @json($communityAnalytics['revenueChart']['payments'] ?? []);
             const communityNgnPlatform = @json($communityAnalytics['revenueChart']['ngnPlatform'] ?? []);
             const communityUsdPlatform = @json($communityAnalytics['revenueChart']['usdPlatform'] ?? []);
+            const paykoinLabels = @json(($paykoinAnalytics ?? [])['volumeChart']['labels'] ?? []);
+            const paykoinTopups = @json(($paykoinAnalytics ?? [])['volumeChart']['topups'] ?? []);
+            const paykoinGifts = @json(($paykoinAnalytics ?? [])['volumeChart']['gifts'] ?? []);
+            const paykoinConverts = @json(($paykoinAnalytics ?? [])['volumeChart']['converts'] ?? []);
 
             function asNumbers(values) {
                 return (values || []).map(function (value) {
@@ -773,6 +870,60 @@
                                 grid: { drawOnChartArea: false },
                                 ticks: { color: '#64748b', font: { size: 11 } },
                             },
+                        },
+                    },
+                });
+
+                createChart('paykoin-home-chart', {
+                    type: 'line',
+                    data: {
+                        labels: paykoinLabels,
+                        datasets: [
+                            {
+                                label: 'Top-ups',
+                                data: asNumbers(paykoinTopups),
+                                borderColor: '#4f46e5',
+                                backgroundColor: 'rgba(79,70,229,.08)',
+                                fill: true,
+                                tension: 0.35,
+                                pointRadius: 0,
+                                borderWidth: 2,
+                            },
+                            {
+                                label: 'Gifts sent',
+                                data: asNumbers(paykoinGifts),
+                                borderColor: '#d97706',
+                                backgroundColor: 'rgba(217,119,6,.08)',
+                                fill: true,
+                                tension: 0.35,
+                                pointRadius: 0,
+                                borderWidth: 2,
+                            },
+                            {
+                                label: 'Converted',
+                                data: asNumbers(paykoinConverts),
+                                borderColor: '#059669',
+                                backgroundColor: 'rgba(5,150,105,.08)',
+                                fill: true,
+                                tension: 0.35,
+                                pointRadius: 0,
+                                borderWidth: 2,
+                            },
+                        ],
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'bottom',
+                                labels: { boxWidth: 10, boxHeight: 10, color: '#64748b', font: { size: 11 }, padding: 14 },
+                            },
+                        },
+                        scales: {
+                            x: scaleDefaults.x,
+                            y: Object.assign({}, scaleDefaults.y, { ticks: { precision: 0, color: '#64748b', font: { size: 11 } } }),
                         },
                     },
                 });

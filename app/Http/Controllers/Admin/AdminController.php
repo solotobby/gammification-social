@@ -19,6 +19,7 @@ use App\Models\UserLevel;
 use App\Models\UserLike;
 use App\Models\UserView;
 use App\Services\Admin\AdminCommunityService;
+use App\Services\Admin\AdminPayKoinService;
 use App\Services\FlutterwavePaymentService;
 use App\Services\KorapayService;
 use App\Services\TransactionService;
@@ -43,6 +44,7 @@ class AdminController extends Controller
         UpgradeSubscriptionService $upgradeSubscriptionService,
         KorapayService $korapayService,
         protected AdminCommunityService $communityAnalytics,
+        protected AdminPayKoinService $payKoinAnalytics,
     ) {
         $this->flutterwavePaymentService = $flutterwavePaymentService;
         $this->transactionService = $transactionService;
@@ -63,7 +65,7 @@ class AdminController extends Controller
         }
 
         $stats = Cache::remember(
-            'admin.dashboard.stats.v6.'.$dateRange->cacheKey(),
+            'admin.dashboard.stats.v7.'.$dateRange->cacheKey(),
             now()->addMinutes(3),
             function () use ($dateRange) {
                 $revenue = Transaction::query()
@@ -118,6 +120,7 @@ class AdminController extends Controller
                     'signupChart' => $this->dailySignupChart($dateRange),
                     'engagementChart' => $this->dailyEngagementChart($dateRange),
                     'communityAnalytics' => $this->communityAnalytics->dashboardAnalytics($dateRange),
+                    'paykoinAnalytics' => $this->payKoinAnalytics->dashboardAnalytics($dateRange),
                 ];
             }
         );

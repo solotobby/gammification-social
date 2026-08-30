@@ -2289,6 +2289,8 @@ body.page-landing-apple .nav.is-scrolled {
   line-height: 1.75;
   color: var(--ink);
   overflow-wrap: anywhere;
+  opacity: 1;
+  transform: none;
 }
 
 .apl-article__body > *:first-child {

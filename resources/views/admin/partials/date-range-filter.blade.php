@@ -2,6 +2,8 @@
     /** @var \App\Support\AdminDateRange $dateRange */
     $routeName = $routeName ?? Route::currentRouteName();
     $routeParams = $routeParams ?? [];
+    $extraQuery = $extraQuery ?? [];
+    $presetQuery = fn (string $rangeKey) => array_merge($routeParams, $extraQuery, ['range' => $rangeKey]);
 @endphp
 
 <style>
@@ -61,7 +63,7 @@
     <div class="dash-range__presets">
         @foreach (\App\Support\AdminDateRange::OPTIONS as $key => $label)
             @continue($key === 'custom')
-            <a href="{{ route($routeName, array_merge($routeParams, ['range' => $key])) }}"
+            <a href="{{ route($routeName, $presetQuery($key)) }}"
                class="dash-range__btn{{ $dateRange->key === $key ? ' is-active' : '' }}">
                 {{ $label }}
             </a>
@@ -70,6 +72,11 @@
     </div>
 
     <input type="hidden" name="range" value="custom">
+    @foreach ($extraQuery as $extraKey => $extraValue)
+        @if ($extraValue !== null && $extraValue !== '')
+            <input type="hidden" name="{{ $extraKey }}" value="{{ $extraValue }}">
+        @endif
+    @endforeach
     <input type="date" name="from" value="{{ $dateRange->start->toDateString() }}" class="dash-input" required>
     <input type="date" name="to" value="{{ $dateRange->end->toDateString() }}" class="dash-input" required>
     <button type="submit" class="dash-btn dash-btn--primary">Apply</button>
