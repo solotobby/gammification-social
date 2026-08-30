@@ -9,6 +9,7 @@ use App\Models\Post;
 use App\Models\PostImages;
 use App\Models\PostVideo;
 use App\Services\PostEarningsService;
+use App\Services\PayKoinService;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -410,8 +411,14 @@ class DashboardTimeline extends Component
     {
         $earnings = app(PostEarningsService::class)->forPosts($this->posts->pluck('id'));
 
+        $postGiftSummaries = app(PayKoinService::class)->giftSummariesForIds(
+            'post',
+            $this->posts->pluck('id')->all(),
+        );
+
         return view('livewire.user.dashboard-timeline', [
             'earnings' => $earnings,
+            'postGiftSummaries' => $postGiftSummaries,
         ]);
     }
 }

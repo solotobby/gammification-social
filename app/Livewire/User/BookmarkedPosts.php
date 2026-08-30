@@ -4,6 +4,7 @@ namespace App\Livewire\User;
 
 use App\Models\Post;
 use App\Services\PostEarningsService;
+use App\Services\PayKoinService;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -63,9 +64,15 @@ class BookmarkedPosts extends Component
 
         $earnings = app(PostEarningsService::class)->forPosts($posts->pluck('id'));
 
+        $postGiftSummaries = app(PayKoinService::class)->giftSummariesForIds(
+            'post',
+            $posts->pluck('id')->all(),
+        );
+
         return view('livewire.user.bookmarked-posts', [
             'posts' => $posts,
             'earnings' => $earnings,
+            'postGiftSummaries' => $postGiftSummaries,
         ])->layout('layouts.app');
     }
 }

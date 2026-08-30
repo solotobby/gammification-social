@@ -34,7 +34,7 @@ class LikeService
                 $existingLike->delete();
                 $post->decrement('likes');
                 
-                userActivity('unlike');
+                userActivity('unlike', $user->id);
 
                 return;
             }
@@ -70,7 +70,7 @@ class LikeService
                 );
             }
 
-            userActivity('like');
+            userActivity('like', $user->id);
         });
     }
 

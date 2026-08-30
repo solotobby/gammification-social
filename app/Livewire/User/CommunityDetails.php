@@ -2,6 +2,10 @@
 
 namespace App\Livewire\User;
 
+use App\Jobs\ProcessCommunityCommentJob;
+use App\Jobs\ProcessCommunityLikeJob;
+use App\Jobs\ProcessCommunityViewJob;
+use App\Livewire\Concerns\SendsPostGifts;
 use App\Http\Controllers\CommunityInviteController;
 use App\Mail\GeneralMail;
 use App\Models\Community;
@@ -10,13 +14,13 @@ use App\Models\CommunityInvite;
 use App\Models\CommunityJoinRequest;
 use App\Models\CommunityPostComment;
 use App\Models\CommunityPostLike;
-use App\Models\CommunityPostView;
 use App\Models\CommunitySubscription;
 use App\Models\Follow;
 use App\Models\User;
 use App\Support\CommunityFeeCalculator;
 use App\Support\StoredMedia;
 use App\Services\CommunityMembershipService;
+use App\Services\PayKoinService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
@@ -28,6 +32,7 @@ use Livewire\WithFileUploads;
 
 class CommunityDetails extends Component
 {
+    use SendsPostGifts;
     use WithFileUploads;
 
     public Community $community;
@@ -40,6 +45,15 @@ class CommunityDetails extends Component
 
     // ---- inline comment inputs, keyed by post id ----
     public array $newComment = [];
+
+    public array $likeOverrides = [];
+
+    public array $commentCountOverrides = [];
+
+    /** @var array<string, list<array<string, mixed>>> */
+    public array $pendingComments = [];
+
+    public array $recordedViews = [];
 
     // ---- "Load more" windows ----
     public int $postsPerPage = 10;
@@ -200,6 +214,23 @@ class CommunityDetails extends Component
      * - public: everyone can browse
      * - private / paid / approval: members only
      */
+    public function canSendPostGift(): bool
+    {
+        if (! auth()->check()) {
+            return false;
+        }
+
+        return match ($this->community->type) {
+            'private', 'paid', 'approval' => $this->isMember(),
+            default => true,
+        };
+    }
+
+    public function authorCanReceiveGifts($post): bool
+    {
+        return canReceiveGifts($post->user ?? null);
+    }
+
     public function canViewFeed(): bool
     {
         return match ($this->community->type) {
@@ -320,33 +351,57 @@ class CommunityDetails extends Component
         $this->dispatch('openPhotoViewer', postId: $postId, imageIndex: $imageIndex, source: 'community');
     }
 
+    public function communityLikesCount(object $post): int
+    {
+        return (int) ($this->likeOverrides[$post->id]['count'] ?? $post->likes_count);
+    }
+
+    public function communityLikedByMe(object $post): bool
+    {
+        return (bool) ($this->likeOverrides[$post->id]['liked'] ?? ($post->liked_by_me ?? false));
+    }
+
+    public function communityCommentsCount(object $post): int
+    {
+        return (int) ($this->commentCountOverrides[$post->id] ?? $post->comments_count);
+    }
+
+    /** @return list<array<string, mixed>> */
+    public function pendingCommentsFor(string $postId): array
+    {
+        return $this->pendingComments[$postId] ?? [];
+    }
+
     public function toggleLike(string $postId): void
     {
-        if (! $this->isMember()) {
+        if (! $this->isMember() || ! auth()->check()) {
             return;
         }
 
-        $post = $this->community->posts()->findOrFail($postId);
+        $post = $this->community->posts()->find($postId);
 
-        $existing = CommunityPostLike::where('community_post_id', $post->id)
-            ->where('user_id', auth()->id())
-            ->first();
-
-        if ($existing) {
-            $existing->delete();
-            $post->decrement('likes_count');
-        } else {
-            CommunityPostLike::create([
-                'community_post_id' => $post->id,
-                'user_id' => auth()->id(),
-            ]);
-            $post->increment('likes_count');
+        if (! $post) {
+            return;
         }
+
+        $current = $this->likeOverrides[$postId] ?? [
+            'liked' => (bool) ($post->liked_by_me ?? CommunityPostLike::where('community_post_id', $post->id)
+                ->where('user_id', auth()->id())
+                ->exists()),
+            'count' => (int) $post->likes_count,
+        ];
+
+        $liked = ! $current['liked'];
+        $count = max(0, $current['count'] + ($liked ? 1 : -1));
+
+        $this->likeOverrides[$postId] = ['liked' => $liked, 'count' => $count];
+
+        ProcessCommunityLikeJob::dispatch($postId, (string) auth()->id());
     }
 
     public function addComment(string $postId): void
     {
-        if (! $this->isMember()) {
+        if (! $this->isMember() || ! auth()->check()) {
             return;
         }
 
@@ -356,17 +411,25 @@ class CommunityDetails extends Component
             return;
         }
 
-        $post = $this->community->posts()->findOrFail($postId);
+        $post = $this->community->posts()->find($postId);
 
-        CommunityPostComment::create([
-            'community_post_id' => $post->id,
-            'user_id' => auth()->id(),
+        if (! $post) {
+            return;
+        }
+
+        $count = $this->communityCommentsCount($post);
+        $this->commentCountOverrides[$postId] = $count + 1;
+
+        $this->pendingComments[$postId] = array_merge($this->pendingComments[$postId] ?? [], [[
+            'id' => 'pending-'.now()->timestamp,
+            'user' => auth()->user(),
             'content' => $text,
-        ]);
-
-        $post->increment('comments_count');
+            'created_at' => now(),
+        ]]);
 
         $this->newComment[$postId] = '';
+
+        ProcessCommunityCommentJob::dispatch($postId, (string) auth()->id(), $text);
     }
 
     /**
@@ -482,20 +545,25 @@ class CommunityDetails extends Component
      */
     public function recordView(string $postId): void
     {
-        $post = $this->community->posts()->find($postId);
-
-        if (! $post) {
+        if (! auth()->check()) {
             return;
         }
 
-        $view = CommunityPostView::firstOrCreate(
-            ['community_post_id' => $post->id, 'user_id' => auth()->id()],
-            ['ip_address' => request()->ip()]
-        );
-
-        if ($view->wasRecentlyCreated) {
-            $post->increment('views_count');
+        if (isset($this->recordedViews[$postId])) {
+            return;
         }
+
+        if (! $this->community->posts()->where('id', $postId)->exists()) {
+            return;
+        }
+
+        $this->recordedViews[$postId] = true;
+
+        ProcessCommunityViewJob::dispatch(
+            $postId,
+            (string) auth()->id(),
+            request()->ip(),
+        );
     }
 
     // =========================================================
@@ -1284,6 +1352,14 @@ class CommunityDetails extends Component
             : null;
 
         $followingAuthorIds = collect();
+        $postGiftSummaries = [];
+
+        if ($posts->count() > 0) {
+            $postGiftSummaries = app(PayKoinService::class)->giftSummariesForIds(
+                'community_post',
+                $posts->pluck('id')->all(),
+            );
+        }
 
         if (auth()->check() && $posts->count() > 0) {
             $authorIds = $posts->pluck('user_id')->unique()->filter();
@@ -1313,6 +1389,7 @@ class CommunityDetails extends Component
                 : collect(),
             'categories' => CommunityCategory::all(),
             'followingAuthorIds' => $followingAuthorIds,
+            'postGiftSummaries' => $postGiftSummaries,
             'inviteLinkUrl' => $linkInvite ? route('community.invite.accept', $linkInvite->token) : null,
             'pendingDirectInvites' => $this->isOwnerOrAdmin() && $this->community->type === 'private'
                 ? CommunityInvite::where('community_id', $this->community->id)

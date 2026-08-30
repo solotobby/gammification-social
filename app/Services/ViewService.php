@@ -45,7 +45,7 @@ class ViewService
                 ]
             );
 
-            userActivity('views');
+            userActivity('views', $userId);
 
             $post->video?->increment('view_count');
 

@@ -4,6 +4,7 @@ namespace App\Livewire\User;
 
 use App\Models\Hashtag as ModelsHashtag;
 use App\Services\PostEarningsService;
+use App\Services\PayKoinService;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -69,10 +70,16 @@ class Hashtag extends Component
 
         $earnings = app(PostEarningsService::class)->forPosts($posts->pluck('id'));
 
+        $postGiftSummaries = app(PayKoinService::class)->giftSummariesForIds(
+            'post',
+            $posts->pluck('id')->all(),
+        );
+
         return view('livewire.user.hashtag', [
             'hashtag' => $hashtag,
             'posts' => $posts,
             'earnings' => $earnings,
+            'postGiftSummaries' => $postGiftSummaries,
             'trendingMembers' => engagement(),
             'trendingTopics' => trendingTopics(),
         ])->layout('layouts.app');

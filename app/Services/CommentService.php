@@ -87,7 +87,7 @@ class CommentService
                 ]);
             }
 
-            userActivity('comment');
+            userActivity('comment', $authUserId);
         });
     }
 }

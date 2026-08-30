@@ -2503,6 +2503,7 @@
                     @include('livewire.user.partials.community-post-card', [
                         'post' => $post,
                         'followingAuthorIds' => $followingAuthorIds,
+                        'giftSummary' => $postGiftSummaries[$post->id] ?? ['total' => 0, 'recent' => []],
                     ])
                 </div>
             @empty

@@ -4,6 +4,7 @@ namespace App\Livewire\User;
 
 use App\Models\Post;
 use App\Services\PostEarningsService;
+use App\Services\PayKoinService;
 use Livewire\Component;
 
 class TimelineDetails extends Component
@@ -26,8 +27,14 @@ class TimelineDetails extends Component
     {
         $earnings = app(PostEarningsService::class)->forPosts(collect([$this->post->id]));
 
+        $postGiftSummaries = app(PayKoinService::class)->giftSummariesForIds(
+            'post',
+            [$this->post->id],
+        );
+
         return view('livewire.user.timeline-details', [
             'estimatedEarnings' => $earnings[$this->post->id] ?? 0,
+            'giftSummary' => $postGiftSummaries[$this->post->id] ?? ['total' => 0, 'recent' => []],
         ])->layout('layouts.app');
     }
 }

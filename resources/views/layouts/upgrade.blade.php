@@ -152,66 +152,110 @@
         .chk-alert--error { background: #FEF2F2; color: #B91C1C; border: 1px solid #FECACA; }
 
         .chk-billing {
-            margin: 0 auto 28px;
-            max-width: 640px;
+            margin: 0 auto 32px;
+            max-width: 520px;
             text-align: center;
         }
 
-        .chk-billing-switch {
-            display: inline-flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 6px;
-            padding: 6px;
+        .chk-billing-label {
+            margin: 0 0 12px;
+            font-size: .95rem;
+            font-weight: 700;
+            color: var(--chk-ink);
+        }
+
+        .chk-mode-switch {
+            position: relative;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            padding: 5px;
             background: #fff;
-            border: 1px solid var(--chk-line);
-            border-radius: 999px;
+            border: 1.5px solid var(--chk-line);
+            border-radius: 14px;
             box-shadow: var(--chk-shadow);
         }
 
-        .chk-billing-switch input { position: absolute; opacity: 0; pointer-events: none; }
-
-        .chk-billing-switch label {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 16px;
-            border-radius: 999px;
-            font-size: .875rem;
-            font-weight: 700;
-            color: var(--chk-soft);
-            cursor: pointer;
-            transition: .2s ease;
+        .chk-mode-switch.is-payg .chk-mode-slider {
+            transform: translateX(100%);
         }
 
-        .chk-billing-switch input:checked + label {
+        .chk-mode-slider {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            width: calc(50% - 5px);
+            height: calc(100% - 10px);
+            border-radius: 10px;
             background: var(--chk-violet);
+            box-shadow: 0 6px 16px rgba(90, 79, 220, .28);
+            transition: transform .22s ease;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .chk-mode-opt {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            min-height: 52px;
+            padding: 10px 12px;
+            border: 0;
+            border-radius: 10px;
+            background: transparent;
+            color: var(--chk-soft);
+            font-family: inherit;
+            font-size: .875rem;
+            font-weight: 700;
+            line-height: 1.2;
+            cursor: pointer;
+            transition: color .2s ease;
+        }
+
+        .chk-mode-opt.is-active {
             color: #fff;
         }
 
-        .chk-save {
+        .chk-mode-opt:focus-visible {
+            outline: 2px solid var(--chk-violet);
+            outline-offset: 2px;
+        }
+
+        .chk-mode-opt .chk-save {
             display: inline-flex;
             align-items: center;
             padding: 2px 8px;
             border-radius: 999px;
-            background: var(--chk-mint);
-            color: #fff;
-            font-size: .68rem;
+            background: rgba(18, 184, 134, .14);
+            color: #0F766E;
+            font-size: .65rem;
             font-weight: 800;
             letter-spacing: .02em;
             text-transform: uppercase;
         }
 
-        .chk-billing-switch input:checked + label .chk-save {
-            background: rgba(255,255,255,.22);
+        .chk-mode-opt.is-active .chk-save {
+            background: rgba(255, 255, 255, .22);
+            color: #fff;
         }
 
         .chk-billing-note {
-            margin: 12px 0 0;
+            margin: 14px 0 0;
+            padding: 12px 14px;
+            border-radius: 12px;
+            background: #fff;
+            border: 1px solid var(--chk-line);
             font-size: .84rem;
-            color: var(--chk-faint);
+            color: var(--chk-soft);
             line-height: 1.5;
+            text-align: left;
         }
+
+        .chk-billing-note strong { color: var(--chk-ink); }
 
         .chk-grid {
             display: grid;
@@ -481,15 +525,9 @@
         }
 
         @media (max-width: 575.98px) {
-            .chk-billing-switch {
-                width: 100%;
-                border-radius: 16px;
-                flex-direction: column;
-            }
-            .chk-billing-switch label {
-                width: 100%;
-                justify-content: center;
-                border-radius: 12px;
+            .chk-mode-opt {
+                min-height: 56px;
+                font-size: .8125rem;
             }
             .chk-plan-top, .chk-features, .chk-foot, .chk-summary { padding-inline: 16px; }
             .chk-summary { margin-inline: 16px; }
@@ -524,21 +562,34 @@
 
         @if ($isNgn)
             <div class="chk-billing">
-                <div class="chk-billing-switch" id="billing-toggle" role="group" aria-label="Billing mode">
-                    <input type="radio" name="billingMode" id="mode-subscription" autocomplete="off"
-                        {{ $currentMode === 'subscription' ? 'checked' : '' }}>
-                    <label for="mode-subscription">
-                        Direct subscription
+                <p class="chk-billing-label">Choose how you want to pay</p>
+                <div class="chk-mode-switch {{ $currentMode === 'payg' ? 'is-payg' : '' }}"
+                    id="billing-toggle"
+                    role="tablist"
+                    aria-label="Billing mode">
+                    <span class="chk-mode-slider" aria-hidden="true"></span>
+                    <button type="button"
+                        class="chk-mode-opt {{ $currentMode === 'subscription' ? 'is-active' : '' }}"
+                        data-mode="subscription"
+                        role="tab"
+                        aria-selected="{{ $currentMode === 'subscription' ? 'true' : 'false' }}">
+                        Subscription
                         <span class="chk-save">Save 10%</span>
-                    </label>
-
-                    <input type="radio" name="billingMode" id="mode-payg" autocomplete="off"
-                        {{ $currentMode === 'payg' ? 'checked' : '' }}>
-                    <label for="mode-payg">Pay as you go</label>
+                    </button>
+                    <button type="button"
+                        class="chk-mode-opt {{ $currentMode === 'payg' ? 'is-active' : '' }}"
+                        data-mode="payg"
+                        role="tab"
+                        aria-selected="{{ $currentMode === 'payg' ? 'true' : 'false' }}">
+                        Pay as you go
+                    </button>
                 </div>
-                <p class="chk-billing-note">
-                    <strong>Direct subscription</strong> renews monthly with 10% off.
-                    <strong>Pay as you go</strong> is billed each month with no stored subscription.
+                <p class="chk-billing-note" id="billing-mode-note">
+                    @if ($currentMode === 'payg')
+                        <strong>Pay as you go</strong> — pay each month when billed. No recurring subscription is stored on your card.
+                    @else
+                        <strong>Subscription</strong> — auto-renews monthly with <strong>10% off</strong>. Cancel anytime.
+                    @endif
                 </p>
             </div>
         @endif
@@ -732,12 +783,40 @@
     @if ($isNgn)
         <script>
             document.addEventListener('DOMContentLoaded', function () {
-                var subRadio = document.getElementById('mode-subscription');
-                var paygRadio = document.getElementById('mode-payg');
+                var toggle = document.getElementById('billing-toggle');
+                var modeNote = document.getElementById('billing-mode-note');
                 var upgradeCards = document.querySelectorAll('.billing-card');
                 var activeCard = document.querySelector('.billing-card-active');
+                var storageKey = 'payhankey_billing_mode';
+
+                var notes = {
+                    subscription: '<strong>Subscription</strong> — auto-renews monthly with <strong>10% off</strong>. Cancel anytime.',
+                    payg: '<strong>Pay as you go</strong> — pay each month when billed. No recurring subscription is stored on your card.',
+                };
+
+                function setSwitchUi(mode) {
+                    if (!toggle) return;
+
+                    toggle.classList.toggle('is-payg', mode === 'payg');
+
+                    toggle.querySelectorAll('.chk-mode-opt').forEach(function (btn) {
+                        var active = btn.dataset.mode === mode;
+                        btn.classList.toggle('is-active', active);
+                        btn.setAttribute('aria-selected', active ? 'true' : 'false');
+                    });
+
+                    if (modeNote) {
+                        modeNote.innerHTML = notes[mode] || '';
+                    }
+                }
 
                 function applyMode(mode) {
+                    setSwitchUi(mode);
+
+                    try {
+                        localStorage.setItem(storageKey, mode);
+                    } catch (e) {}
+
                     upgradeCards.forEach(function (card) {
                         var link = card.querySelector('.billing-link');
                         if (link) {
@@ -765,14 +844,21 @@
                     }
                 }
 
-                if (subRadio) {
-                    subRadio.addEventListener('change', function () {
-                        if (this.checked) applyMode('subscription');
-                    });
-                }
-                if (paygRadio) {
-                    paygRadio.addEventListener('change', function () {
-                        if (this.checked) applyMode('payg');
+                var initialMode = '{{ $currentMode }}';
+                try {
+                    var saved = localStorage.getItem(storageKey);
+                    if (saved === 'subscription' || saved === 'payg') {
+                        initialMode = saved;
+                    }
+                } catch (e) {}
+
+                applyMode(initialMode);
+
+                if (toggle) {
+                    toggle.querySelectorAll('.chk-mode-opt').forEach(function (btn) {
+                        btn.addEventListener('click', function () {
+                            applyMode(btn.dataset.mode);
+                        });
                     });
                 }
             });

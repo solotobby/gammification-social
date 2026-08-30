@@ -9,7 +9,12 @@
     $level = $post->user ? userLevel($post->user->id) : 'Basic';
     $isPostOwner = auth()->id() === ($post->user_id ?? null);
     $isFollowingAuthor = ($followingAuthorIds ?? collect())->contains($post->user_id);
+    $giftSender = auth()->user()->username ?? 'you';
+    $giftSummary = $giftSummary ?? ['total' => 0, 'recent' => []];
+    $giftSpendable = (int) (auth()->user()?->wallet?->paykoin_spendable ?? 0);
 @endphp
+
+@include('livewire.user.partials.post-gift-ui')
 
 <article class="pk-card pk-feed-post" wire:init="recordView('{{ $post->id }}')" wire:key="cpost-{{ $post->id }}">
     <div class="pk-header">
@@ -111,14 +116,14 @@
         </div>
     @endif
 
-    <div class="pk-actions">
-        <button type="button" class="pk-action pk-like @if ($post->liked_by_me) pk-liked @endif"
+    <div class="pk-actions" id="pk-actions-{{ $post->id }}">
+        <button type="button" class="pk-action pk-like @if ($this->communityLikedByMe($post)) pk-liked @endif"
             wire:click="toggleLike('{{ $post->id }}')">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                 stroke-linecap="round" stroke-linejoin="round">
                 <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
             </svg>
-            {{ number_format($post->likes_count) }}
+            {{ number_format($this->communityLikesCount($post)) }}
         </button>
 
         <span class="pk-action">
@@ -126,8 +131,14 @@
                 stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
             </svg>
-            {{ number_format($post->comments_count) }}
+            {{ number_format($this->communityCommentsCount($post)) }}
         </span>
+
+        @auth
+            @if (! $isPostOwner && $this->canSendPostGift() && $this->authorCanReceiveGifts($post))
+                @include('livewire.user.partials.post-gift-button', ['postId' => $post->id])
+            @endif
+        @endauth
 
         <span class="pk-action pk-view">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -139,6 +150,28 @@
         </span>
     </div>
 
+    @auth
+        @if ($this->canSendPostGift() && $this->authorCanReceiveGifts($post))
+            <div
+                wire:ignore
+                class="pk-gift-root"
+                x-data="postGiftPanel({
+                    postId: @js($post->id),
+                    creator: @js(displayName($post->user->name ?? 'Creator')),
+                    username: @js($post->user->username ?? 'creator'),
+                    sender: @js($giftSender),
+                    giftableType: 'community_post',
+                    spendable: @js($giftSpendable),
+                    initialGifts: @js($giftSummary),
+                    canSend: @js(! $isPostOwner),
+                })"
+                @pk-gift-open.window="if ($event.detail.postId === postId) show()"
+            >
+                @include('livewire.user.partials.post-gift-body')
+            </div>
+        @endif
+    @endauth
+
     <div class="pk-comments">
         @if ($this->isMember())
             <div class="pk-comment-input-row">
@@ -149,6 +182,21 @@
                     wire:click="addComment('{{ $post->id }}')">Send</button>
             </div>
         @endif
+
+        @foreach ($this->pendingCommentsFor($post->id) as $comment)
+            <div class="pk-fb-comment" wire:key="pending-comment-{{ $comment['id'] }}">
+                <x-user-avatar :user="$comment['user']" size="sm" />
+                <div class="pk-fb-comment-bubble">
+                    <div class="d-flex align-items-start justify-content-between gap-2">
+                        <div>
+                            <span class="pk-fb-comment-name">{{ $comment['user']->name ?? 'You' }}</span>
+                            <span class="pk-fb-comment-time">{{ $comment['created_at']->diffForHumans() }}</span>
+                            <p class="pk-fb-comment-text mb-0">{{ $comment['content'] }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endforeach
 
         @foreach ($post->comments->take(3) as $comment)
             <div class="pk-fb-comment" wire:key="comment-{{ $comment->id }}">

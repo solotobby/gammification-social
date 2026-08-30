@@ -2,9 +2,9 @@
 
 namespace App\Livewire\User;
 
+use App\Jobs\ProcessCommentJob;
+use App\Jobs\ProcessViewJob;
 use App\Models\Post;
-use App\Services\CommentService;
-use App\Services\ViewService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -35,11 +35,11 @@ class TimelineDetailsComments extends Component
         $this->loadComments(reset: true);
     }
 
-    public function mount(Post $post, ViewService $viewService)
+    public function mount(Post $post)
     {
         $this->post = $post;
         $this->loadComments(reset: true);
-        $this->processView($viewService);
+        $this->processView();
     }
 
     public function loadComments(bool $reset = false): void
@@ -94,19 +94,23 @@ class TimelineDetailsComments extends Component
         $this->loadComments(reset: false);
     }
 
-    public function processView(ViewService $viewService): void
+    public function processView(): void
     {
-        if ($this->viewRecorded) {
+        if ($this->viewRecorded || ! Auth::check()) {
             return;
         }
 
         $this->viewRecorded = true;
-        $viewService->recordView($this->post, Auth::id());
-        $this->post->refresh();
+
+        ProcessViewJob::dispatch(
+            (string) $this->post->id,
+            (string) Auth::id(),
+        );
+
         $this->dispatch('viewRecorded');
     }
 
-    public function commentFeed(CommentService $service): void
+    public function commentFeed(): void
     {
         $this->validate([
             'message' => 'required|string|max:500',
@@ -116,11 +120,27 @@ class TimelineDetailsComments extends Component
             return;
         }
 
-        $service->addComment($this->post->id, Auth::user(), $this->message);
-
+        $text = $this->message;
         $this->message = '';
+        $this->commentsCount++;
+
+        ProcessCommentJob::dispatch(
+            (string) $this->post->id,
+            (string) Auth::id(),
+            $text,
+        );
+
+        $this->comments = collect([[
+            'id' => 'pending-'.now()->timestamp,
+            'user_id' => Auth::id(),
+            'name' => Auth::user()->name,
+            'username' => Auth::user()->username,
+            'avatar' => Auth::user()->avatar ?? 'src/assets/media/avatars/avatar3.jpg',
+            'message' => $text,
+            'created_at' => now()->toDateTimeString(),
+        ]])->concat($this->comments ?? collect());
+
         $this->dispatch('commentAdded');
-        $this->loadComments(reset: true);
     }
 
     public function render()

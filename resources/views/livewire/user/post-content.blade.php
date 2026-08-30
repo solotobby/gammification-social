@@ -24,7 +24,10 @@
         $shareUrl = url('timeline/' . $post->id);
         $showLinkEmbed = ! empty($display['embed']) && ! $vid;
         $showLinkCard = ! empty($display['link_card']) && ! $vid && ! $showLinkEmbed;
+        $giftSender = auth()->user()->username ?? 'you';
     @endphp
+
+    @include('livewire.user.partials.post-gift-ui')
 
     <div @class(['pk-card', 'pk-standalone' => $standalone]) wire:init="recordView">
 
@@ -204,7 +207,7 @@
         {{-- ══════════════════════════════════════════
          ACTION BAR
     ══════════════════════════════════════════ --}}
-        <div class="pk-actions">
+        <div class="pk-actions" id="pk-actions-{{ $post->id }}">
 
             {{-- Like --}}
             <button class="pk-action pk-like {{ $likedByMe ? 'pk-liked' : '' }}"
@@ -230,6 +233,13 @@
                 {{ $commentCount > 0 ? number_format($commentCount) : '' }}
             </a>
 
+            {{-- Gift --}}
+            @auth
+                @if (! $isOwner && $this->authorCanReceiveGifts())
+                    @include('livewire.user.partials.post-gift-button', ['postId' => $post->id])
+                @endif
+            @endauth
+
             {{-- Views --}}
             <span class="pk-action pk-view">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -254,6 +264,37 @@
                 Share
             </button>
         </div>
+
+        @auth
+            @if ($this->authorCanReceiveGifts())
+                <div
+                    wire:ignore
+                    class="pk-gift-root"
+                    x-data="postGiftPanel({
+                        postId: @js($post->id),
+                        creator: @js(displayName($post->user->name)),
+                        username: @js($post->user->username),
+                        sender: @js($giftSender),
+                        giftableType: 'post',
+                        spendable: @js((int) (auth()->user()?->wallet?->paykoin_spendable ?? 0)),
+                        initialGifts: @js($giftSummary),
+                        canSend: @js(! $isOwner),
+                    })"
+                    @pk-gift-open.window="if ($event.detail.postId === postId) show()"
+                >
+                    @include('livewire.user.partials.post-gift-body')
+                </div>
+            @else
+                @if (($giftSummary['total'] ?? 0) > 0)
+                    <div class="pk-gifts-strip" style="padding: 8px 16px 4px 64px">
+                        <span class="pk-gifts-strip-label" style="color:#536471;font-weight:600">
+                            <i class="fa fa-gift"></i>
+                            {{ (int) $giftSummary['total'] }} gift{{ ((int) $giftSummary['total']) === 1 ? '' : 's' }}
+                        </span>
+                    </div>
+                @endif
+            @endif
+        @endauth
 
         {{-- ══════════════════════════════════════════
          COMMENTS

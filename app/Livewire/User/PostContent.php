@@ -2,22 +2,26 @@
 
 namespace App\Livewire\User;
 
+use App\Jobs\ProcessCommentJob;
+use App\Jobs\ProcessLikeJob;
+use App\Jobs\ProcessViewJob;
+use App\Livewire\Concerns\SendsPostGifts;
 use App\Models\Follow;
 use App\Models\HiddenPost;
 use App\Models\Post;
 use App\Models\PostBookmark;
 use App\Models\PostReport;
 use App\Notifications\GeneralNotification;
-use App\Services\CommentService;
-use App\Services\LikeService;
 use App\Services\PostDeletionService;
 use App\Services\PostEarningsService;
-use App\Services\ViewService;
+use App\Services\PayKoinService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 class PostContent extends Component
 {
+    use SendsPostGifts;
+
     public Post $post;
     public $likesCount;
     public $likedByMe;
@@ -56,11 +60,14 @@ class PostContent extends Component
 
     public string $editContent = '';
 
+    /** @var array{total: int, recent: array<int, array<string, mixed>>} */
+    public array $giftSummary = ['total' => 0, 'recent' => []];
+
     protected $listeners = [
         'photoViewerUpdated' => 'refreshFromViewer',
     ];
 
-    public function mount(Post $post, float $estimatedEarnings = 0, bool $standalone = false, bool $formatText = true, bool $showPostMenu = true)
+    public function mount(Post $post, float $estimatedEarnings = 0, bool $standalone = false, bool $formatText = true, bool $showPostMenu = true, ?array $giftSummary = null)
     {
         $this->post = $post;
         $this->estimatedEarnings = $estimatedEarnings;
@@ -87,6 +94,12 @@ class PostContent extends Component
         }
 
         $this->loadPreviewComments(reset: true);
+
+        if ($giftSummary !== null) {
+            $this->giftSummary = $giftSummary;
+        } else {
+            $this->giftSummary = app(PayKoinService::class)->giftsFor('post', $post->id);
+        }
     }
 
     protected function ownerCanManagePost(): bool
@@ -96,6 +109,11 @@ class PostContent extends Component
         }
 
         return in_array(userLevel(auth()->id()), ['Creator', 'Influencer'], true);
+    }
+
+    public function authorCanReceiveGifts(): bool
+    {
+        return canReceiveGifts($this->post->user);
     }
 
     public function openEditPost(): void
@@ -181,7 +199,7 @@ class PostContent extends Component
         $this->loadPreviewComments(reset: true);
     }
 
-    public function submitComment(CommentService $commentService): void
+    public function submitComment(): void
     {
         if (! Auth::check()) {
             return;
@@ -193,12 +211,21 @@ class PostContent extends Component
             'commentMessage' => 'required|string|max:500',
         ]);
 
-        $commentService->addComment($this->post->id, Auth::user(), $this->commentMessage);
-
+        $message = $this->commentMessage;
         $this->commentMessage = '';
-        $this->post->refresh();
-        $this->commentCount = (int) sumCounter($this->post->comments, $this->post->comment_external);
-        $this->loadPreviewComments(reset: true);
+        $this->commentCount++;
+
+        ProcessCommentJob::dispatch($this->post->id, (string) Auth::id(), $message);
+
+        $this->previewComments = collect($this->previewComments->prepend([
+            'id' => 'pending-'.now()->timestamp,
+            'user_id' => Auth::id(),
+            'name' => Auth::user()->name,
+            'username' => Auth::user()->username,
+            'avatar' => Auth::user()->avatar,
+            'message' => $message,
+            'created_at' => now()->toDateTimeString(),
+        ])->take($this->commentsPerPage())->values()->all());
     }
 
     public function loadMoreComments(): void
@@ -242,7 +269,7 @@ class PostContent extends Component
             $this->commentsCursor = $page->last()->created_at->toDateTimeString();
         }
 
-        $mapped = $page->map(fn ($comment) => [
+        $mapped = collect($page->map(fn ($comment) => [
             'id' => $comment->id,
             'user_id' => $comment->user_id,
             'name' => $comment->user->name ?? 'User',
@@ -250,9 +277,11 @@ class PostContent extends Component
             'avatar' => $comment->user->avatar,
             'message' => $comment->message,
             'created_at' => $comment->created_at->toDateTimeString(),
-        ]);
+        ])->all());
 
-        $this->previewComments = $reset ? $mapped : $this->previewComments->concat($mapped);
+        $this->previewComments = $reset
+            ? $mapped
+            : $this->previewComments->concat($mapped);
     }
 
     public function openPhotoViewer(int $imageIndex = 0): void
@@ -270,9 +299,9 @@ class PostContent extends Component
 
         $this->likedByMe = ! $this->likedByMe;
 
-        app(LikeService::class)->toggle(
-            $this->post->unicode,
-            auth()->user()
+        ProcessLikeJob::dispatch(
+            (string) $this->post->unicode,
+            (string) auth()->id(),
         );
     }
 
@@ -381,15 +410,18 @@ class PostContent extends Component
         $this->dispatch('post-action-toast', message: 'Post reported. Thanks for letting us know.');
     }
 
-    public function recordView(ViewService $viewService): void
+    public function recordView(): void
     {
-        if ($this->viewRecorded) {
+        if ($this->viewRecorded || ! auth()->check()) {
             return;
         }
 
         $this->viewRecorded = true;
-        $viewService->recordView($this->post, auth()->id());
-        $this->post->refresh();
+
+        ProcessViewJob::dispatch(
+            (string) $this->post->id,
+            (string) auth()->id(),
+        );
     }
 
     public function openVideoPlayer($videoId)

@@ -2,8 +2,8 @@
 
 namespace App\Jobs;
 
-use App\Models\User;
-use App\Services\LikeService;
+use App\Models\Post;
+use App\Services\ViewService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -11,30 +11,30 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
-class ProcessLikeJob implements ShouldQueue
+class ProcessViewJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $tries = 3;
 
     public function __construct(
-        public string $unicode,
+        public string $postId,
         public string $userId,
     ) {}
 
-    public function handle(LikeService $likeService): void
+    public function handle(ViewService $viewService): void
     {
-        $user = User::find($this->userId);
+        $post = Post::find($this->postId);
 
-        if (! $user) {
+        if (! $post) {
             return;
         }
 
         try {
-            $likeService->toggle($this->unicode, $user);
+            $viewService->recordView($post, $this->userId);
         } catch (\Throwable $e) {
-            Log::error('ProcessLikeJob failed', [
-                'unicode' => $this->unicode,
+            Log::error('ProcessViewJob failed', [
+                'post_id' => $this->postId,
                 'user_id' => $this->userId,
                 'error' => $e->getMessage(),
             ]);

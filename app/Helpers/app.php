@@ -290,6 +290,23 @@ if (!function_exists('canUploadVideo')) {
     }
 }
 
+if (!function_exists('canReceiveGifts')) {
+    function canReceiveGifts($user = null): bool
+    {
+        if ($user === null) {
+            return false;
+        }
+
+        if ($user instanceof \App\Models\User) {
+            $level = normalizeUserLevel(userLevel($user->id));
+
+            return in_array($level, ['Basic', 'Creator', 'Influencer'], true);
+        }
+
+        return false;
+    }
+}
+
 if (!function_exists('userLevel')) {
     function userLevel($userId = null)
     {
@@ -1226,16 +1243,25 @@ if (!function_exists('generateTransactionRef')) {
         if ($type === 'community') {
             return 'COM-' . now()->format('YmdHis') . '-' . random_int(1000, 99999999);
         }
+        if (in_array(strtolower((string) $type), ['paykoin', 'pkn'], true)) {
+            return 'PKN-' . now()->format('YmdHis') . '-' . random_int(1000, 99999999);
+        }
         return 'PKY-' . now()->format('YmdHis') . '-' . random_int(1000, 99999999);
     }
 }
 
 if (!function_exists('userActivity')) {
-    function userActivity($event)
+    function userActivity($event, $userId = null)
     {
+        $userId = $userId ?? auth()->id();
+
+        if (! $userId) {
+            return;
+        }
+
         UserActivity::create([
-            'user_id' => auth()->user()->id,
-            'event' => $event
+            'user_id' => $userId,
+            'event' => $event,
         ]);
     }
 }

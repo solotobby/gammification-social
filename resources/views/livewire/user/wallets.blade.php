@@ -4,10 +4,12 @@
     <div class="pk-app-hero">
         <div class="pk-app-hero-inner">
             <span class="pk-app-kicker">Wallet · {{ userLevel() }}</span>
-            <h1>Your earnings</h1>
-            <p>Balances, subscription status, and payout schedule in one place.</p>
+            <h1>Your earnings & PayKoin</h1>
+            <p>Fiat balances, PayKoin for gifts, and payout schedule in one place.</p>
         </div>
     </div>
+
+    @include('livewire.user.partials.paykoin-wallet')
 
     @foreach (['status_refresh' => 'success', 'status' => 'success', 'status_error' => 'error'] as $key => $type)
         @if (session()->has($key))

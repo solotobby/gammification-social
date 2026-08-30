@@ -10,6 +10,7 @@ use App\Models\Transaction;
 use App\Models\Webhook;
 use App\Services\CommunityFlutterwaveService;
 use App\Services\CommunitySubscriptionService;
+use App\Services\PayKoinService;
 use App\Services\TransactionService;
 use App\Services\UpgradeSubscriptionService;
 use Illuminate\Http\Request;
@@ -64,30 +65,30 @@ class WebhookController extends Controller
                 return response()->json(['status' => 'error', 'message' => 'Transaction not found'], 404);
             }
 
-            // //verify amount and currency match
-            // if (round($transaction->amount, 2) != round($amount, 2)) {
-            //     Log::error('Amount mismatch for reference: ' . $reference);
-            //     return response()->json(['status' => 'error', 'message' => 'Amount mismatch'], 400);
-            // }
+            if ($transaction->type === 'paykoin_topup') {
+                if ($transaction->status === 'successful') {
+                    return response()->json(['message' => 'PAYKOIN TOP-UP ALREADY PROCESSED'], 200);
+                }
 
-            // if (strtoupper($transaction->currency) != strtoupper($currency)) {
-            //     Log::error('Currency mismatch for reference: ' . $reference);
-            //     return response()->json(['status' => 'error', 'message' => 'Currency mismatch'], 400);
-            // }
+                if (! str_starts_with(strtoupper($reference), 'PKN-')) {
+                    Log::error('PayKoin webhook rejected: invalid reference prefix', ['reference' => $reference]);
 
-            // $subject = 'Webhook Received: Kora Pay Security Checks Passed';
-            // $content = "Security checks passed for event: {$request['event']}. Transaction ref: {$reference} is being processed.";
+                    return response()->json(['status' => 'error', 'message' => 'Invalid PayKoin reference'], 400);
+                }
 
+                try {
+                    app(PayKoinService::class)->creditTopUpFromWebhook($transaction, $payload);
 
-            // Mail::to('solotob3@gmail.com')
-            //     ->send(new GeneralMail(
-            //         (object)[
-            //             'name' => 'Oluwatobi Solomon',
-            //             'email' => 'solotob3@gmail.com'
-            //         ],
-            //         $subject,
-            //         $content
-            //     ));
+                    return response()->json(['status' => 'success'], 200);
+                } catch (\Throwable $e) {
+                    Log::error('PayKoin webhook credit failed', [
+                        'reference' => $reference,
+                        'error' => $e->getMessage(),
+                    ]);
+
+                    return response()->json(['status' => 'error', 'message' => $e->getMessage()], 400);
+                }
+            }
 
             if (
                 $transaction->status === 'successful'

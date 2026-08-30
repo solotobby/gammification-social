@@ -37,19 +37,19 @@ class HomeController extends Controller
      */
     public function index()
     {
-
         $user = auth()->user();
 
+        if ($user->hasRole('user')) {
+            $this->loginPoints($user);
 
-        if ($user->hasRole('admin') || $user->hasRole('staff')) {
-            // Panel users use /admin after gate login.
-        } else {
-            $this->loginPoints(auth()->user());
             return redirect('timeline');
         }
 
-        // return redirect('timeline');
-        // return view('home');
+        if (isAdminPanelUser($user)) {
+            return redirect()->route('admin.home');
+        }
+
+        return redirect('timeline');
     }
 
 

@@ -34,6 +34,7 @@
             <livewire:user.post-content
                 :post="$post"
                 :estimated-earnings="$estimatedEarnings ?? 0"
+                :gift-summary="$giftSummary ?? ['total' => 0, 'recent' => []]"
                 :standalone="true"
                 :format-text="true"
                 :show-post-menu="true"

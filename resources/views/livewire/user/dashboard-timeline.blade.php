@@ -483,6 +483,7 @@ body { background: var(--ph-bg); font-family: 'Inter', system-ui, sans-serif; }
             <livewire:user.post-content
                 :post="$post"
                 :estimated-earnings="$earnings[$post->id] ?? 0"
+                :gift-summary="$postGiftSummaries[$post->id] ?? ['total' => 0, 'recent' => []]"
                 :format-text="false"
                 :show-post-menu="true"
                 wire:key="post-{{ $post->id }}" />

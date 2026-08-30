@@ -2,12 +2,12 @@
 
 namespace App\Livewire\User;
 
+use App\Jobs\ProcessCommentJob;
+use App\Jobs\ProcessCommunityCommentJob;
+use App\Jobs\ProcessCommunityLikeJob;
+use App\Jobs\ProcessLikeJob;
 use App\Models\CommunityPost;
-use App\Models\CommunityPostComment;
-use App\Models\CommunityPostLike;
 use App\Models\Post;
-use App\Services\CommentService;
-use App\Services\LikeService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
@@ -111,70 +111,72 @@ class PostPhotoViewer extends Component
         $this->imageIndex++;
     }
 
-    public function toggleLike(LikeService $likeService): void
+    public function toggleLike(): void
     {
         if ($this->source === 'community') {
             if (! $this->communityPost || ! Auth::check()) {
                 return;
             }
 
-            $existing = CommunityPostLike::where('community_post_id', $this->communityPost->id)
-                ->where('user_id', auth()->id())
-                ->first();
+            $this->likedByMe = ! $this->likedByMe;
+            $this->likesCount = max(0, $this->likesCount + ($this->likedByMe ? 1 : -1));
 
-            if ($existing) {
-                $existing->delete();
-                $this->communityPost->decrement('likes_count');
-                $this->likedByMe = false;
-            } else {
-                CommunityPostLike::create([
-                    'community_post_id' => $this->communityPost->id,
-                    'user_id' => auth()->id(),
-                ]);
-                $this->communityPost->increment('likes_count');
-                $this->likedByMe = true;
-            }
+            ProcessCommunityLikeJob::dispatch(
+                (string) $this->communityPost->id,
+                (string) auth()->id(),
+            );
 
-            $this->communityPost->refresh();
-            $this->syncEngagement();
             $this->dispatch('photoViewerUpdated', postId: $this->communityPost->id, source: 'community');
 
             return;
         }
 
-        if (! $this->post) {
+        if (! $this->post || ! Auth::check()) {
             return;
         }
 
-        $likeService->toggle($this->post->unicode, Auth::user());
-        $this->post->refresh();
-        $this->syncEngagement();
+        $this->likedByMe = ! $this->likedByMe;
+        $this->likesCount = max(0, $this->likesCount + ($this->likedByMe ? 1 : -1));
+
+        ProcessLikeJob::dispatch(
+            (string) $this->post->unicode,
+            (string) Auth::id(),
+        );
+
         $this->dispatch('photoViewerUpdated', postId: $this->post->id, source: 'post');
     }
 
-    public function submitComment(CommentService $commentService): void
+    public function submitComment(): void
     {
         $text = trim($this->commentText);
-        if ($text === '' || strlen($text) > 500) {
+        if ($text === '' || strlen($text) > 500 || ! Auth::check()) {
             return;
         }
 
         if ($this->source === 'community') {
-            if (! $this->communityPost || ! Auth::check()) {
+            if (! $this->communityPost) {
                 return;
             }
 
-            CommunityPostComment::create([
-                'community_post_id' => $this->communityPost->id,
-                'user_id' => auth()->id(),
-                'content' => $text,
-            ]);
-
-            $this->communityPost->increment('comments_count');
+            $this->commentsCount++;
             $this->commentText = '';
-            $this->communityPost->refresh();
-            $this->syncEngagement();
-            $this->loadComments(reset: true);
+
+            $this->comments = collect([[
+                'id' => 'pending-'.now()->timestamp,
+                'user_id' => Auth::id(),
+                'name' => Auth::user()->name,
+                'username' => Auth::user()->username,
+                'avatar' => Auth::user()->avatar,
+                'message' => $text,
+                'created_at' => now()->toDateTimeString(),
+            ]])->concat($this->comments ?? collect());
+
+            ProcessCommunityCommentJob::dispatch(
+                (string) $this->communityPost->id,
+                (string) auth()->id(),
+                $text,
+            );
+
             $this->dispatch('photoViewerUpdated', postId: $this->communityPost->id, source: 'community');
 
             return;
@@ -184,11 +186,25 @@ class PostPhotoViewer extends Component
             return;
         }
 
-        $commentService->addComment($this->post->id, Auth::user(), $text);
+        $this->commentsCount++;
         $this->commentText = '';
-        $this->post->refresh();
-        $this->syncEngagement();
-        $this->loadComments(reset: true);
+
+        $this->comments = collect([[
+            'id' => 'pending-'.now()->timestamp,
+            'user_id' => Auth::id(),
+            'name' => Auth::user()->name,
+            'username' => Auth::user()->username,
+            'avatar' => Auth::user()->avatar,
+            'message' => $text,
+            'created_at' => now()->toDateTimeString(),
+        ]])->concat($this->comments ?? collect());
+
+        ProcessCommentJob::dispatch(
+            (string) $this->post->id,
+            (string) Auth::id(),
+            $text,
+        );
+
         $this->dispatch('commentAdded');
         $this->dispatch('photoViewerUpdated', postId: $this->post->id, source: 'post');
     }

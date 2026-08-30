@@ -2,6 +2,7 @@
 
 namespace App\Livewire\User;
 
+use App\Jobs\ProcessLikeJob;
 use App\Models\AccessCode;
 use App\Models\Comment;
 use App\Models\Post;
@@ -248,42 +249,14 @@ class Posts extends Component
 
     public function toggleLike($postId)
     {
-        $user = Auth::user();
+        if (! Auth::check()) {
+            return;
+        }
 
-        $post = Post::with('user') // eager load user
-            ->where('unicode', $postId)
-            ->firstOrFail();
-
-        DB::transaction(function () use ($post, $user) {
-            $isSelfView = $user->id === $post->user_id;
-
-            $like = $post->likes()->where('user_id', $user->id)->first();
-
-            if ($like) {
-                // Unlike
-                $like->delete();
-                $post->decrement('likes');
-            } else {
-                // Like
-                $post->likes()->create([
-                    'user_id' => $user->id,
-                    'is_paid' => false,
-                    'amount'  => calculateUniqueEarningPerLike(),
-                    'poster_user_id' => $post->user_id,
-                    'type' => $isSelfView ? 'self-like' : 'like',
-                ]);
-
-                $post->increment('likes');
-
-                // Queue the notification for async processing
-                $post->user->notify((new GeneralNotification([
-                    'title'   => displayName($user->name) . ' liked your post',
-                    'message' => displayName($user->name) . ' liked your post',
-                    'icon'    => 'fa-thumbs-up text-primary',
-                    'url'     => url('show/' . $post->id),
-                ]))->delay(now()->addSeconds(1))); // small delay to decouple DB write
-            }
-        });
+        ProcessLikeJob::dispatch(
+            (string) $postId,
+            (string) Auth::id(),
+        );
     }
 
     public function deletePost($postId)

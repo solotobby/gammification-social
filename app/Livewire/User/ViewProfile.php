@@ -2,6 +2,7 @@
 
 namespace App\Livewire\User;
 
+use App\Jobs\ProcessLikeJob;
 use App\Support\StoredMedia;
 use App\Models\Follow;
 use App\Models\Post;
@@ -10,6 +11,7 @@ use App\Models\User;
 use App\Models\UserLike;
 use App\Notifications\GeneralNotification;
 use App\Services\PostEarningsService;
+use App\Services\PayKoinService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Illuminate\Support\Facades\Cache;
@@ -102,43 +104,14 @@ class ViewProfile extends Component
 
     public function toggleLike($postId)
     {
-        $user = Auth::user();
+        if (! Auth::check()) {
+            return;
+        }
 
-        // Fetch post with owner user eager-loaded
-        $post = Post::with('user')
-            ->where('unicode', $postId)
-            ->firstOrFail(); // fail early if post not found
-
-        DB::transaction(function () use ($post, $user) {
-            // Check if already liked
-            $like = $post->likes()->where('user_id', $user->id)->first();
-
-            if ($like) {
-                // Unlike: delete like & decrement counter atomically
-                $like->delete();
-                $post->decrement('likes');
-            } else {
-                // Like: create record & increment counter atomically
-                $post->likes()->create([
-                    'user_id'        => $user->id,
-                    'is_paid'        => false,
-                    'amount'         => calculateUniqueEarningPerLike(),
-                    'poster_user_id' => $post->user_id,
-                ]);
-                $post->increment('likes');
-
-                // Queue notification for async processing
-                $post->user->notify((new GeneralNotification([
-                    'title'   => displayName($user->name) . ' liked your post',
-                    'message' => displayName($user->name) . ' liked your post',
-                    'icon'    => 'fa-thumbs-up text-primary',
-                    'url'     => url('timeline/' . $post->id),
-                ]))->delay(now()->addSeconds(1)));
-            }
-        });
-
-        // Refresh the timeline efficiently
-        $this->timeline($this->username);
+        ProcessLikeJob::dispatch(
+            (string) $postId,
+            (string) Auth::id(),
+        );
     }
 
     public function updatedAvatarUpload(): void
@@ -349,6 +322,7 @@ class ViewProfile extends Component
 
         $timelines = $this->user->posts()
             ->visibleToViewer($this->user, auth()->user())
+            ->with(['user', 'trends', 'images', 'video'])
             ->latest()
             ->take($this->perpage + 1)
             ->get();
@@ -358,9 +332,15 @@ class ViewProfile extends Component
 
         $earnings = app(PostEarningsService::class)->forPosts($timelines->pluck('id'));
 
+        $postGiftSummaries = app(PayKoinService::class)->giftSummariesForIds(
+            'post',
+            $timelines->pluck('id')->all(),
+        );
+
         return view('livewire.user.view-profile', [
             'posts' => $timelines,
             'earnings' => $earnings,
+            'postGiftSummaries' => $postGiftSummaries,
             'hasMore' => $hasMore,
         ]);
     }

@@ -24,6 +24,7 @@ use App\Notifications\GeneralNotification;
 use App\Services\HashtagService;
 use App\Models\PostVideo;
 use App\Services\PostEarningsService;
+use App\Services\PayKoinService;
 use App\Services\VideoUploadService;
 use App\Services\ImageUploadService;
 use App\Jobs\ProcessVideoUpload;
@@ -635,8 +636,14 @@ class Timeline extends Component
     {
         $earnings = app(PostEarningsService::class)->forPosts($this->posts->pluck('id'));
 
+        $postGiftSummaries = app(PayKoinService::class)->giftSummariesForIds(
+            'post',
+            $this->posts->pluck('id')->all(),
+        );
+
         return view('livewire.user.timeline', [
             'earnings' => $earnings,
+            'postGiftSummaries' => $postGiftSummaries,
         ])->layout('layouts.app');
     }
 

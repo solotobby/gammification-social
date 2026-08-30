@@ -2,15 +2,15 @@
 
 namespace App\Livewire\User;
 
+use App\Jobs\ProcessCommentJob;
+use App\Jobs\ProcessLikeJob;
+use App\Jobs\ProcessViewJob;
 use App\Models\Comment;
 use App\Models\Follow;
 use App\Models\Post;
 use App\Models\PostVideo;
 use App\Models\User;
 use App\Notifications\GeneralNotification;
-use App\Services\CommentService;
-use App\Services\LikeService;
-use App\Services\ViewService;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Renderless;
@@ -132,7 +132,7 @@ class Rolls extends Component
     }
 
     #[Renderless]
-    public function recordView($postId, ViewService $viewService): void
+    public function recordView($postId): void
     {
         $postId = (string) $postId;
 
@@ -140,18 +140,19 @@ class Rolls extends Component
             return;
         }
 
-        $post = Post::with('video')->find($postId);
-        if (! $post) {
+        if (! Post::whereKey($postId)->exists()) {
             return;
         }
 
-        $viewService->recordView($post, Auth::id());
-        $post->refresh();
+        ProcessViewJob::dispatch($postId, (string) Auth::id());
+
+        $post = Post::find($postId);
+        $count = $post ? $post->totalViews() + 1 : 0;
 
         $this->dispatch(
             'viewCounted',
             postId: $postId,
-            count: $post->totalViews(),
+            count: $count,
         );
     }
 
@@ -202,26 +203,34 @@ class Rolls extends Component
     }
 
     #[Renderless]
-    public function toggleLike($postId, LikeService $likeService): array
+    public function toggleLike($postId): array
     {
         if (! Auth::check()) {
             return ['postId' => (string) $postId, 'liked' => false, 'count' => 0];
         }
 
-        $post = Post::find($postId);
-        if (! $post) {
-            return ['postId' => (string) $postId, 'liked' => false, 'count' => 0];
+        $postId = (string) $postId;
+
+        if (isset($this->likeOverrides[$postId])) {
+            $current = $this->likeOverrides[$postId];
+            $liked = ! $current['liked'];
+            $count = max(0, $current['count'] + ($liked ? 1 : -1));
+            $unicode = (string) (Post::find($postId)?->unicode ?? $postId);
+        } else {
+            $post = Post::find($postId);
+
+            if (! $post) {
+                return ['postId' => $postId, 'liked' => false, 'count' => 0];
+            }
+
+            $liked = ! $post->isLikedBy(auth()->user());
+            $count = max(0, $post->totalLikes() + ($liked ? 1 : -1));
+            $unicode = (string) $post->unicode;
         }
 
-        $postId = (string) $post->id;
-
-        $likeService->toggle((string) $post->unicode, Auth::user());
-
-        $post->refresh();
-        $liked = $post->isLikedBy(auth()->user());
-        $count = $post->totalLikes();
-
         $this->likeOverrides[$postId] = ['liked' => $liked, 'count' => $count];
+
+        ProcessLikeJob::dispatch($unicode, (string) Auth::id());
 
         $this->dispatch('likeUpdated', postId: $postId, liked: $liked, count: $count);
 
@@ -328,20 +337,24 @@ class Rolls extends Component
             return;
         }
 
-        app(CommentService::class)->addComment($postId, Auth::user(), $text);
+        ProcessCommentJob::dispatch($postId, (string) Auth::id(), $text);
 
         $this->commentPostId = $postId;
         $this->showComments  = true;
         $this->commentText   = '';
 
-        $this->activeComments = Comment::with('user')
-            ->where('post_id', $postId)
-            ->latest()
-            ->limit(50)
-            ->get();
+        $pending = new Comment([
+            'id' => 'pending-'.now()->timestamp,
+            'post_id' => $postId,
+            'user_id' => Auth::id(),
+            'message' => $text,
+            'created_at' => now(),
+        ]);
+        $pending->setRelation('user', Auth::user());
 
-        $post = Post::find($postId);
-        $count = $post ? $post->totalComments() : 0;
+        $this->activeComments = collect([$pending])->concat($this->activeComments ?? collect())->take(50);
+
+        $count = ($this->sheetCommentCount ?? 0) + 1;
         $this->sheetCommentCount = $count;
 
         $this->dispatch('commentCountUpdated', postId: $postId, count: $count);

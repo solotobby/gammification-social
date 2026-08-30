@@ -2,8 +2,9 @@
 
 namespace App\Livewire\User;
 
+use App\Jobs\ProcessCommentJob;
+use App\Jobs\ProcessLikeJob;
 use App\Models\Post;
-use App\Services\LikeService;
 use Livewire\Component;
 
 class TimelineDetailsReaction extends Component
@@ -49,14 +50,10 @@ class TimelineDetailsReaction extends Component
         $this->likedByMe = ! $this->likedByMe;
         $this->likesCount += $this->likedByMe ? 1 : -1;
 
-        app(LikeService::class)->toggle(
-            $this->post->unicode,
-            auth()->user()
+        ProcessLikeJob::dispatch(
+            (string) $this->post->unicode,
+            (string) auth()->id(),
         );
-
-        $this->post->refresh();
-        $this->likesCount = sumCounter($this->post->likes, $this->post->likes_external);
-        $this->likedByMe = $this->post->isLikedBy(auth()->user());
     }
 
     public function refreshCounts(): void

@@ -2,8 +2,8 @@
 
 namespace App\Livewire\User;
 
+use App\Jobs\ProcessCommentJob;
 use App\Models\Comment;
-use App\Services\CommentService;
 use Livewire\Component;
 use App\Models\Post;
 use Illuminate\Support\Facades\Auth;
@@ -47,7 +47,7 @@ class PostComments extends Component
         $this->commentsCount = (int) sumCounter($this->post->comments, $this->post->comment_external);
     }
 
-    public function commentFeed(CommentService $service)
+    public function commentFeed()
     {
         $this->validate([
             'message' => 'required|string|max:500',
@@ -57,13 +57,26 @@ class PostComments extends Component
             return;
         }
 
-        $user = Auth::user();
-
-        $service->addComment($this->post->id, $user, $this->message);
-
+        $text = $this->message;
         $this->message = '';
-        $this->post->refresh();
-        $this->loadComments();
+        $this->commentsCount++;
+
+        ProcessCommentJob::dispatch(
+            (string) $this->post->id,
+            (string) Auth::id(),
+            $text,
+        );
+
+        $this->comments = collect([[
+            'id' => 'pending-'.now()->timestamp,
+            'user_id' => Auth::id(),
+            'name' => Auth::user()->name,
+            'username' => Auth::user()->username,
+            'avatar' => Auth::user()->avatar,
+            'message' => $text,
+            'created_at' => now()->toDateTimeString(),
+        ]])->concat($this->comments ?? collect());
+
         $this->dispatch('commentAdded', postId: $this->post->id);
     }
 

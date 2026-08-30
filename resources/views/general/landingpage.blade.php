@@ -213,7 +213,7 @@
         <p class="apl-tier__blurb">Your starting point for creating and growing on Payhankey.</p>
         <ul>
           <li>Unlimited posts &amp; quizzes</li>
-          <li>Payhankey Rolls (Videos)</li>
+          <li>Can Receive & Send Coins</li>
           <li>Full dashboard access</li>
           <li>Discover and join communities</li>
           <li>Up to $2 welcome bonus</li>
@@ -231,7 +231,7 @@
           <li>Create &amp; monetize communities</li>
           <li>Earn up to $2 per eligible post</li>
           <li>Verified creator badge</li>
-          <li>Image &amp; video posting</li>
+          <li>Image posting</li>
           <li>Priority discovery</li>
           <li>AI Creator support tools</li>
         </ul>
@@ -246,6 +246,7 @@
           <li>Earn up to $5 per eligible post</li>
           <li>Influencer verification badge</li>
           <li>Influencer profile ring</li>
+          <li>Image &amp; Video posting</li>
           <li>Higher content limits</li>
           <li>Top-feed placement</li>
           <li>Priority discovery</li>

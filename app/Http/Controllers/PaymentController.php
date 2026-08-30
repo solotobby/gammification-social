@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Services\CommunitySubscriptionService;
 use App\Services\FlutterwavePaymentService;
 use App\Services\KorapayService;
+use App\Services\PayKoinService;
 use App\Services\SubscriptionService;
 use App\Services\TransactionService;
 use Illuminate\Http\Request;
@@ -232,6 +233,31 @@ class PaymentController extends Controller
                 'error',
                 $e->getMessage()
             );
+        }
+    }
+
+    public function verifyPaykoinTopUp(PayKoinService $payKoinService)
+    {
+        $reference = request()->query('reference') ?? request()->query('trxref');
+
+        if (!$reference) {
+            return redirect('wallets')->with('paykoin_error', 'Invalid payment reference.');
+        }
+
+        try {
+            $result = $payKoinService->acknowledgeTopUpReturn($reference);
+
+            if ($result['status'] === 'failed') {
+                return redirect('wallets')->with('paykoin_error', $result['message']);
+            }
+
+            if ($result['status'] === 'credited') {
+                return redirect('wallets')->with('paykoin_status', $result['message']);
+            }
+
+            return redirect('wallets')->with('paykoin_info', $result['message']);
+        } catch (\Throwable $e) {
+            return redirect('wallets')->with('paykoin_error', $e->getMessage());
         }
     }
 }

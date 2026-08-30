@@ -27,7 +27,7 @@
 
                 <div class="flex-grow-1">
                     <div class="bg-light rounded px-3 py-2">
-                        <a class="fw-semibold" href="{{ url('profile/'.$comment['username']) }}">
+                        <a class="fw-semibold" href="{{ isset($comment['username']) ? url('profile/'.$comment['username']) : '#' }}">
                             {{ displayName($comment['name']) }}
                         </a>
                         <small class="text-muted ms-1">

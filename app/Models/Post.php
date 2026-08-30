@@ -20,10 +20,15 @@ class Post extends Model
         'views_external',
         'comments',
         'comment_external',
+        'gifts_count',
         'status',
         'unicode',
         'has_video',
         'has_images'
+    ];
+
+    protected $casts = [
+        'gifts_count' => 'integer',
     ];
 
     public function user()
@@ -83,6 +88,11 @@ class Post extends Model
     public function postComments()
     {
         return $this->hasMany(Comment::class)->orderBy('created_at', 'desc');
+    }
+
+    public function gifts()
+    {
+        return $this->morphMany(PostGift::class, 'giftable');
     }
 
     public function postCommentsExternal()
