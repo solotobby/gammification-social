@@ -2,14 +2,14 @@
 
 namespace App\Livewire\User;
 
-use App\Jobs\ProcessCommentJob;
-use App\Jobs\ProcessLikeJob;
-use App\Jobs\ProcessViewJob;
 use App\Models\Comment;
 use App\Models\Post;
 use App\Models\UserComment;
 use App\Models\UserLike;
 use App\Models\UserView;
+use App\Services\CommentService;
+use App\Services\LikeService;
+use App\Services\ViewService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\Attributes\Validate;
@@ -29,10 +29,16 @@ class ShowNewPosts extends Component
         $this->postQuery = $query;
 
         if (auth()->check()) {
-            ProcessViewJob::dispatch(
-                (string) $this->postQuery,
-                (string) auth()->id(),
-            );
+            // ProcessViewJob::dispatch(
+            //     (string) $this->postQuery,
+            //     (string) auth()->id(),
+            // );
+            $post = Post::find($this->postQuery);
+
+            if ($post) {
+                app(ViewService::class)->recordView($post, (string) auth()->id());
+            }
+
             $this->viewRecorded = true;
         }
     }
@@ -45,10 +51,11 @@ class ShowNewPosts extends Component
             return;
         }
 
-        ProcessLikeJob::dispatch(
-            (string) $postId,
-            (string) Auth::id(),
-        );
+        // ProcessLikeJob::dispatch(
+        //     (string) $postId,
+        //     (string) Auth::id(),
+        // );
+        app(LikeService::class)->toggle((string) $postId, Auth::user());
     }
 
     public function loadMoreComments()
@@ -66,11 +73,12 @@ class ShowNewPosts extends Component
             return;
         }
 
-        ProcessCommentJob::dispatch(
-            (string) $this->postQuery,
-            (string) auth()->id(),
-            $message,
-        );
+        // ProcessCommentJob::dispatch(
+        //     (string) $this->postQuery,
+        //     (string) auth()->id(),
+        //     $message,
+        // );
+        app(CommentService::class)->addComment((string) $this->postQuery, auth()->user(), $message);
 
         $this->reset('message');
     }

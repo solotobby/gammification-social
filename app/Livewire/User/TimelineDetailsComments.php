@@ -2,9 +2,9 @@
 
 namespace App\Livewire\User;
 
-use App\Jobs\ProcessCommentJob;
-use App\Jobs\ProcessViewJob;
 use App\Models\Post;
+use App\Services\CommentService;
+use App\Services\ViewService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -102,10 +102,11 @@ class TimelineDetailsComments extends Component
 
         $this->viewRecorded = true;
 
-        ProcessViewJob::dispatch(
-            (string) $this->post->id,
-            (string) Auth::id(),
-        );
+        // ProcessViewJob::dispatch(
+        //     (string) $this->post->id,
+        //     (string) Auth::id(),
+        // );
+        app(ViewService::class)->recordView($this->post, (string) Auth::id());
 
         $this->dispatch('viewRecorded');
     }
@@ -124,11 +125,12 @@ class TimelineDetailsComments extends Component
         $this->message = '';
         $this->commentsCount++;
 
-        ProcessCommentJob::dispatch(
-            (string) $this->post->id,
-            (string) Auth::id(),
-            $text,
-        );
+        // ProcessCommentJob::dispatch(
+        //     (string) $this->post->id,
+        //     (string) Auth::id(),
+        //     $text,
+        // );
+        app(CommentService::class)->addComment((string) $this->post->id, Auth::user(), $text);
 
         $this->comments = collect([[
             'id' => 'pending-'.now()->timestamp,

@@ -2,7 +2,6 @@
 
 namespace App\Livewire\User;
 
-use App\Jobs\ProcessLikeJob;
 use App\Models\AccessCode;
 use App\Models\Comment;
 use App\Models\Post;
@@ -13,6 +12,7 @@ use App\Models\UserComment;
 use App\Models\UserLevel;
 use App\Models\UserLike;
 use App\Models\UserView;
+use App\Services\LikeService;
 use App\Models\Wallet;
 use App\Notifications\GeneralNotification;
 // use Illuminate\Database\Eloquent\Collection;
@@ -253,10 +253,11 @@ class Posts extends Component
             return;
         }
 
-        ProcessLikeJob::dispatch(
-            (string) $postId,
-            (string) Auth::id(),
-        );
+        // ProcessLikeJob::dispatch(
+        //     (string) $postId,
+        //     (string) Auth::id(),
+        // );
+        app(LikeService::class)->toggle((string) $postId, Auth::user());
     }
 
     public function deletePost($postId)

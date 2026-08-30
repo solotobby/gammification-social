@@ -2,9 +2,8 @@
 
 namespace App\Livewire\Concerns;
 
-use App\Jobs\ProcessPostGiftJob;
+// use App\Jobs\ProcessPostGiftJob;
 use App\Services\PayKoinService;
-use Illuminate\Support\Str;
 use Livewire\Attributes\Renderless;
 
 trait SendsPostGifts
@@ -17,34 +16,26 @@ trait SendsPostGifts
         }
 
         try {
-            $preview = app(PayKoinService::class)->validateCanSendGift(
+            // ProcessPostGiftJob::dispatch(
+            //     auth()->id(),
+            //     $artifactId,
+            //     $giftableType,
+            //     $postId,
+            // );
+
+            $result = app(PayKoinService::class)->sendGift(
                 auth()->user(),
                 $artifactId,
                 $giftableType,
                 $postId,
             );
 
-            ProcessPostGiftJob::dispatch(
-                auth()->id(),
-                $artifactId,
-                $giftableType,
-                $postId,
-            );
-
-            $pendingId = 'pending-'.Str::uuid()->toString();
-
             return [
                 'ok' => true,
-                'pending' => true,
-                'gift' => [
-                    'id' => $pendingId,
-                    'emoji' => $preview['artifact']['emoji'],
-                    'name' => $preview['artifact']['name'],
-                    'price' => $preview['pk_amount'],
-                    'sender' => auth()->user()->username,
-                ],
-                'spendable' => $preview['spendable_after'],
-                'giftTotal' => $preview['gift_total_after'],
+                'pending' => false,
+                'gift' => $result['gift'],
+                'spendable' => $result['spendable'],
+                'giftTotal' => $result['giftTotal'],
             ];
         } catch (\Throwable $e) {
             return ['ok' => false, 'message' => $e->getMessage()];

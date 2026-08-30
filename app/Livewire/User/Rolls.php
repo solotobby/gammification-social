@@ -2,15 +2,15 @@
 
 namespace App\Livewire\User;
 
-use App\Jobs\ProcessCommentJob;
-use App\Jobs\ProcessLikeJob;
-use App\Jobs\ProcessViewJob;
 use App\Models\Comment;
 use App\Models\Follow;
 use App\Models\Post;
 use App\Models\PostVideo;
 use App\Models\User;
 use App\Notifications\GeneralNotification;
+use App\Services\CommentService;
+use App\Services\LikeService;
+use App\Services\ViewService;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Renderless;
@@ -144,9 +144,12 @@ class Rolls extends Component
             return;
         }
 
-        ProcessViewJob::dispatch($postId, (string) Auth::id());
-
+        // ProcessViewJob::dispatch($postId, (string) Auth::id());
         $post = Post::find($postId);
+
+        if ($post) {
+            app(ViewService::class)->recordView($post, (string) Auth::id());
+        }
         $count = $post ? $post->totalViews() + 1 : 0;
 
         $this->dispatch(
@@ -230,7 +233,8 @@ class Rolls extends Component
 
         $this->likeOverrides[$postId] = ['liked' => $liked, 'count' => $count];
 
-        ProcessLikeJob::dispatch($unicode, (string) Auth::id());
+        // ProcessLikeJob::dispatch($unicode, (string) Auth::id());
+        app(LikeService::class)->toggle($unicode, Auth::user());
 
         $this->dispatch('likeUpdated', postId: $postId, liked: $liked, count: $count);
 
@@ -337,7 +341,8 @@ class Rolls extends Component
             return;
         }
 
-        ProcessCommentJob::dispatch($postId, (string) Auth::id(), $text);
+        // ProcessCommentJob::dispatch($postId, (string) Auth::id(), $text);
+        app(CommentService::class)->addComment($postId, Auth::user(), $text);
 
         $this->commentPostId = $postId;
         $this->showComments  = true;

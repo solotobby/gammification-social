@@ -2,9 +2,6 @@
 
 namespace App\Livewire\User;
 
-use App\Jobs\ProcessCommentJob;
-use App\Jobs\ProcessLikeJob;
-use App\Jobs\ProcessViewJob;
 use App\Livewire\Concerns\SendsPostGifts;
 use App\Models\Follow;
 use App\Models\HiddenPost;
@@ -12,9 +9,12 @@ use App\Models\Post;
 use App\Models\PostBookmark;
 use App\Models\PostReport;
 use App\Notifications\GeneralNotification;
+use App\Services\CommentService;
+use App\Services\LikeService;
 use App\Services\PostDeletionService;
 use App\Services\PostEarningsService;
 use App\Services\PayKoinService;
+use App\Services\ViewService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -215,7 +215,8 @@ class PostContent extends Component
         $this->commentMessage = '';
         $this->commentCount++;
 
-        ProcessCommentJob::dispatch($this->post->id, (string) Auth::id(), $message);
+        // ProcessCommentJob::dispatch($this->post->id, (string) Auth::id(), $message);
+        app(CommentService::class)->addComment($this->post->id, Auth::user(), $message);
 
         $this->previewComments = collect($this->previewComments->prepend([
             'id' => 'pending-'.now()->timestamp,
@@ -299,10 +300,11 @@ class PostContent extends Component
 
         $this->likedByMe = ! $this->likedByMe;
 
-        ProcessLikeJob::dispatch(
-            (string) $this->post->unicode,
-            (string) auth()->id(),
-        );
+        // ProcessLikeJob::dispatch(
+        //     (string) $this->post->unicode,
+        //     (string) auth()->id(),
+        // );
+        app(LikeService::class)->toggle((string) $this->post->unicode, auth()->user());
     }
 
     public function toggleFollow(): void
@@ -418,10 +420,11 @@ class PostContent extends Component
 
         $this->viewRecorded = true;
 
-        ProcessViewJob::dispatch(
-            (string) $this->post->id,
-            (string) auth()->id(),
-        );
+        // ProcessViewJob::dispatch(
+        //     (string) $this->post->id,
+        //     (string) auth()->id(),
+        // );
+        app(ViewService::class)->recordView($this->post, (string) auth()->id());
     }
 
     public function openVideoPlayer($videoId)

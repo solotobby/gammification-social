@@ -2,9 +2,6 @@
 
 namespace App\Livewire\User;
 
-use App\Jobs\ProcessCommunityCommentJob;
-use App\Jobs\ProcessCommunityLikeJob;
-use App\Jobs\ProcessCommunityViewJob;
 use App\Livewire\Concerns\SendsPostGifts;
 use App\Http\Controllers\CommunityInviteController;
 use App\Mail\GeneralMail;
@@ -12,6 +9,7 @@ use App\Models\Community;
 use App\Models\CommunityCategory;
 use App\Models\CommunityInvite;
 use App\Models\CommunityJoinRequest;
+use App\Models\CommunityPost;
 use App\Models\CommunityPostComment;
 use App\Models\CommunityPostLike;
 use App\Models\CommunitySubscription;
@@ -20,6 +18,7 @@ use App\Models\User;
 use App\Support\CommunityFeeCalculator;
 use App\Support\StoredMedia;
 use App\Services\CommunityMembershipService;
+use App\Services\CommunityPostEngagementService;
 use App\Services\PayKoinService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -396,7 +395,8 @@ class CommunityDetails extends Component
 
         $this->likeOverrides[$postId] = ['liked' => $liked, 'count' => $count];
 
-        ProcessCommunityLikeJob::dispatch($postId, (string) auth()->id());
+        // ProcessCommunityLikeJob::dispatch($postId, (string) auth()->id());
+        app(CommunityPostEngagementService::class)->toggleLike($post, auth()->user());
     }
 
     public function addComment(string $postId): void
@@ -429,7 +429,8 @@ class CommunityDetails extends Component
 
         $this->newComment[$postId] = '';
 
-        ProcessCommunityCommentJob::dispatch($postId, (string) auth()->id(), $text);
+        // ProcessCommunityCommentJob::dispatch($postId, (string) auth()->id(), $text);
+        app(CommunityPostEngagementService::class)->addComment($post, auth()->user(), $text);
     }
 
     /**
@@ -559,11 +560,16 @@ class CommunityDetails extends Component
 
         $this->recordedViews[$postId] = true;
 
-        ProcessCommunityViewJob::dispatch(
-            $postId,
-            (string) auth()->id(),
-            request()->ip(),
-        );
+        // ProcessCommunityViewJob::dispatch(
+        //     $postId,
+        //     (string) auth()->id(),
+        //     request()->ip(),
+        // );
+        $post = CommunityPost::find($postId);
+
+        if ($post) {
+            app(CommunityPostEngagementService::class)->recordView($post, auth()->user(), request()->ip());
+        }
     }
 
     // =========================================================

@@ -2,7 +2,6 @@
 
 namespace App\Livewire\User;
 
-use App\Jobs\ProcessLikeJob;
 use App\Support\StoredMedia;
 use App\Models\Follow;
 use App\Models\Post;
@@ -10,6 +9,7 @@ use App\Models\ProfileViews;
 use App\Models\User;
 use App\Models\UserLike;
 use App\Notifications\GeneralNotification;
+use App\Services\LikeService;
 use App\Services\PostEarningsService;
 use App\Services\PayKoinService;
 use Illuminate\Support\Facades\Auth;
@@ -108,10 +108,11 @@ class ViewProfile extends Component
             return;
         }
 
-        ProcessLikeJob::dispatch(
-            (string) $postId,
-            (string) Auth::id(),
-        );
+        // ProcessLikeJob::dispatch(
+        //     (string) $postId,
+        //     (string) Auth::id(),
+        // );
+        app(LikeService::class)->toggle((string) $postId, Auth::user());
     }
 
     public function updatedAvatarUpload(): void

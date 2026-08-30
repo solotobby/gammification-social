@@ -2,8 +2,8 @@
 
 namespace App\Livewire\User;
 
-use App\Jobs\ProcessCommentJob;
 use App\Models\Comment;
+use App\Services\CommentService;
 use Livewire\Component;
 use App\Models\Post;
 use Illuminate\Support\Facades\Auth;
@@ -61,11 +61,12 @@ class PostComments extends Component
         $this->message = '';
         $this->commentsCount++;
 
-        ProcessCommentJob::dispatch(
-            (string) $this->post->id,
-            (string) Auth::id(),
-            $text,
-        );
+        // ProcessCommentJob::dispatch(
+        //     (string) $this->post->id,
+        //     (string) Auth::id(),
+        //     $text,
+        // );
+        app(CommentService::class)->addComment((string) $this->post->id, Auth::user(), $text);
 
         $this->comments = collect([[
             'id' => 'pending-'.now()->timestamp,

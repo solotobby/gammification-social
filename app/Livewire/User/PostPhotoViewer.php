@@ -2,12 +2,11 @@
 
 namespace App\Livewire\User;
 
-use App\Jobs\ProcessCommentJob;
-use App\Jobs\ProcessCommunityCommentJob;
-use App\Jobs\ProcessCommunityLikeJob;
-use App\Jobs\ProcessLikeJob;
 use App\Models\CommunityPost;
 use App\Models\Post;
+use App\Services\CommentService;
+use App\Services\CommunityPostEngagementService;
+use App\Services\LikeService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
@@ -121,10 +120,11 @@ class PostPhotoViewer extends Component
             $this->likedByMe = ! $this->likedByMe;
             $this->likesCount = max(0, $this->likesCount + ($this->likedByMe ? 1 : -1));
 
-            ProcessCommunityLikeJob::dispatch(
-                (string) $this->communityPost->id,
-                (string) auth()->id(),
-            );
+            // ProcessCommunityLikeJob::dispatch(
+            //     (string) $this->communityPost->id,
+            //     (string) auth()->id(),
+            // );
+            app(CommunityPostEngagementService::class)->toggleLike($this->communityPost, auth()->user());
 
             $this->dispatch('photoViewerUpdated', postId: $this->communityPost->id, source: 'community');
 
@@ -138,10 +138,11 @@ class PostPhotoViewer extends Component
         $this->likedByMe = ! $this->likedByMe;
         $this->likesCount = max(0, $this->likesCount + ($this->likedByMe ? 1 : -1));
 
-        ProcessLikeJob::dispatch(
-            (string) $this->post->unicode,
-            (string) Auth::id(),
-        );
+        // ProcessLikeJob::dispatch(
+        //     (string) $this->post->unicode,
+        //     (string) Auth::id(),
+        // );
+        app(LikeService::class)->toggle((string) $this->post->unicode, Auth::user());
 
         $this->dispatch('photoViewerUpdated', postId: $this->post->id, source: 'post');
     }
@@ -171,11 +172,12 @@ class PostPhotoViewer extends Component
                 'created_at' => now()->toDateTimeString(),
             ]])->concat($this->comments ?? collect());
 
-            ProcessCommunityCommentJob::dispatch(
-                (string) $this->communityPost->id,
-                (string) auth()->id(),
-                $text,
-            );
+            // ProcessCommunityCommentJob::dispatch(
+            //     (string) $this->communityPost->id,
+            //     (string) auth()->id(),
+            //     $text,
+            // );
+            app(CommunityPostEngagementService::class)->addComment($this->communityPost, auth()->user(), $text);
 
             $this->dispatch('photoViewerUpdated', postId: $this->communityPost->id, source: 'community');
 
@@ -199,11 +201,12 @@ class PostPhotoViewer extends Component
             'created_at' => now()->toDateTimeString(),
         ]])->concat($this->comments ?? collect());
 
-        ProcessCommentJob::dispatch(
-            (string) $this->post->id,
-            (string) Auth::id(),
-            $text,
-        );
+        // ProcessCommentJob::dispatch(
+        //     (string) $this->post->id,
+        //     (string) Auth::id(),
+        //     $text,
+        // );
+        app(CommentService::class)->addComment((string) $this->post->id, Auth::user(), $text);
 
         $this->dispatch('commentAdded');
         $this->dispatch('photoViewerUpdated', postId: $this->post->id, source: 'post');
