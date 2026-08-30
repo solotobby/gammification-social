@@ -51,6 +51,7 @@ return [
         'posts',
         'videos',
         'bookmarks',
+        'messaging',
         'reports',
         'feedback',
         'blog',

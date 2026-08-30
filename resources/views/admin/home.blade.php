@@ -232,7 +232,9 @@
                 </div>
             </section>
 
-            @php($ca = $communityAnalytics)
+            @php
+                $ca = $communityAnalytics;
+            @endphp
 
             <section class="dash-section">
                 <div class="dash-card__head" style="margin-bottom:1rem;padding:0 0.25rem">
@@ -347,7 +349,9 @@
                 </section>
             @endif
 
-            @php($pk = $paykoinAnalytics ?? null)
+            @php
+                $pk = $paykoinAnalytics ?? null;
+            @endphp
 
             @if ($pk)
                 <section class="dash-section">
@@ -417,13 +421,18 @@
                                     <table class="dash-table">
                                         <thead><tr><th>User</th><th>Type</th><th>PK</th><th>When</th></tr></thead>
                                         <tbody>
+                                            @php
+                                                $paykoinTxTypes = [
+                                                    'topup' => 'Top-up',
+                                                    'gift_sent' => 'Sent',
+                                                    'gift_received' => 'Received',
+                                                    'convert' => 'Converted',
+                                                ];
+                                            @endphp
                                             @forelse ($pk['recentTransactions'] as $tx)
-                                                @php
-                                                    $txTypes = ['topup' => 'Top-up', 'gift_sent' => 'Sent', 'gift_received' => 'Received', 'convert' => 'Converted'];
-                                                @endphp
                                                 <tr>
                                                     <td>{{ $tx->user ? '@'.$tx->user->username : '—' }}</td>
-                                                    <td>{{ $txTypes[$tx->type] ?? $tx->type }}</td>
+                                                    <td>{{ $paykoinTxTypes[$tx->type] ?? $tx->type }}</td>
                                                     <td>{{ $tx->pk_amount >= 0 ? '+' : '' }}{{ number_format($tx->pk_amount) }}</td>
                                                     <td>{{ $tx->created_at->diffForHumans() }}</td>
                                                 </tr>

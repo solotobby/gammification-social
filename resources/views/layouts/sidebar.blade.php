@@ -39,6 +39,10 @@
                     <i class="nav-main-link-icon fa fa-bookmark"></i>
                     <span class="nav-main-link-name">Bookmarks</span>
                 </a>
+                <a class="nav-main-link{{ request()->routeIs('admin.messaging.*') ? ' active' : '' }}" href="{{ route('admin.messaging.index') }}">
+                    <i class="nav-main-link-icon fa fa-comments"></i>
+                    <span class="nav-main-link-name">Messaging</span>
+                </a>
 
             <li class="nav-main-item">
                 <a class="nav-main-link nav-main-link-submenu" data-toggle="submenu" aria-haspopup="true"
