@@ -71,6 +71,32 @@
             margin-top: .2rem;
         }
 
+        .payout-search {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .625rem;
+            align-items: center;
+            padding: 0 1.25rem 1rem;
+            border-bottom: 1px solid var(--dash-border);
+        }
+
+        .payout-search .dash-input {
+            flex: 1;
+            min-width: 240px;
+            max-width: 420px;
+        }
+
+        .payout-search__meta {
+            font-size: .8125rem;
+            color: var(--dash-muted);
+            white-space: nowrap;
+        }
+
+        .payout-search__clear {
+            padding: .5rem .75rem;
+            font-size: .8125rem;
+        }
+
         /* Payout sheets — custom overlay (avoids Bootstrap modal/footer conflicts) */
         .payout-sheet {
             display: none;
@@ -360,9 +386,19 @@
                         @endif
                     </div>
 
-                    <div class="dash-card__body--flush">
-                        <div class="dash-table-wrap">
-                            <table class="dash-table">
+                    <div class="payout-search">
+                        <input type="search"
+                            id="payoutMemberSearch"
+                            class="dash-input"
+                            placeholder="Search by name or email…"
+                            autocomplete="off"
+                            aria-label="Search members">
+                        <span id="payoutSearchCount" class="payout-search__meta"></span>
+                        <button type="button" id="payoutSearchClear" class="dash-btn dash-btn--ghost payout-search__clear">Clear</button>
+                    </div>
+
+                    <div class="dash-table-wrap">
+                        <table class="dash-table" id="payoutMembersTable">
                                 <thead>
                                     <tr>
                                         <th>Member</th>
@@ -383,7 +419,7 @@
                                             $statusClass = $payoutStatus === 'Paid' ? 'dash-badge--gray' : ($payoutStatus === 'Queued' ? 'dash-badge--amber' : 'dash-badge--indigo');
                                             $rowId = $user['id'];
                                         @endphp
-                                        <tr>
+                                        <tr data-search="{{ strtolower(($user['name'] ?? '') . ' ' . ($user['email'] ?? '')) }}">
                                             <td>
                                                 <strong>{{ $user['name'] ?? 'N/A' }}</strong>
                                                 <div class="dash-muted" style="font-size:.75rem">{{ $user['email'] ?? '' }}</div>
@@ -478,16 +514,20 @@
                                             </td>
                                         </tr>
                                     @empty
-                                        <tr>
+                                        <tr id="payoutTableEmpty">
                                             <td colspan="9">
                                                 <div class="dash-empty">No eligible users for payout this month.</div>
                                             </td>
                                         </tr>
                                     @endforelse
+                                    <tr id="payoutSearchEmpty" style="display:none">
+                                        <td colspan="9">
+                                            <div class="dash-empty">No members match your search.</div>
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
-                    </div>
                 </div>
             @endif
         </div>
@@ -717,6 +757,57 @@
                 openSheet(sheets.engagement);
             });
         });
+
+        var searchInput = document.getElementById('payoutMemberSearch');
+        var searchCount = document.getElementById('payoutSearchCount');
+        var searchClear = document.getElementById('payoutSearchClear');
+        var searchEmptyRow = document.getElementById('payoutSearchEmpty');
+        var payoutTable = document.getElementById('payoutMembersTable');
+
+        if (searchInput && payoutTable) {
+            var memberRows = Array.from(payoutTable.querySelectorAll('tbody tr[data-search]'));
+            var storageKey = 'admin_payout_search_' + @json($currentLevel ?? 'Influencer');
+
+            function filterPayoutMembers() {
+                var query = searchInput.value.trim().toLowerCase();
+                var visible = 0;
+
+                memberRows.forEach(function (row) {
+                    var matches = !query || row.dataset.search.indexOf(query) !== -1;
+                    row.style.display = matches ? '' : 'none';
+                    if (matches) {
+                        visible++;
+                    }
+                });
+
+                if (searchCount) {
+                    searchCount.textContent = query
+                        ? visible + ' of ' + memberRows.length + ' member(s)'
+                        : memberRows.length + ' member(s)';
+                }
+
+                if (searchEmptyRow) {
+                    searchEmptyRow.style.display = query && visible === 0 ? '' : 'none';
+                }
+            }
+
+            searchInput.value = sessionStorage.getItem(storageKey) || '';
+            searchInput.addEventListener('input', function () {
+                sessionStorage.setItem(storageKey, searchInput.value);
+                filterPayoutMembers();
+            });
+
+            if (searchClear) {
+                searchClear.addEventListener('click', function () {
+                    searchInput.value = '';
+                    sessionStorage.removeItem(storageKey);
+                    filterPayoutMembers();
+                    searchInput.focus();
+                });
+            }
+
+            filterPayoutMembers();
+        }
     });
 </script>
 @endsection
