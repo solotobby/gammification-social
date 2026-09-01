@@ -210,13 +210,12 @@ class Kernel extends ConsoleKernel
             $date = now()->subDay()->toDateString(); // yesterday
 
             $activeUsers = UserLevel::where('status', 'active')
-                // ->whereIn('plan_name', ['Creator', 'Influencer'])
+                ->whereIn('plan_name', ['Basic'])
                 ->with('user:id')
                 ->get();
 
             // $this->info('Calculating and registring daily stat');
             foreach ($activeUsers as $userLevel) {
-
 
                 DB::transaction(function () use ($userLevel, $date) {
                     // Skip if already calculated
@@ -305,22 +304,7 @@ class Kernel extends ConsoleKernel
         })->dailyAt('23:00');
 
         $schedule->command('communities:expire-subscriptions')->hourly();
-
-        // $schedule->call(function () {
-        //     $subject = 'Test Mail';
-        //     $content = "Registered Daily Stats successfully";
-
-
-        //     Mail::to('solotob3@gmail.com')
-        //         ->send(new GeneralMail(
-        //             (object)[
-        //                 'name' => 'Oluwatobi Solomon',
-        //                 'email' => 'solotob3@gmail.com'
-        //             ],
-        //             $subject,
-        //             $content
-        //         ));
-        // })->everyFiveMinutes();
+        
     }
 
     /**

@@ -71,63 +71,24 @@
             margin-top: .2rem;
         }
 
-        .payout-modal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            z-index: 1050;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-            background: rgba(15, 23, 42, .45);
-        }
-
-        .payout-modal.is-open { display: flex; }
-
-        .payout-modal__dialog {
-            width: 100%;
-            max-width: 440px;
-            background: var(--dash-surface);
-            border-radius: var(--dash-radius);
+        #payoutAddModal .modal-content,
+        #payoutEditModal .modal-content,
+        #payoutEngagementModal .modal-content {
             border: 1px solid var(--dash-border);
+            border-radius: var(--dash-radius);
             box-shadow: 0 24px 48px rgba(15, 23, 42, .18);
-            overflow: hidden;
         }
 
-        .payout-modal__head {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 1rem 1.25rem;
+        #payoutAddModal .modal-header,
+        #payoutEditModal .modal-header,
+        #payoutEngagementModal .modal-header {
             border-bottom: 1px solid var(--dash-border);
         }
 
-        .payout-modal__title {
-            margin: 0;
-            font-size: 1rem;
-            font-weight: 700;
-        }
-
-        .payout-modal__close {
-            border: none;
-            background: transparent;
-            color: var(--dash-muted);
-            font-size: 1.25rem;
-            cursor: pointer;
-            line-height: 1;
-        }
-
-        .payout-modal__body {
-            padding: 1.25rem;
-            display: grid;
-            gap: 1rem;
-        }
-
-        .payout-modal__foot {
-            display: flex;
-            justify-content: flex-end;
-            gap: .5rem;
-            padding: 0 1.25rem 1.25rem;
+        #payoutAddModal .modal-footer,
+        #payoutEditModal .modal-footer,
+        #payoutEngagementModal .modal-footer {
+            border-top: 1px solid var(--dash-border);
         }
 
         .dash-field label {
@@ -136,6 +97,9 @@
             font-weight: 600;
             margin-bottom: .35rem;
         }
+
+        .dash-field { margin-bottom: 1rem; }
+        .dash-field:last-child { margin-bottom: 0; }
 
         @media (max-width: 1200px) {
             .dash-grid--4, .dash-grid--5 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -281,8 +245,11 @@
                                                             <li>
                                                                 <span>₦{{ number_format($comp['amount'], 2) }}</span>
                                                                 @if ($payoutStatus === 'Pending')
-                                                                    <button type="button" class="dash-link"
-                                                                        onclick="openEditModal('{{ $comp['id'] }}', {{ json_encode($comp['amount']) }}, {{ json_encode($comp['note'] ?? '') }}, {{ json_encode($user['name']) }})">
+                                                                    <button type="button" class="dash-link js-payout-edit-component"
+                                                                        data-component-id="{{ $comp['id'] }}"
+                                                                        data-amount="{{ $comp['amount'] }}"
+                                                                        data-note="{{ e($comp['note'] ?? '') }}"
+                                                                        data-member="{{ e($user['name']) }}">
                                                                         Edit
                                                                     </button>
                                                                 @endif
@@ -299,8 +266,11 @@
                                                             <li>
                                                                 <span>₦{{ number_format($comp['amount'], 2) }}</span>
                                                                 @if ($payoutStatus === 'Pending')
-                                                                    <button type="button" class="dash-link"
-                                                                        onclick="openEditModal('{{ $comp['id'] }}', {{ json_encode($comp['amount']) }}, {{ json_encode($comp['note'] ?? '') }}, {{ json_encode($user['name']) }})">
+                                                                    <button type="button" class="dash-link js-payout-edit-component"
+                                                                        data-component-id="{{ $comp['id'] }}"
+                                                                        data-amount="{{ $comp['amount'] }}"
+                                                                        data-note="{{ e($comp['note'] ?? '') }}"
+                                                                        data-member="{{ e($user['name']) }}">
                                                                         Edit
                                                                     </button>
                                                                 @endif
@@ -314,16 +284,22 @@
                                             <td>
                                                 @if ($payoutStatus === 'Pending')
                                                     <div class="payout-actions">
-                                                        <button type="button" class="dash-btn dash-btn--ghost"
-                                                            onclick="openAddModal('{{ $rowId }}', 'revenue', {{ json_encode($user['name']) }})">
+                                                        <button type="button" class="dash-btn dash-btn--ghost js-payout-add"
+                                                            data-stat-id="{{ $rowId }}"
+                                                            data-type="revenue"
+                                                            data-member="{{ e($user['name']) }}">
                                                             + Revenue
                                                         </button>
-                                                        <button type="button" class="dash-btn dash-btn--ghost"
-                                                            onclick="openAddModal('{{ $rowId }}', 'bonus', {{ json_encode($user['name']) }})">
+                                                        <button type="button" class="dash-btn dash-btn--ghost js-payout-add"
+                                                            data-stat-id="{{ $rowId }}"
+                                                            data-type="bonus"
+                                                            data-member="{{ e($user['name']) }}">
                                                             + Bonus
                                                         </button>
-                                                        <button type="button" class="dash-btn dash-btn--ghost"
-                                                            onclick="openEngagementModal('{{ $rowId }}', {{ json_encode((float) ($user['userPayout'] ?? 0)) }}, {{ json_encode($user['name']) }})">
+                                                        <button type="button" class="dash-btn dash-btn--ghost js-payout-edit-engagement"
+                                                            data-stat-id="{{ $rowId }}"
+                                                            data-amount="{{ (float) ($user['userPayout'] ?? 0) }}"
+                                                            data-member="{{ e($user['name']) }}">
                                                             Edit
                                                         </button>
                                                         <form method="POST" action="{{ route('admin.payouts.queue', $rowId) }}"
@@ -357,157 +333,189 @@
         </div>
     </div>
 
-    {{-- Add revenue / bonus modal --}}
-    <div class="payout-modal" id="addComponentModal" aria-hidden="true">
-        <div class="payout-modal__dialog" role="dialog">
-            <div class="payout-modal__head">
-                <h3 class="payout-modal__title" id="addModalTitle">Add payout</h3>
-                <button type="button" class="payout-modal__close" onclick="closeModal('addComponentModal')">&times;</button>
+    {{-- Modals live outside .dash so Bootstrap fixed positioning is reliable --}}
+    <div class="modal fade" id="payoutAddModal" tabindex="-1" aria-labelledby="payoutAddModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form method="POST" action="{{ route('admin.payouts.components.store') }}">
+                    @csrf
+                    <input type="hidden" name="engagement_stat_id" id="addStatId">
+                    <input type="hidden" name="type" id="addType">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="payoutAddModalLabel">Add payout</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="dash-muted mb-3" id="addModalMember"></p>
+                        <div class="dash-field">
+                            <label for="addAmount">Amount (NGN)</label>
+                            <input type="number" id="addAmount" name="amount" class="dash-input" min="0.01" step="0.01" required placeholder="e.g. 5000">
+                        </div>
+                        <div class="dash-field">
+                            <label for="addNote">Note (optional)</label>
+                            <input type="text" id="addNote" name="note" class="dash-input" maxlength="500" placeholder="Reason for this payout">
+                        </div>
+                        <div class="dash-field">
+                            <label for="addValidation">Validation code</label>
+                            <input type="text" id="addValidation" name="validationCode" class="dash-input" required autocomplete="off">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="dash-btn dash-btn--ghost" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="dash-btn dash-btn--primary">Save payout</button>
+                    </div>
+                </form>
             </div>
-            <form method="POST" action="{{ route('admin.payouts.components.store') }}">
-                @csrf
-                <input type="hidden" name="engagement_stat_id" id="addStatId">
-                <input type="hidden" name="type" id="addType">
-                <div class="payout-modal__body">
-                    <p class="dash-muted" id="addModalMember" style="margin:0"></p>
-                    <div class="dash-field">
-                        <label for="addAmount">Amount (NGN)</label>
-                        <input type="number" id="addAmount" name="amount" class="dash-input" min="0.01" step="0.01" required placeholder="e.g. 5000">
-                    </div>
-                    <div class="dash-field">
-                        <label for="addNote">Note (optional)</label>
-                        <input type="text" id="addNote" name="note" class="dash-input" maxlength="500" placeholder="Reason for this payout">
-                    </div>
-                    <div class="dash-field">
-                        <label for="addValidation">Validation code</label>
-                        <input type="text" id="addValidation" name="validationCode" class="dash-input" required>
-                    </div>
-                </div>
-                <div class="payout-modal__foot">
-                    <button type="button" class="dash-btn dash-btn--ghost" onclick="closeModal('addComponentModal')">Cancel</button>
-                    <button type="submit" class="dash-btn dash-btn--primary">Save payout</button>
-                </div>
-            </form>
         </div>
     </div>
 
-    {{-- Edit component modal --}}
-    <div class="payout-modal" id="editComponentModal" aria-hidden="true">
-        <div class="payout-modal__dialog" role="dialog">
-            <div class="payout-modal__head">
-                <h3 class="payout-modal__title">Edit payout line</h3>
-                <button type="button" class="payout-modal__close" onclick="closeModal('editComponentModal')">&times;</button>
+    <div class="modal fade" id="payoutEditModal" tabindex="-1" aria-labelledby="payoutEditModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form method="POST" id="editComponentForm">
+                    @csrf
+                    @method('PUT')
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="payoutEditModalLabel">Edit payout line</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="dash-muted mb-3" id="editModalMember"></p>
+                        <div class="dash-field">
+                            <label for="editAmount">Amount (NGN)</label>
+                            <input type="number" id="editAmount" name="amount" class="dash-input" min="0.01" step="0.01" required>
+                        </div>
+                        <div class="dash-field">
+                            <label for="editNote">Note (optional)</label>
+                            <input type="text" id="editNote" name="note" class="dash-input" maxlength="500">
+                        </div>
+                        <div class="dash-field">
+                            <label for="editValidation">Validation code</label>
+                            <input type="text" id="editValidation" name="validationCode" class="dash-input" required autocomplete="off">
+                        </div>
+                    </div>
+                    <div class="modal-footer d-flex justify-content-between w-100">
+                        <button type="button" class="dash-btn dash-btn--ghost" style="color:#b42318;border-color:#fecaca"
+                            id="deleteComponentBtn">
+                            Remove line
+                        </button>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="dash-btn dash-btn--ghost" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="dash-btn dash-btn--primary">Update</button>
+                        </div>
+                    </div>
+                </form>
+                <form method="POST" id="deleteComponentForm" class="d-none">
+                    @csrf
+                    @method('DELETE')
+                    <input type="hidden" name="validationCode" id="deleteValidation">
+                </form>
             </div>
-            <form method="POST" id="editComponentForm">
-                @csrf
-                @method('PUT')
-                <div class="payout-modal__body">
-                    <p class="dash-muted" id="editModalMember" style="margin:0"></p>
-                    <div class="dash-field">
-                        <label for="editAmount">Amount (NGN)</label>
-                        <input type="number" id="editAmount" name="amount" class="dash-input" min="0.01" step="0.01" required>
-                    </div>
-                    <div class="dash-field">
-                        <label for="editNote">Note (optional)</label>
-                        <input type="text" id="editNote" name="note" class="dash-input" maxlength="500">
-                    </div>
-                    <div class="dash-field">
-                        <label for="editValidation">Validation code</label>
-                        <input type="text" id="editValidation" name="validationCode" class="dash-input" required>
-                    </div>
-                </div>
-                <div class="payout-modal__foot">
-                    <button type="button" class="dash-btn dash-btn--ghost" onclick="closeModal('editComponentModal')">Cancel</button>
-                    <button type="submit" class="dash-btn dash-btn--primary">Update</button>
-                </div>
-            </form>
-            <form method="POST" id="deleteComponentForm" style="padding:0 1.25rem 1.25rem">
-                @csrf
-                @method('DELETE')
-                <input type="hidden" name="validationCode" id="deleteValidation">
-                <button type="submit" class="dash-btn dash-btn--ghost" style="color:#b42318;border-color:#fecaca"
-                    onclick="document.getElementById('deleteValidation').value = document.getElementById('editValidation').value; return confirm('Remove this payout line?');">
-                    Remove line
-                </button>
-            </form>
         </div>
     </div>
 
-    {{-- Edit engagement payout modal --}}
-    <div class="payout-modal" id="engagementModal" aria-hidden="true">
-        <div class="payout-modal__dialog" role="dialog">
-            <div class="payout-modal__head">
-                <h3 class="payout-modal__title">Edit engagement payout</h3>
-                <button type="button" class="payout-modal__close" onclick="closeModal('engagementModal')">&times;</button>
+    <div class="modal fade" id="payoutEngagementModal" tabindex="-1" aria-labelledby="payoutEngagementModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form method="POST" id="engagementForm">
+                    @csrf
+                    @method('PATCH')
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="payoutEngagementModalLabel">Edit engagement payout</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="dash-muted mb-3" id="engagementModalMember"></p>
+                        <div class="dash-field">
+                            <label for="engagementAmount">Engagement payout (USD)</label>
+                            <input type="number" id="engagementAmount" name="amount" class="dash-input" min="0" step="0.01" required>
+                            <span class="dash-muted" style="font-size:.75rem">Auto-calculated pro-rata share; override if needed.</span>
+                        </div>
+                        <div class="dash-field">
+                            <label for="engagementValidation">Validation code</label>
+                            <input type="text" id="engagementValidation" name="validationCode" class="dash-input" required autocomplete="off">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="dash-btn dash-btn--ghost" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="dash-btn dash-btn--primary">Update</button>
+                    </div>
+                </form>
             </div>
-            <form method="POST" id="engagementForm">
-                @csrf
-                @method('PATCH')
-                <div class="payout-modal__body">
-                    <p class="dash-muted" id="engagementModalMember" style="margin:0"></p>
-                    <div class="dash-field">
-                        <label for="engagementAmount">Engagement payout (USD)</label>
-                        <input type="number" id="engagementAmount" name="amount" class="dash-input" min="0" step="0.01" required>
-                        <span class="dash-muted" style="font-size:.75rem">Auto-calculated pro-rata share; override if needed.</span>
-                    </div>
-                    <div class="dash-field">
-                        <label for="engagementValidation">Validation code</label>
-                        <input type="text" id="engagementValidation" name="validationCode" class="dash-input" required>
-                    </div>
-                </div>
-                <div class="payout-modal__foot">
-                    <button type="button" class="dash-btn dash-btn--ghost" onclick="closeModal('engagementModal')">Cancel</button>
-                    <button type="submit" class="dash-btn dash-btn--primary">Update</button>
-                </div>
-            </form>
         </div>
     </div>
 @endsection
 
 @section('script')
 <script>
-    function openModal(id) {
-        document.getElementById(id).classList.add('is-open');
-    }
+    document.addEventListener('DOMContentLoaded', function () {
+        var addModalEl = document.getElementById('payoutAddModal');
+        var editModalEl = document.getElementById('payoutEditModal');
+        var engagementModalEl = document.getElementById('payoutEngagementModal');
 
-    function closeModal(id) {
-        document.getElementById(id).classList.remove('is-open');
-    }
+        if (typeof bootstrap === 'undefined') {
+            console.error('Bootstrap is required for payout modals.');
+            return;
+        }
 
-    function openAddModal(statId, type, memberName) {
-        document.getElementById('addStatId').value = statId;
-        document.getElementById('addType').value = type;
-        document.getElementById('addModalTitle').textContent = type === 'revenue' ? 'Add revenue payout' : 'Add bonus payout';
-        document.getElementById('addModalMember').textContent = memberName;
-        document.getElementById('addAmount').value = '';
-        document.getElementById('addNote').value = '';
-        document.getElementById('addValidation').value = '';
-        openModal('addComponentModal');
-    }
+        var addModal = new bootstrap.Modal(addModalEl);
+        var editModal = new bootstrap.Modal(editModalEl);
+        var engagementModal = new bootstrap.Modal(engagementModalEl);
 
-    function openEditModal(componentId, amount, note, memberName) {
-        document.getElementById('editComponentForm').action = '{{ url('admin/payouts/components') }}/' + componentId;
-        document.getElementById('deleteComponentForm').action = '{{ url('admin/payouts/components') }}/' + componentId;
-        document.getElementById('editModalMember').textContent = memberName;
-        document.getElementById('editAmount').value = amount;
-        document.getElementById('editNote').value = note || '';
-        document.getElementById('editValidation').value = '';
-        openModal('editComponentModal');
-    }
+        var componentsBase = @json(url('admin/payouts/components'));
+        var engagementBase = @json(url('admin/payouts/engagement'));
 
-    function openEngagementModal(statId, amount, memberName) {
-        document.getElementById('engagementForm').action = '{{ url('admin/payouts/engagement') }}/' + statId + '/amount';
-        document.getElementById('engagementModalMember').textContent = memberName;
-        document.getElementById('engagementAmount').value = amount;
-        document.getElementById('engagementValidation').value = '';
-        openModal('engagementModal');
-    }
+        document.querySelectorAll('.js-payout-add').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var type = this.dataset.type;
+                document.getElementById('addStatId').value = this.dataset.statId;
+                document.getElementById('addType').value = type;
+                document.getElementById('payoutAddModalLabel').textContent = type === 'revenue' ? 'Add revenue payout' : 'Add bonus payout';
+                document.getElementById('addModalMember').textContent = this.dataset.member || '';
+                document.getElementById('addAmount').value = '';
+                document.getElementById('addNote').value = '';
+                document.getElementById('addValidation').value = '';
+                addModal.show();
+            });
+        });
 
-    document.querySelectorAll('.payout-modal').forEach(function (modal) {
-        modal.addEventListener('click', function (e) {
-            if (e.target === modal) {
-                modal.classList.remove('is-open');
+        document.querySelectorAll('.js-payout-edit-component').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var componentId = this.dataset.componentId;
+                document.getElementById('editComponentForm').action = componentsBase + '/' + componentId;
+                document.getElementById('deleteComponentForm').action = componentsBase + '/' + componentId;
+                document.getElementById('editModalMember').textContent = this.dataset.member || '';
+                document.getElementById('editAmount').value = this.dataset.amount || '';
+                document.getElementById('editNote').value = this.dataset.note || '';
+                document.getElementById('editValidation').value = '';
+                editModal.show();
+            });
+        });
+
+        document.getElementById('deleteComponentBtn').addEventListener('click', function (e) {
+            e.preventDefault();
+            var code = document.getElementById('editValidation').value;
+            if (!code) {
+                alert('Enter your validation code to remove this line.');
+                document.getElementById('editValidation').focus();
+                return;
             }
+            if (!confirm('Remove this payout line?')) {
+                return;
+            }
+            document.getElementById('deleteValidation').value = code;
+            document.getElementById('deleteComponentForm').submit();
+        });
+
+        document.querySelectorAll('.js-payout-edit-engagement').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var statId = this.dataset.statId;
+                document.getElementById('engagementForm').action = engagementBase + '/' + statId + '/amount';
+                document.getElementById('engagementModalMember').textContent = this.dataset.member || '';
+                document.getElementById('engagementAmount').value = this.dataset.amount || '';
+                document.getElementById('engagementValidation').value = '';
+                engagementModal.show();
+            });
         });
     });
 </script>

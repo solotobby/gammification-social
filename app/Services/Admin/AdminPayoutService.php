@@ -5,6 +5,7 @@ namespace App\Services\Admin;
 use App\Mail\GeneralMail;
 use App\Models\EngagementMonthlyStat;
 use App\Models\EngagementPayoutComponent;
+use App\Models\FremiumEngagementStat;
 use App\Models\Payout;
 use App\Models\Transaction;
 use App\Models\User;
@@ -82,7 +83,7 @@ class AdminPayoutService
 
     public function processBasic(string $lastMonth): array
     {
-        $members = EngagementMonthlyStat::with(['user.wallet', 'payoutComponents'])
+        $members = FremiumEngagementStat::with(['user.wallet', 'payoutComponents'])
             ->where('level', 'Basic')
             ->where('month', $lastMonth)
             ->get();
