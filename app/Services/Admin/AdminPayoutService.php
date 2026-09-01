@@ -41,6 +41,7 @@ class AdminPayoutService
             ->with($this->engagementStatRelations())
             ->where('level', $level)
             ->where('month', $lastMonth)
+            ->orderByDesc('points')
             ->get();
 
         $memberCount = $members->count();
@@ -99,6 +100,7 @@ class AdminPayoutService
             ->with($this->engagementStatRelations())
             ->where('level', 'Basic')
             ->where('month', $lastMonth)
+            ->orderByDesc('points')
             ->get();
 
         if ($members->isEmpty()) {
