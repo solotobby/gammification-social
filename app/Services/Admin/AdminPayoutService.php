@@ -4,6 +4,7 @@ namespace App\Services\Admin;
 
 use App\Mail\GeneralMail;
 use App\Models\EngagementMonthlyStat;
+use App\Models\EngagementPayoutComponent;
 use App\Models\Payout;
 use App\Models\Transaction;
 use App\Models\User;
@@ -14,6 +15,7 @@ use App\Notifications\GeneralNotification;
 use App\Services\AdminAuditService;
 use App\Services\FundTransferService;
 use App\Services\TransactionService;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -33,7 +35,7 @@ class AdminPayoutService
             'Influencer' => 5,
         ];
 
-        $members = EngagementMonthlyStat::with(['user.wallet'])
+        $members = EngagementMonthlyStat::with(['user.wallet', 'payoutComponents'])
             ->where('level', $level)
             ->where('month', $lastMonth)
             ->get();
@@ -58,21 +60,13 @@ class AdminPayoutService
                 ? round(($member->points / $totalEngagement) * $levelPool, 2)
                 : 0;
 
-            $member->update(['amount' => $payout]);
+            if (! $member->amount_manual) {
+                $member->update(['amount' => $payout]);
+            } else {
+                $payout = (float) $member->amount;
+            }
 
-            $user = $member->user;
-
-            $userEngagements[] = [
-                'id' => $member->id,
-                'user_id' => $member->user_id,
-                'name' => $user->name ?? 'N/A',
-                'email' => $user->email ?? 'N/A',
-                'engagement' => $member->points ?? 0,
-                'userPercentage' => $percentage,
-                'userPayout' => $payout,
-                'userWallet' => $user->wallet->currency ?? 'USD',
-                'status' => $member->status,
-            ];
+            $userEngagements[] = $this->buildUserEngagementRow($member, $percentage, $payout);
         }
 
         return [
@@ -82,12 +76,13 @@ class AdminPayoutService
             'memberCount' => $memberCount,
             'levelPool' => $levelPool,
             'poolLabel' => 'Level pool',
+            'componentAnalytics' => $this->componentAnalytics($lastMonth, $level),
         ];
     }
 
     public function processBasic(string $lastMonth): array
     {
-        $members = EngagementMonthlyStat::with(['user.wallet'])
+        $members = EngagementMonthlyStat::with(['user.wallet', 'payoutComponents'])
             ->where('level', 'Basic')
             ->where('month', $lastMonth)
             ->get();
@@ -122,21 +117,13 @@ class AdminPayoutService
                 ? round(($member->points / $totalEngagement) * $fremiumPool, 2)
                 : 0;
 
-            $member->update(['amount' => $payout]);
+            if (! $member->amount_manual) {
+                $member->update(['amount' => $payout]);
+            } else {
+                $payout = (float) $member->amount;
+            }
 
-            $user = $member->user;
-
-            $userEngagements[] = [
-                'id' => $member->id,
-                'user_id' => $member->user_id,
-                'name' => $user->name ?? 'N/A',
-                'email' => $user->email ?? 'N/A',
-                'engagement' => $member->points ?? 0,
-                'userPercentage' => $percentage,
-                'userPayout' => $payout,
-                'userWallet' => $user->wallet->currency ?? 'USD',
-                'status' => $member->status,
-            ];
+            $userEngagements[] = $this->buildUserEngagementRow($member, $percentage, $payout);
         }
 
         return [
@@ -146,32 +133,186 @@ class AdminPayoutService
             'memberCount' => $members->count(),
             'levelPool' => $fremiumPool,
             'poolLabel' => 'Freemium pool',
+            'componentAnalytics' => $this->componentAnalytics($lastMonth, 'Basic'),
+        ];
+    }
+
+    public function addComponent(
+        string $engagementStatId,
+        string $type,
+        float $amount,
+        ?string $note = null,
+        string $currency = 'NGN'
+    ): EngagementPayoutComponent {
+        $stat = $this->assertEditableStat($engagementStatId);
+
+        if (! in_array($type, ['revenue', 'bonus'], true)) {
+            throw new \InvalidArgumentException('Invalid payout component type.');
+        }
+
+        if ($amount <= 0) {
+            throw new \InvalidArgumentException('Amount must be greater than zero.');
+        }
+
+        $component = EngagementPayoutComponent::create([
+            'engagement_monthly_stats_id' => $stat->id,
+            'user_id' => $stat->user_id,
+            'level' => $stat->level,
+            'month' => $stat->month,
+            'type' => $type,
+            'amount' => round($amount, 2),
+            'currency' => strtoupper($currency),
+            'note' => $note,
+            'admin_id' => Auth::id(),
+        ]);
+
+        $this->audit->log('payout.component.created', $component, [
+            'engagement_stat_id' => $stat->id,
+            'user_id' => $stat->user_id,
+            'type' => $type,
+            'amount' => $component->amount,
+            'currency' => $component->currency,
+            'note' => $note,
+        ]);
+
+        return $component;
+    }
+
+    public function updateComponent(string $componentId, float $amount, ?string $note = null): EngagementPayoutComponent
+    {
+        $component = EngagementPayoutComponent::query()->findOrFail($componentId);
+
+        if ($component->payout_id) {
+            throw new \RuntimeException('Cannot edit a component that has already been queued.');
+        }
+
+        $this->assertEditableStat($component->engagement_monthly_stats_id);
+
+        if ($amount <= 0) {
+            throw new \InvalidArgumentException('Amount must be greater than zero.');
+        }
+
+        $before = $component->only(['amount', 'note', 'type']);
+
+        $component->update([
+            'amount' => round($amount, 2),
+            'note' => $note,
+            'admin_id' => Auth::id(),
+        ]);
+
+        $this->audit->log('payout.component.updated', $component, [
+            'before' => $before,
+            'after' => $component->only(['amount', 'note', 'type']),
+            'user_id' => $component->user_id,
+        ]);
+
+        return $component->fresh();
+    }
+
+    public function deleteComponent(string $componentId): void
+    {
+        $component = EngagementPayoutComponent::query()->findOrFail($componentId);
+
+        if ($component->payout_id) {
+            throw new \RuntimeException('Cannot delete a component that has already been queued.');
+        }
+
+        $this->assertEditableStat($component->engagement_monthly_stats_id);
+
+        $this->audit->log('payout.component.deleted', $component, [
+            'engagement_stat_id' => $component->engagement_monthly_stats_id,
+            'user_id' => $component->user_id,
+            'type' => $component->type,
+            'amount' => $component->amount,
+            'currency' => $component->currency,
+        ]);
+
+        $component->delete();
+    }
+
+    public function updateEngagementPayoutAmount(string $engagementStatId, float $amount): EngagementMonthlyStat
+    {
+        $stat = $this->assertEditableStat($engagementStatId);
+
+        if ($amount < 0) {
+            throw new \InvalidArgumentException('Engagement payout cannot be negative.');
+        }
+
+        $before = (float) $stat->amount;
+
+        $stat->update([
+            'amount' => round($amount, 2),
+            'amount_manual' => true,
+        ]);
+
+        $this->audit->log('payout.engagement_amount.updated', $stat, [
+            'user_id' => $stat->user_id,
+            'before' => $before,
+            'after' => (float) $stat->amount,
+            'month' => $stat->month,
+            'level' => $stat->level,
+        ]);
+
+        return $stat->fresh();
+    }
+
+    public function componentAnalytics(string $month, ?string $level = null): array
+    {
+        $query = EngagementPayoutComponent::query()->where('month', $month);
+
+        if ($level) {
+            $query->where('level', $level);
+        }
+
+        return [
+            'revenue_total' => (float) (clone $query)->where('type', 'revenue')->sum('amount'),
+            'bonus_total' => (float) (clone $query)->where('type', 'bonus')->sum('amount'),
+            'revenue_count' => (clone $query)->where('type', 'revenue')->count(),
+            'bonus_count' => (clone $query)->where('type', 'bonus')->count(),
+            'members_with_adjustments' => (clone $query)->distinct('user_id')->count('user_id'),
         ];
     }
 
     public function queuePayout(string $engagementStatId): Payout
     {
         $engagementStat = EngagementMonthlyStat::query()
-            ->with('user')
+            ->with(['user', 'payoutComponents'])
             ->findOrFail($engagementStatId);
+
+        if ($engagementStat->status !== 'Pending') {
+            throw new \RuntimeException('This payout has already been queued or paid.');
+        }
+
+        $breakdown = $this->payoutBreakdown($engagementStat);
+        $totalNgn = $breakdown['total_ngn'];
+
+        if ($totalNgn <= 0) {
+            throw new \RuntimeException('Total payout must be greater than zero.');
+        }
 
         $payout = Payout::create([
             'engagement_monthly_stats_id' => $engagementStatId,
             'user_id' => $engagementStat->user_id,
             'level' => $engagementStat->level,
-            'amount' => convertToBaseCurrency($engagementStat->amount, 'NGN'),
+            'amount' => $totalNgn,
             'total_engagement' => $engagementStat->points,
             'month' => $engagementStat->month,
-            'currency' => $engagementStat->currency ?? 'NGN',
+            'currency' => 'NGN',
             'status' => 'Queued',
             'type' => $engagementStat->level === 'Basic' ? 'Freemium' : 'Premium',
         ]);
+
+        EngagementPayoutComponent::query()
+            ->where('engagement_monthly_stats_id', $engagementStatId)
+            ->whereNull('payout_id')
+            ->update(['payout_id' => $payout->id]);
 
         $engagementStat->update(['status' => 'Queued']);
 
         $this->audit->log('payout.queued', $payout, [
             'user_id' => $payout->user_id,
             'amount' => $payout->amount,
+            'breakdown' => $breakdown,
         ]);
 
         $amount = number_format($payout->amount, 2);
@@ -338,5 +479,73 @@ class AdminPayoutService
 
             return $fundTransferResponse;
         });
+    }
+
+    protected function buildUserEngagementRow(EngagementMonthlyStat $member, float $percentage, float $engagementPayout): array
+    {
+        $user = $member->user;
+        $breakdown = $this->payoutBreakdown($member);
+
+        $components = $member->payoutComponents
+            ->whereNull('payout_id')
+            ->values()
+            ->map(fn (EngagementPayoutComponent $c) => [
+                'id' => $c->id,
+                'type' => $c->type,
+                'amount' => (float) $c->amount,
+                'currency' => $c->currency,
+                'note' => $c->note,
+            ])
+            ->all();
+
+        return [
+            'id' => $member->id,
+            'user_id' => $member->user_id,
+            'name' => $user->name ?? 'N/A',
+            'email' => $user->email ?? 'N/A',
+            'engagement' => $member->points ?? 0,
+            'userPercentage' => $percentage,
+            'userPayout' => $engagementPayout,
+            'revenuePayout' => $breakdown['revenue_ngn'],
+            'bonusPayout' => $breakdown['bonus_ngn'],
+            'totalPayoutNgn' => $breakdown['total_ngn'],
+            'userWallet' => $user->wallet->currency ?? 'USD',
+            'status' => $member->status,
+            'components' => $components,
+        ];
+    }
+
+    protected function payoutBreakdown(EngagementMonthlyStat $stat): array
+    {
+        $engagementNgn = (float) convertToBaseCurrency((float) $stat->amount, 'NGN');
+
+        $pendingComponents = $stat->relationLoaded('payoutComponents')
+            ? $stat->payoutComponents->whereNull('payout_id')
+            : EngagementPayoutComponent::query()
+                ->where('engagement_monthly_stats_id', $stat->id)
+                ->whereNull('payout_id')
+                ->get();
+
+        $revenueNgn = (float) $pendingComponents->where('type', 'revenue')->sum('amount');
+        $bonusNgn = (float) $pendingComponents->where('type', 'bonus')->sum('amount');
+
+        return [
+            'engagement_usd' => (float) $stat->amount,
+            'engagement_ngn' => $engagementNgn,
+            'revenue_ngn' => $revenueNgn,
+            'bonus_ngn' => $bonusNgn,
+            'total_ngn' => round($engagementNgn + $revenueNgn + $bonusNgn, 2),
+        ];
+    }
+
+    protected function assertEditableStat(string $engagementStatId): EngagementMonthlyStat
+    {
+        $stat = EngagementMonthlyStat::query()->findOrFail($engagementStatId);
+
+        if ($stat->status !== 'Pending') {
+            throw new \RuntimeException('Payout adjustments are only allowed while status is Pending.');
+        }
+
+        return $stat;
     }
 }

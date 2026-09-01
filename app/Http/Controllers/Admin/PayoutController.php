@@ -50,6 +50,7 @@ class PayoutController extends Controller
             'levelPool' => $result['levelPool'],
             'poolLabel' => $result['poolLabel'] ?? 'Level pool',
             'memberCount' => $result['memberCount'],
+            'componentAnalytics' => $result['componentAnalytics'] ?? [],
             'level' => $level,
             'lastmonth' => $lastMonth,
             'levelTabs' => $levelTabs,
@@ -58,7 +59,11 @@ class PayoutController extends Controller
 
     public function queuePayout(string $engagementStat)
     {
-        $this->payouts->queuePayout($engagementStat);
+        try {
+            $this->payouts->queuePayout($engagementStat);
+        } catch (\Throwable $e) {
+            return back()->with('error', $e->getMessage());
+        }
 
         return redirect()->route('admin.payouts.show', $engagementStat);
     }
@@ -81,6 +86,94 @@ class PayoutController extends Controller
         $this->payouts->markPayoutPaid($payout->id);
 
         return back()->with('success', 'Payment updated.');
+    }
+
+    public function storePayoutComponent(Request $request)
+    {
+        $validated = $request->validate([
+            'engagement_stat_id' => 'required|uuid|exists:engagement_monthly_stats,id',
+            'type' => 'required|in:revenue,bonus',
+            'amount' => 'required|numeric|min:0.01',
+            'note' => 'nullable|string|max:500',
+            'validationCode' => 'required|string',
+        ]);
+
+        if ($validated['validationCode'] !== config('services.env.validation_code')) {
+            return back()->withInput()->with('error', 'Invalid validation code.');
+        }
+
+        try {
+            $this->payouts->addComponent(
+                $validated['engagement_stat_id'],
+                $validated['type'],
+                (float) $validated['amount'],
+                $validated['note'] ?? null,
+            );
+        } catch (\Throwable $e) {
+            return back()->withInput()->with('error', $e->getMessage());
+        }
+
+        return back()->with('success', ucfirst($validated['type']).' payout added.');
+    }
+
+    public function updatePayoutComponent(Request $request, string $component)
+    {
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:0.01',
+            'note' => 'nullable|string|max:500',
+            'validationCode' => 'required|string',
+        ]);
+
+        if ($validated['validationCode'] !== config('services.env.validation_code')) {
+            return back()->withInput()->with('error', 'Invalid validation code.');
+        }
+
+        try {
+            $this->payouts->updateComponent($component, (float) $validated['amount'], $validated['note'] ?? null);
+        } catch (\Throwable $e) {
+            return back()->withInput()->with('error', $e->getMessage());
+        }
+
+        return back()->with('success', 'Payout component updated.');
+    }
+
+    public function destroyPayoutComponent(Request $request, string $component)
+    {
+        $validated = $request->validate([
+            'validationCode' => 'required|string',
+        ]);
+
+        if ($validated['validationCode'] !== config('services.env.validation_code')) {
+            return back()->with('error', 'Invalid validation code.');
+        }
+
+        try {
+            $this->payouts->deleteComponent($component);
+        } catch (\Throwable $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return back()->with('success', 'Payout component removed.');
+    }
+
+    public function updateEngagementPayout(Request $request, string $engagementStat)
+    {
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:0',
+            'validationCode' => 'required|string',
+        ]);
+
+        if ($validated['validationCode'] !== config('services.env.validation_code')) {
+            return back()->withInput()->with('error', 'Invalid validation code.');
+        }
+
+        try {
+            $this->payouts->updateEngagementPayoutAmount($engagementStat, (float) $validated['amount']);
+        } catch (\Throwable $e) {
+            return back()->withInput()->with('error', $e->getMessage());
+        }
+
+        return back()->with('success', 'Engagement payout amount updated.');
     }
 
     public function fundTransfer(Request $request)

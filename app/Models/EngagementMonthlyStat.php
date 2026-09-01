@@ -10,7 +10,7 @@ class EngagementMonthlyStat extends Model
 {
     use HasFactory, UuidTrait;
 
-    protected $fillable = ['user_id', 'level', 'month', 'views', 'likes', 'comments', 'points', 'amount', 'status'];
+    protected $fillable = ['user_id', 'level', 'month', 'views', 'likes', 'comments', 'points', 'amount', 'amount_manual', 'status'];
 
     public function user()
     {
@@ -23,5 +23,10 @@ class EngagementMonthlyStat extends Model
 
     public function wallet(){
         return $this->belongsTo(Wallet::class, 'user_id');
+    }
+
+    public function payoutComponents()
+    {
+        return $this->hasMany(EngagementPayoutComponent::class, 'engagement_monthly_stats_id');
     }
 }

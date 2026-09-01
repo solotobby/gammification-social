@@ -143,6 +143,10 @@ Route::middleware(['auth', 'admin'])
                 Route::get('monthly/{level}/users', [MonthlyPayoutController::class, 'levelUserBreakdown'])->name('monthly.users');
                 Route::post('monthly/{level}/process', [MonthlyPayoutController::class, 'processLevelPrayout'])->name('process-level');
                 Route::get('levels/{level}', [PayoutController::class, 'index'])->name('levels.show');
+                Route::post('components', [PayoutController::class, 'storePayoutComponent'])->name('components.store');
+                Route::put('components/{component}', [PayoutController::class, 'updatePayoutComponent'])->name('components.update');
+                Route::delete('components/{component}', [PayoutController::class, 'destroyPayoutComponent'])->name('components.destroy');
+                Route::patch('engagement/{engagementStat}/amount', [PayoutController::class, 'updateEngagementPayout'])->name('engagement.update');
                 Route::post('queue/{engagementStat}', [PayoutController::class, 'queuePayout'])->name('queue');
                 Route::get('details/{engagementStat}', [PayoutController::class, 'viewPayoutInformation'])->name('show');
                 Route::post('mark-paid/{payout}', [PayoutController::class, 'updatePayoutStatus'])->name('mark-paid');
