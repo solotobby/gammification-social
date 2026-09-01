@@ -19,6 +19,7 @@ use App\Services\TransactionService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 class AdminPayoutService
@@ -36,7 +37,8 @@ class AdminPayoutService
             'Influencer' => 5,
         ];
 
-        $members = EngagementMonthlyStat::with(['user.wallet', 'payoutComponents'])
+        $members = EngagementMonthlyStat::query()
+            ->with($this->engagementStatRelations())
             ->where('level', $level)
             ->where('month', $lastMonth)
             ->get();
@@ -61,7 +63,7 @@ class AdminPayoutService
                 ? round(($member->points / $totalEngagement) * $levelPool, 2)
                 : 0;
 
-            if (! $member->amount_manual) {
+            if (! ($member->amount_manual ?? false)) {
                 $member->update(['amount' => $payout]);
             } else {
                 $payout = (float) $member->amount;
@@ -83,7 +85,18 @@ class AdminPayoutService
 
     public function processBasic(string $lastMonth): array
     {
-        $members = FremiumEngagementStat::with(['user.wallet', 'payoutComponents'])
+        try {
+            $this->syncBasicMonthlyStatsFromFremium($lastMonth);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return [
+                'error' => 'Unable to load Basic payout data. Ensure the latest database migrations have been run (Basic level on engagement_monthly_stats).',
+            ];
+        }
+
+        $members = EngagementMonthlyStat::query()
+            ->with($this->engagementStatRelations())
             ->where('level', 'Basic')
             ->where('month', $lastMonth)
             ->get();
@@ -118,7 +131,7 @@ class AdminPayoutService
                 ? round(($member->points / $totalEngagement) * $fremiumPool, 2)
                 : 0;
 
-            if (! $member->amount_manual) {
+            if (! ($member->amount_manual ?? false)) {
                 $member->update(['amount' => $payout]);
             } else {
                 $payout = (float) $member->amount;
@@ -136,6 +149,46 @@ class AdminPayoutService
             'poolLabel' => 'Freemium pool',
             'componentAnalytics' => $this->componentAnalytics($lastMonth, 'Basic'),
         ];
+    }
+
+    protected function syncBasicMonthlyStatsFromFremium(string $lastMonth): void
+    {
+        $start = \Carbon\Carbon::createFromFormat('Y-m', $lastMonth)->startOfMonth();
+        $end = $start->copy()->endOfMonth();
+
+        $rows = FremiumEngagementStat::query()
+            ->where('level', 'Basic')
+            ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
+            ->groupBy('user_id')
+            ->selectRaw('user_id, SUM(views) as views, SUM(likes) as likes, SUM(comments) as comments, SUM(points) as points')
+            ->get();
+
+        foreach ($rows as $row) {
+            EngagementMonthlyStat::updateOrCreate(
+                [
+                    'user_id' => $row->user_id,
+                    'level' => 'Basic',
+                    'month' => $lastMonth,
+                ],
+                [
+                    'views' => (int) $row->views,
+                    'likes' => (int) $row->likes,
+                    'comments' => (int) $row->comments,
+                    'points' => (int) $row->points,
+                ]
+            );
+        }
+    }
+
+    protected function engagementStatRelations(): array
+    {
+        $relations = ['user.wallet'];
+
+        if (Schema::hasTable('engagement_payout_components')) {
+            $relations[] = 'payoutComponents';
+        }
+
+        return $relations;
     }
 
     public function addComponent(
@@ -231,8 +284,11 @@ class AdminPayoutService
         $component->delete();
     }
 
-    public function updateEngagementPayoutAmount(string $engagementStatId, float $amount): EngagementMonthlyStat
-    {
+    public function updateEngagementPayoutAmount(
+        string $engagementStatId,
+        float $amount,
+        string $inputCurrency = 'NGN'
+    ): EngagementMonthlyStat {
         $stat = $this->assertEditableStat($engagementStatId);
 
         if ($amount < 0) {
@@ -240,9 +296,13 @@ class AdminPayoutService
         }
 
         $before = (float) $stat->amount;
+        $inputCurrency = strtoupper($inputCurrency);
+        $storedAmount = $inputCurrency === 'USD'
+            ? round($amount, 2)
+            : round(convertCurrency($amount, $inputCurrency, 'USD'), 2);
 
         $stat->update([
-            'amount' => round($amount, 2),
+            'amount' => $storedAmount,
             'amount_manual' => true,
         ]);
 
@@ -250,6 +310,8 @@ class AdminPayoutService
             'user_id' => $stat->user_id,
             'before' => $before,
             'after' => (float) $stat->amount,
+            'input_amount' => round($amount, 2),
+            'input_currency' => $inputCurrency,
             'month' => $stat->month,
             'level' => $stat->level,
         ]);
@@ -259,6 +321,16 @@ class AdminPayoutService
 
     public function componentAnalytics(string $month, ?string $level = null): array
     {
+        if (! Schema::hasTable('engagement_payout_components')) {
+            return [
+                'revenue_total' => 0,
+                'bonus_total' => 0,
+                'revenue_count' => 0,
+                'bonus_count' => 0,
+                'members_with_adjustments' => 0,
+            ];
+        }
+
         $query = EngagementPayoutComponent::query()->where('month', $month);
 
         if ($level) {
@@ -487,9 +559,9 @@ class AdminPayoutService
         $user = $member->user;
         $breakdown = $this->payoutBreakdown($member);
 
-        $components = $member->payoutComponents
-            ->whereNull('payout_id')
-            ->values()
+        $components = ($member->relationLoaded('payoutComponents')
+            ? $member->payoutComponents->whereNull('payout_id')->values()
+            : collect())
             ->map(fn (EngagementPayoutComponent $c) => [
                 'id' => $c->id,
                 'type' => $c->type,
@@ -507,6 +579,8 @@ class AdminPayoutService
             'engagement' => $member->points ?? 0,
             'userPercentage' => $percentage,
             'userPayout' => $engagementPayout,
+            'userPayoutNgn' => $breakdown['engagement_ngn'],
+            'amountManual' => (bool) ($member->amount_manual ?? false),
             'revenuePayout' => $breakdown['revenue_ngn'],
             'bonusPayout' => $breakdown['bonus_ngn'],
             'totalPayoutNgn' => $breakdown['total_ngn'],

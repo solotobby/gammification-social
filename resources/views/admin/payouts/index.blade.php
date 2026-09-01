@@ -391,7 +391,15 @@
                                             <td class="dash-num">{{ number_format($user['engagement'] ?? 0) }}</td>
                                             <td><span class="dash-badge dash-badge--indigo">{{ $user['userPercentage'] ?? 0 }}%</span></td>
                                             <td class="dash-num">
-                                                ₦{{ number_format(convertToBaseCurrency($user['userPayout'] ?? 0, 'NGN'), 2) }}
+                                                ₦{{ number_format($user['userPayoutNgn'] ?? convertToBaseCurrency($user['userPayout'] ?? 0, 'NGN'), 2) }}
+                                                @if ($payoutStatus === 'Pending')
+                                                    <button type="button" class="dash-link js-payout-edit-engagement"
+                                                        data-stat-id="{{ $rowId }}"
+                                                        data-amount="{{ number_format($user['userPayoutNgn'] ?? convertToBaseCurrency($user['userPayout'] ?? 0, 'NGN'), 2, '.', '') }}"
+                                                        data-member="{{ e($user['name']) }}">
+                                                        Edit amount
+                                                    </button>
+                                                @endif
                                             </td>
                                             <td class="dash-num">
                                                 ₦{{ number_format($user['revenuePayout'] ?? 0, 2) }}
@@ -403,10 +411,11 @@
                                                                 @if ($payoutStatus === 'Pending')
                                                                     <button type="button" class="dash-link js-payout-edit-component"
                                                                         data-component-id="{{ $comp['id'] }}"
+                                                                        data-type="revenue"
                                                                         data-amount="{{ $comp['amount'] }}"
                                                                         data-note="{{ e($comp['note'] ?? '') }}"
                                                                         data-member="{{ e($user['name']) }}">
-                                                                        Edit
+                                                                        Edit amount
                                                                     </button>
                                                                 @endif
                                                             </li>
@@ -424,10 +433,11 @@
                                                                 @if ($payoutStatus === 'Pending')
                                                                     <button type="button" class="dash-link js-payout-edit-component"
                                                                         data-component-id="{{ $comp['id'] }}"
+                                                                        data-type="bonus"
                                                                         data-amount="{{ $comp['amount'] }}"
                                                                         data-note="{{ e($comp['note'] ?? '') }}"
                                                                         data-member="{{ e($user['name']) }}">
-                                                                        Edit
+                                                                        Edit amount
                                                                     </button>
                                                                 @endif
                                                             </li>
@@ -451,12 +461,6 @@
                                                             data-type="bonus"
                                                             data-member="{{ e($user['name']) }}">
                                                             + Bonus
-                                                        </button>
-                                                        <button type="button" class="dash-btn dash-btn--ghost js-payout-edit-engagement"
-                                                            data-stat-id="{{ $rowId }}"
-                                                            data-amount="{{ (float) ($user['userPayout'] ?? 0) }}"
-                                                            data-member="{{ e($user['name']) }}">
-                                                            Edit
                                                         </button>
                                                         <form method="POST" action="{{ route('admin.payouts.queue', $rowId) }}"
                                                             onsubmit="return confirm('Queue total payout of ₦{{ number_format($user['totalPayoutNgn'] ?? 0, 2) }} for {{ $user['name'] }}?');">
@@ -571,7 +575,7 @@
         <div class="payout-sheet__panel" role="dialog" aria-modal="true" aria-labelledby="payoutEngagementTitle">
             <div class="payout-sheet__head">
                 <div>
-                    <h2 class="payout-sheet__title" id="payoutEngagementTitle">Edit engagement payout</h2>
+                    <h2 class="payout-sheet__title" id="payoutEngagementTitle">Edit engagement amount</h2>
                     <p class="payout-sheet__subtitle" id="engagementSheetMember"></p>
                 </div>
                 <button type="button" class="payout-sheet__close js-payout-sheet-close" aria-label="Close">&times;</button>
@@ -581,10 +585,11 @@
                 @method('PATCH')
                 <div class="payout-sheet__body">
                     <div class="dash-field">
-                        <label for="engagementAmount">Engagement payout (USD)</label>
+                        <label for="engagementAmount">Amount (NGN)</label>
                         <input type="number" id="engagementAmount" name="amount" class="dash-input" min="0" step="0.01" required>
-                        <span class="payout-sheet__hint">Auto-calculated pro-rata share; override if needed.</span>
+                        <span class="payout-sheet__hint">Set the payout amount directly. Share % is for reference only.</span>
                     </div>
+                    <input type="hidden" name="currency" value="NGN">
                     <div class="dash-field">
                         <label for="engagementValidation">Validation code</label>
                         <input type="text" id="engagementValidation" name="validationCode" class="dash-input" required autocomplete="off" placeholder="Enter validation code">
@@ -674,8 +679,12 @@
         document.querySelectorAll('.js-payout-edit-component').forEach(function (btn) {
             btn.addEventListener('click', function () {
                 var componentId = this.dataset.componentId;
+                var componentType = this.dataset.type || 'revenue';
                 document.getElementById('editComponentForm').action = componentsBase + '/' + componentId;
                 document.getElementById('deleteComponentForm').action = componentsBase + '/' + componentId;
+                document.getElementById('payoutEditTitle').textContent = componentType === 'bonus'
+                    ? 'Edit bonus amount'
+                    : 'Edit revenue amount';
                 document.getElementById('editSheetMember').textContent = this.dataset.member || '';
                 document.getElementById('editAmount').value = this.dataset.amount || '';
                 document.getElementById('editNote').value = this.dataset.note || '';

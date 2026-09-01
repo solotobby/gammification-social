@@ -160,6 +160,7 @@ class PayoutController extends Controller
     {
         $validated = $request->validate([
             'amount' => 'required|numeric|min:0',
+            'currency' => 'nullable|string|in:NGN,USD',
             'validationCode' => 'required|string',
         ]);
 
@@ -168,7 +169,11 @@ class PayoutController extends Controller
         }
 
         try {
-            $this->payouts->updateEngagementPayoutAmount($engagementStat, (float) $validated['amount']);
+            $this->payouts->updateEngagementPayoutAmount(
+                $engagementStat,
+                (float) $validated['amount'],
+                $validated['currency'] ?? 'NGN'
+            );
         } catch (\Throwable $e) {
             return back()->withInput()->with('error', $e->getMessage());
         }
