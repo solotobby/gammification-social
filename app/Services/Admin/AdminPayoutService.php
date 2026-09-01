@@ -388,13 +388,14 @@ class AdminPayoutService
             'breakdown' => $breakdown,
         ]);
 
-        $amount = number_format($payout->amount, 2);
         $duration = \Carbon\Carbon::createFromFormat('Y-m', $payout->month)->format('F Y');
+        $notificationMessage = $this->formatPayoutBreakdownPlain($breakdown, $duration);
+        $emailContent = $this->formatPayoutBreakdownHtml($breakdown, $duration);
 
         $engagementStat->user->notify(
             (new GeneralNotification([
                 'title' => '🚀 Payhankey Payout Processed!!',
-                'message' => 'Great news! Your Payhankey payout has been successfully processed!',
+                'message' => $notificationMessage,
                 'icon' => 'fa-heart text-danger',
                 'url' => url('wallets'),
             ]))->delay(now()->addSeconds(1))
@@ -406,7 +407,7 @@ class AdminPayoutService
                 'email' => $engagementStat->user->email,
             ],
             '🎉 Your Payhankey payout has been processed!',
-            "<p>Your payout of NGN {$amount} for {$duration} has been processed.</p>"
+            $emailContent
         ));
 
         return $payout;
@@ -611,6 +612,52 @@ class AdminPayoutService
             'bonus_ngn' => $bonusNgn,
             'total_ngn' => round($engagementNgn + $revenueNgn + $bonusNgn, 2),
         ];
+    }
+
+    protected function formatPayoutBreakdownPlain(array $breakdown, string $duration): string
+    {
+        $format = fn (float $amount): string => '₦' . number_format($amount, 2);
+
+        return implode("\n", [
+            "Great news! Your Payhankey payout for {$duration} has been queued.",
+            '',
+            'Engagement Payout: ' . $format($breakdown['engagement_ngn']),
+            'Ad Revenue Payout: ' . $format($breakdown['revenue_ngn']),
+            'Payhankey Bonus: ' . $format($breakdown['bonus_ngn']),
+            'Total: ' . $format($breakdown['total_ngn']),
+        ]);
+    }
+
+    protected function formatPayoutBreakdownHtml(array $breakdown, string $duration): string
+    {
+        $format = fn (float $amount): string => '₦' . number_format($amount, 2);
+        $rows = [
+            ['Engagement Payout:', $format($breakdown['engagement_ngn'])],
+            ['Ad Revenue Payout:', $format($breakdown['revenue_ngn'])],
+            ['Payhankey Bonus:', $format($breakdown['bonus_ngn'])],
+            ['Total:', $format($breakdown['total_ngn'])],
+        ];
+
+        $tableRows = '';
+        foreach ($rows as [$label, $value]) {
+            $isTotal = $label === 'Total:';
+            $labelStyle = $isTotal
+                ? 'padding:10px 0;font-weight:700;border-top:1px solid #dee2e6;'
+                : 'padding:8px 0;color:#64748b;';
+            $valueStyle = $isTotal
+                ? 'padding:10px 0;font-weight:700;text-align:right;border-top:1px solid #dee2e6;'
+                : 'padding:8px 0;text-align:right;font-weight:600;';
+
+            $tableRows .= "<tr><td style=\"{$labelStyle}\">{$label}</td><td style=\"{$valueStyle}\">{$value}</td></tr>";
+        }
+
+        return <<<HTML
+<p>Great news! Your Payhankey payout for {$duration} has been queued.</p>
+<table style="width:100%;max-width:420px;border-collapse:collapse;margin:16px 0;font-size:15px;color:#0f172a;">
+    {$tableRows}
+</table>
+<p style="margin-top:16px;color:#64748b;font-size:14px;">You can track this payout from your wallet.</p>
+HTML;
     }
 
     protected function assertEditableStat(string $engagementStatId): EngagementMonthlyStat
