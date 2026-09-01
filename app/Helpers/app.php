@@ -1246,6 +1246,9 @@ if (!function_exists('generateTransactionRef')) {
         if (in_array(strtolower((string) $type), ['paykoin', 'pkn'], true)) {
             return 'PKN-' . now()->format('YmdHis') . '-' . random_int(1000, 99999999);
         }
+        if (in_array(strtolower((string) $type), ['krf', 'korapay_funding'], true)) {
+            return 'KRF-' . now()->format('YmdHis') . '-' . random_int(1000, 99999999);
+        }
         return 'PKY-' . now()->format('YmdHis') . '-' . random_int(1000, 99999999);
     }
 }

@@ -8,6 +8,7 @@ use App\Models\Community;
 use App\Models\Level;
 use App\Models\Transaction;
 use App\Models\Webhook;
+use App\Services\Admin\AdminKorapayService;
 use App\Services\CommunityFlutterwaveService;
 use App\Services\CommunitySubscriptionService;
 use App\Services\PayKoinService;
@@ -63,6 +64,31 @@ class WebhookController extends Controller
             if (!$transaction) {
                 Log::error('Transaction not found for reference: ' . $reference);
                 return response()->json(['status' => 'error', 'message' => 'Transaction not found'], 404);
+            }
+
+            if ($transaction->type === 'korapay_funding') {
+                if ($transaction->status === 'successful') {
+                    return response()->json(['message' => 'KORAPAY FUNDING ALREADY PROCESSED'], 200);
+                }
+
+                if (! str_starts_with(strtoupper($reference), 'KRF-')) {
+                    Log::error('Korapay funding webhook rejected: invalid reference prefix', ['reference' => $reference]);
+
+                    return response()->json(['status' => 'error', 'message' => 'Invalid funding reference'], 400);
+                }
+
+                try {
+                    app(AdminKorapayService::class)->completeFundingFromWebhook($transaction, $payload);
+
+                    return response()->json(['status' => 'success'], 200);
+                } catch (\Throwable $e) {
+                    Log::error('Korapay funding webhook failed', [
+                        'reference' => $reference,
+                        'error' => $e->getMessage(),
+                    ]);
+
+                    return response()->json(['status' => 'error', 'message' => $e->getMessage()], 400);
+                }
             }
 
             if ($transaction->type === 'paykoin_topup') {
