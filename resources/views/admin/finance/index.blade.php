@@ -21,6 +21,7 @@
         </div>
         <div style="display:flex;gap:.5rem;flex-wrap:wrap">
             <a href="{{ route('admin.korapay.index') }}" class="dash-btn dash-btn--ghost">Kora Pay balance</a>
+            <a href="{{ route('admin.flutterwave.index') }}" class="dash-btn dash-btn--ghost">Flutterwave</a>
             <a href="{{ route('admin.withdrawals.index') }}" class="dash-btn dash-btn--ghost">Withdrawals</a>
             <a href="{{ route('admin.payouts.current') }}" class="dash-btn dash-btn--ghost">Current payouts</a>
         </div>

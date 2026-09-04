@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\AcademyController as AdminAcademyController;
 use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\BlogController as AdminBlogController;
 use App\Http\Controllers\Admin\HelpCenterController as AdminHelpCenterController;
+use App\Http\Controllers\Admin\FlutterwaveController;
 use App\Http\Controllers\Admin\KorapayController;
 use App\Http\Controllers\Admin\BookmarkAnalyticsController;
 use App\Http\Controllers\Admin\CommunityController;
@@ -125,6 +126,7 @@ Route::middleware(['auth', 'admin'])
             Route::get('korapay', [KorapayController::class, 'index'])->name('korapay.index');
             Route::post('korapay/deposit', [KorapayController::class, 'deposit'])->name('korapay.deposit');
             Route::get('korapay/verify', [KorapayController::class, 'verify'])->name('korapay.verify');
+            Route::get('flutterwave', [FlutterwaveController::class, 'index'])->name('flutterwave.index');
 
             Route::prefix('withdrawals')->name('withdrawals.')->group(function () {
                 Route::get('/', [WithdrawalController::class, 'withdrawalList'])->name('index');

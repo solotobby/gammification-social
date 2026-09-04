@@ -77,6 +77,10 @@
                     <i class="nav-main-link-icon fa fa-building-columns"></i>
                     <span class="nav-main-link-name">Kora Pay</span>
                 </a>
+                <a class="nav-main-link{{ request()->routeIs('admin.flutterwave.*') ? ' active' : '' }}" href="{{ route('admin.flutterwave.index') }}">
+                    <i class="nav-main-link-icon fa fa-wave-square"></i>
+                    <span class="nav-main-link-name">Flutterwave</span>
+                </a>
                 <a class="nav-main-link{{ request()->routeIs('admin.audit-logs.*') ? ' active' : '' }}" href="{{ route('admin.audit-logs.index') }}">
                     <i class="nav-main-link-icon fa fa-shield-halved"></i>
                     <span class="nav-main-link-name">Audit Log</span>
