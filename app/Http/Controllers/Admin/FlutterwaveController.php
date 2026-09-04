@@ -24,7 +24,10 @@ class FlutterwaveController extends Controller
         $status = $request->string('status')->trim()->toString() ?: null;
         $type = $request->string('type')->trim()->toString() ?: null;
         $flow = $request->string('flow')->trim()->toString() ?: null;
+        $currency = $request->string('currency')->trim()->toString() ?: null;
+        $billingType = $request->string('billing')->trim()->toString() ?: null;
         $search = $request->string('q')->trim()->toString() ?: null;
+        $filterOptions = $this->flutterwave->transactionFilterOptions();
 
         $balances = $this->flutterwave->fetchBalances();
         $stats = $this->flutterwave->flowStats($dateRange);
@@ -39,26 +42,47 @@ class FlutterwaveController extends Controller
             'stats' => $stats,
             'transfers' => $transfers,
             'transactions' => match ($tab) {
-                'transactions' => $this->flutterwave->transactionHistory($dateRange, $status, $type, $search, $flow),
+                'transactions' => $this->flutterwave->transactionHistory(
+                    $dateRange,
+                    $status,
+                    $type,
+                    $search,
+                    $flow,
+                    $currency,
+                ),
                 'overview' => $this->flutterwave->recentTransactions($dateRange, 10),
                 default => null,
             },
             'subscriptions' => $tab === 'subscriptions'
-                ? $this->flutterwave->subscriptionHistory($dateRange, $status, $search)
+                ? $this->flutterwave->subscriptionHistory($dateRange, $status, $search, $billingType)
                 : null,
             'levelPlans' => $tab === 'subscriptions'
-                ? $this->flutterwave->levelSubscriptionPlans($dateRange)
-                : collect(),
+                ? $this->flutterwave->levelSubscriptionPlans($dateRange, $search, $status)
+                : null,
             'walletTotals' => $tab === 'wallets'
                 ? $this->flutterwave->platformWalletTotals()
                 : collect(),
             'statusLabels' => $this->flutterwave->statusLabels(),
             'subscriptionStatusLabels' => $this->flutterwave->subscriptionStatusLabels(),
             'typeLabels' => $this->flutterwave->typeLabels(),
+            'filterOptions' => $filterOptions,
             'status' => $status ?? '',
             'type' => $type ?? '',
             'flow' => $flow ?? '',
+            'currency' => $currency ?? '',
+            'billingType' => $billingType ?? '',
             'search' => $search ?? '',
         ]);
+    }
+
+    public function showSubscription(string $kind, string $id)
+    {
+        $detail = match ($kind) {
+            'community' => $this->flutterwave->communitySubscriptionDetail($id),
+            'level' => $this->flutterwave->levelPlanDetail($id),
+            default => abort(404),
+        };
+
+        return view('admin.flutterwave.subscription', $detail);
     }
 }

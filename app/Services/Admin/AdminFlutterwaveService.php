@@ -198,6 +198,7 @@ class AdminFlutterwaveService
         ?string $type = null,
         ?string $search = null,
         ?string $flow = null,
+        ?string $currency = null,
     ): LengthAwarePaginator {
         $query = Transaction::query()
             ->with('user:id,name,username,email')
@@ -225,6 +226,10 @@ class AdminFlutterwaveService
             $query->where('action', 'Debit');
         }
 
+        if ($currency) {
+            $query->where('currency', strtoupper($currency));
+        }
+
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('ref', 'like', "%{$search}%")
@@ -240,10 +245,39 @@ class AdminFlutterwaveService
         return $query->paginate(25)->withQueryString();
     }
 
+    public function transactionFilterOptions(): array
+    {
+        $currencies = Transaction::query()
+            ->where('provider', 'flutterwave')
+            ->whereNotNull('currency')
+            ->distinct()
+            ->orderBy('currency')
+            ->pluck('currency')
+            ->filter()
+            ->values()
+            ->all();
+
+        $types = Transaction::query()
+            ->where('provider', 'flutterwave')
+            ->whereNotNull('type')
+            ->distinct()
+            ->orderBy('type')
+            ->pluck('type')
+            ->filter()
+            ->values()
+            ->all();
+
+        return [
+            'currencies' => $currencies,
+            'types' => $types,
+        ];
+    }
+
     public function subscriptionHistory(
         AdminDateRange $dateRange,
         ?string $status = null,
         ?string $search = null,
+        ?string $billingType = null,
     ): LengthAwarePaginator {
         $query = CommunitySubscription::query()
             ->with([
@@ -256,6 +290,10 @@ class AdminFlutterwaveService
 
         if ($status) {
             $query->where('status', $status);
+        }
+
+        if ($billingType) {
+            $query->where('billing_type', $billingType);
         }
 
         if ($search) {
@@ -273,18 +311,217 @@ class AdminFlutterwaveService
             });
         }
 
-        return $query->paginate(25)->withQueryString();
+        $paginator = $query->paginate(25)->withQueryString();
+        $this->attachCommunityPayments($paginator->getCollection());
+
+        return $paginator;
     }
 
-    public function levelSubscriptionPlans(AdminDateRange $dateRange): Collection
-    {
-        return UserPaymentPlan::query()
+    public function levelSubscriptionPlans(
+        AdminDateRange $dateRange,
+        ?string $search = null,
+        ?string $status = null,
+    ): LengthAwarePaginator {
+        $query = UserPaymentPlan::query()
             ->with(['user:id,name,username,email', 'level:id,name'])
             ->where('payment_gateway', 'flutterwave')
             ->whereBetween('created_at', [$dateRange->start, $dateRange->end])
+            ->latest();
+
+        if ($status) {
+            $query->where('status', $status);
+        }
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('payment_plan_id', 'like', "%{$search}%")
+                    ->orWhere('name', 'like', "%{$search}%")
+                    ->orWhereHas('user', function ($userQuery) use ($search) {
+                        $userQuery->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%")
+                            ->orWhere('username', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        $paginator = $query->paginate(25)->withQueryString();
+        $this->attachLevelPlanContext($paginator->getCollection());
+
+        return $paginator;
+    }
+
+    public function communitySubscriptionDetail(string $id): array
+    {
+        $subscription = CommunitySubscription::query()
+            ->with([
+                'user:id,name,username,email',
+                'community:id,name,slug,currency,owner_id',
+            ])
+            ->where('gateway', 'flutterwave')
+            ->findOrFail($id);
+
+        $payment = $this->findPaymentForReference($subscription->gateway_reference);
+        $relatedPayments = Transaction::query()
+            ->with('user:id,name,username,email')
+            ->where('provider', 'flutterwave')
+            ->where('user_id', $subscription->user_id)
+            ->where(function ($q) use ($subscription) {
+                $q->where('type', 'like', 'community_%');
+                if ($subscription->gateway_reference) {
+                    $q->orWhere('ref', $subscription->gateway_reference);
+                }
+            })
             ->latest()
-            ->limit(50)
+            ->limit(20)
             ->get();
+
+        return [
+            'kind' => 'community',
+            'subscription' => $subscription,
+            'payment' => $payment,
+            'relatedPayments' => $relatedPayments,
+            'nextPaymentAt' => $subscription->isRecurring() ? $subscription->expires_at : null,
+            'nextPaymentLabel' => $subscription->isOneOff()
+                ? 'One-off — no renewal'
+                : ($subscription->expires_at
+                    ? $subscription->expires_at->format('M j, Y g:i A')
+                    : 'Not scheduled'),
+        ];
+    }
+
+    public function levelPlanDetail(string $id): array
+    {
+        $plan = UserPaymentPlan::query()
+            ->with(['user:id,name,username,email', 'level:id,name'])
+            ->where('payment_gateway', 'flutterwave')
+            ->findOrFail($id);
+
+        $userLevel = \App\Models\UserLevel::query()
+            ->with('level:id,name')
+            ->where('user_id', $plan->user_id)
+            ->when($plan->level_id, fn ($q) => $q->where('level_id', $plan->level_id))
+            ->latest()
+            ->first();
+
+        $relatedPayments = Transaction::query()
+            ->with('user:id,name,username,email')
+            ->where('provider', 'flutterwave')
+            ->where('user_id', $plan->user_id)
+            ->where('type', 'subscription_upgrade')
+            ->latest()
+            ->limit(20)
+            ->get();
+
+        $payment = $relatedPayments->firstWhere('status', 'successful')
+            ?? $relatedPayments->first();
+
+        return [
+            'kind' => 'level',
+            'plan' => $plan,
+            'userLevel' => $userLevel,
+            'payment' => $payment,
+            'relatedPayments' => $relatedPayments,
+            'nextPaymentAt' => $userLevel?->next_payment_date,
+            'nextPaymentLabel' => $userLevel?->next_payment_date
+                ? $userLevel->next_payment_date->format('M j, Y g:i A')
+                : 'Not scheduled',
+        ];
+    }
+
+    protected function attachCommunityPayments(Collection $subscriptions): void
+    {
+        $refs = $subscriptions->pluck('gateway_reference')->filter()->unique()->values();
+
+        if ($refs->isEmpty()) {
+            $subscriptions->each(function ($sub) {
+                $sub->setAttribute('attached_payment', null);
+                $sub->setAttribute('next_payment_label', $this->communityNextPaymentLabel($sub));
+            });
+
+            return;
+        }
+
+        $payments = Transaction::query()
+            ->where('provider', 'flutterwave')
+            ->whereIn('ref', $refs->all())
+            ->get()
+            ->keyBy('ref');
+
+        $subscriptions->each(function ($sub) use ($payments) {
+            $payment = $sub->gateway_reference
+                ? ($payments->get($sub->gateway_reference) ?? null)
+                : null;
+            $sub->setAttribute('attached_payment', $payment);
+            $sub->setAttribute('next_payment_label', $this->communityNextPaymentLabel($sub));
+        });
+    }
+
+    protected function attachLevelPlanContext(Collection $plans): void
+    {
+        if ($plans->isEmpty()) {
+            return;
+        }
+
+        $userIds = $plans->pluck('user_id')->unique()->values();
+        $levelIds = $plans->pluck('level_id')->filter()->unique()->values();
+
+        $userLevels = \App\Models\UserLevel::query()
+            ->whereIn('user_id', $userIds)
+            ->when($levelIds->isNotEmpty(), fn ($q) => $q->whereIn('level_id', $levelIds))
+            ->latest()
+            ->get()
+            ->groupBy(fn ($row) => $row->user_id.'|'.$row->level_id);
+
+        $payments = Transaction::query()
+            ->where('provider', 'flutterwave')
+            ->where('type', 'subscription_upgrade')
+            ->whereIn('user_id', $userIds)
+            ->where('status', 'successful')
+            ->latest()
+            ->get()
+            ->groupBy('user_id');
+
+        $plans->each(function ($plan) use ($userLevels, $payments) {
+            $key = $plan->user_id.'|'.$plan->level_id;
+            $userLevel = $userLevels->get($key)?->first()
+                ?? $userLevels->flatten(1)->firstWhere('user_id', $plan->user_id);
+            $payment = $payments->get($plan->user_id)?->first();
+
+            $plan->setAttribute('user_level', $userLevel);
+            $plan->setAttribute('attached_payment', $payment);
+            $plan->setAttribute(
+                'next_payment_label',
+                $userLevel?->next_payment_date
+                    ? $userLevel->next_payment_date->format('M j, Y')
+                    : 'Not scheduled'
+            );
+        });
+    }
+
+    protected function communityNextPaymentLabel(CommunitySubscription $sub): string
+    {
+        if ($sub->isOneOff()) {
+            return 'One-off — no renewal';
+        }
+
+        if (! $sub->expires_at) {
+            return 'Not scheduled';
+        }
+
+        return $sub->expires_at->format('M j, Y');
+    }
+
+    protected function findPaymentForReference(?string $reference): ?Transaction
+    {
+        if (! $reference) {
+            return null;
+        }
+
+        return Transaction::query()
+            ->with('user:id,name,username,email')
+            ->where('provider', 'flutterwave')
+            ->where('ref', $reference)
+            ->first();
     }
 
     public function platformWalletTotals(): Collection
@@ -323,6 +560,8 @@ class AdminFlutterwaveService
         return [
             'subscription_upgrade' => 'Level subscription',
             'community' => 'Community payment',
+            'community_subscription' => 'Community subscription',
+            'community_one_off' => 'Community one-off',
         ];
     }
 }

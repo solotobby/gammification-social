@@ -13,6 +13,11 @@
         .dash-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: start; }
         @media (max-width: 960px) { .dash-grid-2 { grid-template-columns: 1fr; } }
         .dash-filter-bar { display:flex; flex-wrap:wrap; gap:.5rem; align-items:center; margin-bottom:1rem; padding:0 1.25rem 1rem; }
+        .dash-filter-bar .dash-input { flex: 1; min-width: 140px; }
+        .dash-row-link { cursor: pointer; transition: background .12s; }
+        .dash-row-link:hover { background: #f8fafc; }
+        .dash-row-link a { color: inherit; text-decoration: none; }
+        .dash-row-link a:hover { color: var(--dash-accent); text-decoration: underline; }
 
         .flw-hero {
             position: relative;
@@ -92,6 +97,12 @@
         .flw-balance-chip__code { font-size:.75rem; font-weight:700; color:#fdba74; letter-spacing:.06em; }
         .flw-balance-chip__avail { font-size:1.125rem; font-weight:700; color:#fff7ed; margin-top:.25rem; font-variant-numeric:tabular-nums; }
         .flw-balance-chip__ledger { font-size:.75rem; color:rgba(214,211,209,.75); margin-top:.2rem; }
+        .dash-filter-bar { display:flex; flex-wrap:wrap; gap:.5rem; align-items:center; margin-bottom:1rem; padding:0 1.25rem 1rem; }
+        .dash-filter-bar .dash-input { flex: 1; min-width: 140px; }
+        .dash-row-link { cursor: pointer; transition: background .12s; }
+        .dash-row-link:hover { background: #f8fafc; }
+        .dash-row-link a { color: inherit; text-decoration: none; }
+        .dash-row-link a:hover { color: var(--dash-accent); text-decoration: underline; }
     </style>
 @endsection
 
@@ -104,6 +115,8 @@
         'status' => $status ?: null,
         'type' => $type ?: null,
         'flow' => $flow ?: null,
+        'currency' => $currency ?: null,
+        'billing' => $billingType ?: null,
     ]);
 @endphp
 
@@ -286,7 +299,7 @@
                 <div class="dash-card__head">
                     <div>
                         <h2 class="dash-card__title">Transactions</h2>
-                        <p class="dash-muted" style="margin:.25rem 0 0">Inflows and ledger activity via Flutterwave</p>
+                        <p class="dash-muted" style="margin:.25rem 0 0">Filter Flutterwave ledger by status, type, currency, and flow</p>
                     </div>
                 </div>
                 <form method="get" action="{{ route('admin.flutterwave.index') }}" class="dash-filter-bar">
@@ -295,24 +308,37 @@
                     @endforeach
                     <input type="hidden" name="tab" value="transactions">
                     <input type="search" name="q" value="{{ $search }}" class="dash-input" placeholder="Search ref, user, email…">
-                    <select name="status" class="dash-input" style="min-width:140px;flex:0">
+                    <select name="status" class="dash-input" style="max-width:150px">
                         <option value="">All statuses</option>
                         @foreach ($statusLabels as $value => $label)
                             <option value="{{ $value }}" @selected($status === $value)>{{ $label }}</option>
                         @endforeach
                     </select>
-                    <select name="type" class="dash-input" style="min-width:160px;flex:0">
+                    <select name="type" class="dash-input" style="max-width:180px">
                         <option value="">All types</option>
                         @foreach ($typeLabels as $value => $label)
                             <option value="{{ $value }}" @selected($type === $value)>{{ $label }}</option>
                         @endforeach
+                        @foreach (($filterOptions['types'] ?? []) as $txType)
+                            @continue(array_key_exists($txType, $typeLabels) || $txType === 'community')
+                            <option value="{{ $txType }}" @selected($type === $txType)>{{ $txType }}</option>
+                        @endforeach
                     </select>
-                    <select name="flow" class="dash-input" style="min-width:120px;flex:0">
+                    <select name="currency" class="dash-input" style="max-width:120px">
+                        <option value="">All currencies</option>
+                        @foreach (($filterOptions['currencies'] ?? []) as $code)
+                            <option value="{{ $code }}" @selected(($currency ?? '') === $code)>{{ $code }}</option>
+                        @endforeach
+                    </select>
+                    <select name="flow" class="dash-input" style="max-width:120px">
                         <option value="">All flow</option>
                         <option value="in" @selected($flow === 'in')>Inflow</option>
                         <option value="out" @selected($flow === 'out')>Outflow</option>
                     </select>
                     <button type="submit" class="dash-btn dash-btn--primary">Filter</button>
+                    @if ($search || $status || $type || $flow || ($currency ?? ''))
+                        <a href="{{ route('admin.flutterwave.index', array_merge($dateRange->queryParams(), ['tab' => 'transactions'])) }}" class="dash-btn dash-btn--ghost">Clear</a>
+                    @endif
                 </form>
                 <div class="dash-card__body--flush">
                     @include('admin.flutterwave.partials.transactions-table')
@@ -328,7 +354,7 @@
                 <div class="dash-card__head">
                     <div>
                         <h2 class="dash-card__title">Community subscriptions</h2>
-                        <p class="dash-muted" style="margin:.25rem 0 0">Paid communities billed through Flutterwave</p>
+                        <p class="dash-muted" style="margin:.25rem 0 0">Click a row for payment details and next due date</p>
                     </div>
                 </div>
                 <form method="get" action="{{ route('admin.flutterwave.index') }}" class="dash-filter-bar">
@@ -337,13 +363,21 @@
                     @endforeach
                     <input type="hidden" name="tab" value="subscriptions">
                     <input type="search" name="q" value="{{ $search }}" class="dash-input" placeholder="Search member, community, ref…">
-                    <select name="status" class="dash-input" style="min-width:140px;flex:0">
+                    <select name="status" class="dash-input" style="max-width:150px">
                         <option value="">All statuses</option>
                         @foreach ($subscriptionStatusLabels as $value => $label)
                             <option value="{{ $value }}" @selected($status === $value)>{{ $label }}</option>
                         @endforeach
                     </select>
+                    <select name="billing" class="dash-input" style="max-width:160px">
+                        <option value="">All billing</option>
+                        <option value="subscription" @selected(($billingType ?? '') === 'subscription')>Recurring</option>
+                        <option value="one_off" @selected(($billingType ?? '') === 'one_off')>One-off</option>
+                    </select>
                     <button type="submit" class="dash-btn dash-btn--primary">Filter</button>
+                    @if ($search || $status || ($billingType ?? ''))
+                        <a href="{{ route('admin.flutterwave.index', array_merge($dateRange->queryParams(), ['tab' => 'subscriptions'])) }}" class="dash-btn dash-btn--ghost">Clear</a>
+                    @endif
                 </form>
                 <div class="dash-card__body--flush">
                     <div class="dash-table-wrap">
@@ -354,16 +388,24 @@
                                     <th>Community</th>
                                     <th>Billing</th>
                                     <th>Amount</th>
+                                    <th>Payment</th>
+                                    <th>Next payment</th>
                                     <th>Status</th>
-                                    <th>Reference</th>
-                                    <th>Created</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse ($subscriptions ?? [] as $sub)
-                                    <tr>
+                                    @php
+                                        $subStatus = $sub->status ?? '—';
+                                        $subBadge = $subStatus === 'active' ? 'dash-badge--success' : ($subStatus === 'expired' ? 'dash-badge--warn' : 'dash-badge--danger');
+                                        $pay = $sub->attached_payment;
+                                        $payBadge = $pay?->status === 'successful' ? 'dash-badge--success'
+                                            : (in_array($pay?->status, ['initiated', 'processing'], true) ? 'dash-badge--warn' : 'dash-badge--danger');
+                                        $detailUrl = route('admin.flutterwave.subscriptions.show', ['kind' => 'community', 'id' => $sub->id]);
+                                    @endphp
+                                    <tr class="dash-row-link" onclick="window.location='{{ $detailUrl }}'">
                                         <td>
-                                            <strong>{{ $sub->user?->name ?? '—' }}</strong>
+                                            <a href="{{ $detailUrl }}"><strong>{{ $sub->user?->name ?? 'N/A' }}</strong></a>
                                             <div class="dash-muted" style="font-size:.75rem">{{ $sub->user?->email }}</div>
                                         </td>
                                         <td>{{ $sub->community?->name ?? '—' }}</td>
@@ -377,14 +419,15 @@
                                             {{ strtoupper($sub->community?->currency ?? '') }} {{ number_format((float) $sub->amount, 2) }}
                                         </td>
                                         <td>
-                                            @php
-                                                $subStatus = $sub->status ?? '—';
-                                                $subBadge = $subStatus === 'active' ? 'dash-badge--success' : ($subStatus === 'cancelled' ? 'dash-badge--warn' : 'dash-badge--danger');
-                                            @endphp
-                                            <span class="dash-badge {{ $subBadge }}">{{ $subStatus }}</span>
+                                            @if ($pay)
+                                                <span class="dash-badge {{ $payBadge }}">{{ $pay->status }}</span>
+                                                <div class="dash-muted" style="font-size:.75rem">{{ $pay->ref }}</div>
+                                            @else
+                                                <span class="dash-badge dash-badge--warn">No payment</span>
+                                            @endif
                                         </td>
-                                        <td class="dash-muted" style="font-size:.8rem">{{ $sub->gateway_reference ?: '—' }}</td>
-                                        <td class="dash-muted">{{ $sub->created_at?->format('M j, Y g:i A') }}</td>
+                                        <td class="dash-muted">{{ $sub->next_payment_label }}</td>
+                                        <td><span class="dash-badge {{ $subBadge }}">{{ $subStatus }}</span></td>
                                     </tr>
                                 @empty
                                     <tr><td colspan="7"><div class="dash-empty">No Flutterwave community subscriptions in this range.</div></td></tr>
@@ -402,7 +445,7 @@
                 <div class="dash-card__head">
                     <div>
                         <h2 class="dash-card__title">Level payment plans</h2>
-                        <p class="dash-muted" style="margin:.25rem 0 0">Flutterwave plans created for Creator / Influencer subscriptions</p>
+                        <p class="dash-muted" style="margin:.25rem 0 0">Click a row for attached payment and next payment date</p>
                     </div>
                 </div>
                 <div class="dash-card__body--flush">
@@ -413,30 +456,48 @@
                                     <th>Member</th>
                                     <th>Level</th>
                                     <th>Amount</th>
+                                    <th>Payment</th>
+                                    <th>Next payment</th>
                                     <th>Plan ID</th>
                                     <th>Status</th>
-                                    <th>Created</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse ($levelPlans as $plan)
-                                    <tr>
+                                @forelse ($levelPlans ?? [] as $plan)
+                                    @php
+                                        $pay = $plan->attached_payment;
+                                        $payBadge = $pay?->status === 'successful' ? 'dash-badge--success'
+                                            : (in_array($pay?->status, ['initiated', 'processing'], true) ? 'dash-badge--warn' : 'dash-badge--danger');
+                                        $detailUrl = route('admin.flutterwave.subscriptions.show', ['kind' => 'level', 'id' => $plan->id]);
+                                    @endphp
+                                    <tr class="dash-row-link" onclick="window.location='{{ $detailUrl }}'">
                                         <td>
-                                            <strong>{{ $plan->user?->name ?? '—' }}</strong>
+                                            <a href="{{ $detailUrl }}"><strong>{{ $plan->user?->name ?? 'N/A' }}</strong></a>
                                             <div class="dash-muted" style="font-size:.75rem">{{ $plan->user?->email }}</div>
                                         </td>
                                         <td>{{ $plan->level?->name ?? $plan->name ?? '—' }}</td>
                                         <td class="dash-num">{{ $plan->currency }} {{ number_format((float) $plan->amount, 2) }}</td>
+                                        <td>
+                                            @if ($pay)
+                                                <span class="dash-badge {{ $payBadge }}">{{ $pay->status }}</span>
+                                                <div class="dash-muted" style="font-size:.75rem">{{ $pay->ref }}</div>
+                                            @else
+                                                <span class="dash-badge dash-badge--warn">No payment</span>
+                                            @endif
+                                        </td>
+                                        <td class="dash-muted">{{ $plan->next_payment_label }}</td>
                                         <td class="dash-muted" style="font-size:.8rem">{{ $plan->payment_plan_id ?: '—' }}</td>
-                                        <td><span class="dash-badge dash-badge--flw">{{ $plan->status ?: '—' }}</span></td>
-                                        <td class="dash-muted">{{ $plan->created_at?->format('M j, Y') }}</td>
+                                        <td><span class="dash-badge dash-badge--flw">{{ $plan->user_level?->status ?? ($plan->status ?: '—') }}</span></td>
                                     </tr>
                                 @empty
-                                    <tr><td colspan="6"><div class="dash-empty">No Flutterwave level plans in this range.</div></td></tr>
+                                    <tr><td colspan="7"><div class="dash-empty">No Flutterwave level plans in this range.</div></td></tr>
                                 @endforelse
                             </tbody>
                         </table>
                     </div>
+                    @if ($levelPlans && method_exists($levelPlans, 'hasPages') && $levelPlans->hasPages())
+                        <div class="dash-pagination">{{ $levelPlans->links('pagination::bootstrap-5') }}</div>
+                    @endif
                 </div>
             </div>
         @endif

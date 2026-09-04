@@ -127,6 +127,9 @@ Route::middleware(['auth', 'admin'])
             Route::post('korapay/deposit', [KorapayController::class, 'deposit'])->name('korapay.deposit');
             Route::get('korapay/verify', [KorapayController::class, 'verify'])->name('korapay.verify');
             Route::get('flutterwave', [FlutterwaveController::class, 'index'])->name('flutterwave.index');
+            Route::get('flutterwave/subscriptions/{kind}/{id}', [FlutterwaveController::class, 'showSubscription'])
+                ->whereIn('kind', ['community', 'level'])
+                ->name('flutterwave.subscriptions.show');
 
             Route::prefix('withdrawals')->name('withdrawals.')->group(function () {
                 Route::get('/', [WithdrawalController::class, 'withdrawalList'])->name('index');
