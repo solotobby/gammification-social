@@ -27,7 +27,14 @@ class FlutterwaveController extends Controller
         $currency = $request->string('currency')->trim()->toString() ?: null;
         $billingType = $request->string('billing')->trim()->toString() ?: null;
         $search = $request->string('q')->trim()->toString() ?: null;
+        $levelSearch = $request->string('lq')->trim()->toString() ?: null;
+        $levelPayment = $request->string('payment')->trim()->toString() ?: null;
+        $levelStatus = $request->string('lstatus')->trim()->toString() ?: null;
         $filterOptions = $this->flutterwave->transactionFilterOptions();
+
+        if ($levelPayment && ! in_array($levelPayment, ['with', 'without'], true)) {
+            $levelPayment = null;
+        }
 
         $balances = $this->flutterwave->fetchBalances();
         $stats = $this->flutterwave->flowStats($dateRange);
@@ -57,7 +64,7 @@ class FlutterwaveController extends Controller
                 ? $this->flutterwave->subscriptionHistory($dateRange, $status, $search, $billingType)
                 : null,
             'levelPlans' => $tab === 'subscriptions'
-                ? $this->flutterwave->levelSubscriptionPlans($dateRange, $search, $status)
+                ? $this->flutterwave->levelSubscriptionPlans($dateRange, $levelSearch, $levelStatus, $levelPayment)
                 : null,
             'walletTotals' => $tab === 'wallets'
                 ? $this->flutterwave->platformWalletTotals()
@@ -72,6 +79,9 @@ class FlutterwaveController extends Controller
             'currency' => $currency ?? '',
             'billingType' => $billingType ?? '',
             'search' => $search ?? '',
+            'levelSearch' => $levelSearch ?? '',
+            'levelPayment' => $levelPayment ?? '',
+            'levelStatus' => $levelStatus ?? '',
         ]);
     }
 

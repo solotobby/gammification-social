@@ -321,6 +321,7 @@ class AdminFlutterwaveService
         AdminDateRange $dateRange,
         ?string $search = null,
         ?string $status = null,
+        ?string $paymentFilter = null,
     ): LengthAwarePaginator {
         $query = UserPaymentPlan::query()
             ->with(['user:id,name,username,email', 'level:id,name'])
@@ -340,11 +341,28 @@ class AdminFlutterwaveService
                         $userQuery->where('name', 'like', "%{$search}%")
                             ->orWhere('email', 'like', "%{$search}%")
                             ->orWhere('username', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('level', function ($levelQuery) use ($search) {
+                        $levelQuery->where('name', 'like', "%{$search}%");
                     });
             });
         }
 
-        $paginator = $query->paginate(25)->withQueryString();
+        if (in_array($paymentFilter, ['with', 'without'], true)) {
+            $paidUserIds = Transaction::query()
+                ->where('provider', 'flutterwave')
+                ->where('type', 'subscription_upgrade')
+                ->where('status', 'successful')
+                ->select('user_id');
+
+            if ($paymentFilter === 'with') {
+                $query->whereIn('user_id', $paidUserIds);
+            } else {
+                $query->whereNotIn('user_id', $paidUserIds);
+            }
+        }
+
+        $paginator = $query->paginate(25, ['*'], 'level_page')->withQueryString();
         $this->attachLevelPlanContext($paginator->getCollection());
 
         return $paginator;

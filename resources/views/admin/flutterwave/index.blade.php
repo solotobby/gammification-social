@@ -117,6 +117,9 @@
         'flow' => $flow ?: null,
         'currency' => $currency ?: null,
         'billing' => $billingType ?: null,
+        'lq' => $levelSearch ?: null,
+        'payment' => $levelPayment ?: null,
+        'lstatus' => $levelStatus ?: null,
     ]);
 @endphp
 
@@ -362,6 +365,9 @@
                         <input type="hidden" name="{{ $key }}" value="{{ $value }}">
                     @endforeach
                     <input type="hidden" name="tab" value="subscriptions">
+                    @if ($levelSearch ?? '')<input type="hidden" name="lq" value="{{ $levelSearch }}">@endif
+                    @if ($levelPayment ?? '')<input type="hidden" name="payment" value="{{ $levelPayment }}">@endif
+                    @if ($levelStatus ?? '')<input type="hidden" name="lstatus" value="{{ $levelStatus }}">@endif
                     <input type="search" name="q" value="{{ $search }}" class="dash-input" placeholder="Search member, community, ref…">
                     <select name="status" class="dash-input" style="max-width:150px">
                         <option value="">All statuses</option>
@@ -445,9 +451,38 @@
                 <div class="dash-card__head">
                     <div>
                         <h2 class="dash-card__title">Level payment plans</h2>
-                        <p class="dash-muted" style="margin:.25rem 0 0">Click a row for attached payment and next payment date</p>
+                        <p class="dash-muted" style="margin:.25rem 0 0">Search members/plans and filter by payment attachment</p>
                     </div>
                 </div>
+                <form method="get" action="{{ route('admin.flutterwave.index') }}" class="dash-filter-bar">
+                    @foreach ($dateRange->queryParams() as $key => $value)
+                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                    @endforeach
+                    <input type="hidden" name="tab" value="subscriptions">
+                    @if ($search)<input type="hidden" name="q" value="{{ $search }}">@endif
+                    @if ($status)<input type="hidden" name="status" value="{{ $status }}">@endif
+                    @if ($billingType ?? '')<input type="hidden" name="billing" value="{{ $billingType }}">@endif
+                    <input type="search" name="lq" value="{{ $levelSearch ?? '' }}" class="dash-input" placeholder="Search member, email, level, plan ID…">
+                    <select name="payment" class="dash-input" style="max-width:180px">
+                        <option value="">All payment states</option>
+                        <option value="with" @selected(($levelPayment ?? '') === 'with')>With payment</option>
+                        <option value="without" @selected(($levelPayment ?? '') === 'without')>Without payment</option>
+                    </select>
+                    <select name="lstatus" class="dash-input" style="max-width:150px">
+                        <option value="">All plan statuses</option>
+                        <option value="active" @selected(($levelStatus ?? '') === 'active')>Active</option>
+                        <option value="inactive" @selected(($levelStatus ?? '') === 'inactive')>Inactive</option>
+                    </select>
+                    <button type="submit" class="dash-btn dash-btn--primary">Filter</button>
+                    @if (($levelSearch ?? '') || ($levelPayment ?? '') || ($levelStatus ?? ''))
+                        <a href="{{ route('admin.flutterwave.index', array_merge($dateRange->queryParams(), array_filter([
+                            'tab' => 'subscriptions',
+                            'q' => $search ?: null,
+                            'status' => $status ?: null,
+                            'billing' => $billingType ?: null,
+                        ]))) }}" class="dash-btn dash-btn--ghost">Clear</a>
+                    @endif
+                </form>
                 <div class="dash-card__body--flush">
                     <div class="dash-table-wrap">
                         <table class="dash-table">
@@ -490,7 +525,7 @@
                                         <td><span class="dash-badge dash-badge--flw">{{ $plan->user_level?->status ?? ($plan->status ?: '—') }}</span></td>
                                     </tr>
                                 @empty
-                                    <tr><td colspan="7"><div class="dash-empty">No Flutterwave level plans in this range.</div></td></tr>
+                                    <tr><td colspan="7"><div class="dash-empty">No Flutterwave level plans match your filters.</div></td></tr>
                                 @endforelse
                             </tbody>
                         </table>
