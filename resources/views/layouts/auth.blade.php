@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="{{ versioned_asset('rsc/styles.css') }}">
 <link rel="stylesheet" href="{{ versioned_asset('rsc/auth-scaffold.css') }}">
 @stack('head')
+@include('partials.google-ads-tag')
 <noscript><style>.reveal{opacity:1!important;transform:none!important}</style></noscript>
 </head>
 <body class="auth-scaffold">

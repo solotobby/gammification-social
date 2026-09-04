@@ -36,6 +36,8 @@
     <!-- Dashmix framework -->
     <link rel="stylesheet" id="css-main" href="{{ asset('src/assets/css/dashmix.min.css') }}">
 
+    @include('partials.google-ads-tag')
+
     @vite([
       // 'resources/sass/app.scss', 
       'resources/js/app.js'

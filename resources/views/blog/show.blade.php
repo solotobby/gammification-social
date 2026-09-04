@@ -29,20 +29,9 @@
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1535267515255754"
      crossorigin="anonymous"></script>
 
-    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-10842521152"></script>
+    @include('partials.google-ads-tag')
 
     <link rel="stylesheet" id="css-main" href="{{ asset('src/assets/css/dashmix.css') }}">
-
-    <script>
-        window.dataLayer = window.dataLayer || [];
-
-        function gtag() {
-            dataLayer.push(arguments);
-        }
-        gtag('js', new Date());
-
-        gtag('config', 'AW-10842521152');
-    </script>
 
     <style>
         body {

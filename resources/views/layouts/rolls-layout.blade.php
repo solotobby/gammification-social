@@ -22,6 +22,7 @@
 
     <!-- Livewire Styles -->
     @livewireStyles
+    @include('partials.google-ads-tag')
 
     <style>
         body {

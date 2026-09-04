@@ -32,15 +32,7 @@
     <!-- Dashmix framework -->
     <link rel="stylesheet" id="css-main" href="{{ asset('src/assets/css/dashmix.css') }}">
 
-    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-10842521152"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      gtag('config', 'AW-10842521152');
-    </script>
-
+    @include('partials.google-ads-tag')
 
     @vite([
       // 'resources/sass/app.scss', 
