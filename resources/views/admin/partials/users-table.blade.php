@@ -40,7 +40,19 @@
                 {{ number_format($users->total()) }} total · showing {{ $users->firstItem() ?? 0 }}–{{ $users->lastItem() ?? 0 }}
             </p>
         </div>
-        <span class="dash-pill">Level: {{ ucfirst($currentLevel) }}</span>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
+            <span class="dash-pill">Level: {{ ucfirst($currentLevel) }}</span>
+            <a href="{{ route('admin.users.export', array_filter(['format' => 'excel', 'level' => $currentLevel !== 'all' ? $currentLevel : null])) }}"
+               class="dash-btn dash-btn--ghost">
+                <i class="fa fa-file-excel"></i> Excel
+            </a>
+            <a href="{{ route('admin.users.export', array_filter(['format' => 'pdf', 'level' => $currentLevel !== 'all' ? $currentLevel : null])) }}"
+               class="dash-btn dash-btn--ghost"
+               target="_blank"
+               rel="noopener">
+                <i class="fa fa-file-pdf"></i> PDF
+            </a>
+        </div>
     </div>
 
     <div class="dash-card__body--flush">

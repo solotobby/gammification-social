@@ -39,6 +39,9 @@ Route::middleware(['auth', 'admin'])
 
         Route::prefix('users')->name('users.')->group(function () {
             Route::get('search', [UserController::class, 'userSearch'])->name('search');
+            Route::get('export/{format}', [UserController::class, 'exportUsers'])
+                ->whereIn('format', ['excel', 'pdf'])
+                ->name('export');
             Route::get('{user}/transactions', [UserController::class, 'transactionList'])->name('transactions');
             Route::get('{user}/posts', [UserController::class, 'postList'])->name('posts');
             Route::get('{user}/engagement', [UserEngagementController::class, 'engagementAnalytics'])->name('engagement');

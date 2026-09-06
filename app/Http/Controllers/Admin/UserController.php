@@ -32,6 +32,53 @@ class UserController extends Controller
         ]);
     }
 
+    public function exportUsers(Request $request, string $format)
+    {
+        if (! in_array($format, ['excel', 'pdf'], true)) {
+            abort(404);
+        }
+
+        $level = $request->query('level', 'all');
+        $users = $this->users->usersForExport($level);
+        $levelLabel = $level === 'all' ? 'All' : $level;
+        $filename = 'payhankey-users-'.strtolower($levelLabel).'-'.now()->format('Y-m-d');
+
+        if ($format === 'excel') {
+            $headers = [
+                'Content-Type' => 'application/vnd.ms-excel; charset=UTF-8',
+                'Content-Disposition' => "attachment; filename=\"{$filename}.csv\"",
+            ];
+
+            $callback = function () use ($users, $levelLabel) {
+                $out = fopen('php://output', 'w');
+                fwrite($out, "\xEF\xBB\xBF");
+                fputcsv($out, ['Name', 'Username', 'Email', 'Level', 'Verified', 'Channel', 'Joined']);
+
+                foreach ($users as $user) {
+                    fputcsv($out, [
+                        $user->name,
+                        $user->username,
+                        $user->email,
+                        $user->userLevel?->plan_name ?? 'Basic',
+                        $user->email_verified_at ? 'Verified' : 'Pending',
+                        $user->heard ?: '',
+                        optional($user->created_at)->format('Y-m-d H:i'),
+                    ]);
+                }
+
+                fclose($out);
+            };
+
+            return response()->stream($callback, 200, $headers);
+        }
+
+        return view('admin.user.export-pdf', [
+            'users' => $users,
+            'levelLabel' => $levelLabel,
+            'exportedAt' => now(),
+        ]);
+    }
+
     public function userSearch(Request $request)
     {
         $query = trim($request->input('query'));

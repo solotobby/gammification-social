@@ -31,11 +31,23 @@ class AdminUserService
 
     public function listUsers(?string $level = null): LengthAwarePaginator
     {
+        return $this->usersQuery($level)
+            ->paginate(50);
+    }
+
+    public function usersForExport(?string $level = null)
+    {
+        return $this->usersQuery($level)
+            ->select('id', 'name', 'username', 'email', 'email_verified_at', 'created_at', 'heard')
+            ->get();
+    }
+
+    protected function usersQuery(?string $level = null)
+    {
         return User::query()
             ->with(['userLevel:id,user_id,plan_name,level_id,status,next_payment_date'])
             ->byLevel($level)
-            ->latest()
-            ->paginate(50);
+            ->latest();
     }
 
     public function searchUsers(string $query): LengthAwarePaginator
