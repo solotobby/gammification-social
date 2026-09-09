@@ -134,7 +134,7 @@
                         <tbody>
                             @forelse ($reconciliation['queuedWithdrawals'] as $item)
                                 <tr>
-                                    <td>{{ $item->user ? '@'.$item->user->username : '—' }}</td>
+                                    <td>@if($item->user)<span>@</span>{{ $item->user->username }}@else — @endif</td>
                                     <td>{{ $item->wallet_type }}</td>
                                     <td>${{ number_format((float) $item->amount, 2) }}</td>
                                     <td>@if($item->user)<a href="{{ route('admin.users.show', $item->user) }}" class="dash-btn dash-btn--ghost dash-btn--sm">User</a>@endif</td>
@@ -156,7 +156,7 @@
                         <tbody>
                             @foreach ($reconciliation['queuedPayouts'] as $item)
                                 <tr>
-                                    <td>{{ $item->user ? '@'.$item->user->username : '—' }}</td>
+                                    <td>@if($item->user)<span>@</span>{{ $item->user->username }}@else — @endif</td>
                                     <td>Payout · {{ $item->level }}</td>
                                     <td>${{ number_format((float) $item->amount, 2) }}</td>
                                     <td><span class="dash-badge dash-badge--warn">{{ $item->status }}</span></td>
@@ -164,7 +164,7 @@
                             @endforeach
                             @foreach ($reconciliation['pendingEngagement'] as $item)
                                 <tr>
-                                    <td>{{ $item->user ? '@'.$item->user->username : '—' }}</td>
+                                    <td>@if($item->user)<span>@</span>{{ $item->user->username }}@else — @endif</td>
                                     <td>Stat · {{ $item->level }} · {{ $item->month }}</td>
                                     <td>${{ number_format((float) $item->amount, 2) }}</td>
                                     <td><span class="dash-badge dash-badge--warn">{{ $item->status }}</span></td>
@@ -192,7 +192,7 @@
                                 <tr>
                                     <td>
                                         {{ $wallet->user ? displayName($wallet->user->name) : '—' }}
-                                        <div class="dash-muted" style="font-size:.75rem">{{ $wallet->user ? '@'.$wallet->user->username : '' }}</div>
+                                        <div class="dash-muted" style="font-size:.75rem">@if($wallet->user)<span>@</span>{{ $wallet->user->username }}@endif</div>
                                     </td>
                                     <td>{{ $wallet->currency }}</td>
                                     <td class="{{ $wallet->balance < 0 ? 'text-danger' : '' }}">{{ number_format((float) $wallet->balance, 2) }}</td>
@@ -255,7 +255,7 @@
                             <td style="font-family:ui-monospace,monospace;font-size:.8rem">{{ $tx->ref }}</td>
                             <td>
                                 @if ($tx->user)
-                                    <a href="{{ route('admin.users.show', $tx->user) }}">{{ '@'.$tx->user->username }}</a>
+                                    <a href="{{ route('admin.users.show', $tx->user) }}"><span>@</span>{{ $tx->user->username }}</a>
                                 @else
                                     —
                                 @endif

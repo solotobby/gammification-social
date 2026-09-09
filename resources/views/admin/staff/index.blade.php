@@ -73,7 +73,7 @@
                                         <tr>
                                             <td>
                                                 <strong>{{ $member->name }}</strong>
-                                                <div class="dash-muted" style="font-size:.8rem;">{{ '@'.$member->username }}</div>
+                                                <div class="dash-muted" style="font-size:.8rem;"><span>@</span>{{ $member->username }}</div>
                                             </td>
                                             <td class="dash-muted">{{ $member->email }}</td>
                                             <td>

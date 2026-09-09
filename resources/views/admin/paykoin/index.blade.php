@@ -149,7 +149,7 @@
                                     <tr>
                                         <td>
                                             @if ($tx->user)
-                                                <a href="{{ route('admin.users.show', $tx->user) }}">@{{ $tx->user->username }}</a>
+                                                <a href="{{ route('admin.users.show', $tx->user) }}"><span>@</span>{{ $tx->user->username }}</a>
                                             @else — @endif
                                         </td>
                                         <td><span class="dash-badge dash-badge--pk">{{ $typeLabels[$tx->type] ?? $tx->type }}</span></td>
@@ -178,7 +178,7 @@
                                     <tr>
                                         <td>
                                             @if ($gift->sender && $gift->recipient)
-                                                @{{ $gift->sender->username }} → @{{ $gift->recipient->username }}
+                                                <span>@</span>{{ $gift->sender->username }} → <span>@</span>{{ $gift->recipient->username }}
                                             @else — @endif
                                         </td>
                                         <td>{{ $artifactLabel($gift->artifact_id) }}</td>
@@ -257,7 +257,7 @@
                                     <td>{{ $tx->created_at->format('M j, Y H:i') }}</td>
                                     <td>
                                         @if ($tx->user)
-                                            <a href="{{ route('admin.users.show', $tx->user) }}">@{{ $tx->user->username }}</a>
+                                            <a href="{{ route('admin.users.show', $tx->user) }}"><span>@</span>{{ $tx->user->username }}</a>
                                         @else — @endif
                                     </td>
                                     <td><span class="dash-badge dash-badge--pk">{{ $typeLabels[$tx->type] ?? $tx->type }}</span></td>
@@ -316,12 +316,12 @@
                                     <td>{{ $gift->created_at->format('M j, Y H:i') }}</td>
                                     <td>
                                         @if ($gift->sender)
-                                            <a href="{{ route('admin.users.show', $gift->sender) }}">@{{ $gift->sender->username }}</a>
+                                            <a href="{{ route('admin.users.show', $gift->sender) }}"><span>@</span>{{ $gift->sender->username }}</a>
                                         @else — @endif
                                     </td>
                                     <td>
                                         @if ($gift->recipient)
-                                            <a href="{{ route('admin.users.show', $gift->recipient) }}">@{{ $gift->recipient->username }}</a>
+                                            <a href="{{ route('admin.users.show', $gift->recipient) }}"><span>@</span>{{ $gift->recipient->username }}</a>
                                         @else — @endif
                                     </td>
                                     <td>{{ $artifactLabel($gift->artifact_id) }}</td>
@@ -375,7 +375,7 @@
                                     <td>
                                         @if ($wallet->user)
                                             <strong>{{ $wallet->user->name }}</strong><br>
-                                            <span class="dash-muted">@{{ $wallet->user->username }}</span>
+                                            <span class="dash-muted"><span>@</span>{{ $wallet->user->username }}</span>
                                         @else — @endif
                                     </td>
                                     <td>{{ $wallet->currency ?: '—' }}</td>

@@ -100,7 +100,7 @@
                                                         {{ displayName($post->user->name) }}
                                                     </a>
                                                     <div class="dash-muted" style="font-size:.75rem">
-                                                        {{ '@'.$post->user->username }}
+                                                        <span>@</span>{{ $post->user->username }}
                                                         · {{ $post->user->status }}
                                                     </div>
                                                 </div>

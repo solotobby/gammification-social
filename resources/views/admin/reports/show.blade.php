@@ -86,7 +86,7 @@
                                             {{ displayName($post->user->name) }}
                                         </a>
                                         <div class="dash-muted">
-                                            {{ '@'.$post->user->username }} · {{ $post->user->email }}
+                                            <span>@</span>{{ $post->user->username }} · {{ $post->user->email }}
                                             · author status: <strong>{{ $post->user->status }}</strong>
                                         </div>
                                     </div>
@@ -124,7 +124,7 @@
                                                 {{ $report->user ? displayName($report->user->name) : 'Unknown reporter' }}
                                             </div>
                                             <div class="dash-muted" style="font-size:.8rem">
-                                                {{ $report->user ? '@'.$report->user->username : '—' }}
+                                                @if($report->user)<span>@</span>{{ $report->user->username }}@else — @endif
                                                 · {{ $report->created_at?->diffForHumans() }}
                                             </div>
                                             @if ($report->reason)

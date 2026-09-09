@@ -93,7 +93,7 @@
                                         <img src="{{ $video->user->avatar ?? asset('src/assets/media/avatars/avatar13.jpg') }}" alt="">
                                         <div>
                                             <a class="dash-author__name" href="{{ route('admin.users.show', $video->user) }}">{{ displayName($video->user->name) }}</a>
-                                            <div class="dash-muted" style="font-size:.75rem">{{ '@'.$video->user->username }}</div>
+                                            <div class="dash-muted" style="font-size:.75rem"><span>@</span>{{ $video->user->username }}</div>
                                         </div>
                                     </div>
                                 @else

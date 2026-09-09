@@ -119,7 +119,7 @@
                                 <img src="{{ $participant->user->avatar ?? asset('src/assets/media/avatars/avatar13.jpg') }}" alt="">
                                 <div>
                                     <div style="font-weight:600;font-size:.875rem">{{ displayName($participant->user->name) }}</div>
-                                    <div class="dash-muted" style="font-size:.75rem">{{ '@'.$participant->user->username }}</div>
+                                    <div class="dash-muted" style="font-size:.75rem"><span>@</span>{{ $participant->user->username }}</div>
                                 </div>
                             </a>
                         @endif

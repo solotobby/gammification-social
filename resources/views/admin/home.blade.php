@@ -432,7 +432,7 @@
                                             @endphp
                                             @forelse ($pk['recentTransactions'] as $tx)
                                                 <tr>
-                                                    <td>{{ $tx->user ? '@'.$tx->user->username : '—' }}</td>
+                                                    <td>@if($tx->user)<span>@</span>{{ $tx->user->username }}@else — @endif</td>
                                                     <td>{{ $paykoinTxTypes[$tx->type] ?? $tx->type }}</td>
                                                     <td>{{ $tx->pk_amount >= 0 ? '+' : '' }}{{ number_format($tx->pk_amount) }}</td>
                                                     <td>{{ $tx->created_at->diffForHumans() }}</td>

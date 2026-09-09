@@ -114,7 +114,7 @@
                                     <a href="{{ route('admin.users.show', $post->user) }}" class="dash-author__name">
                                         {{ displayName($post->user->name) }}
                                     </a>
-                                    <div class="dash-muted">{{ '@'.$post->user->username }} · {{ $post->user->email }}</div>
+                                    <div class="dash-muted"><span>@</span>{{ $post->user->username }} · {{ $post->user->email }}</div>
                                 </div>
                             </div>
                         @endif
@@ -195,7 +195,7 @@
                                         {{ $report->user ? displayName($report->user->name) : 'Unknown user' }}
                                     </div>
                                     <div class="dash-muted" style="font-size:.8rem">
-                                        {{ $report->user->username ?? '—' }} · {{ $report->created_at?->diffForHumans() }}
+                                        @if($report->user)<span>@</span>{{ $report->user->username }}@else — @endif · {{ $report->created_at?->diffForHumans() }}
                                     </div>
                                     @if ($report->reason)
                                         <div style="margin-top:.35rem;font-size:.875rem">{{ $report->reason }}</div>

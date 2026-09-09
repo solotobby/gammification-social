@@ -167,7 +167,7 @@
             <header class="dash-header">
                 <div>
                     <h1>{{ $user->name }}</h1>
-                    <p>{{ '@' . $user->username }} · {{ $user->email }}</p>
+                    <p><span>@</span>{{ $user->username }} · {{ $user->email }}</p>
                     <div class="dash-meta">
                         <span class="dash-badge dash-badge--indigo">{{ $planName }}</span>
                         @if ($subscription && ! $subscriptionActive)

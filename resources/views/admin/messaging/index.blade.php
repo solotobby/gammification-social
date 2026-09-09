@@ -144,7 +144,7 @@
                                                 <img src="{{ $user->avatar ?? asset('src/assets/media/avatars/avatar13.jpg') }}" alt="">
                                                 <div>
                                                     <div style="font-weight:600">{{ displayName($user->name) }}</div>
-                                                    <div class="dash-muted" style="font-size:.75rem">{{ '@'.$user->username }}</div>
+                                                    <div class="dash-muted" style="font-size:.75rem"><span>@</span>{{ $user->username }}</div>
                                                 </div>
                                             </div>
                                         </td>
@@ -205,7 +205,7 @@
                             <tbody>
                                 @forelse ($stats['recent_messages'] as $message)
                                     <tr>
-                                        <td class="dash-muted">{{ $message->user ? '@'.$message->user->username : '—' }}</td>
+                                        <td class="dash-muted">@if($message->user)<span>@</span>{{ $message->user->username }}@else — @endif</td>
                                         <td>{{ $messaging->previewMessage($message) }}</td>
                                         <td><span class="dash-badge dash-badge--{{ $message->type === 'image' ? 'image' : 'text' }}">{{ $messaging->typeLabel($message->type) }}</span></td>
                                         <td class="dash-muted">{{ $message->created_at?->diffForHumans() }}</td>
@@ -310,7 +310,7 @@
                             <tbody>
                                 @forelse ($messages as $message)
                                     <tr>
-                                        <td class="dash-muted">{{ $message->user ? '@'.$message->user->username : '—' }}</td>
+                                        <td class="dash-muted">@if($message->user)<span>@</span>{{ $message->user->username }}@else — @endif</td>
                                         <td style="max-width:280px">{{ $messaging->previewMessage($message) }}</td>
                                         <td><span class="dash-badge dash-badge--{{ $message->type === 'image' ? 'image' : 'text' }}">{{ $messaging->typeLabel($message->type) }}</span></td>
                                         <td class="dash-muted" style="font-size:.75rem">{{ $message->conversation ? $messaging->participantLabel($message->conversation) : '—' }}</td>
@@ -353,7 +353,7 @@
                         <a href="{{ route('admin.messaging.show', $conversation) }}" class="dash-media-card" style="text-decoration:none;color:inherit">
                             <img src="{{ $attachment->url() }}" alt="Message media" loading="lazy" onerror="this.src='{{ asset('src/assets/media/photos/photo3.jpg') }}'">
                             <div class="dash-media-card__meta">
-                                <strong>{{ $sender ? '@'.$sender->username : 'Unknown' }}</strong>
+                                <strong><span>@</span>{{ $sender->username }}</strong>
                                 {{ $attachment->message?->created_at?->diffForHumans() ?? '—' }}
                                 @if ($conversation)
                                     <div>{{ Str::limit($messaging->participantLabel($conversation), 28) }}</div>

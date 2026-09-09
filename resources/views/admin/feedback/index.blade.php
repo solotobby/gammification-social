@@ -108,7 +108,7 @@
                                             <td class="dash-muted">
                                                 @if ($item->user)
                                                     <a href="{{ route('admin.users.show', $item->user) }}" class="dash-link">
-                                                        {{ '@'.$item->user->username }}
+                                                        <span>@</span>{{ $item->user->username }}
                                                     </a>
                                                 @else
                                                     —

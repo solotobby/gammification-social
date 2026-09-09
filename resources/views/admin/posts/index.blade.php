@@ -122,7 +122,7 @@
                                                     <a href="{{ route('admin.users.show', $post->user) }}" class="dash-author__name">
                                                         {{ displayName($post->user->name) }}
                                                     </a>
-                                                    <div class="dash-muted" style="font-size:.75rem">{{ '@'.$post->user->username }}</div>
+                                                    <div class="dash-muted" style="font-size:.75rem"><span>@</span>{{ $post->user->username }}</div>
                                                 </div>
                                             </div>
                                         @else

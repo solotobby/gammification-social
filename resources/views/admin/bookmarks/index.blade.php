@@ -66,7 +66,7 @@
                             @forelse ($topPosts as $post)
                                 <tr>
                                     <td>{{ \Illuminate\Support\Str::limit(strip_tags($post->content), 80) ?: '—' }}</td>
-                                    <td class="dash-muted">{{ $post->user ? '@'.$post->user->username : '—' }}</td>
+                                    <td class="dash-muted">@if($post->user)<span>@</span>{{ $post->user->username }}@else — @endif</td>
                                     <td><strong>{{ number_format($post->bookmarks_count) }}</strong></td>
                                     <td><span class="dash-badge {{ $post->status === 'LIVE' ? 'dash-badge--success' : 'dash-badge--warn' }}">{{ $post->status }}</span></td>
                                     <td><a href="{{ route('admin.posts.show', $post) }}" class="dash-btn dash-btn--ghost dash-btn--sm">Open</a></td>
@@ -94,7 +94,7 @@
                                             <img src="{{ $user->avatar ?? asset('src/assets/media/avatars/avatar13.jpg') }}" alt="">
                                             <div>
                                                 <div style="font-weight:600">{{ displayName($user->name) }}</div>
-                                                <div class="dash-muted" style="font-size:.75rem">{{ '@'.$user->username }}</div>
+                                                <div class="dash-muted" style="font-size:.75rem"><span>@</span>{{ $user->username }}</div>
                                             </div>
                                         </div>
                                     </td>
@@ -121,7 +121,7 @@
                         <tbody>
                             @forelse ($recent as $bookmark)
                                 <tr>
-                                    <td class="dash-muted">{{ $bookmark->user ? '@'.$bookmark->user->username : '—' }}</td>
+                                    <td class="dash-muted">@if($bookmark->user)<span>@</span>{{ $bookmark->user->username }}@else — @endif</td>
                                     <td>{{ \Illuminate\Support\Str::limit(strip_tags($bookmark->post?->content), 90) ?: '—' }}</td>
                                     <td class="dash-muted">{{ $bookmark->created_at?->diffForHumans() }}</td>
                                 </tr>

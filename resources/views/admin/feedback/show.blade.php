@@ -61,7 +61,7 @@
             <header class="dash-header">
                 <div>
                     <h1>{{ $feedback->subject }}</h1>
-                    <p>Conversation with {{ $feedback->user?->username ? '@'.$feedback->user->username : 'user' }}</p>
+                    <p>Conversation with @if($feedback->user?->username)<span>@</span>{{ $feedback->user->username }}@else user @endif</p>
                 </div>
                 <a href="{{ route('admin.feedback.index') }}" class="dash-btn dash-btn--ghost">← Back</a>
             </header>
@@ -91,7 +91,7 @@
                                             @if ($msg->is_staff)
                                                 Support · {{ $msg->user?->name ?? 'Admin' }}
                                             @else
-                                                {{ '@'.($msg->user?->username ?? 'user') }}
+                                                @if($msg->user?->username)<span>@</span>{{ $msg->user->username }}@else user @endif
                                             @endif
                                         </span>
                                         <span>{{ $msg->created_at?->format('M j, Y · H:i') }}</span>
@@ -133,7 +133,7 @@
                                     <dt>Username</dt>
                                     <dd>
                                         <a href="{{ route('admin.users.show', $feedback->user) }}" class="dash-link">
-                                            {{ '@'.$feedback->user->username }}
+                                            <span>@</span>{{ $feedback->user->username }}
                                         </a>
                                     </dd>
                                     <dt>Email</dt>

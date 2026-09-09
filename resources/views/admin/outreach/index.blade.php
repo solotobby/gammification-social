@@ -175,7 +175,7 @@
                                                         <div>
                                                             <a href="{{ route('admin.users.show', $user) }}" class="dash-author__name">{{ $user->name }}</a>
                                                             <div class="dash-muted" style="font-size:.8rem;">
-                                                                {{ '@'.$user->username }}
+                                                                <span>@</span>{{ $user->username }}
                                                                 @if ($user->email)
                                                                     · {{ $user->email }}
                                                                 @endif
