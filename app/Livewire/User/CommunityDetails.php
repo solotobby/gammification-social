@@ -15,6 +15,7 @@ use App\Models\CommunityPostLike;
 use App\Models\CommunitySubscription;
 use App\Models\Follow;
 use App\Models\User;
+use App\Notifications\GeneralNotification;
 use App\Support\CommunityFeeCalculator;
 use App\Support\StoredMedia;
 use App\Services\CommunityMembershipService;
@@ -617,6 +618,7 @@ class CommunityDetails extends Component
         }
 
         $this->community->refresh();
+        $this->dispatch('post-action-toast', message: 'You left ' . $this->community->name);
         session()->flash('status', 'You have left ' . $this->community->name . '.');
     }
 
@@ -665,6 +667,7 @@ class CommunityDetails extends Component
             ));
         }
 
+        $this->dispatch('post-action-toast', message: 'Join request sent.');
         session()->flash('status', 'Your request has been sent to the admin.');
     }
 
@@ -688,11 +691,9 @@ class CommunityDetails extends Component
             return;
         }
 
-        DB::transaction(function () use ($request) {
+        $success = DB::transaction(function () use ($request) {
             if (! app(CommunityMembershipService::class)->attachMember($this->community, $request->user_id)) {
-                session()->flash('error', 'Could not approve — user may be banned from this community.');
-
-                return;
+                return false;
             }
 
             $request->update([
@@ -700,7 +701,14 @@ class CommunityDetails extends Component
                 'reviewed_by' => auth()->id(),
                 'reviewed_at' => now(),
             ]);
+
+            return true;
         });
+
+        if (! $success) {
+            session()->flash('error', 'Could not approve — user may be banned from this community.');
+            return;
+        }
 
         $requester = $request->user;
 
@@ -720,6 +728,7 @@ class CommunityDetails extends Component
             ));
         }
 
+        $this->dispatch('post-action-toast', message: 'Member approved.');
         session()->flash('status', 'Request approved.');
     }
 
@@ -762,6 +771,7 @@ class CommunityDetails extends Component
             ));
         }
 
+        $this->dispatch('post-action-toast', message: 'Member declined.');
         session()->flash('status', 'Request denied.');
     }
 

@@ -9,7 +9,7 @@
         aria-label="Notifications">
         <i class="fa fa-bell"></i>
         @if ($unreadCount > 0)
-            <span class="pk-n-dot" aria-hidden="true"></span>
+            <span class="pk-n-count">{{ $unreadCount > 99 ? '99+' : $unreadCount }}</span>
         @endif
     </button>
 

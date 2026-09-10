@@ -34,7 +34,7 @@ class Community extends Component
     public string $fee_payer = 'creator';
     public string $billing_type = 'subscription';
     public ?string $billing_interval = 'monthly';
- 
+
 
     // ---- platform economics ----
     public int $platformFeePercent;
@@ -117,7 +117,7 @@ class Community extends Component
 
         $userCurrencyCode = getCurrencyCode(creatorCommunityCurrency());
         $userBaseCurrency = creatorCommunityCurrency() ?? userBaseCurrency();
-       
+
 
         $breakdown = CommunityFeeCalculator::breakdown(
             (float) $this->monthly_fee,
@@ -271,6 +271,7 @@ class Community extends Component
             return;
         }
 
+        $this->dispatch('post-action-toast', message: 'Joined ' . $community->name);
         session()->flash('status', 'Joined ' . $community->name . '.');
     }
 
