@@ -277,22 +277,18 @@ class Community extends Model
     }
 
     /**
-     * Whether this community is priced in the given user's wallet currency.
+     * Whether this community is available for the given user (always true regardless of currency).
      */
     public function isInCurrency(?string $currency = null): bool
     {
-        $currency ??= userBaseCurrency();
-
-        return self::normaliseCurrency($this->currency) === self::normaliseCurrency($currency);
+        return true;
     }
 
     /**
-     * Limit discovery lists to communities in the viewer's wallet currency.
+     * Scope to allow discovery across all currencies without restriction.
      */
     public function scopeForUserCurrency($query, ?string $currency = null)
     {
-        $currency = self::normaliseCurrency($currency ?? userBaseCurrency());
-
-        return $query->where('currency', $currency);
+        return $query;
     }
 }

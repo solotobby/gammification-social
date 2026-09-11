@@ -2288,7 +2288,20 @@
                                     @case('paid')
                                         <span class="fb-hero-type">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke-linecap="round"/></svg>
-                                            Paid · {{ getCurrencyCode() }}{{ number_format(convertCurrency($community->member_charge, $community->currency, auth()->user()->wallet->currency), 2) }}{{ $community->price_suffix }}
+                                            @php
+                                                $detailUserCurr = auth()->user()?->wallet?->currency ?? 'NGN';
+                                                $detailCommCurr = $community->currency ?? 'NGN';
+                                                try {
+                                                    $detailDisplayPrice = $detailCommCurr === $detailUserCurr
+                                                        ? (float) $community->member_charge
+                                                        : (float) convertCurrency($community->member_charge, $detailCommCurr, $detailUserCurr);
+                                                    $detailCurrencySymbol = getCurrencyCode($detailUserCurr) ?? getCurrencyCode();
+                                                } catch (\Throwable $e) {
+                                                    $detailDisplayPrice = (float) $community->member_charge;
+                                                    $detailCurrencySymbol = getCurrencyCode($detailCommCurr) ?? getCurrencyCode();
+                                                }
+                                            @endphp
+                                            Paid · {{ $detailCurrencySymbol }}{{ number_format($detailDisplayPrice, 2) }}{{ $community->price_suffix }}
                                         </span>
                                     @break
                                     @case('approval')
@@ -2557,7 +2570,20 @@
                     <span>
                         {{ ucfirst($community->type) }}
                         @if ($community->type === 'paid')
-                            · {{ getCurrencyCode() }}{{ number_format(convertCurrency($community->member_charge, $community->currency, auth()->user()->wallet->currency), 2) }}{{ $community->price_suffix }}
+                            @php
+                                $aboutUserCurr = auth()->user()?->wallet?->currency ?? 'NGN';
+                                $aboutCommCurr = $community->currency ?? 'NGN';
+                                try {
+                                    $aboutDisplayPrice = $aboutCommCurr === $aboutUserCurr
+                                        ? (float) $community->member_charge
+                                        : (float) convertCurrency($community->member_charge, $aboutCommCurr, $aboutUserCurr);
+                                    $aboutCurrencySymbol = getCurrencyCode($aboutUserCurr) ?? getCurrencyCode();
+                                } catch (\Throwable $e) {
+                                    $aboutDisplayPrice = (float) $community->member_charge;
+                                    $aboutCurrencySymbol = getCurrencyCode($aboutCommCurr) ?? getCurrencyCode();
+                                }
+                            @endphp
+                            · {{ $aboutCurrencySymbol }}{{ number_format($aboutDisplayPrice, 2) }}{{ $community->price_suffix }}
                         @endif
                     </span>
                 </div>
