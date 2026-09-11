@@ -81,8 +81,9 @@ class NewTimeline extends Component
     // ─── Feed Loading ─────────────────────────────────────────────────────────────
     public function loadPosts(): void
     {
-        $allPosts = Post::with(['user', 'images', 'video'])
+        $allPosts = Post::with(['user', 'images', 'video', 'activeBoost'])
             ->where('status', 'LIVE')
+            ->orderByDesc('is_boosted')
             ->latest('created_at')
             ->take($this->perPage() * $this->page * 2)
             ->get();

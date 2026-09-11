@@ -25,22 +25,48 @@
         || (! $isOwner);
 @endphp
 
-<div class="pk-header-actions">
+<div class="pk-header-actions"
+    x-data="{
+        isBoosted: @js((bool) ($post->is_boosted ?? false)) || Boolean(sessionStorage.getItem('pk_boosted_{{ $post->id }}'))
+    }"
+    @pk-post-boosted.window="if ($event.detail.postId == '{{ $post->id }}') isBoosted = true">
     @if ($showEarnings)
-        @if ($isOwner && $context === 'post')
-            <a href="{{ url('post/timeline/' . $post->id . '/analytics') }}" class="pk-earn" wire:navigate>
-                {{ getCurrencyCode() }}{{ number_format($estimatedEarnings, 2) }}
-            </a>
-        @else
-            <span class="pk-earn pk-earn--static" title="Estimated earnings">
-                {{ getCurrencyCode() }}{{ number_format($estimatedEarnings, 2) }}
-            </span>
-        @endif
+        <template x-if="isBoosted">
+            <div style="display:inline-flex;align-items:center;gap:6px">
+                @if ($isOwner && $context === 'post')
+                    <a href="{{ url('post/timeline/' . $post->id . '/analytics?tab=boost') }}"
+                        class="pk-boosted-pill"
+                        title="Promoted across Payhankey & Partner Websites · Click for Campaign Analytics"
+                        style="text-decoration:none;cursor:pointer"
+                        wire:navigate>
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                        Boosted
+                    </a>
+                @else
+                    <span class="pk-boosted-pill" title="Promoted across Payhankey & Partner Websites">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                        Boosted
+                    </span>
+                @endif
+            </div>
+        </template>
+        <template x-if="!isBoosted">
+            <div>
+                @if ($isOwner && $context === 'post')
+                    <a href="{{ url('post/timeline/' . $post->id . '/analytics') }}" class="pk-earn" wire:navigate>
+                        {{ getCurrencyCode() }}{{ number_format($estimatedEarnings, 2) }}
+                    </a>
+                @else
+                    <span class="pk-earn pk-earn--static" title="Estimated earnings">
+                        {{ getCurrencyCode() }}{{ number_format($estimatedEarnings, 2) }}
+                    </span>
+                @endif
+            </div>
+        </template>
     @endif
 
     @if ($showPostMenu && $hasMenuItems)
         <details class="pk-menu"
-            x-data
             x-on:click.outside="$el.removeAttribute('open')"
             x-on:keydown.escape.window="$el.removeAttribute('open')">
             <summary class="pk-options-btn" aria-label="Post options">
@@ -53,6 +79,15 @@
 
             <div class="pk-menu-panel">
                 @if ($context === 'post' && $isOwner)
+                    <a href="{{ url('post/timeline/' . $post->id . '/boost') }}" 
+                        class="pk-menu-item"
+                        style="color: #6D28D9; font-weight: 600;"
+                        wire:navigate
+                        @click="$el.closest('details')?.removeAttribute('open')">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; flex-shrink: 0;"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                        <span x-text="isBoosted ? 'Boost post (Extend)' : 'Boost post'"></span>
+                    </a>
+
                     <a href="{{ url('post/timeline/' . $post->id . '/analytics') }}"
                         class="pk-menu-item" wire:navigate>
                         <i class="far fa-chart-bar"></i>

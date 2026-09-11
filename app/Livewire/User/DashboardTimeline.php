@@ -74,9 +74,10 @@ class DashboardTimeline extends Component
             ->where('user_id', $userId)
             ->pluck('post_id');
 
-        $allPosts = Post::with(['user', 'images', 'video'])
+        $allPosts = Post::with(['user', 'images', 'video', 'activeBoost'])
             ->where('status', 'LIVE')
             ->when($hiddenPostIds->isNotEmpty(), fn ($q) => $q->whereNotIn('id', $hiddenPostIds))
+            ->orderByDesc('is_boosted')
             ->latest('created_at')
             ->take($this->perPage() * $this->page * 2)
             ->get();

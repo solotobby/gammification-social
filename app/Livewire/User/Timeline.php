@@ -146,10 +146,11 @@ class Timeline extends Component
             ->where('user_id', $userId)
             ->pluck('post_id');
 
-        $query = Post::with(['user', 'trends', 'images', 'video'])
+        $query = Post::with(['user', 'trends', 'images', 'video', 'activeBoost'])
             ->withExists(['likes as liked_by_me' => fn ($q) => $q->where('user_id', $userId)])
             ->where('status', 'LIVE')
             ->when($hiddenPostIds->isNotEmpty(), fn ($q) => $q->whereNotIn('id', $hiddenPostIds))
+            ->orderByDesc('is_boosted')
             ->latest('created_at');
 
         // Fetch more than perPage to allow interleaving

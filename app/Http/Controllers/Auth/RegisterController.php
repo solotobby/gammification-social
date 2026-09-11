@@ -151,13 +151,24 @@ class RegisterController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|min:3',
             'username' => 'required|string|min:3|max:255|unique:users,username',
-            'email' => 'required|string|email:rfc,dns|max:255|unique:users,email',
+            'email' => 'required|string|email:rfc|max:255|unique:users,email',
             'password' => 'required|string|min:8',
             'referral_code' => 'nullable|string|exists:users,referral_code',
         ]);
 
-        // Fetch static data BEFORE transaction
-        $level = Level::where('name', 'Basic')->firstOrFail();
+        // Gracefully resolve default Basic level without throwing 404 if missing
+        $level = Level::where('name', 'Basic')->first()
+            ?? Level::first()
+            ?? Level::create([
+                'name' => 'Basic',
+                'amount' => 0,
+                'reg_bonus' => 0,
+                'ref_bonus' => 0,
+                'min_withdrawal' => 0,
+                'earning_per_view' => 0,
+                'earning_per_like' => 0,
+                'earning_per_comment' => 0,
+            ]);
 
         $referrer = null;
         if (!empty($validated['referral_code'])) {
@@ -181,15 +192,18 @@ class RegisterController extends Controller
                 'next_payment_date' => now()->addYear(),
             ]);
 
+            Role::firstOrCreate(['name' => 'user', 'guard_name' => 'web']);
             $user->assignRole('user');
 
             Wallet::create([
                 'user_id' => $user->id,
-                'balance' => $level->reg_bonus,
+                'balance' => $level->reg_bonus ?? 0,
                 'promoter_balance' => 0,
                 'referral_balance' => 0,
+                'paykoin_spendable' => 0,
+                'paykoin_earned' => 0,
                 'currency' => 'USD',
-                'level' => $level->name
+                'level' => $level->name,
             ]);
 
             $accessCode = AccessCode::create([
@@ -199,7 +213,7 @@ class RegisterController extends Controller
                 'amount' => $level->amount,
                 'code' => generateCode(10),
                 'level_id' => $level->id,
-                'is_active' => false
+                'is_active' => false,
             ]);
 
             $user->update(['access_code_id' => $accessCode->id]);
@@ -314,14 +328,22 @@ class RegisterController extends Controller
 
     public function loginUser(Request $request)
     {
-        $credentials = $request->validate([
-            'email' => ['required', 'email:rfc,dns'],
-            'password' => ['required', 'string', 'min:8'],
+        $request->validate([
+            'email' => ['required', 'string'],
+            'password' => ['required', 'string'],
         ]);
+
+        $loginInput = trim((string) $request->input('email'));
+        $loginField = filter_var($loginInput, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+
+        $credentials = [
+            $loginField => $loginInput,
+            'password' => $request->input('password'),
+        ];
 
         if (! Auth::attempt($credentials, $request->boolean('remember'))) {
             logger()->warning('Failed login attempt', [
-                'email' => $request->email,
+                'login' => $loginInput,
                 'ip' => $request->ip(),
             ]);
 
@@ -330,7 +352,7 @@ class RegisterController extends Controller
             ])->onlyInput('email');
         }
 
-        RateLimiter::clear($request->ip().'|'.strtolower((string) $request->input('email')));
+        RateLimiter::clear($request->ip().'|'.strtolower($loginInput));
 
         // Prevent session fixation
         $request->session()->regenerate();

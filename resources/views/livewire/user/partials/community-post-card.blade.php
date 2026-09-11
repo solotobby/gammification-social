@@ -38,8 +38,8 @@
                 @endif
             </div>
             <div class="pk-handle-row">
-                <a class="pk-handle" href="{{ $profileUrl }}">
-                    @<span>{{ $post->user->username ?? 'deleted' }}</span>
+                <a class="pk-handle" href="{{ $profileUrl }}" title="{{ '@' . ($post->user->username ?? 'deleted') }}">
+                    @<span>{{ Str::limit($post->user->username ?? 'deleted', 5, '...') }}</span>
                 </a>
                 <span class="pk-sep">·</span>
                 <span class="pk-time">{{ $post->created_at->diffForHumans() }}</span>

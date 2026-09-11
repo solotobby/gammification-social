@@ -20,6 +20,7 @@ use App\Http\Controllers\GeneralController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\KorapayWebhookController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PostBoostClickController;
 use App\Http\Controllers\RollsController;
 use App\Http\Controllers\RollsWatchController;
 use App\Http\Controllers\VideoAnalyticsController;
@@ -43,6 +44,7 @@ use App\Livewire\User\Messages;
 use App\Livewire\User\NewTimeline;
 use App\Livewire\User\Payout;
 use App\Livewire\User\PostAnalytics;
+use App\Livewire\User\PostBoost;
 use App\Livewire\User\Posts;
 use App\Livewire\User\Profile;
 use App\Livewire\User\ProfileConnections;
@@ -115,6 +117,7 @@ Route::group(['namespace' => 'auth'], function () {
     Route::get('reg', [\App\Http\Controllers\Auth\RegisterController::class, 'reg']);
 
     Route::post('process/reg', [\App\Http\Controllers\Auth\RegisterController::class, 'regUser'])->name('reg.user');
+    Route::get('process/reg', fn () => redirect('/register'));
 
     Route::post('user/login', [\App\Http\Controllers\Auth\RegisterController::class, 'loginUser'])
         ->middleware('throttle:login')->name('login.user');
@@ -199,6 +202,8 @@ Route::group(['namespace' => 'auth'], function () {
 });
 
 Auth::routes();
+Route::post('register', [\App\Http\Controllers\Auth\RegisterController::class, 'regUser']);
+Route::post('login', [\App\Http\Controllers\Auth\RegisterController::class, 'loginUser'])->middleware('throttle:login');
 
 
 
@@ -248,6 +253,7 @@ Route::middleware([
 
         Route::get('profile/{username}', ViewProfile::class);
         Route::get('post/timeline/{id}/analytics', PostAnalytics::class);
+        Route::get('post/timeline/{id}/boost', PostBoost::class)->name('post.boost');
         Route::get('analytics', Analytics::class);
         Route::get('settings', Settings::class);
         Route::get('feedback', FeedbackForm::class)->name('feedback');
@@ -278,5 +284,11 @@ Route::middleware([
         Route::get('community', Community::class)->name('community');
         Route::get('community/{community}', CommunityDetails::class)->name('community.show');
     });
-
 });
+
+// Public click tracking for boosted posts (records location, device, browser & redirects)
+Route::get('boost/click/{boostId}', [PostBoostClickController::class, 'handleClick'])->name('boost.click');
+
+// Public syndication API for partner websites
+Route::get('api/v1/boosted-ads', [PostBoostClickController::class, 'syndicatedAds'])->name('api.boosted-ads');
+
