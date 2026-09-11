@@ -1021,12 +1021,24 @@
                                     @case('paid')
                                         <span class="pk-status-pill pk-status-paid">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6">
-                                                {{-- <path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"
-                                                    stroke-linecap="round" /> --}}
+                                                <path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"
+                                                    stroke-linecap="round" />
                                             </svg>
-                                            {{ getCurrencyCode() }}{{ number_format(convertCurrency($community->member_charge, $community->currency, auth()->user()->wallet->currency), 2) }}
+                                            @php
+                                                $userCurr = auth()->user()?->wallet?->currency ?? 'NGN';
+                                                $commCurr = $community->currency ?? 'NGN';
+                                                try {
+                                                    $displayPrice = $commCurr === $userCurr
+                                                        ? (float) $community->member_charge
+                                                        : (float) convertCurrency($community->member_charge, $commCurr, $userCurr);
+                                                    $currencySymbol = getCurrencyCode($userCurr) ?? getCurrencyCode();
+                                                } catch (\Throwable $e) {
+                                                    $displayPrice = (float) $community->member_charge;
+                                                    $currencySymbol = getCurrencyCode($commCurr) ?? getCurrencyCode();
+                                                }
+                                            @endphp
+                                            {{ $currencySymbol }}{{ number_format($displayPrice, 2) }}
                                             {{ $community->price_suffix }}
-                                            {{-- &#8358;{{ number_format($community->member_charge, 2) }} --}}
                                         </span>
                                     @break
 

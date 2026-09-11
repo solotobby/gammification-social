@@ -52,10 +52,6 @@ class CommunitySubscriptionService
 
     public function generatePaymentLink(Community $community, User $user)
     {
-        if (! $community->isInCurrency(userBaseCurrency($user->id))) {
-            throw new RuntimeException('This community is not available in your currency.');
-        }
-
         //get current user base currency
         $userCurrency = userBaseCurrency();
 

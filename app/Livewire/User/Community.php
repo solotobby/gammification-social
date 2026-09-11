@@ -250,17 +250,10 @@ class Community extends Component
         $community = CommunityModel::query()
             ->where('type', 'public')
             ->whereNull('archived_at')
-            ->forUserCurrency()
             ->findOrFail($communityId);
 
         if (app(CommunityMembershipService::class)->isBanned($community, auth()->id())) {
             session()->flash('error', 'You cannot rejoin this community.');
-
-            return;
-        }
-
-        if (! $community->isInCurrency()) {
-            session()->flash('error', 'This community is not available in your currency.');
 
             return;
         }
@@ -331,11 +324,6 @@ class Community extends Component
             });
         }
 
-        // Discovery tabs only show communities in the viewer's wallet currency.
-        // Joined/mine always include memberships regardless of currency.
-        if (! in_array($this->filter, ['joined', 'mine'], true)) {
-            $query->forUserCurrency();
-        }
 
         // Private communities are hidden from discovery unless you own,
         // belong to, or have a pending direct invitation.
@@ -387,14 +375,12 @@ class Community extends Component
             'trending' => CommunityModel::query()
                 ->withCount('members')
                 ->where('type', '!=', 'private')
-                ->forUserCurrency()
                 ->orderByDesc('members_count')
                 ->limit(3)
                 ->get(),
             'suggested' => CommunityModel::query()
                 ->withCount('members')
                 ->where('type', 'public')
-                ->forUserCurrency()
                 ->whereDoesntHave('members', fn($q) => $q->where('users.id', auth()->id()))
                 ->inRandomOrder()
                 ->limit(2)

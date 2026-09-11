@@ -88,14 +88,6 @@ class CommunityDetails extends Component
             abort(404);
         }
 
-        if (
-            auth()->check()
-            && ! $community->isInCurrency()
-            && ! $this->isOwner()
-            && ! $this->isMember()
-        ) {
-            abort(404);
-        }
 
         $this->platformFeePercent = (int) config('community.platform_fee_percent', 10);
         $this->billingIntervals = config('community.billing_intervals', []);
