@@ -46,9 +46,6 @@
         <div class="pk-panel">
             <div class="pk-panel-head">
                 <h2>Subscription & payout</h2>
-                <button type="button" class="pk-btn pk-btn--ghost" wire:click="refresh">
-                    <i class="fa fa-refresh"></i> Refresh
-                </button>
             </div>
             <div class="pk-panel-body">
                 @if ($subscription)

@@ -374,7 +374,8 @@ class PostQualityMonetizationTest extends TestCase
             ->test(\App\Livewire\User\Timeline::class)
             ->assertSee('Monetization Quality Standards')
             ->assertSee('What makes a post eligible?')
-            ->assertSee('minimum 5 words and 25 characters');
+            ->assertSee('meaningful, complete sentences')
+            ->assertSee('At least 5 substantive words (25+ characters)');
     }
 }
 
