@@ -122,21 +122,14 @@ class Timeline extends Component
     }
 
 
+    public int $feedSeed = 0;
+
     public function mount()
     {
-        // $this->loadPosts();
-        // $this->preloadNext();
-
+        $this->feedSeed = rand(10000, 999999);
         $this->posts = collect();
         $this->loadPosts();
-
-        // $this->buffer = collect();
-
-        // $this->loadInitial();
-        // $this->preloadNext();
     }
-
-
 
     public function loadPosts()
     {
@@ -149,36 +142,24 @@ class Timeline extends Component
         $query = Post::with(['user', 'trends', 'images', 'video', 'activeBoost'])
             ->withExists(['likes as liked_by_me' => fn ($q) => $q->where('user_id', $userId)])
             ->where('status', 'LIVE')
-            ->when($hiddenPostIds->isNotEmpty(), fn ($q) => $q->whereNotIn('id', $hiddenPostIds))
-            ->orderByDesc('is_boosted')
-            ->latest('created_at');
+            ->when($hiddenPostIds->isNotEmpty(), fn ($q) => $q->whereNotIn('id', $hiddenPostIds));
 
-        // Fetch more than perPage to allow interleaving
-        $allPosts = $query->take($this->perPage * $this->page * 2)->get();
+        $feed = app(\App\Services\TimelineFeedService::class)->buildFeed(
+            organicQuery: $query,
+            targetCount: $this->perPage * $this->page,
+            seed: $this->feedSeed,
+            cadence: 4,
+            withRelations: [
+                'user',
+                'trends',
+                'images',
+                'video',
+                'activeBoost',
+            ]
+        );
 
-        // Step 2: group by user
-        $grouped = $allPosts->groupBy('user_id');
-
-        // Step 3: interleave posts: take first from each user, then second, etc.
-        $interleaved = collect();
-        $index = 0;
-
-        do {
-            $added = 0;
-            foreach ($grouped as $userPosts) {
-                if (isset($userPosts[$index])) {
-                    $interleaved->push($userPosts[$index]);
-                    $added++;
-                }
-            }
-            $index++;
-        } while ($added > 0 && $interleaved->count() < $this->perPage * $this->page);
-
-        // Step 4: limit final posts
-        $this->posts = $interleaved->take($this->perPage * $this->page);
-
-        // Step 5: check if there are more posts
-        $this->hasMore = $allPosts->count() > $this->posts->count();
+        $this->posts = $feed['posts'];
+        $this->hasMore = $feed['hasMore'];
     }
 
     public function loadNextPage()

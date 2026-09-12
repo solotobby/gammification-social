@@ -28,7 +28,9 @@
     @endphp
 
     @include('livewire.user.partials.post-gift-ui')
-    @include('livewire.user.partials.post-boost-ui')
+    @if (\App\Models\SystemSetting::isBoostEnabled())
+        @include('livewire.user.partials.post-boost-ui')
+    @endif
 
     <div @class(['pk-card', 'pk-standalone' => $standalone]) wire:init="recordView">
 
@@ -71,7 +73,7 @@
 
                 <div class="pk-handle-row">
                     <a class="pk-handle" href="{{ url('profile/' . $post->user->username) }}" title="{{ '@' . $post->user->username }}">
-                        <span>@</span>{{ Str::limit($post->user->username, 5, '...') }}
+                        <span>@</span>{{ mb_strlen($post->user->username) > 5 ? mb_substr($post->user->username, 0, 5) . '...' : $post->user->username }}
                     </a>
                     <span class="pk-sep">·</span>
                     <span class="pk-time">{{ $post->created_at->diffForHumans() }}</span>
@@ -267,52 +269,54 @@
         </div>
 
         {{-- ══════════════════════════════════════════
-             BOOST POST PURPLE LAYER
+             BOOST POST PURPLE LAYER (Controlled by Admin Setting)
         ══════════════════════════════════════════ --}}
-        @auth
-            @if ($isOwner)
-                <div
-                    x-data="{
-                        isBoosted: @js((bool) ($post->is_boosted ?? false)) || Boolean(sessionStorage.getItem('pk_boosted_{{ $post->id }}')),
-                        campaignData: null,
-                        init() {
-                            const stored = sessionStorage.getItem('pk_boosted_{{ $post->id }}');
-                            if (stored) {
-                                try { this.campaignData = JSON.parse(stored); } catch(e) {}
+        @if (\App\Models\SystemSetting::isBoostEnabled())
+            @auth
+                @if ($isOwner)
+                    <div
+                        x-data="{
+                            isBoosted: @js((bool) ($post->is_boosted ?? false)) || Boolean(sessionStorage.getItem('pk_boosted_{{ $post->id }}')),
+                            campaignData: null,
+                            init() {
+                                const stored = sessionStorage.getItem('pk_boosted_{{ $post->id }}');
+                                if (stored) {
+                                    try { this.campaignData = JSON.parse(stored); } catch(e) {}
+                                }
                             }
-                        }
-                    }"
-                    @pk-post-boosted.window="if ($event.detail.postId == '{{ $post->id }}') { isBoosted = true; campaignData = $event.detail; }"
-                >
-                    <a
-                        href="{{ url('post/timeline/' . $post->id . '/boost') }}"
-                        wire:navigate
-                        class="pk-boost-strip"
-                        role="button"
-                        aria-label="Boost this post"
+                        }"
+                        @pk-post-boosted.window="if ($event.detail.postId == '{{ $post->id }}') { isBoosted = true; campaignData = $event.detail; }"
                     >
-                        <div class="pk-boost-strip-left">
-                            <span class="pk-boost-strip-tag">
-                                <span>🚀</span>
-                                <span x-text="isBoosted ? 'Boost Active' : 'Boost Post'"></span>
-                            </span>
-                            <span x-show="!isBoosted" style="color:#475569">
-                                Get clicks on <strong>Payhankey</strong> & <strong>Partner Websites</strong> · 3 PK / click
-                            </span>
-                            <span x-show="isBoosted" style="color:#6366F1;font-weight:600">
-                                Ad running across Payhankey & Partner Websites
-                            </span>
-                        </div>
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="pk-boost-strip-btn">
-                                <span x-text="isBoosted ? 'Manage' : 'Boost'"></span>
-                                <span>→</span>
-                            </span>
-                        </div>
-                    </a>
-                </div>
-            @endif
-        @endauth
+                        <a
+                            href="{{ url('post/timeline/' . $post->id . '/boost') }}"
+                            wire:navigate
+                            class="pk-boost-strip"
+                            role="button"
+                            aria-label="Boost this post"
+                        >
+                            <div class="pk-boost-strip-left">
+                                <span class="pk-boost-strip-tag">
+                                    <span>🚀</span>
+                                    <span x-text="isBoosted ? 'Boost Active' : 'Boost Post'"></span>
+                                </span>
+                                <span x-show="!isBoosted" style="color:#475569">
+                                    Get clicks on <strong>Payhankey</strong> & <strong>Partner Websites</strong> · 3 PK / click
+                                </span>
+                                <span x-show="isBoosted" style="color:#6366F1;font-weight:600">
+                                    Ad running across Payhankey & Partner Websites
+                                </span>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="pk-boost-strip-btn">
+                                    <span x-text="isBoosted ? 'Manage' : 'Boost'"></span>
+                                    <span>→</span>
+                                </span>
+                            </div>
+                        </a>
+                    </div>
+                @endif
+            @endauth
+        @endif
 
         {{-- ══════════════════════════════════════════
              SPONSORED CTA BAR (FOR FEED VIEWERS)

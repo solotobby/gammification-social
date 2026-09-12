@@ -16,6 +16,10 @@ class PostBoost extends Component
 
     public function mount(string $id): void
     {
+        if (! \App\Models\SystemSetting::isBoostEnabled()) {
+            abort(403, 'Post boosting is currently unavailable.');
+        }
+
         $this->post = Post::query()->with(['user', 'images', 'video'])->findOrFail($id);
 
         if ($this->post->user_id !== auth()->id()) {

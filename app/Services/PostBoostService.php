@@ -6,6 +6,7 @@ use App\Models\PaykoinTransaction;
 use App\Models\Post;
 use App\Models\PostBoost;
 use App\Models\PostBoostClick;
+use App\Models\SystemSetting;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Notifications\PostBoostCompletedNotification;
@@ -27,6 +28,10 @@ class PostBoostService
      */
     public function createBoost(User $user, Post $post, array $data): PostBoost
     {
+        if (! SystemSetting::isBoostEnabled()) {
+            throw new RuntimeException('Post boost feature is currently paused by administrators.');
+        }
+
         if ($post->user_id !== $user->id) {
             throw new RuntimeException('Unauthorized: You can only boost your own posts.');
         }
@@ -128,6 +133,8 @@ class PostBoostService
                 report($e);
             }
 
+            app(TimelineFeedService::class)->clearCache();
+
             return $boost;
         });
     }
@@ -208,6 +215,8 @@ class PostBoostService
                 } catch (\Throwable $e) {
                     report($e);
                 }
+
+                app(TimelineFeedService::class)->clearCache();
             }
 
             $lockedBoost->save();

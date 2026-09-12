@@ -146,11 +146,8 @@ class PostContent extends Component
             'editContent' => 'required|string|max:5000',
         ]);
 
-        Post::where('id', $this->post->id)
-            ->where('user_id', auth()->id())
-            ->update([
-                'content' => $this->editContent,
-            ]);
+        $this->post->content = $this->editContent;
+        $this->post->save();
 
         $this->post->refresh();
         $this->editingPost = false;

@@ -29,6 +29,8 @@ class PostBoostTest extends TestCase
     {
         parent::setUp();
 
+        \App\Models\SystemSetting::enableBoost();
+
         $this->user = User::factory()->create([
             'username' => 'testuser_' . Str::lower(Str::random(6)),
             'referral_code' => strtoupper(Str::random(8)),

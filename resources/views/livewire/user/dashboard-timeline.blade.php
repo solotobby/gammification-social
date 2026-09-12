@@ -211,6 +211,9 @@ body { background: var(--ph-bg); font-family: 'Inter', system-ui, sans-serif; }
                 <strong>{{ getCurrencyCode() }}{{ convertToBaseCurrency(1, auth()->user()->wallet->currency) }}</strong>
                 per 1,000 engagements — text, images <strong>and short videos</strong>.
                 <a href="https://payhankey.com/blog/how-payout-for-content-monetization-works-on-payhankey-social-media-69a6ec0f95475" target="_blank">Learn more →</a>
+                <div style="margin-top:10px;padding-top:10px;border-top:1px dashed rgba(10,61,145,.25);font-size:12px;color:#1e3a8a;line-height:1.5;">
+                    <strong>ℹ️ Monetization Quality Standards:</strong> Posts must be meaningful, complete sentences with genuine value (minimum 5 words and 25 characters) to earn rewards. Short phrases, word soup, greetings without substance, or spam will publish live, but will not earn monetization rewards.
+                </div>
             </div>
         </div>
 

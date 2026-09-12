@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\HelpCenterController as AdminHelpCenterController
 use App\Http\Controllers\Admin\FlutterwaveController;
 use App\Http\Controllers\Admin\KorapayController;
 use App\Http\Controllers\Admin\BookmarkAnalyticsController;
+use App\Http\Controllers\Admin\BoostManagementController;
 use App\Http\Controllers\Admin\CommunityController;
 use App\Http\Controllers\Admin\CurrencyController;
 use App\Http\Controllers\Admin\FinanceController;
@@ -70,6 +71,12 @@ Route::middleware(['auth', 'admin'])
             Route::post('{post}/hide', [PostController::class, 'hide'])->name('hide');
             Route::post('{post}/unhide', [PostController::class, 'unhide'])->name('unhide');
             Route::delete('{post}', [PostController::class, 'destroy'])->name('destroy');
+        });
+
+        Route::prefix('boosts')->name('boosts.')->group(function () {
+            Route::get('/', [BoostManagementController::class, 'index'])->name('index');
+            Route::post('toggle', [BoostManagementController::class, 'toggleSystem'])->name('toggle');
+            Route::post('{boost}/status', [BoostManagementController::class, 'updateStatus'])->name('status');
         });
 
         Route::prefix('reports')->name('reports.')->group(function () {

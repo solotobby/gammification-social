@@ -39,7 +39,7 @@
             </div>
             <div class="pk-handle-row">
                 <a class="pk-handle" href="{{ $profileUrl }}" title="{{ '@' . ($post->user->username ?? 'deleted') }}">
-                    @<span>{{ Str::limit($post->user->username ?? 'deleted', 5, '...') }}</span>
+                    @<span>{{ mb_strlen($post->user->username ?? 'deleted') > 5 ? mb_substr($post->user->username ?? 'deleted', 0, 5) . '...' : ($post->user->username ?? 'deleted') }}</span>
                 </a>
                 <span class="pk-sep">·</span>
                 <span class="pk-time">{{ $post->created_at->diffForHumans() }}</span>

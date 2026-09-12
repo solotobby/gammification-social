@@ -19,6 +19,7 @@
     $canDelete = $canDelete ?? false;
     $username = $post->user->username ?? 'user';
 
+    $boostEnabled = \App\Models\SystemSetting::isBoostEnabled();
     $canManagePost = $canManagePost ?? false;
     $hasMenuItems = ($context === 'post' && $isOwner)
         || ($context === 'community' && $canDelete)
@@ -31,7 +32,7 @@
     }"
     @pk-post-boosted.window="if ($event.detail.postId == '{{ $post->id }}') isBoosted = true">
     @if ($showEarnings)
-        <template x-if="isBoosted">
+        <template x-if="isBoosted && @js($boostEnabled)">
             <div style="display:inline-flex;align-items:center;gap:6px">
                 @if ($isOwner && $context === 'post')
                     <a href="{{ url('post/timeline/' . $post->id . '/analytics?tab=boost') }}"
@@ -50,7 +51,7 @@
                 @endif
             </div>
         </template>
-        <template x-if="!isBoosted">
+        <template x-if="!isBoosted || !@js($boostEnabled)">
             <div>
                 @if ($isOwner && $context === 'post')
                     <a href="{{ url('post/timeline/' . $post->id . '/analytics') }}" class="pk-earn" wire:navigate>
@@ -67,6 +68,7 @@
 
     @if ($showPostMenu && $hasMenuItems)
         <details class="pk-menu"
+            x-data
             x-on:click.outside="$el.removeAttribute('open')"
             x-on:keydown.escape.window="$el.removeAttribute('open')">
             <summary class="pk-options-btn" aria-label="Post options">
@@ -79,23 +81,33 @@
 
             <div class="pk-menu-panel">
                 @if ($context === 'post' && $isOwner)
-                    <a href="{{ url('post/timeline/' . $post->id . '/boost') }}" 
-                        class="pk-menu-item"
-                        style="color: #6D28D9; font-weight: 600;"
-                        wire:navigate
-                        @click="$el.closest('details')?.removeAttribute('open')">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; flex-shrink: 0;"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                        <span x-text="isBoosted ? 'Boost post (Extend)' : 'Boost post'"></span>
-                    </a>
+                    @if ($boostEnabled)
+                        <a href="{{ url('post/timeline/' . $post->id . '/boost') }}" 
+                            class="pk-menu-item"
+                            style="color: #6D28D9; font-weight: 600;"
+                            wire:navigate
+                            @click="$el.closest('details')?.removeAttribute('open')">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; flex-shrink: 0;"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                            <span x-text="isBoosted ? 'Boost post (Extend)' : 'Boost post'"></span>
+                        </a>
+                    @endif
 
                     <a href="{{ url('post/timeline/' . $post->id . '/analytics') }}"
-                        class="pk-menu-item" wire:navigate>
+                        class="pk-menu-item" wire:navigate
+                        @click="$el.closest('details')?.removeAttribute('open')">
                         <i class="far fa-chart-bar"></i>
                         View analytics
                     </a>
 
+                    <button type="button" class="pk-menu-item"
+                        onclick="navigator.clipboard.writeText('{{ url('timeline/' . $post->id) }}').then(() => { if (typeof window.pkToast === 'function') window.pkToast('Link copied to clipboard'); }); this.closest('details')?.removeAttribute('open');">
+                        <i class="far fa-copy"></i>
+                        Copy link
+                    </button>
+
                     @if ($canManagePost)
-                        <button type="button" class="pk-menu-item" wire:click="openEditPost">
+                        <button type="button" class="pk-menu-item" wire:click="openEditPost"
+                            @click="$el.closest('details')?.removeAttribute('open')">
                             <i class="far fa-edit"></i>
                             Edit post
                         </button>
@@ -104,7 +116,8 @@
 
                         <button type="button" class="pk-menu-item pk-menu-item--danger"
                             wire:click="deleteOwnPost"
-                            wire:confirm="Delete this post? All accrued earnings for it will be removed. This can't be undone.">
+                            wire:confirm="Delete this post? All accrued earnings for it will be removed. This can't be undone."
+                            @click="$el.closest('details')?.removeAttribute('open')">
                             <i class="far fa-trash-alt"></i>
                             Delete post
                         </button>
@@ -155,7 +168,8 @@
                         @endauth
 
                         <button type="button" class="pk-menu-item @if ($isBookmarked) pk-menu-item--active @endif"
-                            wire:click="toggleBookmark">
+                            wire:click="toggleBookmark"
+                            @click="$el.closest('details')?.removeAttribute('open')">
                             <i class="@if ($isBookmarked) fa @else far @endif fa-bookmark"></i>
                             @if ($isBookmarked)
                                 Remove bookmark
@@ -164,16 +178,24 @@
                             @endif
                         </button>
 
+                        <button type="button" class="pk-menu-item"
+                            onclick="navigator.clipboard.writeText('{{ url('timeline/' . $post->id) }}').then(() => { if (typeof window.pkToast === 'function') window.pkToast('Link copied to clipboard'); }); this.closest('details')?.removeAttribute('open');">
+                            <i class="far fa-copy"></i>
+                            Copy link
+                        </button>
+
                         <div class="pk-menu-divider"></div>
 
                         <button type="button" class="pk-menu-item"
-                            wire:click="hidePost">
+                            wire:click="hidePost"
+                            @click="$el.closest('details')?.removeAttribute('open')">
                             <i class="far fa-eye-slash"></i>
                             Hide post
                         </button>
 
                         <button type="button" class="pk-menu-item pk-menu-item--danger"
-                            wire:click="reportPost">
+                            wire:click="reportPost"
+                            @click="$el.closest('details')?.removeAttribute('open')">
                             <i class="fa fa-flag"></i>
                             Report post
                         </button>

@@ -31,18 +31,22 @@ class CommentService
             ]);
 
             // 2️⃣ Lock the post to prevent race conditions
-            $post = Post::select('id', 'user_id')
+            $post = Post::select('id', 'user_id', 'is_monetized', 'monetization_paused', 'status')
                 ->whereKey($postId)
                 ->lockForUpdate()
                 ->firstOrFail();
 
             $isSelfComment = $authUserId === $post->user_id;
+            $isMonetizable = $post->canMonetize() && ! $isSelfComment && $user->status !== 'SHADOW_BANNED';
 
             $type = match (true) {
                 $isSelfComment => 'self-comment',
                 $user->status === 'SHADOW_BANNED' => 'shadow_banned',
+                ! $post->canMonetize() => 'unmonetized',
                 default => 'comment',
             };
+
+            $amount = $isMonetizable ? calculateUniqueEarningPerComment() : 0.00;
 
             // 3️⃣ Check if this is the user's first comment
             $isFirstComment = ! UserComment::where([
@@ -57,9 +61,9 @@ class CommentService
                     'user_id'        => $authUserId,
                     'post_id'        => $postId,
                     'is_paid'        => false,
-                    'amount'         => calculateUniqueEarningPerComment(),
+                    'amount'         => $amount,
                     'poster_user_id' => $post->user_id,
-                    'type'           => $type, //$isSelfComment ? 'self-comment' : 'comment',
+                    'type'           => $type,
                 ]);
 
                 // 5️⃣ Atomic increment

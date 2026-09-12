@@ -71,9 +71,12 @@ class NewTimeline extends Component
         ];
     }
 
+    public int $feedSeed = 0;
+
     // ─── Lifecycle ───────────────────────────────────────────────────────────────
     public function mount(): void
     {
+        $this->feedSeed = rand(10000, 999999);
         $this->posts = collect();
         $this->loadPosts();
     }
@@ -81,30 +84,19 @@ class NewTimeline extends Component
     // ─── Feed Loading ─────────────────────────────────────────────────────────────
     public function loadPosts(): void
     {
-        $allPosts = Post::with(['user', 'images', 'video', 'activeBoost'])
-            ->where('status', 'LIVE')
-            ->orderByDesc('is_boosted')
-            ->latest('created_at')
-            ->take($this->perPage() * $this->page * 2)
-            ->get();
+        $query = Post::with(['user', 'images', 'video', 'activeBoost'])
+            ->where('status', 'LIVE');
 
-        $grouped    = $allPosts->groupBy('user_id');
-        $interleaved = collect();
-        $index      = 0;
+        $feed = app(\App\Services\TimelineFeedService::class)->buildFeed(
+            organicQuery: $query,
+            targetCount: $this->perPage() * $this->page,
+            seed: $this->feedSeed,
+            cadence: 4,
+            withRelations: ['user', 'images', 'video', 'activeBoost']
+        );
 
-        do {
-            $added = 0;
-            foreach ($grouped as $userPosts) {
-                if (isset($userPosts[$index])) {
-                    $interleaved->push($userPosts[$index]);
-                    $added++;
-                }
-            }
-            $index++;
-        } while ($added > 0 && $interleaved->count() < $this->perPage() * $this->page);
-
-        $this->posts   = $interleaved->take($this->perPage() * $this->page);
-        $this->hasMore = $allPosts->count() > $this->posts->count();
+        $this->posts = $feed['posts'];
+        $this->hasMore = $feed['hasMore'];
     }
 
     protected function perPage(): int { return 20; }

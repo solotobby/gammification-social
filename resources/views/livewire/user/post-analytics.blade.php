@@ -609,6 +609,19 @@
 
                         <div class="d-flex align-items-center gap-2 flex-wrap mt-2">
                             <span class="pa-level-pill">{{ userLevel() }} account</span>
+                            @if (! $isMonetized)
+                                <span class="pa-level-pill" style="background:#DC2626;color:#fff" title="{{ $monetizationNote ?? 'Content ineligible for monetization' }}">
+                                    ⚠️ Ineligible for Monetization
+                                </span>
+                            @elseif ($post->monetization_paused)
+                                <span class="pa-level-pill" style="background:#F59E0B;color:#fff">
+                                    ⏸️ Monetization Paused
+                                </span>
+                            @else
+                                <span class="pa-level-pill" style="background:rgba(16, 185, 129, 0.2);color:#A7F3D0">
+                                    ✓ Monetized
+                                </span>
+                            @endif
                             <template x-if="isBoosted">
                                 <span class="pa-level-pill" style="background:#10B981;color:#fff">
                                     🚀 Active Boost Campaign
@@ -999,6 +1012,20 @@
                      TAB 2: CREATOR MONETIZATION (STANDARD)
                 ══════════════════════════════════════════════════ -->
                 <div x-show="activeTab === 'monetization'">
+
+                    @if (! $isMonetized)
+                        <div class="pa-boost-monetization-alert" style="background:#FEF2F2;border-color:#FECACA;margin-bottom:18px">
+                            <div class="pa-boost-alert-icon" style="color:#DC2626">⚠️</div>
+                            <div class="pa-boost-alert-body">
+                                <h4 style="color:#991B1B">Monetization Disabled for this Post</h4>
+                                <p style="color:#B91C1C">
+                                    This post was evaluated as ineligible for creator monetization: <strong>{{ $monetizationNote ?? 'Content does not meet minimum quality criteria.' }}</strong>
+                                    <br>
+                                    Your post remains fully published and visible to your followers and feed readers, but impressions and reactions on this post will not accrue earnings.
+                                </p>
+                            </div>
+                        </div>
+                    @endif
 
                     <div class="pa-earn-hero">
                         <div class="pa-earn-inner">

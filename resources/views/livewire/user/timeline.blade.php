@@ -774,6 +774,162 @@
                 opacity: .6;
                 cursor: wait
             }
+
+            /* Post quality & monetization guidelines banner */
+            .ph-quality-banner {
+                background: linear-gradient(135deg, rgba(90, 79, 220, .07), rgba(16, 185, 129, .07));
+                border: 1px solid rgba(90, 79, 220, .2);
+                border-radius: 16px;
+                padding: 14px 16px;
+                margin-bottom: 16px;
+                box-shadow: 0 2px 10px -4px rgba(90, 79, 220, .1);
+            }
+
+            .ph-quality-banner-header {
+                display: flex;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .ph-quality-banner-icon {
+                width: 36px;
+                height: 36px;
+                border-radius: 10px;
+                background: linear-gradient(135deg, var(--ph-violet), var(--ph-violet-bright));
+                color: #fff;
+                display: grid;
+                place-items: center;
+                font-size: 1rem;
+                flex-shrink: 0;
+                box-shadow: 0 4px 12px -4px rgba(90, 79, 220, .4);
+            }
+
+            .ph-quality-banner-content {
+                flex: 1;
+                min-width: 0;
+            }
+
+            .ph-quality-banner-title {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 4px;
+            }
+
+            .ph-quality-banner-title strong {
+                font-family: var(--ph-display);
+                font-size: .95rem;
+                color: var(--ph-ink);
+                font-weight: 700;
+            }
+
+            .ph-quality-banner-badge {
+                font-size: .68rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: .5px;
+                padding: 2px 7px;
+                border-radius: 999px;
+                background: rgba(16, 185, 129, .15);
+                color: #0c8a64;
+            }
+
+            .ph-quality-close-btn {
+                margin-left: auto;
+                background: none;
+                border: none;
+                color: var(--ph-slate-light);
+                font-size: 1.2rem;
+                line-height: 1;
+                cursor: pointer;
+                padding: 0 4px;
+                border-radius: 4px;
+            }
+
+            .ph-quality-close-btn:hover {
+                color: var(--ph-ink);
+            }
+
+            .ph-quality-banner-text {
+                font-size: .83rem;
+                color: var(--ph-slate);
+                line-height: 1.45;
+                margin: 0;
+            }
+
+            .ph-quality-banner-actions {
+                margin-top: 8px;
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .ph-quality-details-btn {
+                background: none;
+                border: none;
+                padding: 0;
+                font-size: .8rem;
+                font-weight: 600;
+                color: var(--ph-violet);
+                cursor: pointer;
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+            }
+
+            .ph-quality-details-btn:hover {
+                text-decoration: underline;
+            }
+
+            .ph-quality-banner-subtext {
+                font-size: .75rem;
+                color: var(--ph-slate-light);
+            }
+
+            .ph-quality-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+                margin-top: 10px;
+                padding-top: 10px;
+                border-top: 1px dashed rgba(90, 79, 220, .18);
+            }
+
+            @media (max-width: 576px) {
+                .ph-quality-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            .ph-quality-col {
+                background: #fff;
+                border-radius: 10px;
+                padding: 10px 12px;
+                border: 1px solid rgba(90, 79, 220, .1);
+                font-size: .78rem;
+            }
+
+            .ph-quality-col-title {
+                font-weight: 700;
+                margin-bottom: 6px;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+
+            .ph-quality-col-title.valid { color: #0c8a64; }
+            .ph-quality-col-title.invalid { color: #d9383a; }
+
+            .ph-quality-col ul {
+                margin: 0;
+                padding-left: 16px;
+                color: var(--ph-slate);
+            }
+
+            .ph-quality-col li {
+                margin-bottom: 3px;
+            }
         </style>
     @endverbatim
 
@@ -821,6 +977,61 @@
             @error('video')
                 <div class="ph-flash ph-flash--danger" role="alert">{{ $message }}</div>
             @enderror
+
+            {{-- ===== Monetization Quality Guidelines Note ===== --}}
+            <div class="ph-quality-banner" x-data="{ dismissed: false, open: false }" x-show="!dismissed" x-transition.opacity>
+                <div class="ph-quality-banner-header">
+                    <div class="ph-quality-banner-icon">
+                        <i class="fa fa-gem"></i>
+                    </div>
+                    <div class="ph-quality-banner-content">
+                        <div class="ph-quality-banner-title">
+                            <strong>Monetization Quality Standards</strong>
+                            <span class="ph-quality-banner-badge">Notice</span>
+                            <button type="button" @click="dismissed = true" class="ph-quality-close-btn" title="Dismiss note">
+                                &times;
+                            </button>
+                        </div>
+                        <p class="ph-quality-banner-text">
+                            To get post monetization, posts must be <strong>meaningful, complete sentences</strong> with real substance. Posts that are <strong>short, incomplete, or low-effort</strong> may be disqualified from monetization, even if they are published live.
+                        </p>
+                        <div class="ph-quality-banner-actions">
+                            <button type="button" @click="open = !open" class="ph-quality-details-btn">
+                                <span x-text="open ? 'Hide criteria' : 'What makes a post eligible?'">What makes a post eligible?</span>
+                                <i class="fa" :class="open ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                            </button>
+                            <span class="ph-quality-banner-subtext">Low-quality posts still publish live, but won't earn monetization rewards.</span>
+                        </div>
+
+                        <div x-show="open" x-transition style="display: none;">
+                            <div class="ph-quality-grid">
+                                <div class="ph-quality-col">
+                                    <div class="ph-quality-col-title valid">
+                                        <i class="fa fa-check-circle"></i> Eligible for Monetization
+                                    </div>
+                                    <ul>
+                                        <li>Complete sentences containing an action or clear predicate</li>
+                                        <li>At least 5 substantive words (25+ characters)</li>
+                                        <li>Valuable insights, discussions, updates, and original thoughts</li>
+                                        <li>Greetings paired with substantive follow-up content</li>
+                                    </ul>
+                                </div>
+                                <div class="ph-quality-col">
+                                    <div class="ph-quality-col-title invalid">
+                                        <i class="fa fa-times-circle"></i> Disqualified from Monetization
+                                    </div>
+                                    <ul>
+                                        <li>1–2 letter words or short phrases (e.g., <em>"hi"</em>, <em>"ok"</em>, <em>"gm"</em>)</li>
+                                        <li>Random word lists or fragments missing verbs</li>
+                                        <li>Superficial greetings without substance (e.g. <em>"Good morning everyone"</em>)</li>
+                                        <li>All-caps shouting, repetitive text, or punctuation spam</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             {{-- ===== Composer ===== --}}
             <div class="ph-composer" x-data="timelineComposer()" x-init="boot()"

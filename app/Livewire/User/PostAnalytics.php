@@ -65,6 +65,8 @@ class PostAnalytics extends Component
             $this->post->update(['is_boosted' => true]);
             session()->flash('boost_success', 'Boost delivery resumed! Your post is actively prioritized in feeds.');
         }
+
+        app(\App\Services\TimelineFeedService::class)->clearCache();
     }
 
     public function render()
@@ -202,6 +204,9 @@ class PostAnalytics extends Component
             'totalEarnings' => $totalEarnings,
             'monetizedEngagement' => $monetizedEngagement,
             'currency' => getCurrencyCode(),
+            'isMonetized' => (bool) ($post->is_monetized ?? true),
+            'monetizationNote' => $post->monetization_note,
+            'canMonetize' => $post->canMonetize(),
             // Boost analytics
             'hasBoost' => $hasBoost,
             'latestBoost' => $latestBoost,

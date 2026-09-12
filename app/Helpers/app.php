@@ -684,9 +684,10 @@ if (!function_exists('viewsAmountCalculator')) {
         return DB::transaction(function () use ($postId) {
             $viewsEarnings = UserView::where('post_id', $postId)->sum('amount');
 
+            $currency = auth()->user()?->wallet?->currency ?? 'NGN';
             $convertedAmount = convertToBaseCurrency(
                 $viewsEarnings,
-                auth()->user()->wallet->currency
+                $currency
             );
 
             return (float) round($convertedAmount, 5);
@@ -704,9 +705,10 @@ if (!function_exists('likesAmountCalculator')) {
         return DB::transaction(function () use ($postId) {
             $likesEarnings = UserLike::where('post_id', $postId)->sum('amount');
 
+            $currency = auth()->user()?->wallet?->currency ?? 'NGN';
             $convertedAmount = convertToBaseCurrency(
                 $likesEarnings,
-                auth()->user()->wallet->currency
+                $currency
             );
 
             return (float) round($convertedAmount, 5);
@@ -726,9 +728,10 @@ if (!function_exists('commentsAmountCalculator')) {
         return DB::transaction(function () use ($postId) {
             $commentsEarnings = UserComment::where('post_id', $postId)->sum('amount');
 
+            $currency = auth()->user()?->wallet?->currency ?? 'NGN';
             $convertedAmount = convertToBaseCurrency(
                 $commentsEarnings,
-                auth()->user()->wallet->currency
+                $currency
             );
 
             return (float) round($convertedAmount, 5);
@@ -741,8 +744,8 @@ if (!function_exists('commentsAmountCalculator')) {
 if (!function_exists('sumCounter')) {
     function sumCounter($like, $like_ext)
     {
-        $val1 = $like ?? 0;
-        $val2 = $like_ext ?? 0;
+        $val1 = is_countable($like) ? count($like) : (is_numeric($like) ? (int)$like : 0);
+        $val2 = is_countable($like_ext) ? count($like_ext) : (is_numeric($like_ext) ? (int)$like_ext : 0);
         return  $val1 + $val2;
     }
 }

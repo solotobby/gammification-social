@@ -23,6 +23,10 @@
                     <i class="nav-main-link-icon fa fa-newspaper"></i>
                     <span class="nav-main-link-name">Timeline Posts</span>
                 </a>
+                <a class="nav-main-link{{ request()->routeIs('admin.boosts.*') ? ' active' : '' }}" href="{{ route('admin.boosts.index') }}">
+                    <i class="nav-main-link-icon fa fa-rocket"></i>
+                    <span class="nav-main-link-name">Post Boosts</span>
+                </a>
                 <a class="nav-main-link{{ request()->routeIs('admin.reports.*') ? ' active' : '' }}" href="{{ route('admin.reports.index') }}">
                     <i class="nav-main-link-icon fa fa-flag"></i>
                     <span class="nav-main-link-name">Post Reports</span>

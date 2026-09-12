@@ -19,8 +19,14 @@ class AuthTest extends TestCase
     {
         parent::setUp();
 
-        Role::firstOrCreate(['name' => 'user', 'guard_name' => 'web']);
-        Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+        Role::firstOrCreate(
+            ['name' => 'user', 'guard_name' => 'web'],
+            ['id' => (string) Str::uuid()]
+        );
+        Role::firstOrCreate(
+            ['name' => 'admin', 'guard_name' => 'web'],
+            ['id' => (string) Str::uuid()]
+        );
 
         Level::firstOrCreate(
             ['name' => 'Basic'],

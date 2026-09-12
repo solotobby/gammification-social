@@ -25,12 +25,17 @@ class ViewService
 
             $isSelfView = $userId === $post->user_id;
 
-            //manage account monetization 
+            // Manage monetization qualification: post must be monetizable, not self-view, and not shadow-banned
+            $isMonetizable = $post->canMonetize() && ! $isSelfView && $user->status !== 'SHADOW_BANNED';
+
             $type = match (true) {
                 $isSelfView => 'self-view',
                 $user->status === 'SHADOW_BANNED' => 'self-view',
+                ! $post->canMonetize() => 'unmonetized',
                 default => 'view',
             };
+
+            $amount = $isMonetizable ? calculateUniqueEarningPerView() : 0.00;
 
             $view = UserView::firstOrCreate(
                 [
@@ -39,9 +44,9 @@ class ViewService
                 ],
                 [
                     'is_paid' => false,
-                    'amount' => calculateUniqueEarningPerView(),
+                    'amount' => $amount,
                     'poster_user_id' => $post->user_id,
-                    'type' => $type, //$isSelfView ? 'self-view' : 'view',
+                    'type' => $type,
                 ]
             );
 
@@ -50,9 +55,9 @@ class ViewService
             $post->video?->increment('view_count');
 
             if ($view->wasRecentlyCreated) {
-                $post->increment('views');
+                Post::whereKey($post->id)->increment('views');
             } else {
-                $post->increment('views_external');
+                Post::whereKey($post->id)->increment('views_external');
             }
         });
 

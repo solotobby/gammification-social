@@ -38,21 +38,24 @@ class LikeService
 
                 return;
             }
-            //manage account monetization 
+            $isMonetizable = $post->canMonetize() && ! $isSelfLike && $user->status !== 'SHADOW_BANNED';
+
             $type = match (true) {
                 $isSelfLike => 'self-like',
                 $user->status === 'SHADOW_BANNED' => 'self-like',
+                ! $post->canMonetize() => 'unmonetized',
                 default => 'like',
             };
 
+            $amount = $isMonetizable ? calculateUniqueEarningPerLike() : 0.00;
 
             // ❤️ Like
             $post->likes()->create([
                 'user_id'        => $user->id,
                 'poster_user_id' => $post->user_id,
                 'is_paid'        => false,
-                'amount'         => calculateUniqueEarningPerLike(),
-                'type'           => $type, //$isSelfLike ? 'self-like' : 'like',
+                'amount'         => $amount,
+                'type'           => $type,
             ]);
 
             $post->increment('likes');

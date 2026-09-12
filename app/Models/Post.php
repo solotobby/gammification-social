@@ -24,6 +24,8 @@ class Post extends Model
         'status',
         'is_boosted',
         'monetization_paused',
+        'is_monetized',
+        'monetization_note',
         'unicode',
         'has_video',
         'has_images'
@@ -33,7 +35,32 @@ class Post extends Model
         'gifts_count' => 'integer',
         'is_boosted' => 'boolean',
         'monetization_paused' => 'boolean',
+        'is_monetized' => 'boolean',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (Post $post) {
+            if (! isset($post->is_monetized)) {
+                $evaluation = app(\App\Services\PostQualityService::class)->evaluate($post->content);
+                $post->is_monetized = $evaluation['is_eligible'];
+                $post->monetization_note = $evaluation['is_eligible'] ? null : $evaluation['reason'];
+            }
+        });
+
+        static::updating(function (Post $post) {
+            if ($post->isDirty('content') && ! $post->isDirty('is_monetized')) {
+                $evaluation = app(\App\Services\PostQualityService::class)->evaluate($post->content);
+                $post->is_monetized = $evaluation['is_eligible'];
+                $post->monetization_note = $evaluation['is_eligible'] ? null : $evaluation['reason'];
+            }
+        });
+    }
+
+    public function canMonetize(): bool
+    {
+        return (bool) ($this->is_monetized && ! $this->monetization_paused && $this->status === 'LIVE');
+    }
 
     public function boosts()
     {
