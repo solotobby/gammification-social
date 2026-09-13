@@ -101,6 +101,7 @@ class CommunitySubscriptionService
             type: 'community_' . $community->billing_type,
             description: ' Payment for community ( ' .  $community->billing_type . ' ): ' . $community->name,
             meta: [
+                'channel' => 'web',
                 'community' => $community->name,
                 'community_id' => $community->id,
                 'user_id' => $user->id,
@@ -129,6 +130,7 @@ class CommunitySubscriptionService
                 "email" => $user->email,
             ],
             "metadata" => [
+                "channel" => "web",
                 "community_id" => (string) $community->id,
                 "user_id" => (string) $user->id,
                 "billing_type" => $community->billing_type,
@@ -228,6 +230,7 @@ class CommunitySubscriptionService
             type: 'community_' . $community->billing_type,
             description: 'Payment for community (' . $community->billing_type . '): ' . $community->name,
             meta: [
+                'channel' => 'web',
                 'community' => $community->name,
                 'community_id' => $community->id,
                 'user_id' => $user->id,

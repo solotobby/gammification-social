@@ -116,16 +116,29 @@ class WebhookController extends Controller
                 }
             }
 
+            $originChannel = $transaction->meta['channel'] ?? data_get($request, 'data.metadata.channel', 'web');
+
+            Log::info('Korapay webhook processing charge', [
+                'reference' => $reference,
+                'origin_channel' => $originChannel,
+                'type' => $transaction->type,
+                'user_id' => $transaction->user_id,
+            ]);
+
             if (
                 $transaction->status === 'successful'
             ) {
-                return response()->json(['message' => 'PAYMENT ALREADY PROCESSED'], 400);
+                return response()->json(['message' => 'PAYMENT ALREADY PROCESSED'], 200);
             }
 
-            if (str_starts_with(strtoupper($reference), 'COM-')) {
+            $isCommunity = str_starts_with(strtoupper($reference), 'COM-')
+                || str_starts_with(strtoupper($reference), 'COMM-')
+                || str_starts_with((string) $transaction->type, 'community_');
+                
+            $isLevelUpgrade = str_starts_with(strtoupper($reference), 'PKY-')
+                || $transaction->type === 'subscription_upgrade';
 
-                $payload = $transaction->meta;
-
+            if ($isCommunity) {
                 $communityId = $transaction->meta['community_id'] ?? null;
 
                 if (!$communityId) {
@@ -140,7 +153,6 @@ class WebhookController extends Controller
                         'message' => 'Community ID not found',
                     ], 400);
                 }
-
 
                 $community = Community::find($communityId);
 
@@ -158,9 +170,8 @@ class WebhookController extends Controller
 
                 app(CommunitySubscriptionService::class)->processSuccessfulPayment($community, $transaction->user, $transaction);
 
-
-                $subject = 'Webhook Received: Upgrade Processed Successfully';
-                $content = "Upgrade processed successfully for event: {$event}. Transaction ref: {$reference} has been marked successful and subscription upgraded for {$transaction->user->name}.";
+                $subject = 'Webhook Received: Community Subscription Processed Successfully';
+                $content = "Community subscription processed successfully for event: {$event}. Transaction ref: {$reference} [Channel: {$originChannel}].";
 
                 Mail::to('solotob3@gmail.com')
                     ->send(new GeneralMail(
@@ -172,10 +183,18 @@ class WebhookController extends Controller
                         $content
                     ));
 
+            } elseif ($isLevelUpgrade) {
 
-            } elseif (str_starts_with(strtoupper($reference), 'PKY-')) {
+                $level = Level::where('id', $transaction->meta['level_id'] ?? null)->first();
 
-                $level = Level::where('id', $transaction->meta['level_id'])->first();
+                if (!$level) {
+                    Log::error('Subscription level not found for reference: ' . $reference, [
+                        'transaction_id' => $transaction->id,
+                        'meta' => $transaction->meta,
+                    ]);
+
+                    return response()->json(['status' => 'error', 'message' => 'Subscription level not found'], 404);
+                }
 
                 $this->upgradeSubscriptionService->upgradeSubscription(
                     $transaction->user,
@@ -185,7 +204,7 @@ class WebhookController extends Controller
                 );
 
                 $subject = 'Webhook Received: Upgrade Processed Successfully';
-                $content = "Upgrade processed successfully for event: {$event}. Transaction ref: {$reference} has been marked successful and subscription upgraded for {$transaction->user->name}.";
+                $content = "Upgrade processed successfully for event: {$event}. Transaction ref: {$reference} [Channel: {$originChannel}] has been marked successful and subscription upgraded for {$transaction->user->name}.";
 
                 Mail::to('solotob3@gmail.com')
                     ->send(new GeneralMail(
@@ -202,8 +221,6 @@ class WebhookController extends Controller
                 Log::error('Unknown transaction reference prefix: ' . $reference);
                 return response()->json(['status' => 'error', 'message' => 'Unknown transaction reference'], 400);
             }
-
-
 
             return response()->json(['status' => 'success'], 200);
         } else {
@@ -442,6 +459,15 @@ class WebhookController extends Controller
 
 
 
+        $originChannel = $transaction->meta['channel'] ?? data_get($gatewayData, 'meta.channel', 'web');
+
+        Log::info('Flutterwave webhook processing charge', [
+            'tx_ref' => $txRef,
+            'origin_channel' => $originChannel,
+            'type' => $transaction->type,
+            'user_id' => $transaction->user_id,
+        ]);
+
         /**
          * =====================================================
          * HANDLE SUCCESSFUL PAYMENT
@@ -454,7 +480,8 @@ class WebhookController extends Controller
                 $gatewayData,
                 $payload,
                 $txRef,
-                $event
+                $event,
+                $originChannel
             ) {
 
                 $transaction->refresh();
@@ -465,11 +492,14 @@ class WebhookController extends Controller
 
                 $reference = strtoupper((string) $txRef);
                 $isCommunity = str_starts_with($reference, 'COM-')
+                    || str_starts_with($reference, 'COMM-')
                     || str_starts_with((string) $transaction->type, 'community_');
+                $isLevelUpgrade = str_starts_with($reference, 'PKY-')
+                    || $transaction->type === 'subscription_upgrade';
 
                 if ($isCommunity) {
                     $this->processCommunityFlutterwavePayment($transaction, $payload);
-                } elseif (str_starts_with($reference, 'PKY-')) {
+                } elseif ($isLevelUpgrade) {
                     $level = Level::where('id', $transaction->meta['level_id'] ?? null)->first();
 
                     if (! $level) {
@@ -487,6 +517,28 @@ class WebhookController extends Controller
                         $transaction,
                         $payload
                     );
+                } elseif (str_starts_with($reference, 'PKN-') || $transaction->type === 'paykoin_topup') {
+                    $pkAmount = (int) ($transaction->meta['pk_amount'] ?? 0);
+                    if ($pkAmount > 0) {
+                        $wallet = \App\Models\Wallet::where('user_id', $transaction->user_id)->lockForUpdate()->firstOrFail();
+                        $wallet->paykoin_spendable = (int) $wallet->paykoin_spendable + $pkAmount;
+                        $wallet->save();
+
+                        $this->transactionService->markSuccessful($transaction, $payload);
+
+                        \App\Models\PaykoinTransaction::firstOrCreate(
+                            ['ref' => $transaction->ref],
+                            [
+                                'user_id' => $transaction->user_id,
+                                'type' => 'topup',
+                                'pk_amount' => $pkAmount,
+                                'fiat_amount' => (float) $transaction->amount,
+                                'currency' => $transaction->currency,
+                                'description' => 'PayKoin top-up',
+                                'meta' => ['provider' => 'flutterwave', 'source' => 'webhook', 'channel' => $originChannel],
+                            ]
+                        );
+                    }
                 } else {
                     Log::error('Unknown Flutterwave transaction reference prefix', [
                         'tx_ref' => $txRef,
@@ -503,7 +555,7 @@ class WebhookController extends Controller
                             'email' => 'solotob3@gmail.com',
                         ],
                         'Webhook Received: Payment Processed Successfully',
-                        "Payment processed for event: {$event}. Transaction ref: {$txRef}."
+                        "Payment processed for event: {$event}. Transaction ref: {$txRef} [Channel: {$originChannel}]."
                     ));
             });
 

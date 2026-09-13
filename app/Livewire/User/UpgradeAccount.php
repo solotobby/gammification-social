@@ -78,7 +78,8 @@ class UpgradeAccount extends Component
             'metadata' => [
                 'user_id' => $user->id,
                 'level' => $level,
-                'name' => $user->name
+                'name' => $user->name,
+                'channel' => 'web',
             ],
         ])->throw();
 

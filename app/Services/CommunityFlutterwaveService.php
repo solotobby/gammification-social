@@ -44,6 +44,7 @@ class CommunityFlutterwaveService
                 'title' => $community->name,
             ],
             'meta' => [
+                'channel' => 'web',
                 'community_id' => $community->id,
                 'user_id' => $user->id,
                 'billing_type' => $community->billing_type,

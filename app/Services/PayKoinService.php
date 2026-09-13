@@ -88,6 +88,7 @@ class PayKoinService
             type: 'paykoin_topup',
             description: 'PayKoin top-up',
             meta: [
+                'channel' => 'web',
                 'pk_amount' => $pkAmount,
                 'cash_amount' => $cashAmount,
                 'charge_amount_ngn' => $chargeAmount,
@@ -114,6 +115,7 @@ class PayKoinService
             'metadata' => [
                 'user_id' => $user->id,
                 'type' => 'paykoin_topup',
+                'channel' => 'web',
                 'pk_amount' => $pkAmount,
             ],
         ]);
