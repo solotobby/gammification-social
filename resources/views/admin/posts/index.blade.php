@@ -45,15 +45,17 @@
                     <div class="dash-kpi">
                         <span class="dash-kpi__label">Live</span>
                         <div class="dash-kpi__value">{{ number_format($stats['live']) }}</div>
+                        <div class="dash-muted">{{ number_format($stats['hidden']) }} hidden</div>
                     </div>
                     <div class="dash-kpi">
-                        <span class="dash-kpi__label">Hidden</span>
-                        <div class="dash-kpi__value">{{ number_format($stats['hidden']) }}</div>
+                        <span class="dash-kpi__label">Monetized</span>
+                        <div class="dash-kpi__value" style="color:#067647">{{ number_format($stats['monetized'] ?? 0) }}</div>
+                        <div class="dash-muted">Eligible for rewards</div>
                     </div>
                     <div class="dash-kpi">
-                        <span class="dash-kpi__label">Reported</span>
-                        <div class="dash-kpi__value">{{ number_format($stats['reported']) }}</div>
-                        <div class="dash-muted">{{ number_format($stats['shadow']) }} shadow-banned</div>
+                        <span class="dash-kpi__label">Ineligible</span>
+                        <div class="dash-kpi__value" style="color:#b42318">{{ number_format($stats['unmonetized'] ?? 0) }}</div>
+                        <div class="dash-muted">{{ number_format($stats['reported']) }} reported</div>
                     </div>
                 </div>
             </section>
@@ -61,11 +63,16 @@
             <section class="dash-section">
                 <form method="get" class="dash-toolbar">
                     <input type="search" name="q" value="{{ $search }}" placeholder="Search content, username, email, or post ID" class="dash-input">
-                    <select name="status" class="dash-input" style="flex:0 0 150px">
+                    <select name="status" class="dash-input" style="flex:0 0 140px">
                         <option value="">All statuses</option>
                         @foreach (['LIVE', 'HIDDEN', 'SHADOW_BANNED'] as $option)
                             <option value="{{ $option }}" @selected($status === $option)>{{ str_replace('_', ' ', $option) }}</option>
                         @endforeach
+                    </select>
+                    <select name="monetization" class="dash-input" style="flex:0 0 160px">
+                        <option value="">All monetization</option>
+                        <option value="eligible" @selected(($monetization ?? '') === 'eligible')>Eligible only</option>
+                        <option value="ineligible" @selected(($monetization ?? '') === 'ineligible')>Ineligible only</option>
                     </select>
                     <select name="media" class="dash-input" style="flex:0 0 130px">
                         <option value="">All media</option>
@@ -78,7 +85,7 @@
                         Reported only
                     </label>
                     <button type="submit" class="dash-btn dash-btn--primary">Filter</button>
-                    @if ($search || $status || $media || $reportedOnly)
+                    @if ($search || $status || $media || ($monetization ?? '') || $reportedOnly)
                         <a href="{{ route('admin.posts.index') }}" class="dash-btn dash-btn--ghost">Clear</a>
                     @endif
                 </form>
@@ -91,6 +98,7 @@
                                 <th>Author</th>
                                 <th>Engagement</th>
                                 <th>Status</th>
+                                <th>Monetization</th>
                                 <th>Posted</th>
                                 <th></th>
                             </tr>
@@ -147,6 +155,25 @@
                                         @endphp
                                         <span class="dash-badge {{ $badge }}">{{ str_replace('_', ' ', $post->status) }}</span>
                                     </td>
+                                    <td>
+                                        @if ($post->is_monetized)
+                                            <span class="dash-badge dash-badge--success" title="Eligible for views/likes/comments earnings">
+                                                <i class="fa fa-check-circle me-1"></i> Eligible
+                                            </span>
+                                        @else
+                                            <span class="dash-badge dash-badge--danger" title="Disqualified from monetization">
+                                                <i class="fa fa-times-circle me-1"></i> Ineligible
+                                            </span>
+                                        @endif
+                                        @if ($post->monetization_paused)
+                                            <span class="dash-badge dash-badge--warn" style="display:block;margin-top:.25rem;width:fit-content">Paused</span>
+                                        @endif
+                                        @if ($post->monetization_note)
+                                            <div class="dash-muted" style="font-size:.72rem;margin-top:.3rem;line-height:1.3;max-width:180px" title="{{ $post->monetization_note }}">
+                                                {{ \Illuminate\Support\Str::limit($post->monetization_note, 45) }}
+                                            </div>
+                                        @endif
+                                    </td>
                                     <td class="dash-muted">
                                         {{ $post->created_at?->format('M j, Y') }}
                                         <span style="display:block;font-size:.75rem">{{ $post->created_at?->diffForHumans() }}</span>
@@ -154,6 +181,28 @@
                                     <td>
                                         <div class="dash-actions">
                                             <a href="{{ route('admin.posts.show', $post) }}" class="dash-btn dash-btn--ghost dash-btn--sm">Review</a>
+
+                                            {{-- Quick Monetization Toggle --}}
+                                            @if ($post->is_monetized)
+                                                <form method="post" action="{{ route('admin.posts.monetization', $post) }}" style="display:inline">
+                                                    @csrf
+                                                    <input type="hidden" name="is_monetized" value="0">
+                                                    <input type="hidden" name="monetization_note" value="Disqualified by administrator">
+                                                    <button type="submit" class="dash-btn dash-btn--ghost dash-btn--sm" title="Disqualify post from monetization" onclick="return confirm('Disqualify this post from monetization?')">
+                                                        Disqualify
+                                                    </button>
+                                                </form>
+                                            @else
+                                                <form method="post" action="{{ route('admin.posts.monetization', $post) }}" style="display:inline">
+                                                    @csrf
+                                                    <input type="hidden" name="is_monetized" value="1">
+                                                    <input type="hidden" name="monetization_note" value="Approved by administrator">
+                                                    <button type="submit" class="dash-btn dash-btn--sm" style="background:#067647;color:#fff;border:none" title="Approve monetization for this post" onclick="return confirm('Approve monetization for this post?')">
+                                                        Monetize
+                                                    </button>
+                                                </form>
+                                            @endif
+
                                             @if ($post->status === 'HIDDEN')
                                                 <form method="post" action="{{ route('admin.posts.unhide', $post) }}">
                                                     @csrf
@@ -177,7 +226,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6">
+                                    <td colspan="7">
                                         <div class="dash-empty">No timeline posts match these filters.</div>
                                     </td>
                                 </tr>

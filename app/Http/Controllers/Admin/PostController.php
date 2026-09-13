@@ -16,14 +16,16 @@ class PostController extends Controller
         $search = $request->string('q')->trim()->toString() ?: null;
         $status = $request->string('status')->trim()->toString() ?: null;
         $media = $request->string('media')->trim()->toString() ?: null;
+        $monetization = $request->string('monetization')->trim()->toString() ?: null;
         $reportedOnly = $request->boolean('reported');
 
         return view('admin.posts.index', [
-            'posts' => $this->posts->list($search, $status, $media, $reportedOnly),
+            'posts' => $this->posts->list($search, $status, $media, $reportedOnly, $monetization),
             'stats' => $this->posts->dashboardStats(),
             'search' => $search ?? '',
             'status' => $status ?? '',
             'media' => $media ?? '',
+            'monetization' => $monetization ?? '',
             'reportedOnly' => $reportedOnly,
         ]);
     }
@@ -36,6 +38,33 @@ class PostController extends Controller
             'post' => $post,
             'estimatedEarnings' => $this->posts->estimatedEarnings($post),
         ]);
+    }
+
+    public function updateMonetization(Request $request, Post $post)
+    {
+        $validated = $request->validate([
+            'is_monetized' => 'required|boolean',
+            'monetization_note' => 'nullable|string|max:255',
+        ]);
+
+        $this->posts->updateMonetization(
+            $post,
+            (bool) $validated['is_monetized'],
+            $validated['monetization_note'] ?? null
+        );
+
+        $statusLabel = $validated['is_monetized'] ? 'eligible for monetization' : 'disqualified from monetization';
+
+        return back()->with('success', "Post marked as {$statusLabel}.");
+    }
+
+    public function reEvaluateQuality(Post $post)
+    {
+        $updated = $this->posts->reEvaluateQuality($post);
+
+        $statusLabel = $updated->is_monetized ? 'eligible for monetization' : 'disqualified from monetization';
+
+        return back()->with('success', "Post quality re-evaluated: now {$statusLabel}.");
     }
 
     public function hide(Request $request, Post $post)

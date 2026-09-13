@@ -100,6 +100,7 @@
                             <p class="dash-muted" style="margin:.25rem 0 0">
                                 Posted {{ $post->created_at?->format('M j, Y g:i A') }}
                                 · <span class="dash-badge {{ $badge }}">{{ str_replace('_', ' ', $post->status) }}</span>
+                                · <span class="dash-badge {{ $post->is_monetized ? 'dash-badge--success' : 'dash-badge--danger' }}">{{ $post->is_monetized ? 'Monetized' : 'Ineligible' }}</span>
                             </p>
                         </div>
                         <a href="{{ url('timeline/'.$post->id) }}" target="_blank" class="dash-btn dash-btn--ghost dash-btn--sm">
@@ -146,6 +147,64 @@
                 </section>
 
                 <aside style="display:grid;gap:1rem">
+                    {{-- Monetization Eligibility Card --}}
+                    <section class="dash-card">
+                        <div class="dash-card__head" style="display:flex;justify-content:space-between;align-items:center">
+                            <h2 class="dash-card__title">Monetization Status</h2>
+                            @if ($post->is_monetized)
+                                <span class="dash-badge dash-badge--success"><i class="fa fa-check-circle me-1"></i> Eligible</span>
+                            @else
+                                <span class="dash-badge dash-badge--danger"><i class="fa fa-times-circle me-1"></i> Ineligible</span>
+                            @endif
+                        </div>
+                        <div class="dash-card__body">
+                            @if ($post->monetization_paused)
+                                <div class="dash-alert dash-alert--warning" style="margin-bottom:.75rem;padding:.5rem .75rem;font-size:.82rem">
+                                    <i class="fa fa-pause-circle me-1"></i> Monetization is currently paused for this post.
+                                </div>
+                            @endif
+
+                            <div style="margin-bottom:.85rem;font-size:.85rem">
+                                <strong>Assessment / Reason:</strong>
+                                <p class="dash-muted" style="margin:.25rem 0 0;font-size:.82rem;line-height:1.45">
+                                    {{ $post->monetization_note ?: 'Meets monetization quality standards.' }}
+                                </p>
+                            </div>
+
+                            <div style="margin-bottom:1rem;font-size:.85rem">
+                                <strong>Can Monetize:</strong>
+                                <span class="dash-badge {{ $post->canMonetize() ? 'dash-badge--success' : 'dash-badge--warn' }}" style="margin-left:.35rem">
+                                    {{ $post->canMonetize() ? 'Yes (Active)' : 'No (Earnings Disabled)' }}
+                                </span>
+                            </div>
+
+                            {{-- Update Status Form --}}
+                            <form method="post" action="{{ route('admin.posts.monetization', $post) }}" style="margin-bottom:.75rem">
+                                @csrf
+                                <label class="dash-muted" style="display:block;margin-bottom:.35rem;font-size:.8rem;font-weight:600">
+                                    Update Eligibility Status
+                                </label>
+                                <select name="is_monetized" class="dash-input" style="width:100%;margin-bottom:.5rem">
+                                    <option value="1" @selected($post->is_monetized)>Eligible (Monetized)</option>
+                                    <option value="0" @selected(!$post->is_monetized)>Ineligible (Disqualified)</option>
+                                </select>
+                                <label class="dash-muted" style="display:block;margin-bottom:.35rem;font-size:.8rem">Reason / Admin Note (optional)</label>
+                                <input type="text" name="monetization_note" class="dash-input" placeholder="e.g. Approved upon review / Low quality" value="{{ $post->monetization_note }}" style="width:100%;margin-bottom:.65rem">
+                                <button type="submit" class="dash-btn dash-btn--primary" style="width:100%">
+                                    Save Monetization Status
+                                </button>
+                            </form>
+
+                            {{-- Re-evaluate Quality Engine Button --}}
+                            <form method="post" action="{{ route('admin.posts.re-evaluate', $post) }}">
+                                @csrf
+                                <button type="submit" class="dash-btn dash-btn--ghost dash-btn--sm" style="width:100%" title="Run content through PostQualityService engine">
+                                    <i class="fa fa-refresh me-1"></i> Re-evaluate with Quality Engine
+                                </button>
+                            </form>
+                        </div>
+                    </section>
+
                     <section class="dash-card">
                         <div class="dash-card__head">
                             <h2 class="dash-card__title">Moderation</h2>

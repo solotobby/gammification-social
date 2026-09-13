@@ -68,6 +68,8 @@ Route::middleware(['auth', 'admin'])
         Route::prefix('posts')->name('posts.')->group(function () {
             Route::get('/', [PostController::class, 'index'])->name('index');
             Route::get('{post}', [PostController::class, 'show'])->name('show');
+            Route::post('{post}/monetization', [PostController::class, 'updateMonetization'])->name('monetization');
+            Route::post('{post}/re-evaluate', [PostController::class, 'reEvaluateQuality'])->name('re-evaluate');
             Route::post('{post}/hide', [PostController::class, 'hide'])->name('hide');
             Route::post('{post}/unhide', [PostController::class, 'unhide'])->name('unhide');
             Route::delete('{post}', [PostController::class, 'destroy'])->name('destroy');

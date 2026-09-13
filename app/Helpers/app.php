@@ -168,18 +168,11 @@ if (!function_exists('generateCode')) {
 if (!function_exists('getCurrencyCode')) {
     function getCurrencyCode($currency = null)
     {
-        // $codes = [
-        //     'USD' => '$',
-        //     'NGN' => '₦',
-        //     'EUR' => '€',
-        //     'GBP' => '£',
-        // ];
-
         $codes = Currency::where('is_active', true)->pluck('symbol', 'code')->toArray();
 
         if ($currency == null) {
-            $userCurrency = Wallet::where('user_id', auth()->user()->id)->first();
-            return $codes[$userCurrency->currency] ?? null;
+            $userCurrency = auth()->check() ? Wallet::where('user_id', auth()->id())->value('currency') : null;
+            return $codes[$userCurrency ?? 'NGN'] ?? ($codes['NGN'] ?? '₦');
         } else {
             return $codes[$currency] ?? null;
         }

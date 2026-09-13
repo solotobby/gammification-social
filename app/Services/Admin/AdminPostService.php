@@ -6,6 +6,7 @@ use App\Models\Post;
 use App\Services\AdminAuditService;
 use App\Services\PostDeletionService;
 use App\Services\PostEarningsService;
+use App\Services\PostQualityService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class AdminPostService
@@ -14,6 +15,7 @@ class AdminPostService
         protected AdminAuditService $audit,
         protected PostDeletionService $deletion,
         protected PostEarningsService $earnings,
+        protected PostQualityService $quality,
     ) {}
 
     public function dashboardStats(): array
@@ -24,10 +26,12 @@ class AdminPostService
             'hidden' => Post::query()->where('status', 'HIDDEN')->count(),
             'shadow' => Post::query()->where('status', 'SHADOW_BANNED')->count(),
             'reported' => Post::query()->whereHas('reports', fn ($q) => $q->pending())->count(),
+            'monetized' => Post::query()->where('is_monetized', true)->count(),
+            'unmonetized' => Post::query()->where('is_monetized', false)->count(),
         ];
     }
 
-    public function list(?string $search = null, ?string $status = null, ?string $media = null, bool $reportedOnly = false): LengthAwarePaginator
+    public function list(?string $search = null, ?string $status = null, ?string $media = null, bool $reportedOnly = false, ?string $monetization = null): LengthAwarePaginator
     {
         $query = Post::query()
             ->with(['user:id,name,username,email,avatar,status'])
@@ -62,6 +66,12 @@ class AdminPostService
 
         if ($reportedOnly) {
             $query->whereHas('reports', fn ($q) => $q->pending());
+        }
+
+        if ($monetization === 'eligible') {
+            $query->where('is_monetized', true);
+        } elseif ($monetization === 'ineligible') {
+            $query->where('is_monetized', false);
         }
 
         return $query->paginate(20)->withQueryString();
@@ -128,5 +138,47 @@ class AdminPostService
         $this->audit->log('post.deleted', null, array_merge($meta, $result));
 
         return $result;
+    }
+
+    public function updateMonetization(Post $post, bool $isMonetized, ?string $note = null): Post
+    {
+        $previousMonetized = (bool) $post->is_monetized;
+        $previousNote = $post->monetization_note;
+
+        $post->update([
+            'is_monetized' => $isMonetized,
+            'monetization_note' => $note ?: ($isMonetized ? 'Manually approved by administrator.' : 'Disqualified by administrator.'),
+        ]);
+
+        $this->audit->log('post.monetization_updated', $post, [
+            'previous_monetized' => $previousMonetized,
+            'new_monetized' => $isMonetized,
+            'previous_note' => $previousNote,
+            'new_note' => $post->monetization_note,
+        ]);
+
+        return $post->fresh();
+    }
+
+    public function reEvaluateQuality(Post $post): Post
+    {
+        $previousMonetized = (bool) $post->is_monetized;
+        $previousNote = $post->monetization_note;
+
+        $evaluation = $this->quality->evaluate($post->content);
+
+        $post->update([
+            'is_monetized' => $evaluation['is_eligible'],
+            'monetization_note' => $evaluation['is_eligible'] ? null : $evaluation['reason'],
+        ]);
+
+        $this->audit->log('post.quality_reevaluated', $post, [
+            'previous_monetized' => $previousMonetized,
+            'new_monetized' => (bool) $post->is_monetized,
+            'previous_note' => $previousNote,
+            'new_note' => $post->monetization_note,
+        ]);
+
+        return $post->fresh();
     }
 }
