@@ -209,26 +209,106 @@
         @endif
 
         @foreach ($post->comments->take(3) as $comment)
-            <div class="pk-fb-comment" wire:key="comment-{{ $comment->id }}">
-                <x-user-avatar :user="$comment->user" size="sm" />
-                <div class="pk-fb-comment-bubble">
-                    <div class="d-flex align-items-start justify-content-between gap-2">
-                        <div>
-                            <span class="pk-fb-comment-name">{{ $comment->user->name ?? 'Deleted user' }}</span>
-                            <span class="pk-fb-comment-time">{{ $comment->created_at->diffForHumans() }}</span>
-                            <p class="pk-fb-comment-text mb-0">{{ $comment->content }}</p>
+            <div class="pk-fb-comment-thread" wire:key="comment-thread-{{ $comment->id }}" x-data="{ replyOpen: false, showReplies: true }">
+                <div class="pk-fb-comment">
+                    <x-user-avatar :user="$comment->user" size="sm" />
+                    <div class="pk-fb-comment-main">
+                        <div class="pk-fb-comment-bubble">
+                            <div class="d-flex align-items-start justify-content-between gap-2">
+                                <div>
+                                    <span class="pk-fb-comment-name">{{ $comment->user->name ?? 'Deleted user' }}</span>
+                                    <span class="pk-fb-comment-time">{{ $comment->created_at->diffForHumans() }}</span>
+                                    <p class="pk-fb-comment-text mb-0">{{ $comment->content }}</p>
+                                </div>
+                                @if ($this->canDeleteComment($comment->id))
+                                    <button type="button" class="pk-icon-btn pk-icon-btn-sm pk-icon-danger"
+                                        wire:click="deleteComment('{{ $comment->id }}')"
+                                        aria-label="Delete comment">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14Z"
+                                                stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
+                                    </button>
+                                @endif
+                            </div>
                         </div>
-                        @if ($this->canDeleteComment($comment->id))
-                            <button type="button" class="pk-icon-btn pk-icon-btn-sm pk-icon-danger"
-                                wire:click="deleteComment('{{ $comment->id }}')"
-                                aria-label="Delete comment">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14Z"
-                                        stroke-linecap="round" stroke-linejoin="round" />
-                                </svg>
-                            </button>
-                        @endif
+
+                        {{-- Action buttons below comment bubble --}}
+                        <div class="pk-fb-comment-actions">
+                            @if ($this->isMember())
+                                <button type="button" class="pk-fb-comment-action-btn"
+                                    @click="replyOpen = !replyOpen; if (replyOpen) showReplies = true">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="9 17 4 12 9 7"></polyline>
+                                        <path d="M20 18v-2a4 4 0 0 0-4-4H4"></path>
+                                    </svg>
+                                    Reply
+                                </button>
+                            @endif
+
+                            @if ($comment->replies->count() > 0)
+                                <button type="button" class="pk-fb-comment-action-btn pk-fb-replies-toggle"
+                                    @click="showReplies = !showReplies">
+                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                        :style="showReplies ? 'transform: rotate(180deg)' : ''" style="transition: transform .2s ease">
+                                        <polyline points="6 9 12 15 18 9"></polyline>
+                                    </svg>
+                                    <span x-text="showReplies ? 'Hide {{ $comment->replies->count() }} {{ Str::plural('reply', $comment->replies->count()) }}' : 'View {{ $comment->replies->count() }} {{ Str::plural('reply', $comment->replies->count()) }}'"></span>
+                                </button>
+                            @endif
+                        </div>
                     </div>
+                </div>
+
+                {{-- Replies Thread --}}
+                <div class="pk-fb-replies-list" x-show="showReplies || replyOpen" x-cloak>
+                    @foreach ($comment->replies as $reply)
+                        <div class="pk-fb-comment pk-fb-reply" wire:key="reply-{{ $reply->id }}">
+                            <x-user-avatar :user="$reply->user" size="xs" />
+                            <div class="pk-fb-comment-main">
+                                <div class="pk-fb-comment-bubble pk-fb-reply-bubble">
+                                    <div class="d-flex align-items-start justify-content-between gap-2">
+                                        <div>
+                                            <span class="pk-fb-comment-name">{{ $reply->user->name ?? 'Deleted user' }}</span>
+                                            <span class="pk-fb-comment-time">{{ $reply->created_at->diffForHumans() }}</span>
+                                            <p class="pk-fb-comment-text mb-0">{{ $reply->content }}</p>
+                                        </div>
+                                        @if ($this->canDeleteComment($reply->id))
+                                            <button type="button" class="pk-icon-btn pk-icon-btn-sm pk-icon-danger"
+                                                wire:click="deleteComment('{{ $reply->id }}')"
+                                                aria-label="Delete reply">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14Z"
+                                                        stroke-linecap="round" stroke-linejoin="round" />
+                                                </svg>
+                                            </button>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+
+                    {{-- Inline Reply Input Box --}}
+                    @if ($this->isMember())
+                        <div class="pk-fb-reply-input-row" x-show="replyOpen" x-cloak>
+                            <x-user-avatar :user="auth()->user()" size="xs" />
+                            <div class="pk-fb-reply-input-wrap">
+                                <input type="text" maxlength="500"
+                                    class="pk-fb-reply-input"
+                                    wire:model="replyText.{{ $comment->id }}"
+                                    wire:keydown.enter="addReply('{{ $post->id }}', '{{ $comment->id }}')"
+                                    @keydown.enter="replyOpen = false"
+                                    placeholder="Reply to {{ displayName($comment->user?->name ?? 'user') }}…">
+                                <div class="pk-fb-reply-actions">
+                                    <button type="button" class="pk-fb-reply-cancel-btn" @click="replyOpen = false">Cancel</button>
+                                    <button type="button" class="pk-btn pk-btn-outline pk-btn-xs"
+                                        @click="replyOpen = false"
+                                        wire:click="addReply('{{ $post->id }}', '{{ $comment->id }}')">Reply</button>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </div>
         @endforeach

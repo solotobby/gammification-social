@@ -16,17 +16,32 @@ class CommentService
     public $user;
     public $message;
 
-    public function addComment($postId, User $user, $message)
+    public function addComment($postId, User $user, $message, ?string $parentId = null): Comment
     {
-
         $authUserId = $user->id;
 
-        DB::transaction(function () use ($authUserId, $postId, $message, $user) {
+        return DB::transaction(function () use ($authUserId, $postId, $message, $user, $parentId) {
+            $effectiveParentId = $parentId;
+            $parentComment = null;
+
+            if ($effectiveParentId) {
+                $parentComment = Comment::find($effectiveParentId);
+                if ($parentComment) {
+                    // Flatten nested reply to root parent if parent is already a reply
+                    if ($parentComment->parent_id) {
+                        $effectiveParentId = $parentComment->parent_id;
+                        $parentComment = Comment::find($effectiveParentId) ?? $parentComment;
+                    }
+                } else {
+                    $effectiveParentId = null;
+                }
+            }
 
             // 1️⃣ Create the raw comment
-            Comment::create([
+            $comment = Comment::create([
                 'user_id' => $authUserId,
                 'post_id' => $postId,
+                'parent_id' => $effectiveParentId,
                 'message' => $message,
             ]);
 
@@ -55,7 +70,6 @@ class CommentService
             ])->exists();
 
             if ($isFirstComment) {
-
                 // 4️⃣ Create a unique comment entry
                 UserComment::create([
                     'user_id'        => $authUserId,
@@ -69,7 +83,6 @@ class CommentService
                 // 5️⃣ Atomic increment
                 Post::whereKey($postId)->increment('comments');
 
-
                 // 6️⃣ Notify post owner (skip self-comment)
                 if (! $isSelfComment) {
                     $postOwner = User::find($post->user_id);
@@ -80,18 +93,29 @@ class CommentService
                         'url'     => url('timeline/' . $post->id),
                     ]));
                 }
-
-
             } else {
-
                 // Non-unique comment
-                // Post::whereKey($postId)->increment('comment_external');
                 Post::whereKey($postId)->update([
                     'comment_external' => DB::raw('COALESCE(comment_external, 0) + 1'),
                 ]);
             }
 
+            // If this is a reply, notify the parent comment's author if it's someone else
+            if ($parentComment && $parentComment->user_id && $parentComment->user_id !== $authUserId) {
+                if ($parentComment->user_id !== $post->user_id || ! $isFirstComment) {
+                    $parentAuthor = User::find($parentComment->user_id);
+                    $parentAuthor?->notify(new GeneralNotification([
+                        'title'   => displayName($user->name) . ' replied to your comment',
+                        'message' => displayName($user->name) . ' replied to your comment on a post',
+                        'icon'    => 'fa-reply text-primary',
+                        'url'     => url('timeline/' . $post->id),
+                    ]));
+                }
+            }
+
             userActivity('comment', $authUserId);
+
+            return $comment;
         });
     }
 }

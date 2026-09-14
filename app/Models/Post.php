@@ -133,6 +133,11 @@ class Post extends Model
 
     public function postComments()
     {
+        return $this->hasMany(Comment::class)->whereNull('parent_id')->orderBy('created_at', 'desc');
+    }
+
+    public function allComments()
+    {
         return $this->hasMany(Comment::class)->orderBy('created_at', 'desc');
     }
 

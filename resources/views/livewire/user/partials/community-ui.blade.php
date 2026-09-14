@@ -508,10 +508,17 @@
         background: var(--pk-fb-bg);
         border-top: 1px solid var(--pk-x-line);
     }
+    .community-show-page .pk-fb-comment-thread {
+        margin-bottom: 12px;
+    }
     .community-show-page .pk-fb-comment {
         display: flex;
         gap: 8px;
-        margin-bottom: 10px;
+        align-items: flex-start;
+    }
+    .community-show-page .pk-fb-comment-main {
+        flex: 1;
+        min-width: 0;
     }
     .community-show-page .pk-fb-comment-av {
         width: 32px;
@@ -525,8 +532,6 @@
         border-radius: 18px;
         padding: 8px 14px;
         box-shadow: 0 1px 2px rgba(15,17,23,.06);
-        flex: 1;
-        min-width: 0;
     }
     .community-show-page .pk-fb-comment-name {
         font-weight: 700;
@@ -546,6 +551,105 @@
         margin: 2px 0 0;
         line-height: 1.45;
         word-break: break-word;
+    }
+    .community-show-page .pk-fb-comment-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 4px;
+        padding-left: 8px;
+    }
+    .community-show-page .pk-fb-comment-action-btn {
+        background: none;
+        border: none;
+        padding: 0;
+        font-size: 11.5px;
+        font-weight: 600;
+        color: var(--pk-gray-600);
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        transition: color .15s ease;
+    }
+    .community-show-page .pk-fb-comment-action-btn:hover {
+        color: var(--pk-ink);
+        text-decoration: underline;
+    }
+    .community-show-page .pk-fb-replies-toggle {
+        color: var(--pk-violet, #6366f1);
+    }
+    .community-show-page .pk-fb-replies-list {
+        margin-left: 20px;
+        padding-left: 12px;
+        border-left: 2px solid #eef0f4;
+        margin-top: 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    .community-show-page .pk-fb-reply {
+        margin-bottom: 0;
+    }
+    .community-show-page .pk-fb-reply-bubble {
+        background: #f8fafc;
+        border: 1px solid #f1f5f9;
+        box-shadow: none;
+        border-radius: 14px;
+        padding: 6px 12px;
+    }
+    .community-show-page .pk-fb-reply-bubble .pk-fb-comment-text {
+        font-size: 13.5px;
+    }
+    .community-show-page .pk-fb-reply-input-row {
+        display: flex;
+        gap: 8px;
+        align-items: flex-start;
+        margin-top: 6px;
+    }
+    .community-show-page .pk-fb-reply-input-wrap {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+    .community-show-page .pk-fb-reply-input {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 6px 12px;
+        font-size: 13px;
+        width: 100%;
+        outline: none;
+        transition: border-color .15s ease, box-shadow .15s ease;
+    }
+    .community-show-page .pk-fb-reply-input:focus {
+        border-color: var(--pk-violet, #6366f1);
+        box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+    }
+    .community-show-page .pk-fb-reply-actions {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 8px;
+    }
+    .community-show-page .pk-fb-reply-cancel-btn {
+        background: none;
+        border: none;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--pk-gray-500);
+        cursor: pointer;
+        padding: 2px 6px;
+    }
+    .community-show-page .pk-fb-reply-cancel-btn:hover {
+        color: var(--pk-ink);
+        text-decoration: underline;
+    }
+    .community-show-page .pk-btn-xs {
+        font-size: 11px;
+        padding: 3px 10px;
+        border-radius: 12px;
     }
     .community-show-page .pk-comment-input-row input {
         background: #fff;

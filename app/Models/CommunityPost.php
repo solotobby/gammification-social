@@ -64,6 +64,11 @@ class CommunityPost extends Model
 
     public function comments()
     {
+        return $this->hasMany(CommunityPostComment::class)->whereNull('parent_id')->latest();
+    }
+
+    public function allComments()
+    {
         return $this->hasMany(CommunityPostComment::class)->latest();
     }
 

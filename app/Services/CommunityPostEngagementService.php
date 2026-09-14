@@ -32,7 +32,7 @@ class CommunityPostEngagementService
         $post->increment('likes_count');
     }
 
-    public function addComment(CommunityPost $post, User $user, string $content): void
+    public function addComment(CommunityPost $post, User $user, string $content, ?string $parentId = null): CommunityPostComment
     {
         $content = trim($content);
 
@@ -40,13 +40,29 @@ class CommunityPostEngagementService
             throw new RuntimeException('Invalid comment.');
         }
 
-        CommunityPostComment::create([
+        if ($parentId) {
+            $parent = CommunityPostComment::where('id', $parentId)
+                ->where('community_post_id', $post->id)
+                ->first();
+
+            // If the targeted comment is already a reply, keep a clean 1-level thread under the root comment
+            if ($parent && $parent->parent_id) {
+                $parentId = $parent->parent_id;
+            } elseif (! $parent) {
+                $parentId = null;
+            }
+        }
+
+        $comment = CommunityPostComment::create([
             'community_post_id' => $post->id,
             'user_id' => $user->id,
             'content' => $content,
+            'parent_id' => $parentId,
         ]);
 
         $post->increment('comments_count');
+
+        return $comment;
     }
 
     public function recordView(CommunityPost $post, User $user, ?string $ipAddress = null): void

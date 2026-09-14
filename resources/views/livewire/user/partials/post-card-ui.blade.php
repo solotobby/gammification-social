@@ -673,6 +673,101 @@
             background: #f7f8fa;
         }
 
+        /* ── Feed Threaded Replies ───────────────────────────────── */
+        .pk-comment-thread {
+            position: relative;
+        }
+
+        .pk-comment-bubble {
+            background: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            padding: 8px 12px;
+        }
+
+        .pk-comment-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 4px;
+            margin-left: 4px;
+            font-size: 12px;
+        }
+
+        .pk-comment-action-btn {
+            background: none;
+            border: none;
+            padding: 0;
+            font-size: 12px;
+            font-weight: 600;
+            color: #65676b;
+            cursor: pointer;
+            transition: color .15s;
+        }
+
+        .pk-comment-action-btn:hover {
+            color: #5A4FDC;
+            text-decoration: underline;
+        }
+
+        .pk-comment-action-btn--delete {
+            color: #dc3545;
+        }
+
+        .pk-comment-action-btn--delete:hover {
+            color: #bd2130;
+        }
+
+        .pk-replies-list {
+            margin-top: 8px;
+            margin-left: 12px;
+            padding-left: 12px;
+            border-left: 2px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .pk-reply-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .pk-reply-bubble {
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 6px 10px;
+            font-size: 13px;
+        }
+
+        .pk-replies-toggle {
+            background: none;
+            border: none;
+            padding: 2px 0 4px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #5A4FDC;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .pk-replies-toggle:hover {
+            text-decoration: underline;
+        }
+
+        .pk-inline-reply-box {
+            margin-top: 8px;
+            margin-left: 12px;
+            padding: 8px 10px;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+        }
+
         /* ── Share modal overrides ──────────────────────────────── */
         .pk-modal-header {
             background: linear-gradient(120deg, #5A4FDC 0%, #7c6ef0 100%);

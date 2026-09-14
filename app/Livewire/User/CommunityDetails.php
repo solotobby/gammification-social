@@ -47,6 +47,9 @@ class CommunityDetails extends Component
     // ---- inline comment inputs, keyed by post id ----
     public array $newComment = [];
 
+    // ---- inline reply inputs, keyed by comment id ----
+    public array $replyText = [];
+
     public array $likeOverrides = [];
 
     public array $commentCountOverrides = [];
@@ -422,6 +425,29 @@ class CommunityDetails extends Component
         app(CommunityPostEngagementService::class)->addComment($post, auth()->user(), $text);
     }
 
+    public function addReply(string $postId, string $commentId): void
+    {
+        if (! $this->isMember() || ! auth()->check()) {
+            return;
+        }
+
+        $text = trim($this->replyText[$commentId] ?? '');
+
+        if ($text === '' || mb_strlen($text) > 500) {
+            return;
+        }
+
+        $post = $this->community->posts()->find($postId);
+
+        if (! $post) {
+            return;
+        }
+
+        $this->replyText[$commentId] = '';
+
+        app(CommunityPostEngagementService::class)->addComment($post, auth()->user(), $text, $commentId);
+    }
+
     /**
      * Admins and the owner can remove any post in the community — not just
      * their own. Regular members can't delete posts at all (not even
@@ -514,13 +540,18 @@ class CommunityDetails extends Component
         $comment = CommunityPostComment::query()
             ->where('id', $commentId)
             ->whereHas('post', fn ($q) => $q->where('community_id', $this->community->id))
+            ->withCount('replies')
             ->first();
 
         if (! $comment) {
             return;
         }
 
-        $comment->post->decrement('comments_count');
+        $deletedCount = 1 + ($comment->replies_count ?? 0);
+        $currentCount = (int) ($comment->post->comments_count ?? 0);
+        if ($currentCount > 0) {
+            $comment->post->decrement('comments_count', min($currentCount, $deletedCount));
+        }
         $comment->delete();
 
         session()->flash('status', 'Comment deleted.');
@@ -1336,7 +1367,7 @@ class CommunityDetails extends Component
         $this->community->loadCount(['members', 'posts']);
 
         $postsQuery = $this->community->posts()
-            ->with(['user', 'media', 'comments.user'])
+            ->with(['user', 'media', 'comments.user', 'comments.replies.user'])
             ->withExists(['likes as liked_by_me' => fn ($q) => $q->where('user_id', auth()->id())])
             ->when($this->postSearch !== '', function ($q) {
                 $term = '%'.$this->postSearch.'%';

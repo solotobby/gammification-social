@@ -19,14 +19,24 @@ class AuthTest extends TestCase
     {
         parent::setUp();
 
-        Role::firstOrCreate(
-            ['name' => 'user', 'guard_name' => 'web'],
-            ['id' => (string) Str::uuid()]
-        );
-        Role::firstOrCreate(
-            ['name' => 'admin', 'guard_name' => 'web'],
-            ['id' => (string) Str::uuid()]
-        );
+        if (! Role::where('name', 'user')->where('guard_name', 'web')->exists()) {
+            \Illuminate\Support\Facades\DB::table('roles')->insert([
+                'id' => (string) Str::uuid(),
+                'name' => 'user',
+                'guard_name' => 'web',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+        if (! Role::where('name', 'admin')->where('guard_name', 'web')->exists()) {
+            \Illuminate\Support\Facades\DB::table('roles')->insert([
+                'id' => (string) Str::uuid(),
+                'name' => 'admin',
+                'guard_name' => 'web',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
 
         Level::firstOrCreate(
             ['name' => 'Basic'],

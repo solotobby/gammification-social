@@ -3,6 +3,7 @@
 namespace App\Livewire\User;
 
 use App\Livewire\Concerns\SendsPostGifts;
+use App\Models\Comment;
 use App\Models\Follow;
 use App\Models\HiddenPost;
 use App\Models\Post;
@@ -32,6 +33,9 @@ class PostContent extends Component
     public int $commentCount = 0;
 
     public string $commentMessage = '';
+
+    /** @var array<string, string> */
+    public array $replyMessage = [];
 
     /** @var \Illuminate\Support\Collection<int, array<string, mixed>> */
     public $previewComments;
@@ -212,18 +216,71 @@ class PostContent extends Component
         $this->commentMessage = '';
         $this->commentCount++;
 
-        // ProcessCommentJob::dispatch($this->post->id, (string) Auth::id(), $message);
         app(CommentService::class)->addComment($this->post->id, Auth::user(), $message);
 
-        $this->previewComments = collect($this->previewComments->prepend([
-            'id' => 'pending-'.now()->timestamp,
-            'user_id' => Auth::id(),
-            'name' => Auth::user()->name,
-            'username' => Auth::user()->username,
-            'avatar' => Auth::user()->avatar,
-            'message' => $message,
-            'created_at' => now()->toDateTimeString(),
-        ])->take($this->commentsPerPage())->values()->all());
+        $this->loadPreviewComments(reset: true);
+    }
+
+    public function submitReply(string $commentId): void
+    {
+        if (! Auth::check()) {
+            return;
+        }
+
+        $message = trim($this->replyMessage[$commentId] ?? '');
+
+        if ($message === '') {
+            return;
+        }
+
+        if (mb_strlen($message) > 500) {
+            $this->addError('replyMessage.' . $commentId, 'The reply cannot exceed 500 characters.');
+            return;
+        }
+
+        app(CommentService::class)->addComment($this->post->id, Auth::user(), $message, $commentId);
+
+        $this->replyMessage[$commentId] = '';
+        $this->commentCount++;
+
+        $this->loadPreviewComments(reset: true);
+    }
+
+    public function canDeleteComment(?string $userId): bool
+    {
+        if (! Auth::check()) {
+            return false;
+        }
+
+        return Auth::id() === $userId || Auth::id() === $this->post->user_id;
+    }
+
+    public function deleteComment(string $commentId): void
+    {
+        if (! Auth::check()) {
+            return;
+        }
+
+        $comment = Comment::withCount('replies')->find($commentId);
+        if (! $comment || (string) $comment->post_id !== (string) $this->post->id) {
+            return;
+        }
+
+        if (! $this->canDeleteComment($comment->user_id)) {
+            return;
+        }
+
+        $deletedCount = 1 + ($comment->replies_count ?? 0);
+        $comment->delete();
+
+        // Safely adjust counters
+        $this->post->refresh();
+        $this->commentCount = max(0, $this->commentCount - $deletedCount);
+        if ($this->post->comments > 0) {
+            $this->post->decrement('comments', min((int) $this->post->comments, $deletedCount));
+        }
+
+        $this->loadPreviewComments(reset: true);
     }
 
     public function loadMoreComments(): void
@@ -251,7 +308,7 @@ class PostContent extends Component
         $perPage = $this->commentsPerPage();
 
         $query = $this->post->postComments()
-            ->with('user')
+            ->with(['user', 'replies.user'])
             ->latest('created_at')
             ->limit($perPage + 1);
 
@@ -275,6 +332,15 @@ class PostContent extends Component
             'avatar' => $comment->user->avatar,
             'message' => $comment->message,
             'created_at' => $comment->created_at->toDateTimeString(),
+            'replies' => $comment->replies->map(fn ($reply) => [
+                'id' => $reply->id,
+                'user_id' => $reply->user_id,
+                'name' => $reply->user->name ?? 'User',
+                'username' => $reply->user->username ?? 'user',
+                'avatar' => $reply->user->avatar,
+                'message' => $reply->message,
+                'created_at' => $reply->created_at->toDateTimeString(),
+            ])->values()->all(),
         ])->all());
 
         $this->previewComments = $reset
