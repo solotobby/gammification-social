@@ -12,11 +12,18 @@
     $giftSender = auth()->user()->username ?? 'you';
     $giftSummary = $giftSummary ?? ['total' => 0, 'recent' => []];
     $giftSpendable = (int) (auth()->user()?->wallet?->paykoin_spendable ?? 0);
+    $comm = $this->community ?? $post->community;
+    $postShareUrl = $comm ? (route('community.show', $comm) . '#cpost-' . $post->id) : url('timeline/' . $post->id);
+    $authorName = displayName($post->user->name ?? 'Member');
+    $cleanSnippet = Str::limit(trim(preg_replace('/\s+/', ' ', strip_tags($post->content ?? ''))), 100);
+    $postShareText = $cleanSnippet !== ''
+        ? "Check out this post by {$authorName} in " . ($comm->name ?? 'community') . ": \"{$cleanSnippet}\""
+        : "Check out this post by {$authorName} in " . ($comm->name ?? 'community') . ' on ' . config('app.name');
 @endphp
 
 @include('livewire.user.partials.post-gift-ui')
 
-<article class="pk-card pk-feed-post" wire:init="recordView('{{ $post->id }}')" wire:key="cpost-{{ $post->id }}">
+<article class="pk-card pk-feed-post" id="cpost-{{ $post->id }}" wire:init="recordView('{{ $post->id }}')" wire:key="cpost-{{ $post->id }}">
     <div class="pk-header">
         <div class="pk-avatar-col">
             <x-user-avatar :user="$post->user" size="md" :href="$profileUrl" />
@@ -53,6 +60,8 @@
             'canDelete' => $this->canDeletePost($post->id),
             'isFollowing' => $isFollowingAuthor,
             'showEarnings' => false,
+            'postShareUrl' => $postShareUrl,
+            'postShareText' => $postShareText,
         ])
     </div>
 
@@ -148,6 +157,22 @@
             </svg>
             {{ number_format($post->views_count) }}
         </span>
+
+        {{-- Share --}}
+        <button type="button" class="pk-action pk-share"
+            @click="openPostShare('{{ $post->id }}', @js($postShareUrl), @js($postShareText), @js($authorName))"
+            title="Share post"
+            aria-label="Share post">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="18" cy="5" r="3" />
+                <circle cx="6" cy="12" r="3" />
+                <circle cx="18" cy="19" r="3" />
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+            </svg>
+            Share
+        </button>
     </div>
 
     @auth
@@ -182,21 +207,6 @@
                     wire:click="addComment('{{ $post->id }}')">Send</button>
             </div>
         @endif
-
-        @foreach ($this->pendingCommentsFor($post->id) as $comment)
-            <div class="pk-fb-comment" wire:key="pending-comment-{{ $comment['id'] }}">
-                <x-user-avatar :user="$comment['user']" size="sm" />
-                <div class="pk-fb-comment-bubble">
-                    <div class="d-flex align-items-start justify-content-between gap-2">
-                        <div>
-                            <span class="pk-fb-comment-name">{{ $comment['user']->name ?? 'You' }}</span>
-                            <span class="pk-fb-comment-time">{{ $comment['created_at']->diffForHumans() }}</span>
-                            <p class="pk-fb-comment-text mb-0">{{ $comment['content'] }}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        @endforeach
 
         @foreach ($post->comments->take(3) as $comment)
             <div class="pk-fb-comment" wire:key="comment-{{ $comment->id }}">

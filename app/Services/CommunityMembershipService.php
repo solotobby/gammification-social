@@ -4,7 +4,9 @@ namespace App\Services;
 
 use App\Models\Community;
 use App\Models\User;
+use App\Notifications\CommunityMemberJoinedNotification;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class CommunityMembershipService
@@ -15,11 +17,13 @@ class CommunityMembershipService
      */
     public function attachMember(Community $community, string $userId, string $role = 'member'): bool
     {
-        if ($community->isArchived() && $community->user_id !== $userId) {
+        if ($community->isArchived() && (string) $community->user_id !== (string) $userId) {
             return false;
         }
 
-        return DB::transaction(function () use ($community, $userId, $role) {
+        $isNewJoin = false;
+
+        $attached = DB::transaction(function () use ($community, $userId, $role, &$isNewJoin) {
             $existing = DB::table('community_users')
                 ->where('community_id', $community->id)
                 ->where('user_id', $userId)
@@ -31,6 +35,9 @@ class CommunityMembershipService
             }
 
             if ($existing) {
+                if ($existing->status !== 'active') {
+                    $isNewJoin = true;
+                }
                 DB::table('community_users')
                     ->where('id', $existing->id)
                     ->update([
@@ -39,6 +46,7 @@ class CommunityMembershipService
                         'updated_at' => now(),
                     ]);
             } else {
+                $isNewJoin = true;
                 DB::table('community_users')->insert([
                     'id' => (string) Str::uuid(),
                     'community_id' => $community->id,
@@ -52,6 +60,20 @@ class CommunityMembershipService
 
             return true;
         });
+
+        if ($attached && $isNewJoin && (string) $community->user_id !== (string) $userId) {
+            try {
+                $joinedUser = User::find($userId);
+                $owner = $community->user ?? User::find($community->user_id);
+                if ($owner && $joinedUser) {
+                    $owner->notify(new CommunityMemberJoinedNotification($community, $joinedUser));
+                }
+            } catch (\Throwable $e) {
+                Log::warning('Failed to dispatch CommunityMemberJoinedNotification: ' . $e->getMessage());
+            }
+        }
+
+        return $attached;
     }
 
     public function leave(Community $community, User $user): bool

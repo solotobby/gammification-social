@@ -305,6 +305,12 @@
         margin-bottom: 0;
     }
 
+    .community-show-page .pk-feed-post:target {
+        border-color: var(--pk-violet, #5A4FDC);
+        box-shadow: 0 0 0 2px rgba(90, 79, 220, 0.25);
+        scroll-margin-top: 80px;
+    }
+
     .community-show-page .pk-text a,
     .community-show-page .pk-text .pk-tag,
     .community-show-page .pk-text .pk-mention {

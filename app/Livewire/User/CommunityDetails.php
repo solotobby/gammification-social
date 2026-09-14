@@ -2,6 +2,7 @@
 
 namespace App\Livewire\User;
 
+use App\Jobs\SendCommunityNewPostNotificationJob;
 use App\Livewire\Concerns\SendsPostGifts;
 use App\Http\Controllers\CommunityInviteController;
 use App\Mail\GeneralMail;
@@ -305,7 +306,7 @@ class CommunityDetails extends Component
             return;
         }
 
-        DB::transaction(function () {
+        $post = DB::transaction(function () {
             $post = $this->community->posts()->create([
                 'user_id' => auth()->id(),
                 'content' => $this->content,
@@ -322,7 +323,13 @@ class CommunityDetails extends Component
                     'sort' => $index,
                 ]);
             }
+
+            return $post;
         });
+
+        if ($post) {
+            SendCommunityNewPostNotificationJob::dispatch($post->id);
+        }
 
         $this->reset(['content', 'media']);
         $this->postsPerPage = self::PAGE_STEP;
@@ -361,7 +368,7 @@ class CommunityDetails extends Component
     /** @return list<array<string, mixed>> */
     public function pendingCommentsFor(string $postId): array
     {
-        return $this->pendingComments[$postId] ?? [];
+        return [];
     }
 
     public function toggleLike(string $postId): void
@@ -410,19 +417,8 @@ class CommunityDetails extends Component
             return;
         }
 
-        $count = $this->communityCommentsCount($post);
-        $this->commentCountOverrides[$postId] = $count + 1;
-
-        $this->pendingComments[$postId] = array_merge($this->pendingComments[$postId] ?? [], [[
-            'id' => 'pending-'.now()->timestamp,
-            'user' => auth()->user(),
-            'content' => $text,
-            'created_at' => now(),
-        ]]);
-
         $this->newComment[$postId] = '';
 
-        // ProcessCommunityCommentJob::dispatch($postId, (string) auth()->id(), $text);
         app(CommunityPostEngagementService::class)->addComment($post, auth()->user(), $text);
     }
 

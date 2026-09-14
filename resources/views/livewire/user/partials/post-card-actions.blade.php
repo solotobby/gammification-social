@@ -22,7 +22,7 @@
     $boostEnabled = \App\Models\SystemSetting::isBoostEnabled();
     $canManagePost = $canManagePost ?? false;
     $hasMenuItems = ($context === 'post' && $isOwner)
-        || ($context === 'community' && $canDelete)
+        || ($context === 'community')
         || (! $isOwner);
 @endphp
 
@@ -122,15 +122,31 @@
                             Delete post
                         </button>
                     @endif
-                @elseif ($context === 'community' && $canDelete)
-                    <button type="button" class="pk-menu-item pk-menu-item--danger"
-                        wire:click="deletePost('{{ $post->id }}')"
-                        onclick="return confirm('Delete this post? This can\'t be undone.')">
-                        <i class="far fa-trash-alt"></i>
-                        Delete post
+                @elseif ($context === 'community')
+                    @php
+                        $cShareUrl = $postShareUrl ?? ($post->community ? (route('community.show', $post->community) . '#cpost-' . $post->id) : url('timeline/' . $post->id));
+                        $cShareText = $postShareText ?? ('Check out this post on ' . config('app.name'));
+                        $cAuthor = displayName($post->user->name ?? 'Member');
+                    @endphp
+
+                    <button type="button" class="pk-menu-item"
+                        @click="$dispatch('open-post-share', {
+                            id: '{{ $post->id }}',
+                            url: @js($cShareUrl),
+                            text: @js($cShareText),
+                            author: @js($cAuthor)
+                        }); $el.closest('details')?.removeAttribute('open');">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; flex-shrink: 0;"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                        Share post
                     </button>
-                @elseif (! $isOwner)
-                    @if ($context === 'community')
+
+                    <button type="button" class="pk-menu-item"
+                        onclick="navigator.clipboard.writeText(@js($cShareUrl)).then(() => { if (typeof window.pkToast === 'function') window.pkToast('Link copied to clipboard'); }); this.closest('details')?.removeAttribute('open');">
+                        <i class="far fa-copy"></i>
+                        Copy link
+                    </button>
+
+                    @if (! $isOwner)
                         <button type="button" class="pk-menu-item @if ($isFollowing) pk-menu-item--active @endif"
                             wire:click="toggleFollowAuthor('{{ $post->user_id }}')">
                             <i class="fa @if ($isFollowing) fa-user-minus @else fa-user-plus @endif"></i>
@@ -146,7 +162,18 @@
                             <i class="fa fa-flag"></i>
                             Report post
                         </button>
-                    @else
+                    @endif
+
+                    @if ($canDelete)
+                        <div class="pk-menu-divider"></div>
+                        <button type="button" class="pk-menu-item pk-menu-item--danger"
+                            wire:click="deletePost('{{ $post->id }}')"
+                            onclick="return confirm('Delete this post? This can\'t be undone.')">
+                            <i class="far fa-trash-alt"></i>
+                            Delete post
+                        </button>
+                    @endif
+                @elseif (! $isOwner)
                         <button type="button" class="pk-menu-item @if ($isFollowing) pk-menu-item--active @endif"
                             wire:click="toggleFollow">
                             <i class="fa @if ($isFollowing) fa-user-minus @else fa-user-plus @endif"></i>
@@ -200,7 +227,6 @@
                             Report post
                         </button>
                     @endif
-                @endif
             </div>
         </details>
     @endif
