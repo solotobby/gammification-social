@@ -699,6 +699,10 @@
         </div>
     </footer>
     <!-- END Footer -->
+
+    <!-- Mobile Bottom Navigation Menu -->
+    @include('layouts.partials.mobile-bottom-nav')
+    <!-- END Mobile Bottom Navigation Menu -->
     </div>
     <!-- END Page Container -->
 
