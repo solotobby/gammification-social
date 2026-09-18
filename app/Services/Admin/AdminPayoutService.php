@@ -7,6 +7,7 @@ use App\Models\EngagementMonthlyStat;
 use App\Models\EngagementPayoutComponent;
 use App\Models\FremiumEngagementStat;
 use App\Models\Payout;
+use App\Models\PayoutPoolTopup;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Models\UserLevel;
@@ -555,6 +556,82 @@ class AdminPayoutService
 
             return $fundTransferResponse;
         });
+    }
+
+    public function distributePoolTopup(string $level, string $month, float $amountNgn, ?string $note = null): array
+    {
+        $members = EngagementMonthlyStat::query()
+            ->where('level', $level)
+            ->where('month', $month)
+            ->where('status', 'Pending')
+            ->get();
+
+        if ($members->isEmpty()) {
+            throw new \RuntimeException('No Pending members found for ' . $level . ' in ' . $month . '. Ensure engagement stats have been processed first.');
+        }
+
+        $totalEngagement = (int) $members->sum('points');
+        $memberCount = $members->count();
+        $distributedCount = 0;
+
+        DB::transaction(function () use ($members, $amountNgn, $totalEngagement, $memberCount, &$distributedCount) {
+            foreach ($members as $member) {
+                $share = $totalEngagement > 0
+                    ? round(($member->points / $totalEngagement) * $amountNgn, 2)
+                    : round($amountNgn / $memberCount, 2);
+
+                if ($share < 0.01) {
+                    continue;
+                }
+
+                // 'Pool top-up' (fixed string) is the idempotency key — lets us
+                // updateOrCreate safely without affecting manually-added bonus lines.
+                EngagementPayoutComponent::updateOrCreate(
+                    [
+                        'engagement_monthly_stats_id' => $member->id,
+                        'type'                        => 'bonus',
+                        'note'                        => 'Pool top-up',
+                    ],
+                    [
+                        'user_id'  => $member->user_id,
+                        'level'    => $member->level,
+                        'month'    => $member->month,
+                        'amount'   => $share,
+                        'currency' => 'NGN',
+                        'admin_id' => Auth::id(),
+                    ]
+                );
+
+                $distributedCount++;
+            }
+        });
+
+        // One top-up record per level+month — update amount/note if admin resubmits.
+        $topup = PayoutPoolTopup::updateOrCreate(
+            [
+                'level' => $level,
+                'month' => $month,
+            ],
+            [
+                'amount'            => round($amountNgn, 2),
+                'note'              => $note,
+                'admin_id'          => Auth::id(),
+                'distributed_count' => $distributedCount,
+            ]
+        );
+
+        $this->audit->log('payout.pool_topup', $topup, [
+            'level'             => $level,
+            'month'             => $month,
+            'amount'            => round($amountNgn, 2),
+            'distributed_count' => $distributedCount,
+        ]);
+
+        return [
+            'topup'             => $topup,
+            'distributed_count' => $distributedCount,
+            'amount'            => round($amountNgn, 2),
+        ];
     }
 
     protected function buildUserEngagementRow(EngagementMonthlyStat $member, float $percentage, float $engagementPayout): array

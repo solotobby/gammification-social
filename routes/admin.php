@@ -160,6 +160,7 @@ Route::middleware(['auth', 'admin'])
                 Route::get('monthly/{level}/users', [MonthlyPayoutController::class, 'levelUserBreakdown'])->name('monthly.users');
                 Route::post('monthly/{level}/process', [MonthlyPayoutController::class, 'processLevelPrayout'])->name('process-level');
                 Route::get('levels/{level}', [PayoutController::class, 'index'])->name('levels.show');
+                Route::post('levels/{level}/topup', [PayoutController::class, 'topupPool'])->name('levels.topup');
                 Route::post('components', [PayoutController::class, 'storePayoutComponent'])->name('components.store');
                 Route::put('components/{component}', [PayoutController::class, 'updatePayoutComponent'])->name('components.update');
                 Route::delete('components/{component}', [PayoutController::class, 'destroyPayoutComponent'])->name('components.destroy');

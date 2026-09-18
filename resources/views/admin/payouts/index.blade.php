@@ -533,6 +533,52 @@
         </div>
     </div>
 
+    {{-- Pro-rata Pool Top-up --}}
+    @if (($status ?? '') !== 'error')
+    <div class="dash-card" style="margin-top:1.5rem;max-width:900px;margin-left:auto;margin-right:auto;">
+        <div class="dash-card__head">
+            <div>
+                <h2 class="dash-card__title">Top-up pool</h2>
+                <p class="dash-muted" style="margin:0.25rem 0 0;">
+                    Distribute a lump sum pro-rata across all <strong>Pending</strong> {{ $currentLevel }} members for {{ $monthLabel }}, based on each member's engagement share. This adds a bonus component to their existing payout.
+                </p>
+            </div>
+        </div>
+        <div class="dash-card__body">
+            <form method="POST" action="{{ route('admin.payouts.levels.topup', $currentLevel) }}"
+                  onsubmit="return confirmTopup(this)">
+                @csrf
+                <div style="display:flex;flex-wrap:wrap;gap:1rem;align-items:flex-end">
+                    <div class="dash-field" style="flex:1;min-width:180px;margin:0">
+                        <label for="topupAmount" style="display:block;font-size:.8125rem;font-weight:600;margin-bottom:.35rem;color:#334155">Amount (NGN)</label>
+                        <input type="number" id="topupAmount" name="amount" class="dash-input"
+                               min="1" step="0.01" required
+                               placeholder="e.g. 1000000"
+                               value="{{ old('amount') }}">
+                    </div>
+                    <div class="dash-field" style="flex:2;min-width:220px;margin:0">
+                        <label for="topupNote" style="display:block;font-size:.8125rem;font-weight:600;margin-bottom:.35rem;color:#334155">Note (optional)</label>
+                        <input type="text" id="topupNote" name="note" class="dash-input"
+                               maxlength="500"
+                               placeholder="e.g. Q3 company bonus pool"
+                               value="{{ old('note') }}">
+                    </div>
+                    <div class="dash-field" style="flex:1;min-width:180px;margin:0">
+                        <label for="topupValidation" style="display:block;font-size:.8125rem;font-weight:600;margin-bottom:.35rem;color:#334155">Validation code</label>
+                        <input type="text" id="topupValidation" name="validationCode" class="dash-input"
+                               required autocomplete="off" placeholder="Enter validation code">
+                    </div>
+                    <div style="flex:0">
+                        <button type="submit" class="dash-btn dash-btn--primary" style="white-space:nowrap">
+                            <i class="fa fa-upload"></i> Distribute top-up
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    @endif
+
     {{-- Payout sheets (appended at page level, outside .dash overflow) --}}
     <div class="payout-sheet" id="payoutAddSheet" aria-hidden="true">
         <div class="payout-sheet__panel" role="dialog" aria-modal="true" aria-labelledby="payoutAddTitle">
@@ -809,5 +855,20 @@
             filterPayoutMembers();
         }
     });
+
+    function confirmTopup(form) {
+        var amount = parseFloat(document.getElementById('topupAmount').value || 0);
+        if (!amount || amount < 1) {
+            alert('Enter a valid amount (minimum ₦1).');
+            return false;
+        }
+        var level = @json($currentLevel ?? 'members');
+        var month = @json($monthLabel ?? '');
+        return confirm(
+            'Distribute ₦' + amount.toLocaleString('en-NG', {minimumFractionDigits: 2}) +
+            ' pro-rata across all Pending ' + level + ' members for ' + month + '?\n\n' +
+            'This will add a bonus component to each member\'s payout. This action cannot be undone.'
+        );
+    }
 </script>
 @endsection

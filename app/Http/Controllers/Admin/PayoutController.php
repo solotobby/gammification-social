@@ -211,4 +211,33 @@ class PayoutController extends Controller
             ], 500);
         }
     }
+    public function topupPool(Request $request, string $level)
+    {
+        $validated = $request->validate([
+            'amount'         => 'required|numeric|min:1',
+            'note'           => 'nullable|string|max:500',
+            'validationCode' => 'required|string',
+        ]);
+
+        if ($validated['validationCode'] !== config('services.env.validation_code')) {
+            return back()->withInput()->with('error', 'Invalid validation code.');
+        }
+
+        $lastMonth = now()->subMonth()->format('Y-m');
+
+        try {
+            $result = $this->payouts->distributePoolTopup(
+                $level,
+                $lastMonth,
+                (float) $validated['amount'],
+                $validated['note'] ?? null,
+            );
+        } catch (\Throwable $e) {
+            return back()->withInput()->with('error', $e->getMessage());
+        }
+
+        $formatted = '₦' . number_format($result['amount'], 2);
+
+        return back()->with('success', "Pool top-up of {$formatted} distributed to {$result['distributed_count']} member(s).");
+    }
 }

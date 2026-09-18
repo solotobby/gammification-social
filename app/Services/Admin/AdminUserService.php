@@ -75,13 +75,32 @@ class AdminUserService
     public function profileData(string $userId): array
     {
         $user = User::query()
-            ->with(['wallet', 'userLevel.level'])
+            ->with(['wallet', 'userLevel.level', 'profile'])
             ->findOrFail($userId);
 
         $subscription = $user->userLevel;
         $planName = $subscription?->plan_name ?? $subscription?->level?->name;
         $levelPlan = $subscription?->level
             ?? ($planName ? Level::query()->where('name', $planName)->first() : null);
+
+        $postsCount = Post::query()->where('user_id', $user->id)->count();
+        $commentsCount = DB::table('comments')->where('user_id', $user->id)->count();
+        $likesReceived = DB::table('user_likes')->where('poster_user_id', $user->id)->count();
+        $viewsReceived = DB::table('user_views')->where('poster_user_id', $user->id)->count();
+        $commentsReceived = DB::table('user_comments')->where('poster_user_id', $user->id)->count();
+        $followersCount = DB::table('follows')->where('following_id', $user->id)->count();
+        $followingCount = DB::table('follows')->where('follower_id', $user->id)->count();
+        $referralsCount = DB::table('referrals')->where('referral_id', $user->id)->count();
+        $communitiesOwnedCount = DB::table('communities')->where('user_id', $user->id)->count();
+        $communitiesJoinedCount = DB::table('community_users')->where('user_id', $user->id)->count();
+
+        $lifetimePayoutsSum = (float) DB::table('payouts')->where('user_id', $user->id)->sum('amount');
+        $lifetimePayoutsCount = DB::table('payouts')->where('user_id', $user->id)->count();
+
+        $recentPosts = Post::query()->where('user_id', $user->id)->latest()->take(6)->get();
+        $recentTransactions = Transaction::query()->where('user_id', $user->id)->latest()->take(8)->get();
+        $monthlyStats = EngagementMonthlyStat::query()->where('user_id', $user->id)->orderByDesc('month')->take(6)->get();
+        $recentActivities = DB::table('user_activities')->where('user_id', $user->id)->latest()->take(8)->get();
 
         return [
             'user' => $user,
@@ -92,7 +111,17 @@ class AdminUserService
                 ->latest()
                 ->limit(20)
                 ->get(),
-            'postsCount' => Post::query()->where('user_id', $user->id)->count(),
+            'postsCount' => $postsCount,
+            'commentsCount' => $commentsCount,
+            'likesReceived' => $likesReceived,
+            'viewsReceived' => $viewsReceived,
+            'commentsReceived' => $commentsReceived,
+            'totalEngagement' => $viewsReceived + $likesReceived + $commentsReceived,
+            'followersCount' => $followersCount,
+            'followingCount' => $followingCount,
+            'referralsCount' => $referralsCount,
+            'communitiesOwnedCount' => $communitiesOwnedCount,
+            'communitiesJoinedCount' => $communitiesJoinedCount,
             'level' => $planName,
             'subscription' => $subscription,
             'access' => AccessCode::query()->where('email', $user->email)->latest()->first(),
@@ -102,10 +131,16 @@ class AdminUserService
                 ->where('user_id', $user->id)
                 ->where('month', now()->subMonth()->format('Y-m'))
                 ->first(),
+            'lifetimePayoutsSum' => $lifetimePayoutsSum,
+            'lifetimePayoutsCount' => $lifetimePayoutsCount,
             'totalWithdrawals' => Withdrawals::query()
                 ->where('user_id', $user->id)
                 ->where('status', 'Paid')
                 ->sum('amount'),
+            'recentPosts' => $recentPosts,
+            'recentTransactions' => $recentTransactions,
+            'monthlyStats' => $monthlyStats,
+            'recentActivities' => $recentActivities,
         ];
     }
 
