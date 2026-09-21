@@ -165,13 +165,41 @@ if (!function_exists('generateCode')) {
     }
 }
 
+if (!function_exists('getActiveCurrencyRates')) {
+    function getActiveCurrencyRates(): array
+    {
+        static $cachedRates = null;
+        if ($cachedRates !== null) {
+            return $cachedRates;
+        }
+
+        return $cachedRates = \Illuminate\Support\Facades\Cache::remember('active_currency_rates', 3600, function () {
+            return Currency::where('is_active', true)->pluck('base_rate', 'code')->toArray();
+        });
+    }
+}
+
+if (!function_exists('getActiveCurrencySymbols')) {
+    function getActiveCurrencySymbols(): array
+    {
+        static $cachedSymbols = null;
+        if ($cachedSymbols !== null) {
+            return $cachedSymbols;
+        }
+
+        return $cachedSymbols = \Illuminate\Support\Facades\Cache::remember('active_currency_symbols', 3600, function () {
+            return Currency::where('is_active', true)->pluck('symbol', 'code')->toArray();
+        });
+    }
+}
+
 if (!function_exists('getCurrencyCode')) {
     function getCurrencyCode($currency = null)
     {
-        $codes = Currency::where('is_active', true)->pluck('symbol', 'code')->toArray();
+        $codes = getActiveCurrencySymbols();
 
         if ($currency == null) {
-            $userCurrency = auth()->check() ? Wallet::where('user_id', auth()->id())->value('currency') : null;
+            $userCurrency = userBaseCurrency();
             return $codes[$userCurrency ?? 'NGN'] ?? ($codes['NGN'] ?? '₦');
         } else {
             return $codes[$currency] ?? null;
@@ -184,9 +212,18 @@ if (!function_exists('userBaseCurrency')) {
     {
         $userId ??= auth()->id();
 
+        if (! $userId) {
+            return null;
+        }
+
+        static $userCurrencies = [];
+        if (isset($userCurrencies[$userId])) {
+            return $userCurrencies[$userId];
+        }
+
         $currency = Wallet::where('user_id', $userId)->value('currency');
 
-        return $currency ? strtoupper((string) $currency) : null;
+        return $userCurrencies[$userId] = ($currency ? strtoupper((string) $currency) : null);
     }
 }
 
@@ -309,6 +346,11 @@ if (!function_exists('userLevel')) {
             return 'Basic';
         }
 
+        static $userLevels = [];
+        if (isset($userLevels[$userId])) {
+            return $userLevels[$userId];
+        }
+
         $record = UserLevel::where('user_id', $userId)
             ->where('status', UserLevel::STATUS_ACTIVE)
             ->orderByDesc('next_payment_date')
@@ -316,17 +358,17 @@ if (!function_exists('userLevel')) {
             ?? UserLevel::where('user_id', $userId)->latest()->first();
 
         if ($record?->plan_name) {
-            return normalizeUserLevel($record->plan_name);
+            return $userLevels[$userId] = normalizeUserLevel($record->plan_name);
         }
 
         if ($record?->level_id) {
             $levelName = Level::where('id', $record->level_id)->value('name');
             if ($levelName) {
-                return normalizeUserLevel($levelName);
+                return $userLevels[$userId] = normalizeUserLevel($levelName);
             }
         }
 
-        return 'Basic';
+        return $userLevels[$userId] = 'Basic';
     }
 }
 
@@ -590,27 +632,15 @@ if (!function_exists('updateWalletEarnings')) {
 }
 
 if (!function_exists('estimatedEarnings')) {
-    function estimatedEarnings($postId): float
+    function estimatedEarnings($postId, ?string $currency = null): float
     {
-        // $post = Post::find($postId);
-
         if (!$postId) {
             return 0.00;
         }
 
-        return DB::transaction(function () use ($postId) {
+        $earnings = app(\App\Services\PostEarningsService::class)->forPosts(collect([$postId]), $currency);
 
-            $allearnings = UserView::where('post_id', $postId)->where('created_at', '>=', now()->subDays(30))->sum('amount') +
-                UserLike::where('post_id', $postId)->where('created_at', '>=', now()->subDays(30))->sum('amount') +
-                UserComment::where('post_id', $postId)->where('created_at', '>=', now()->subDays(30))->sum('amount');
-
-            $convertedAmount = convertToBaseCurrency(
-                $allearnings,
-                auth()->user()->wallet->currency
-            );
-
-            return (float) round($convertedAmount, 5);
-        });
+        return (float) ($earnings[$postId] ?? 0.00);
     }
 }
 
@@ -618,15 +648,7 @@ if (!function_exists('estimatedEarnings')) {
 if (!function_exists('convertToBaseCurrency')) {
     function convertToBaseCurrency($amount, $currency)
     {
-
-        // $rates = [
-        //     'USD' => 1,
-        //     'NGN' => 1500,
-        //     'EUR' => 0.91,
-        //     'GBP' => 0.81,
-        // ];
-
-        $rates = Currency::where('is_active', true)->pluck('base_rate', 'code')->toArray();
+        $rates = getActiveCurrencyRates();
 
         $rate = $rates[$currency] ?? 1;
         $convertedAmount = $amount * $rate;
@@ -638,9 +660,7 @@ if (!function_exists('convertToBaseCurrency')) {
 if (!function_exists('convertCurrency')) {
     function convertCurrency($amount, $from, $to)
     {
-        $rates = Currency::where('is_active', true)
-            ->pluck('base_rate', 'code')
-            ->toArray();
+        $rates = getActiveCurrencyRates();
 
         $from = strtoupper($from);
         $to = strtoupper($to);
@@ -669,22 +689,18 @@ if (!function_exists('convertCurrency')) {
 if (!function_exists('viewsAmountCalculator')) {
     function viewsAmountCalculator($postId): float
     {
-
         if (!$postId) {
             return 0.0;
         }
 
-        return DB::transaction(function () use ($postId) {
-            $viewsEarnings = UserView::where('post_id', $postId)->sum('amount');
+        $viewsEarnings = UserView::where('post_id', $postId)->sum('amount');
+        $currency = userBaseCurrency() ?? 'NGN';
+        $convertedAmount = convertToBaseCurrency(
+            $viewsEarnings,
+            $currency
+        );
 
-            $currency = auth()->user()?->wallet?->currency ?? 'NGN';
-            $convertedAmount = convertToBaseCurrency(
-                $viewsEarnings,
-                $currency
-            );
-
-            return (float) round($convertedAmount, 5);
-        });
+        return (float) round($convertedAmount, 5);
     }
 }
 
@@ -695,17 +711,15 @@ if (!function_exists('likesAmountCalculator')) {
         if (!$postId) {
             return 0.0;
         }
-        return DB::transaction(function () use ($postId) {
-            $likesEarnings = UserLike::where('post_id', $postId)->sum('amount');
 
-            $currency = auth()->user()?->wallet?->currency ?? 'NGN';
-            $convertedAmount = convertToBaseCurrency(
-                $likesEarnings,
-                $currency
-            );
+        $likesEarnings = UserLike::where('post_id', $postId)->sum('amount');
+        $currency = userBaseCurrency() ?? 'NGN';
+        $convertedAmount = convertToBaseCurrency(
+            $likesEarnings,
+            $currency
+        );
 
-            return (float) round($convertedAmount, 5);
-        });
+        return (float) round($convertedAmount, 5);
     }
 }
 
@@ -713,22 +727,18 @@ if (!function_exists('likesAmountCalculator')) {
 if (!function_exists('commentsAmountCalculator')) {
     function commentsAmountCalculator($postId): float
     {
-
-
         if (!$postId) {
             return 0.0;
         }
-        return DB::transaction(function () use ($postId) {
-            $commentsEarnings = UserComment::where('post_id', $postId)->sum('amount');
 
-            $currency = auth()->user()?->wallet?->currency ?? 'NGN';
-            $convertedAmount = convertToBaseCurrency(
-                $commentsEarnings,
-                $currency
-            );
+        $commentsEarnings = UserComment::where('post_id', $postId)->sum('amount');
+        $currency = userBaseCurrency() ?? 'NGN';
+        $convertedAmount = convertToBaseCurrency(
+            $commentsEarnings,
+            $currency
+        );
 
-            return (float) round($convertedAmount, 5);
-        });
+        return (float) round($convertedAmount, 5);
     }
 }
 

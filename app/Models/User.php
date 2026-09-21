@@ -231,7 +231,18 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function isFollowing(User $user): bool
     {
-        return $this->following()->where('following_id', $user->id)->exists();
+        if ($this->relationLoaded('following')) {
+            return $this->following->contains('id', $user->id);
+        }
+
+        static $followingCache = [];
+        $key = "{$this->id}:{$user->id}";
+
+        if (array_key_exists($key, $followingCache)) {
+            return $followingCache[$key];
+        }
+
+        return $followingCache[$key] = $this->following()->where('following_id', $user->id)->exists();
     }
 
     public function bookmarkedPosts()

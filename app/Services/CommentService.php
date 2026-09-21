@@ -45,10 +45,9 @@ class CommentService
                 'message' => $message,
             ]);
 
-            // 2️⃣ Lock the post to prevent race conditions
+            // 2️⃣ Fetch the post to attribute comment
             $post = Post::select('id', 'user_id', 'is_monetized', 'monetization_paused', 'status')
                 ->whereKey($postId)
-                ->lockForUpdate()
                 ->firstOrFail();
 
             $isSelfComment = $authUserId === $post->user_id;

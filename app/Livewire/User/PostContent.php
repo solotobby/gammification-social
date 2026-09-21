@@ -91,10 +91,12 @@ class PostContent extends Component
 
         if ($this->showPostMenu && auth()->check() && auth()->id() !== $post->user_id) {
             $this->isFollowing = auth()->user()->isFollowing($post->user);
-            $this->isBookmarked = PostBookmark::where([
-                'user_id' => auth()->id(),
-                'post_id' => $post->id,
-            ])->exists();
+            $this->isBookmarked = isset($post->is_bookmarked_by_me)
+                ? (bool) $post->is_bookmarked_by_me
+                : PostBookmark::where([
+                    'user_id' => auth()->id(),
+                    'post_id' => $post->id,
+                ])->exists();
         }
 
         $this->loadPreviewComments(reset: true);

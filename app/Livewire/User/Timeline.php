@@ -140,7 +140,10 @@ class Timeline extends Component
             ->pluck('post_id');
 
         $query = Post::with(['user', 'trends', 'images', 'video', 'activeBoost'])
-            ->withExists(['likes as liked_by_me' => fn ($q) => $q->where('user_id', $userId)])
+            ->withExists([
+                'likes as liked_by_me' => fn ($q) => $q->where('user_id', $userId),
+                'bookmarks as is_bookmarked_by_me' => fn ($q) => $q->where('user_id', $userId),
+            ])
             ->where('status', 'LIVE')
             ->when($hiddenPostIds->isNotEmpty(), fn ($q) => $q->whereNotIn('id', $hiddenPostIds));
 

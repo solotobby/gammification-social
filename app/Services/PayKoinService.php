@@ -10,6 +10,7 @@ use App\Models\Transaction;
 use App\Models\User;
 use App\Models\Wallet;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
@@ -320,25 +321,27 @@ class PayKoinService
      */
     public function giftsFor(string $giftableType, string $giftableId, int $limit = 20): array
     {
-        $modelClass = $this->resolveGiftableClass($giftableType);
+        return Cache::remember("post_gifts:{$giftableType}:{$giftableId}:{$limit}", 300, function () use ($giftableType, $giftableId, $limit) {
+            $modelClass = $this->resolveGiftableClass($giftableType);
 
-        $gifts = PostGift::query()
-            ->where('giftable_type', $modelClass)
-            ->where('giftable_id', $giftableId)
-            ->with('sender:id,username')
-            ->latest()
-            ->limit($limit)
-            ->get();
+            $gifts = PostGift::query()
+                ->where('giftable_type', $modelClass)
+                ->where('giftable_id', $giftableId)
+                ->with('sender:id,username')
+                ->latest()
+                ->limit($limit)
+                ->get();
 
-        $total = (int) PostGift::query()
-            ->where('giftable_type', $modelClass)
-            ->where('giftable_id', $giftableId)
-            ->count();
+            $total = (int) PostGift::query()
+                ->where('giftable_type', $modelClass)
+                ->where('giftable_id', $giftableId)
+                ->count();
 
-        return [
-            'total' => $total,
-            'recent' => $gifts->map(fn (PostGift $gift) => $this->formatGiftForUi($gift))->values()->all(),
-        ];
+            return [
+                'total' => $total,
+                'recent' => $gifts->map(fn (PostGift $gift) => $this->formatGiftForUi($gift))->values()->all(),
+            ];
+        });
     }
 
     /**
@@ -541,6 +544,10 @@ class PayKoinService
                     'giftable_id' => $giftable->id,
                 ],
             ]);
+
+            $giftableClass = $giftable::class;
+            Cache::forget("post_gifts:{$giftableType}:{$giftableId}:20");
+            Cache::forget("post_gifts:{$giftableClass}:{$giftableId}:20");
 
             return [
                 'gift' => $this->formatGiftForUi($gift->load('sender:id,username')),

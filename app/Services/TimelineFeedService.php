@@ -158,6 +158,13 @@ class TimelineFeedService
             $query->with($withRelations);
         }
 
+        if ($userId = auth()->id()) {
+            $query->withExists([
+                'likes as liked_by_me' => fn ($q) => $q->where('user_id', $userId),
+                'bookmarks as is_bookmarked_by_me' => fn ($q) => $q->where('user_id', $userId),
+            ]);
+        }
+
         $posts = $query->get()->keyBy('id');
 
         // Maintain selection order so stable sampling is preserved
