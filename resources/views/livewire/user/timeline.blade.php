@@ -1276,7 +1276,6 @@
                             title="Mutual connections only — people you follow who follow you back">
                         <i class="fa fa-user-friends"></i>
                         <span>Following</span>
-                        <span class="ph-feed-tab-badge">Mutuals</span>
                     </button>
                 </div>
             </div>
@@ -1294,7 +1293,7 @@
                     @if ($activeTab === 'following')
                         <div class="ph-empty-ic"><i class="fa fa-user-friends"></i></div>
                         <h6>No mutual connections yet</h6>
-                        <p>When people you follow follow you back, their posts will appear right here in your reciprocal feed.</p>
+                        <p>When people you follow, follow you back, their posts will appear right here in your reciprocal feed.</p>
                     @else
                         <div class="ph-empty-ic"><i class="fa fa-feather-alt"></i></div>
                         <h6>Your feed is waiting</h6>
