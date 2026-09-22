@@ -698,7 +698,72 @@
                 }
             }
 
-            /* feed header + empty + load more */
+            /* feed header + tabs + empty + load more */
+            .ph-feed-tabs-container {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin: 8px 0 16px;
+                border-bottom: 1px solid var(--ph-line);
+                position: relative;
+            }
+
+            .ph-feed-tabs {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .ph-feed-tab-btn {
+                position: relative;
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                padding: 10px 18px;
+                font-family: var(--ph-display);
+                font-size: 1.05rem;
+                font-weight: 600;
+                color: var(--ph-slate);
+                background: none;
+                border: none;
+                cursor: pointer;
+                border-radius: 12px 12px 0 0;
+                transition: all .2s ease;
+            }
+
+            .ph-feed-tab-btn:hover {
+                color: var(--ph-ink);
+                background: rgba(90, 79, 220, .04);
+            }
+
+            .ph-feed-tab-btn.active {
+                color: var(--ph-violet);
+                font-weight: 700;
+            }
+
+            .ph-feed-tab-btn.active::after {
+                content: "";
+                position: absolute;
+                bottom: -1px;
+                left: 12px;
+                right: 12px;
+                height: 3px;
+                background: linear-gradient(90deg, var(--ph-violet), var(--ph-violet-bright));
+                border-radius: 3px 3px 0 0;
+            }
+
+            .ph-feed-tab-badge {
+                font-family: var(--ph-body);
+                font-size: 0.68rem;
+                font-weight: 700;
+                padding: 2px 7px;
+                border-radius: 999px;
+                background: rgba(16, 185, 129, .12);
+                color: var(--ph-mint);
+                letter-spacing: .02em;
+                text-transform: uppercase;
+            }
+
             .ph-feed-head {
                 display: flex;
                 align-items: center;
@@ -1195,8 +1260,26 @@
                 </form>
             </div>
 
-            {{-- ===== Feed ===== --}}
-            <div class="ph-feed-head">Your feed</div>
+            {{-- ===== Feed Tabs ===== --}}
+            <div class="ph-feed-tabs-container">
+                <div class="ph-feed-tabs">
+                    <button type="button"
+                            wire:click="setTab('for_you')"
+                            class="ph-feed-tab-btn {{ $activeTab === 'for_you' ? 'active' : '' }}"
+                            title="Discovery feed based on direct connections, interactions, and trending creators">
+                        <i class="fa fa-sparkles"></i>
+                        <span>For You</span>
+                    </button>
+                    <button type="button"
+                            wire:click="setTab('following')"
+                            class="ph-feed-tab-btn {{ $activeTab === 'following' ? 'active' : '' }}"
+                            title="Mutual connections only — people you follow who follow you back">
+                        <i class="fa fa-user-friends"></i>
+                        <span>Following</span>
+                        <span class="ph-feed-tab-badge">Mutuals</span>
+                    </button>
+                </div>
+            </div>
 
             @forelse ($posts as $post)
                 <livewire:user.post-content
@@ -1205,12 +1288,18 @@
                     :gift-summary="$postGiftSummaries[$post->id] ?? ['total' => 0, 'recent' => []]"
                     :format-text="false"
                     :show-post-menu="true"
-                    wire:key="post-{{ $post->id }}" />
+                    wire:key="post-{{ $post->id }}-{{ $activeTab }}" />
             @empty
                 <div class="ph-empty">
-                    <div class="ph-empty-ic"><i class="fa fa-feather-alt"></i></div>
-                    <h6>Your feed is waiting</h6>
-                    <p>Share your first post above — it can start earning the moment people engage.</p>
+                    @if ($activeTab === 'following')
+                        <div class="ph-empty-ic"><i class="fa fa-user-friends"></i></div>
+                        <h6>No mutual connections yet</h6>
+                        <p>When people you follow follow you back, their posts will appear right here in your reciprocal feed.</p>
+                    @else
+                        <div class="ph-empty-ic"><i class="fa fa-feather-alt"></i></div>
+                        <h6>Your feed is waiting</h6>
+                        <p>Share your first post above — it can start earning the moment people engage.</p>
+                    @endif
                 </div>
             @endforelse
 

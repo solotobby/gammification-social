@@ -123,6 +123,24 @@ class Timeline extends Component
 
 
     public int $feedSeed = 0;
+    public string $activeTab = 'for_you'; // 'for_you' | 'following'
+
+    public function setTab(string $tab): void
+    {
+        if (! in_array($tab, ['for_you', 'following'], true)) {
+            return;
+        }
+
+        if ($this->activeTab === $tab) {
+            return;
+        }
+
+        $this->activeTab = $tab;
+        $this->page = 1;
+        $this->posts = collect();
+        $this->hasMore = true;
+        $this->loadPosts();
+    }
 
     public function mount()
     {
@@ -147,18 +165,20 @@ class Timeline extends Component
             ->where('status', 'LIVE')
             ->when($hiddenPostIds->isNotEmpty(), fn ($q) => $q->whereNotIn('id', $hiddenPostIds));
 
-        $feed = app(\App\Services\TimelineFeedService::class)->buildFeed(
-            organicQuery: $query,
+        $feed = app(\App\Services\TimelineFeedService::class)->buildFeedForTab(
+            tab: $this->activeTab,
+            userId: $userId,
             targetCount: $this->perPage * $this->page,
             seed: $this->feedSeed,
-            cadence: 4,
+            cadence: null, // dynamic 5-8 cadence
             withRelations: [
                 'user',
                 'trends',
                 'images',
                 'video',
                 'activeBoost',
-            ]
+            ],
+            baseQuery: $query
         );
 
         $this->posts = $feed['posts'];

@@ -2,10 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Models\Follow;
 use App\Models\Post;
 use App\Models\PostBoost;
 use App\Models\SystemSetting;
 use App\Models\User;
+use App\Models\UserComment;
+use App\Models\UserLike;
 use App\Models\Wallet;
 use App\Services\TimelineFeedService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -267,5 +270,232 @@ class TimelineFeedInterleavingTest extends TestCase
         $this->assertNotEmpty($posts);
         // First post is organic
         $this->assertFalse((bool) $posts->first()->is_boosted);
+    }
+
+    public function test_dynamic_cadence_interleaves_between_5_and_8_posts(): void
+    {
+        $feedService = app(TimelineFeedService::class);
+
+        $organic = collect();
+        for ($i = 1; $i <= 30; $i++) {
+            $organic->push((object) ['id' => "org_{$i}", 'is_boosted' => false]);
+        }
+
+        $boosted = collect();
+        for ($b = 1; $b <= 5; $b++) {
+            $boosted->push((object) ['id' => "boost_{$b}", 'is_boosted' => true]);
+        }
+
+        $seed = 54321;
+        $interleaved = $feedService->interleave(
+            organicPosts: $organic,
+            boostedPosts: $boosted,
+            targetCount: 30,
+            cadence: null, // dynamic 5-8 cadence
+            seed: $seed
+        );
+
+        $this->assertNotEmpty($interleaved);
+
+        // Calculate intervals between boosted posts
+        $consecutiveOrganic = 0;
+        $foundBoosted = false;
+
+        foreach ($interleaved as $item) {
+            if ($item->is_boosted) {
+                if ($foundBoosted) {
+                    $this->assertGreaterThanOrEqual(5, $consecutiveOrganic, "Interval between boosted posts was {$consecutiveOrganic}, expected >= 5");
+                    $this->assertLessThanOrEqual(8, $consecutiveOrganic, "Interval between boosted posts was {$consecutiveOrganic}, expected <= 8");
+                }
+                $consecutiveOrganic = 0;
+                $foundBoosted = true;
+            } else {
+                $consecutiveOrganic++;
+            }
+        }
+
+        $this->assertTrue($foundBoosted, 'At least one boosted post should be interleaved.');
+    }
+
+    protected function createTestUser(array $overrides = []): User
+    {
+        return User::factory()->create(array_merge([
+            'username' => 'testuser_' . Str::lower(Str::random(6)),
+            'referral_code' => strtoupper(Str::random(8)),
+            'email_verified_at' => now(),
+        ], $overrides));
+    }
+
+    public function test_for_you_prioritizes_warm_network_with_recency_guardrail_over_cold_posts(): void
+    {
+        $friend = $this->createTestUser(['username' => 'friend_' . Str::lower(Str::random(6))]);
+        $stranger = $this->createTestUser(['username' => 'stranger_' . Str::lower(Str::random(6))]);
+
+        // User follows friend (making friend part of warm network)
+        Follow::create([
+            'follower_id' => $this->user->id,
+            'following_id' => $friend->id,
+        ]);
+
+        $feedService = app(TimelineFeedService::class);
+        $feedService->clearUserCache($this->user->id);
+
+        // Warm post created 5 days ago (within 4-10 day recency guardrail)
+        $warmPost = Post::create([
+            'user_id' => $friend->id,
+            'unicode' => Str::random(8),
+            'content' => 'Warm Post 5 days old',
+            'status' => 'LIVE',
+            'is_boosted' => false,
+            'created_at' => now()->subDays(5),
+        ]);
+
+        // Cold post by stranger
+        $coldPost = Post::create([
+            'user_id' => $stranger->id,
+            'unicode' => Str::random(8),
+            'content' => 'Cold Post by stranger',
+            'status' => 'LIVE',
+            'is_boosted' => false,
+            'views' => 10,
+            'created_at' => now()->subHours(2),
+        ]);
+
+        $result = $feedService->buildFeedForTab(
+            tab: 'for_you',
+            userId: $this->user->id,
+            targetCount: 10,
+            seed: 42
+        );
+
+        $postIds = $result['posts']->pluck('id')->all();
+        $this->assertContains($warmPost->id, $postIds);
+
+        // Warm post is in Tier 1 and appears before or alongside discovery
+        $warmIndex = array_search($warmPost->id, $postIds, true);
+        $coldIndex = array_search($coldPost->id, $postIds, true);
+
+        $this->assertLessThan($coldIndex, $warmIndex, 'Tier 1 warm network post should appear before Tier 2 discovery post.');
+    }
+
+    public function test_for_you_falls_back_to_platform_discovery_when_warm_network_is_exhausted(): void
+    {
+        $popularCreator = $this->createTestUser(['username' => 'creator_' . Str::lower(Str::random(6))]);
+
+        // High engagement post from creator not in warm circle
+        $viralPost = Post::create([
+            'user_id' => $popularCreator->id,
+            'unicode' => Str::random(8),
+            'content' => 'Trending viral post',
+            'status' => 'LIVE',
+            'is_boosted' => false,
+            'views' => 5000,
+            'likes' => 300,
+            'comments' => 150,
+            'comment_external' => 50,
+            'created_at' => now()->subHours(6),
+        ]);
+
+        $feedService = app(TimelineFeedService::class);
+        $feedService->clearUserCache($this->user->id);
+
+        $result = $feedService->buildFeedForTab(
+            tab: 'for_you',
+            userId: $this->user->id,
+            targetCount: 10,
+            seed: 123
+        );
+
+        $postIds = $result['posts']->pluck('id')->all();
+        $this->assertContains($viralPost->id, $postIds, 'Viral post should be surfaced via Tier 2 platform discovery.');
+    }
+
+    public function test_following_tab_only_returns_mutual_connections(): void
+    {
+        $mutualUser = $this->createTestUser(['username' => 'mutual_' . Str::lower(Str::random(6))]);
+        $oneWayFollowed = $this->createTestUser(['username' => 'oneway1_' . Str::lower(Str::random(6))]);
+        $oneWayFollower = $this->createTestUser(['username' => 'oneway2_' . Str::lower(Str::random(6))]);
+
+        // Mutual: User follows mutualUser AND mutualUser follows User
+        Follow::create(['follower_id' => $this->user->id, 'following_id' => $mutualUser->id]);
+        Follow::create(['follower_id' => $mutualUser->id, 'following_id' => $this->user->id]);
+
+        // One-way: User follows oneWayFollowed (but they don't follow back)
+        Follow::create(['follower_id' => $this->user->id, 'following_id' => $oneWayFollowed->id]);
+
+        // One-way: oneWayFollower follows User (but User doesn't follow back)
+        Follow::create(['follower_id' => $oneWayFollower->id, 'following_id' => $this->user->id]);
+
+        $feedService = app(TimelineFeedService::class);
+        $feedService->clearUserCache($this->user->id);
+
+        $mutualPost = Post::create([
+            'user_id' => $mutualUser->id,
+            'unicode' => Str::random(8),
+            'content' => 'Mutual friend post',
+            'status' => 'LIVE',
+            'is_boosted' => false,
+            'created_at' => now()->subHour(),
+        ]);
+
+        $oneWayPost1 = Post::create([
+            'user_id' => $oneWayFollowed->id,
+            'unicode' => Str::random(8),
+            'content' => 'Non-mutual post 1',
+            'status' => 'LIVE',
+            'is_boosted' => false,
+            'created_at' => now()->subHour(),
+        ]);
+
+        $oneWayPost2 = Post::create([
+            'user_id' => $oneWayFollower->id,
+            'unicode' => Str::random(8),
+            'content' => 'Non-mutual post 2',
+            'status' => 'LIVE',
+            'is_boosted' => false,
+            'created_at' => now()->subHour(),
+        ]);
+
+        $result = $feedService->buildFeedForTab(
+            tab: 'following',
+            userId: $this->user->id,
+            targetCount: 10,
+            seed: 777
+        );
+
+        $postIds = $result['posts']->pluck('id')->all();
+
+        $this->assertContains($mutualPost->id, $postIds, 'Mutual connection post must be in Following feed.');
+        $this->assertNotContains($oneWayPost1->id, $postIds, 'One-way followed user post must NOT be in Following feed.');
+        $this->assertNotContains($oneWayPost2->id, $postIds, 'One-way follower user post must NOT be in Following feed.');
+    }
+
+    public function test_timeline_livewire_component_switches_tabs(): void
+    {
+        $mutualUser = $this->createTestUser(['username' => 'tabuser_' . Str::lower(Str::random(6))]);
+        Follow::create(['follower_id' => $this->user->id, 'following_id' => $mutualUser->id]);
+        Follow::create(['follower_id' => $mutualUser->id, 'following_id' => $this->user->id]);
+
+        Post::create([
+            'user_id' => $mutualUser->id,
+            'unicode' => Str::random(8),
+            'content' => 'Tab test post',
+            'status' => 'LIVE',
+            'is_boosted' => false,
+            'created_at' => now(),
+        ]);
+
+        $component = Livewire::actingAs($this->user)->test(\App\Livewire\User\Timeline::class);
+
+        // Default tab is for_you
+        $this->assertEquals('for_you', $component->get('activeTab'));
+
+        // Switch to following
+        $component->call('setTab', 'following');
+        $this->assertEquals('following', $component->get('activeTab'));
+
+        // Switch back to for_you
+        $component->call('setTab', 'for_you');
+        $this->assertEquals('for_you', $component->get('activeTab'));
     }
 }
